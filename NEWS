@@ -1,7 +1,11 @@
-1.1   Added subset, update methods.  Variance estimation is now correct for 	subpopulations produced with select.
+1.2  	- svydesign(nest=TRUE) now uses less memory
+	- added regTermTest for testing regression terms.	
+
+1.1   	Added subset, update methods.  Variance estimation is now correct for
+ 	subpopulations produced with select or subscripting.
 
 1.0	No changes
-
+	
 0.9-5   - finite population correction should be done with PSUs not 
 	  individuals
 	- added Cox models

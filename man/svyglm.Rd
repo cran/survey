@@ -31,7 +31,12 @@ svyglm(formula, design,subset=NULL, ...)
   Standard errors for cluster-sampled designs are computed using a
 linearisation estimate (in the absence of strata this is equivalent to
 the Huber/White sandwich formula in GEEs).  Most of these computations
-are done in \code{\link{svyCprod}}.  }
+are done in \code{\link{svyCprod}}.
+
+There is no \code{anova} method for \code{svyglm} as the models are not
+fitted by maximum likelihood. The function \code{\link{regTermTest}} may
+be useful for testing sets of regression terms.
+}
 \value{
   An object of class \code{svyglm}.
 }
@@ -40,7 +45,7 @@ are done in \code{\link{svyCprod}}.  }
 
 
 \seealso{ \code{\link{svydesign}}, \code{\link{glm}},
-  \code{\link{svyCprod}}, \code{\link{svy.varcoef}}}
+  \code{\link{svyCprod}}, \code{\link{svy.varcoef}},\code{\link{regTermTest}}}
 
 \examples{
   ## Independent sampling

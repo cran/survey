@@ -5,6 +5,7 @@ update.survey.design    Add variables to a survey design
 svycoxph                Survey-weighted generalised linear models.
 svyglm                  Survey-weighted generalised linear models.
 svyquantile             Summary statistics for sample surveys
+regTermTest		Test terms in a regression model
 svymle                  Maximum likelihood estimation in complex
                         surveys
 

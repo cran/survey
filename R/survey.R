@@ -1,6 +1,23 @@
 svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
                     data=NULL, nest=FALSE, check.strata=!nest,weights=NULL){
 
+    ## less memory-hungry version for sparse tables
+    interaction<-function (..., drop = TRUE) {
+        args <- list(...)
+        narg <- length(args)
+        if (narg == 1 && is.list(args[[1]])) {
+            args <- args[[1]]
+            narg <- length(args)
+        }
+        
+        ls<-sapply(args,function(a) length(levels(a)))
+        ans<-do.call("paste",c(lapply(args,as.character),sep="."))
+        ans<-factor(ans)
+        return(ans)
+        
+    }
+
+    
      if(inherits(ids,"formula")) {
 	 mf<-substitute(model.frame(ids,data=data))   
 	 ids<-eval.parent(mf)
@@ -55,14 +72,14 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
      if (nest && NCOL(ids)>1){
       N<-ncol(ids)
       for(i in 2:(N)){
-         ids[,i]<-do.call("interaction",ids[,1:i,drop=TRUE])
+          ids[,i]<-do.call("interaction", ids[,1:i,drop=TRUE])
       }
     }
      ## force clusters nested in strata
      if (nest && !is.null(strata) && NCOL(ids)){
        N<-NCOL(ids)
        for(i in 1:N)
-         ids[,i]<-do.call("interaction", list(strata, ids[,i],drop=TRUE))
+         ids[,i]<-do.call("interaction", list(strata, ids[,i]))
      }
 
     ## check if clusters nested in strata 
@@ -218,7 +235,8 @@ update.survey.design<-function(object,vars=~.,...){
 	} else {
  	   vars<-call("data.frame",vars)
            vv <- cbind(object$variables, eval(vars, object$variables, parent.frame()))
-	} 	if(NROW(vv)!=NROW(object$variables))
+	}
+ 	if(NROW(vv)!=NROW(object$variables))
 		stop("Number of observations changed.")
         object$variables<-vv
 	object$call<-sys.call()
@@ -226,7 +244,9 @@ update.survey.design<-function(object,vars=~.,...){
 }
 
 subset.survey.design<-function(x,subset,...){
-        e <- substitute(subset)        r <- eval(e, x$variables, parent.frame())        r <- r & !is.na(r) 
+        e <- substitute(subset)
+        r <- eval(e, x$variables, parent.frame())
+        r <- r & !is.na(r) 
         x<-x[r,]
 	x$call<-sys.call()
 	x
@@ -801,3 +821,4 @@ summary.svymle<-function(object,stderr=c("robust","model"),...){
     if (is.null(getOption("survey.lonely.psu")))
         options(survey.lonely.psu="fail")
 }
+
