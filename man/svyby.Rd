@@ -25,7 +25,8 @@ svyby(formula, by, design, FUN, ..., keep.var = FALSE, keep.names = TRUE)
 \value{
   A data frame showing the factors and the results of \code{FUN}
 }
-\seealso{\code{\link{svytable}} }
+\seealso{\code{\link{svytable}} and \code{\link{ftable.svystat}} for
+  contingency tables, \code{\link{ftable.svyby}} for pretty-printing of \code{svyby} }
 \examples{
 data(api)
 dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)

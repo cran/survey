@@ -113,7 +113,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
     }
 
 
-     if (!is.null(fpc)){
+    if (!is.null(fpc)){
 
        if (NCOL(ids)>1){
          if (all(fpc<1))
@@ -147,6 +147,22 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
       probs<-as.vector(probs)
     }
 
+
+    certainty<-rep(FALSE,length(unique(strata)))
+    names(certainty)<-as.character(unique(strata))
+    if (any(nPSU==1)){
+      ## lonely PSUs: are they certainty PSUs?
+      if (!is.null(fpc)){
+        certainty<- fpc$N < 1.01
+        names(certainty)<-as.character(fpc$strata)
+      } else if (all(as.vector(probs)<=1)){
+        certainty<- !is.na(match(as.character(unique(strata)),as.character(strata)[probs > 0.99]))
+        names(certainty)<-as.character(unique(strata))
+      } else {
+        warning("Some strata have only one PSU and I can't tell if they are certainty PSUs")
+      }
+      
+    } 
     
     if (is.numeric(probs) && length(probs)==1)
         probs<-rep(probs, NROW(variables))
@@ -163,6 +179,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
     rval$call<-match.call()
     rval$variables<-variables
     rval$fpc<-fpc
+    rval$certainty<-certainty
     rval$call<-sys.call()
     rval$nPSU<-nPSU
     class(rval)<-"survey.design"
@@ -301,11 +318,80 @@ print.summary.survey.design<-function(x,...){
   print(y,varnames=TRUE,design.summaries=TRUE,...)
 }	
      
-svyCprod<-function(x, strata, psu, fpc, nPSU,
+postStratify.survey.design<-function(design, strata, population, partial=FALSE,...){
+
+  if(inherits(strata,"formula")){
+    mf<-substitute(model.frame(strata, data=design$variables))
+    strata<-eval.parent(mf)
+  }
+  strata<-as.data.frame(strata)
+
+  sampletable<-xtabs(I(1/design$prob)~.,data=strata)
+  sampletable<-as.data.frame(sampletable)
+
+  if (inherits(population,"table"))
+    population<-as.data.frame(population)
+  else if (!is.data.frame(population))
+    stop("population must be a table or dataframe")
+
+  if (!all(names(strata) %in% names(population)))
+    stop("Stratifying variables don't match")
+  nn<- names(population) %in% names(strata)
+  if (sum(!nn)!=1)
+    stop("stratifying variables don't match")
+
+  names(population)[which(!nn)]<-"Pop.Freq"
+  
+  both<-merge(sampletable, population, by=names(strata), all=TRUE)
+
+  samplezero <- both$Freq %in% c(0, NA)
+  popzero <- both$Pop.Freq %in% c(0, NA)
+  both<-both[!(samplezero & popzero),]
+  
+  if (any(onlysample<- popzero & !samplezero)){
+    print(both[onlysample,])
+    stop("Strata in sample absent from population. This Can't Happen")
+  }
+  if (any(onlypop <- samplezero & !popzero)){
+    if (partial){
+      both<-both[!onlypop,]
+      warning("Some strata absent from sample: ignored")
+    } else {
+      print(both[onlypop,])
+      stop("Some strata absent from sample: use partial=TRUE to ignore them.")
+    }
+  } 
+
+  reweight<-both$Pop.Freq/both$Freq
+  both$label <- do.call("interaction", list(both[,names(strata)]))
+  designlabel <- do.call("interaction", strata)
+  index<-match(designlabel, both$label)
+
+  design$prob<-design$prob/reweight[index]
+  design$postStrata<-c(design$postStrata,list(index))
+  
+  ## Do we need to iterate here a la raking to get design strata
+  ## and post-strata both balanced?
+  design$call<-sys.call()
+  
+  design
+}
+
+
+svyCprod<-function(x, strata, psu, fpc, nPSU, certainty=NULL, postStrata=NULL,
                    lonely.psu=getOption("survey.lonely.psu")){
 
   x<-as.matrix(x)
   n<-NROW(x)
+
+  ## Remove post-stratum means, which may cut across PSUs
+  if(!is.null(postStrata)){
+    for (psvar in postStrata){
+      postStrata<-as.factor(psvar)
+      psmeans<-rowsum(x,psvar,reorder=TRUE)/as.vector(table(factor(psvar)))
+      x<- x-psmeans[match(psvar,sort(unique(psvar))),]
+    }
+  }
 
   ##First collapse over PSUs
 
@@ -317,6 +403,11 @@ svyCprod<-function(x, strata, psu, fpc, nPSU,
   else
     strata<-as.character(strata) ##can't use factors as indices in for()'
 
+  if (is.null(certainty)){
+    certainty<-rep(FALSE,length(strata))
+    names(certainty)<-strata
+  }
+  
   if (!is.null(psu)){
     x<-rowsum(x, psu, reorder=FALSE)
     strata<-strata[!duplicated(psu)]
@@ -335,7 +426,7 @@ svyCprod<-function(x, strata, psu, fpc, nPSU,
 	   x<-c(x,xtra)
         n<-NROW(x)
       }
-  }
+  } else obsn<-table(strata)
 
   if(is.null(strata)){
       x<-t(t(x)-colMeans(x))
@@ -367,21 +458,32 @@ svyCprod<-function(x, strata, psu, fpc, nPSU,
       }
       
       xs<-x[this.stratum,,drop=FALSE]
+
+      this.certain<-certainty[names(certainty) %in% s]
       
-      ## stratum with only 1 cluster leads to undefined variance
-      if (this.n==1){
-          this.df<-1
-          lonely.psu<-match.arg(lonely.psu, c("remove","adjust","fail","certainty"))
-          if (lonely.psu=="fail")
-              stop("Stratum ",s, " has only one sampling unit.")
-          else if (lonely.psu!="certainty")
-              warning("Stratum ",s, " has only one sampling unit.")
-          if (lonely.psu=="adjust")
-            xs<-strata.means[match(s,ss),,drop=FALSE]
+      ## stratum with only 1 design cluster leads to undefined variance
+      lonely.psu<-match.arg(lonely.psu, c("remove","adjust","fail","certainty","average"))
+      if (this.n==1 && !this.certain){
+        this.df<-1
+        if (lonely.psu=="fail")
+          stop("Stratum ",s, " has only one sampling unit.")
+        else if (lonely.psu!="certainty")
+          warning("Stratum ",s, " has only one sampling unit.")
+        if (lonely.psu=="adjust")
+          xs<-strata.means[match(s,ss),,drop=FALSE]
+      } else if (obsn[match(s,names(obsn))]==1 && !this.certain){
+        ## stratum with only 1 cluster left after subsetting leads to zero variance, which
+        ## is standard but presumably undesirable.
+        warning("Stratum ",s," has only one PSU in this subset.")
+        if (lonely.psu=="adjust")
+          xs<-strata.means[match(s,ss),,drop=FALSE]
       }
-      
       ## add it up
-      v<-v+crossprod(xs)*this.df*this.fpc
+      if (!this.certain)
+        v<-v+crossprod(xs)*this.df*this.fpc
+    }
+  if (lonely.psu=="average"){
+    v<- v/(1-mean(obsn==1 & !certainty))
   }
   v
 }
@@ -421,7 +523,8 @@ svymean<-function(x,design, na.rm=FALSE,deff=FALSE){
   psum<-sum(pweights)
   average<-colSums(x*pweights/psum)
   x<-sweep(x,2,average)
-  v<-svyCprod(x*pweights/psum,design$strata,design$cluster[[1]], design$fpc, design$nPSU)
+  v<-svyCprod(x*pweights/psum,design$strata,design$cluster[[1]], design$fpc,
+              design$nPSU,design$certainty, design$postStrata)
   attr(average,"var")<-v
   attr(average,"statistic")<-"mean"
   class(average)<-"svystat"
@@ -497,7 +600,8 @@ svytotal<-function(x,design, na.rm=FALSE, deff=FALSE){
   N<-sum(1/design$prob)
   m <- svymean(x, design, na.rm=na.rm)
   total<-m*N
-  attr(total, "var")<-v<-svyCprod(x/design$prob,design$strata, design$cluster[[1]], design$fpc, design$nPSU)
+  attr(total, "var")<-v<-svyCprod(x/design$prob,design$strata, design$cluster[[1]], design$fpc,
+                                  design$nPSU,design$certainty,design$postStrata)
   attr(total,"statistic")<-"total"
   if (deff){
     vsrs<-svyvar(x,design)*sum(weights(design)^2)
@@ -610,7 +714,8 @@ svyratio<-function(numerator, denominator, design){
     for(i in 1:nn){
       for(j in 1:nd){
         r<-(numerator[,i]-rval$ratio[i,j]*denominator[,j])/sum(denominator[,j]/design$prob)
-        vars[i,j]<-svyCprod(r*1/design$prob, design$strata, design$cluster[[1]], design$fpc, design$nPSU)
+        vars[i,j]<-svyCprod(r*1/design$prob, design$strata, design$cluster[[1]], design$fpc,
+                            design$nPSU, design$certainty,design$postStrata)
       }
     }
     colnames(vars)<-names(denominator)
@@ -719,7 +824,8 @@ svycoxph<-function(formula,design,subset=NULL,...){
     
     
     g$var<-svyCprod(resid(g,"dfbeta",weighted=TRUE), design$strata,
-                    design$cluster[[1]], design$fpc,design$nPSU)
+                    design$cluster[[1]], design$fpc,design$nPSU,
+                    design$certainty,design$postStrata)
     
     g$naive.var<-NULL
     g$wald.test<-coef(g)%*%solve(g$var,coef(g))
@@ -823,7 +929,8 @@ vcov.svyglm<-function(object,...)  object$cov.unscaled
 svy.varcoef<-function(glm.object,design){
     Ainv<-summary(glm.object)$cov.unscaled
     estfun<-model.matrix(glm.object)*resid(glm.object,"working")*glm.object$weights
-    B<-svyCprod(estfun,design$strata,design$cluster[[1]],design$fpc, design$nPSU)
+    B<-svyCprod(estfun,design$strata,design$cluster[[1]],design$fpc, design$nPSU,
+                design$certainty,design$postStrata)
     Ainv%*%B%*%Ainv
 }
 
@@ -1043,7 +1150,8 @@ svymle<-function(loglike, gradient=NULL, design, formulas, start=NULL, control=l
 
        db<-rval$scores%*%rval$invinf
 
-       rval$sandwich<-svyCprod(db,design$strata,design$psu, design$fpc, design$nPSU)
+       rval$sandwich<-svyCprod(db,design$strata,design$psu, design$fpc, design$nPSU,
+                               design$certainty, design$postStrata)
        dimnames(rval$sandwich)<-list(parnms,parnms)
      }
   rval$call<-match.call()

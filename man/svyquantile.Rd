@@ -33,7 +33,7 @@ svrepquantile(x, design, quantiles, method = "linear", f = 1, return.replicates=
   just rejects.
   
   For \code{svrepquantile} ordinary replication-based standard errors
-  are computed.  These are not valid for the JK1 and JKn jackknife
+  are computed.  These are typically not valid for the JK1 and JKn jackknife
   designs. They are valid for BRR and Fay's method, and for some
   bootstrap-based designs.
 
@@ -51,7 +51,9 @@ svrepquantile(x, design, quantiles, method = "linear", f = 1, return.replicates=
   \code{\link{as.svrepdesign}}, \code{\link{svrepdesign}}}
 \references{
   Binder DA (1991) Use of estimating functions for interval estimation
-  from complex surveys. \emph{Proceedings of the ASA Survey Research Methods Section}  1991: 34-42
+  from complex surveys. \emph{Proceedings of the ASA Survey Research
+    Methods Section}  1991: 34-42
+  
   Shao J, Tu D (1995) \emph{The Jackknife and Bootstrap}. Springer.  
   }
 \examples{

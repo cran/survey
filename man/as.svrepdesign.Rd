@@ -8,7 +8,7 @@
 }
 \usage{
 as.svrepdesign(design, type=c("auto", "JK1", "JKn", "BRR", "Fay"),
-fay.rho = 0, ...)
+fay.rho = 0, ..., compress=TRUE)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -18,6 +18,8 @@ fay.rho = 0, ...)
   \item{fay.rho}{Tuning parameter for Fay's variance method }
   \item{\dots}{Other arguments to \code{\link{brrweights}}, controlling
     the handling of strata that do not have exactly 2 clusters.}
+  \item{compress}{Use a compressed representation of the replicate
+    weights matrix.}
 }
 
 \value{
@@ -35,6 +37,7 @@ nest=TRUE)
 
 # convert to BRR replicate weights
 scd2brr <- as.svrepdesign(scdnofpc, type="BRR")
+scd2fay <- as.svrepdesign(scdnofpc, type="Fay",fay.rho=0.3)
 # convert to JKn weights 
 scd2jkn <- as.svrepdesign(scdnofpc, type="JKn")
 
@@ -42,6 +45,7 @@ scd2jkn <- as.svrepdesign(scdnofpc, type="JKn")
 scd2jknf <- as.svrepdesign(scddes, type="JKn")
 
 svrepratio(~alive, ~arrests, design=scd2brr)
+svrepratio(~alive, ~arrests, design=scd2fay)
 svrepratio(~alive, ~arrests, design=scd2jkn)
 svrepratio(~alive, ~arrests, design=scd2jknf)
 

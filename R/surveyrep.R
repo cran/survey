@@ -11,13 +11,16 @@ hadamard<-local({
   
   function(n){
     m<-n-(n %% 4)
-    precooked<- which(m < hadamard.sizes)
+    precooked<- which(m < hadamard.sizes & m+4 >=hadamard.sizes)
     if (length(precooked))
       return(hadamard.list[[min(precooked)]])
+    if (all(m<hadamard.sizes))
+      return(hadamard.list[[1]])
     
-    bestfit<- which.min(log(hadamard.sizes/(m+4), 2) %% 1)
+    sizes<-hadamard.sizes*2^pmax(0,ceiling(log((n+1)/hadamard.sizes,2)) )
+    bestfit<- which.min(sizes-n)
     
-    ndoubles<-log(hadamard.sizes[bestfit]/(m+4), 2)
+    ndoubles<-ceiling(log(sizes/hadamard.sizes, 2))[bestfit]
     H<-hadamard.list[[bestfit]]
     for(i in 1:ndoubles)
       H<-hadamard.doubler(H)
@@ -27,7 +30,7 @@ hadamard<-local({
 })
 
 
-jk1weights<-function(psu, fpc=NULL, fpctype=c("population","fraction","correction")){
+jk1weights<-function(psu, fpc=NULL, fpctype=c("population","fraction","correction"), compress=TRUE){
     fpctype<-match.arg(fpctype)
   unq<-unique(psu)
   n<-length(unq)
@@ -40,12 +43,26 @@ jk1weights<-function(psu, fpc=NULL, fpctype=c("population","fraction","correctio
       if (fpctype=="population" && fpc<n) stop("Population size smaller than sample size. No can do.")
       fpc <-switch(fpctype, population=(fpc-n)/fpc, fraction=1-fpc, correction=fpc)
       }
-  repweights<-outer(psu, unq, "!=")*n/(n-1)
-  list(type="jk1", repweights=repweights,scale=(fpc*(n-1)/n))
-}
+    if (compress){
+      repweights<-matrix(n/(n-1),n,n)
+      diag(repweights)<-0
+      repweights<-list(weights=repweights, index=match(psu,unq))
+      class(repweights)<-c("repweights_compressed","repweights")
+      rval<-list(type="jk1", repweights=repweights,scale=fpc*(n-1)/n)
+      rval
+    } else {
+      repweights<-outer(psu, unq, "!=")*n/(n-1)
+      class(repweights)<-"repweights"
+      rval<-list(type="jk1", repweights=repweights,scale=(fpc*(n-1)/n))
+      rval
+    }
+  }
 
 
-jknweights<-function(strata,psu, fpc=NULL, fpctype=c("population","fraction","correction")){
+
+
+
+jknweights<-function(strata,psu, fpc=NULL, fpctype=c("population","fraction","correction"),compress=TRUE){
 
   sunq<-unique(strata)
   unq<-unique(psu)
@@ -73,26 +90,38 @@ jknweights<-function(strata,psu, fpc=NULL, fpctype=c("population","fraction","co
           stop("fpc has names that do not match the stratum identifiers")
   }
 
-   
-  repweights<-matrix(1,ncol=length(unq), nrow=length(psu))
+
+  if (compress){
+    repweights<-matrix(1,ncol=length(unq),nrow=length(unq))
+  } else {
+    repweights<-matrix(1,ncol=length(unq), nrow=length(psu))
+  }
   counter<-0
   rscales<-numeric(length(unique(psu)))
   
   for(ss in as.character(sunq)){
       thisfpc<-fpc[match(ss,names(fpc))]
-      theseweights<-jk1weights(psu[strata %in% ss], fpc=thisfpc, fpctype=fpctype)
-      repweights[strata %in% ss, counter+1:NCOL(theseweights$repweights)]<-theseweights$repweights
-      rscales[counter+1:NCOL(theseweights$repweights)]<-theseweights$scale
-      counter<-counter+NCOL(theseweights$repweights)
+      theseweights<-jk1weights(psu[strata %in% ss], fpc=thisfpc, fpctype=fpctype,compress=compress)
+      nc<-if (compress) NCOL(theseweights$repweights$weights) else NCOL(theseweights$repweights)
+      if (compress)
+        repweights[strata[!duplicated(psu)] %in% ss,counter+1:nc]<-theseweights$repweights$weights
+      else
+        repweights[strata %in% ss, counter+1:nc]<-theseweights$repweights
+      rscales[counter+1:nc]<-theseweights$scale
+      counter<-counter+nc
   }
-  
+  if (compress){
+    repweights<-list(weights=repweights,index=match(psu,unq))
+    class(repweights)<- "repweights_compressed"
+  } else class(repweights)<-"repweights"
   list(type="jkn", repweights=repweights, rscales=rscales, scale=1)
 }
 
 
 
 brrweights<-function(strata,psu, match=NULL, small=c("fail","split","merge"),
-                     large=c("split","merge","fail"),only.weights=FALSE){
+                     large=c("split","merge","fail"),fay.rho=0,
+                     only.weights=FALSE,compress=TRUE){
 
   small<-match.arg(small)
   large<-match.arg(large)
@@ -175,19 +204,29 @@ brrweights<-function(strata,psu, match=NULL, small=c("fail","split","merge"),
   H<-hadamard(upto)
   ii<-1:upto
   jj<-1:length(weightstrata)
-  sampler<-function(i, fay.rho=0){
+  sampler<-function(i){
     h<-H[1+ii, i]+1
     col<-h[match(weightstrata,ii)]
     wa<-weights[cbind(jj,col)]
     wb<-weights[cbind(jj,3-col)]
-    wa[match(psu,psunq)]*(2-fay.rho)+wb[match(psu,psunq)]*fay.rho
+    if (compress)
+      wa*(2-fay.rho)+wb*fay.rho
+    else
+      wa[match(psu,psunq)]*(2-fay.rho)+wb[match(psu,psunq)]*fay.rho
   }
 
-  if (only.weights)
-    sapply(1:NCOL(H),sampler,fay.rho=0)
-  else
-    list(weights=weights, wstrata=weightstrata, strata=sunq, psu=psunq,
-         npairs=NCOL(H),sampler=sampler)
+  if (only.weights){
+    repweights<-sapply(1:NCOL(H),sampler)
+    if (!compress){
+      class(repweights)<-"repweights"
+      return(repweights)
+    }
+    repweights<-list(weights=repweights,index=match(psu,psunq))
+    class(repweights)<-c("repweights_compressed","repweights")
+    repweights
+  }  else 
+  list(weights=weights, wstrata=weightstrata, strata=sunq, psu=psunq,
+       npairs=NCOL(H),sampler=sampler,compress=compress)
 
 }
   
@@ -199,7 +238,7 @@ brrweights<-function(strata,psu, match=NULL, small=c("fail","split","merge"),
 ## Designs with replication weights rather than survey structure.
 ##
 
-as.svrepdesign<-function(design,type=c("auto","JK1","JKn","BRR","Fay"), fay.rho=0,...){
+as.svrepdesign<-function(design,type=c("auto","JK1","JKn","BRR","Fay"), fay.rho=0,...,compress=TRUE){
 
   type<-match.arg(type)
 
@@ -228,7 +267,7 @@ as.svrepdesign<-function(design,type=c("auto","JK1","JKn","BRR","Fay"), fay.rho=
   
   if (type=="JK1"){
     ##JK1
-    r<-jk1weights(design$cluster[,1], fpc=fpc,fpctype=fpctype)
+    r<-jk1weights(design$cluster[,1], fpc=fpc,fpctype=fpctype, compress=compress)
     repweights<-r$repweights
     scale<-r$scale
     rscales<-rep(1, NCOL(repweights))
@@ -236,9 +275,8 @@ as.svrepdesign<-function(design,type=c("auto","JK1","JKn","BRR","Fay"), fay.rho=
     pweights<-1/design$prob
   } else if (type %in% c("BRR","Fay")){
     ##BRR
-    r<-brrweights(design$strata, design$cluster[,1],...)
-    repweights<-sapply(1:r$npairs,r$sampler, fay.rho=fay.rho)
-    
+    repweights<-brrweights(design$strata, design$cluster[,1],...,fay.rho=fay.rho,
+                           compress=compress,only.weights=TRUE)
     pweights<-1/design$prob
     if (length(pweights)==1)
       pweights<-rep(pweights, NROW(design$variables))
@@ -248,19 +286,19 @@ as.svrepdesign<-function(design,type=c("auto","JK1","JKn","BRR","Fay"), fay.rho=
     else
       type<-"Fay"
 
-    rscales<-rep(1,r$npairs)
-    scale<-1/(r$npairs*(1-fay.rho)^2)
+    rscales<-rep(1,ncol(repweights))
+    scale<-1/(ncol(repweights)*(1-fay.rho)^2)
     
   } else if (type=="JKn"){
     ##JKn
-    r<-jknweights(design$strata,design$cluster[,1], fpc=fpc,fpctype=fpctype)
+    r<-jknweights(design$strata,design$cluster[,1], fpc=fpc,fpctype=fpctype, compress=compress)
     pweights<-1/design$prob
     repweights<-r$repweights
     scale<-1
     rscales<-r$rscales
   } else stop("Can't happen")
 
-  rval<-list(repweights=as.matrix(repweights), pweights=pweights,
+  rval<-list(repweights=repweights, pweights=pweights,
              type=type, rho=fay.rho,scale=scale, rscales=rscales,
              call=sys.call(), combined.weights=FALSE)
   rval$variables <- design$variables  
@@ -352,6 +390,8 @@ svrepdesign<-function(variables=NULL,repweights=NULL, weights=NULL,
              combined.weights=combined.weights)
   rval$variables<-variables
   rval$pweights<-weights
+  if (!inherits(repweights,"repweights"))
+    class(rval)<-"repweights"
   rval$repweights<-repweights
   class(rval)<-"svyrep.design"
   rval
@@ -389,7 +429,7 @@ print.summary.svyrep.design<-function(x,...){
 
 image.svyrep.design<-function(x, ..., col=grey(seq(.5,1,length=30)), type.=c("rep","total")){
   type<-match.arg(type.)
-  m<-x$repweights
+  m<-as.matrix(x$repweights)
   if (type=="total"){
     m<-m*x$pweights
   } 
@@ -440,9 +480,9 @@ update.svyrep.design<-function(object,...){
 weights.svyrep.design<-function(object,type=c("replication","sampling","analysis"),...){
   type<-match.arg(type)
   switch(type,
-         replication=object$repweights,
+         replication=weights(object$repweights),
          sampling=object$pweights,
-         analysis=if(object$combined.weights) object$repweights else object$repweights*object$pweights)
+         analysis=if(object$combined.weights) as.matrix(object$repweights) else as.matrix(object$repweights)*object$pweights)
 }
 
 weights.survey.design<-function(object,...){
@@ -538,16 +578,7 @@ svrepvar<-function(x, design, na.rm=FALSE, rho=NULL, return.replicates=FALSE){
   wts<-design$repweights
   scale<-design$scale
   rscales<-design$rscales
-  if (design$type=="Fay" ){
-    if (!is.null(rho))
-      stop("The replication weights have fixed rho: you cannot specify it here.")
-  } else  if (design$type=="BRR"){
-    rho<-design$rho
-  } else if (design$type %in% c("JK1","JKn","other")){
-    if(!is.null(rho))
-      stop("You cannot specify rho for this design")
-  }
-  
+  if (!is.null(rho)) .NotYetUsed("rho")
   
   x<-as.matrix(x)
   
@@ -557,18 +588,24 @@ svrepvar<-function(x, design, na.rm=FALSE, rho=NULL, return.replicates=FALSE){
     x[is.na(x)]<-0
   }
   
-  if (!design$combined.weights)
-    wts<-wts*design$pweights
-
+  if (design$combined.weights)
+    pw<-1
+  else
+    pw<-design$pweights
+  
   v<-function(w){
-    xbar<-colSums(w*x)/sum(w)
+    xbar<-colSums(as.vector(w)*pw*x)/sum(as.vector(w)*pw)
     xdev<-sweep(x,2,xbar,"-")
-    colSums(xdev*xdev*w)/sum(w)
+    colSums(xdev*xdev*as.vector(w)*pw)/sum(as.vector(w)*pw)
   }
-  rval<-v(design$pweights)
+
+  if (design$combined.weights)
+    rval<-v(design$pweights)
+  else
+    rval<-v(rep(1,length(design$pweights)))
   
   repvars<-apply(wts,2, v)
-
+  
   repvars<-drop(t(repvars))
   attr(rval,"var")<-svrVar(repvars, scale, rscales)
   attr(rval, "statistic")<-"variance"
@@ -610,22 +647,16 @@ svrepmean<-function(x,design, na.rm=FALSE, rho=NULL, return.replicates=FALSE,def
   wts<-design$repweights
   scale<-design$scale
   rscales<-design$rscales
-  if (design$type=="Fay" ){
-    if (!is.null(rho))
-      stop("The replication weights have fixed rho: you cannot specify it here.")
-  } else  if (design$type=="BRR"){
-    rho<-design$rho
-  } else if (design$type %in% c("JK1","JKn","other")){
-    if(!is.null(rho))
-      stop("You cannot specify rho for this design")
-  }
+  if (!is.null(rho)) .NotYetUsed("rho")
   
   if (!design$combined.weights)
-    wts<-wts*design$pweights
+    pw<-design$pweights
+  else
+    pw<-1
   
   rval<-colSums(design$pweights*x)/sum(design$pweights)
   
-  repmeans<-apply(wts,2, function(w)  colSums(w*x)/sum(w))
+  repmeans<-apply(wts,2, function(w)  colSums(as.vector(w)*x*pw)/sum(pw*as.vector(w)))
 
   repmeans<-drop(t(repmeans))
 
@@ -662,19 +693,10 @@ svreptotal<-function(x,design, na.rm=FALSE, rho=NULL, return.replicates=FALSE, d
   }   else if(typeof(x) %in% c("expression","symbol"))
     x<-eval(x, design$variables)
 
-  wts<-as.matrix(design$repweights)
+  wts<-design$repweights
   scale<-design$scale
   rscales<-design$rscales
-  if (design$type=="Fay" ){
-    if (!is.null(rho))
-      stop("The replication weights have fixed rho: you cannot specify it here.")
-  } else  if (design$type=="BRR"){
-    rho<-design$rho
-  } else if (design$type %in% c("JK1","JKn","other")){
-    if(!is.null(rho))
-      stop("You cannot specify rho for this design")
-  }
-  
+  if (!is.null(rho)) .NotYetUsed("rho")
   
   x<-as.matrix(x)
   
@@ -685,11 +707,13 @@ svreptotal<-function(x,design, na.rm=FALSE, rho=NULL, return.replicates=FALSE, d
   }
   
   if (!design$combined.weights)
-    wts<-wts*design$pweights
+    pw<-design$pweights
+  else
+    pw<-1
   
   rval<-colSums(design$pweights*x)
   
-  repmeans<-apply(wts,2, function(w)  colSums(w*x))
+  repmeans<-apply(wts,2, function(w)  colSums(as.vector(w)*pw*x))
 
   repmeans<-drop(t(repmeans))
   attr(rval,"var")<-v<-svrVar(repmeans, scale, rscales)
@@ -726,22 +750,8 @@ svrepglm<-function(formula, design, subset=NULL, ..., rho=NULL, return.replicate
       
       scale<-design$scale
       rscales<-design$rscales
-      if (design$type=="Fay" ){
-        if (!is.null(rho))
-          stop("The replication weights have fixed rho: you cannot specify it here.")
-        wts<-design$repweights
-        rho<-design$rho
-      } else if (design$type %in% c("JK1","JKn","other")){
-        if(!is.null(rho))
-          stop("You cannot specify rho for this design")
-        wts<-design$repweights
-      } else if (design$type=="BRR"){
-        if (is.null(rho))
-          rho<-0 
-        wts<-ifelse(design$repweights==2, 2-rho, rho)
-        if (rho!=0) scale<-scale/((1-rho)^2)
-      }
-    
+      if (!is.null(rho)) .NotYetUsed(rho)
+      
       pwts<-design$pweights/sum(design$pweights)
       if (is.data.frame(pwts)) pwts<-pwts[[1]]
       
@@ -755,8 +765,10 @@ svrepglm<-function(formula, design, subset=NULL, ..., rho=NULL, return.replicate
       betas<-matrix(ncol=length(coef(full)),nrow=ncol(design$repweights))
 
       if (!design$combined.weights)
-        wts<-wts*pwts
-
+        pw1<-pwts
+      else
+        pw1<-1
+      wts<-design$repweights
       if (length(nas))
         wts<-wts[-nas,]
       XX<-full$x
@@ -769,8 +781,9 @@ svrepglm<-function(formula, design, subset=NULL, ..., rho=NULL, return.replicate
       incpt<-as.logical(attr(terms(full),"intercept"))
       fam<-full$family
       contrl<-full$control
-      for(i in 1:NCOL(wts)){
-        betas[i,]<-glm.fit(XX, YY, weights = wts[,i],
+      for(i in 1:ncol(wts)){
+        wi<-as.vector(wts[,i])
+        betas[i,]<-glm.fit(XX, YY, weights = wi/sum(wi),
              start =beta0,
              offset = offs,
              family = fam, control = contrl,
@@ -851,23 +864,23 @@ svrepratio<-function(numerator,denominator, design){
 
   if (!inherits(design, "svyrep.design")) stop("design must be a svyrepdesign object")
   
-    if (inherits(numerator,"formula"))
-		numerator<-model.frame(numerator,design$variables)
-    else if(typeof(numerator) %in% c("expression","symbol"))
-        numerator<-eval(numerator, design$variables)
-    if (inherits(denominator,"formula"))
-		denominator<-model.frame(denominator,design$variables)
-    else if(typeof(denominator) %in% c("expression","symbol"))
-        denominator<-eval(denominator, design$variables)
-
-    nn<-NCOL(numerator)
-    nd<-NCOL(denominator)
-
-    all<-cbind(numerator,denominator)
-    allstats<-svrepmean(all,design, return.replicates=TRUE)
+  if (inherits(numerator,"formula"))
+    numerator<-model.frame(numerator,design$variables)
+  else if(typeof(numerator) %in% c("expression","symbol"))
+    numerator<-eval(numerator, design$variables)
+  if (inherits(denominator,"formula"))
+    denominator<-model.frame(denominator,design$variables)
+  else if(typeof(denominator) %in% c("expression","symbol"))
+    denominator<-eval(denominator, design$variables)
+  
+  nn<-NCOL(numerator)
+  nd<-NCOL(denominator)
+  
+  all<-cbind(numerator,denominator)
+  allstats<-svrepmean(all,design, return.replicates=TRUE)
   
   rval<-list(ratio=outer(allstats$mean[1:nn],allstats$mean[nn+1:nd],"/"))
-
+  
   vars<-matrix(nrow=nn,ncol=nd)
   for(i in 1:nn){
     for(j in 1:nd){
@@ -916,46 +929,39 @@ extractAIC.svrepglm<-function(fit,...){
 
 
 withReplicates<-function(design, theta,rho=NULL,..., scale.weights=FALSE, return.replicates=FALSE){
-  
   wts<-design$repweights
   scale<-design$scale
   rscales<-design$rscales
-  if (design$type=="Fay" ){
-    if (!is.null(rho))
-      stop("The replication weights have fixed rho: you cannot specify it here.")
-    rho<-design$rho
-  } else if (design$type %in% c("JK1","JKn","other")){
-    if(!is.null(rho))
-      stop("You cannot specify rho for this design")
-  } else if (design$type=="BRR"){
-    if (is.null(rho))
-      rho<-0
-    wts<-ifelse(design$repweights==2, 2-rho, rho)
-    if (rho!=0)
-      scale<-scale/((1-rho)^2)
-  }
+  if (!is.null(rho)) .NotYetUsed("rho")
 
   if (scale.weights)
     pwts<-design$pweights/sum(design$pweights)
   else
     pwts<-design$pweights
   
-  if (!design$combined.weights)
-    wts<-wts*pwts
-  else if (scale.weights)
-    wts<-sweep(wts,2, drop(colSums(wts)),"/")
-  
-  data<-design$variables
-
-  if (is.function(theta)){
-    full<-theta(pwts,data,...)
-    thetas<-drop(t(apply(wts,2, function(ww) theta(ww, data, ...))))
-  } else{
-    .weights<-pwts
-    full<-with(data, eval(theta))
-    thetas<-drop(t(apply(wts,2, function(.weights) with(data, eval(theta)))))
+  if (inherits(wts,"repweights_compressed")){
+    if (!design$combined.weights)
+      wts$weights<-weights$weights$pwts
+    if (scale.weights)
+      wts$weights<-sweep(wts$weights,2,drop(colSums(wts$weights)),"/")
+  } else {
+    if (!design$combined.weights)
+      wts<-wts*pwts
+    if (scale.weights)
+      wts<-sweep(wts,2, drop(colSums(wts)),"/")
   }
-
+      
+      data<-design$variables
+      
+      if (is.function(theta)){
+        full<-theta(pwts,data,...)
+        thetas<-drop(t(apply(wts,2, function(ww) theta(ww, data, ...))))
+      } else{
+        .weights<-pwts
+        full<-with(data, eval(theta))
+        thetas<-drop(t(apply(wts,2, function(.weights) with(data, eval(theta)))))
+      }
+      
   v<-svrVar(thetas, scale, rscales)
 
   attr(full,"var")<-v
@@ -976,6 +982,7 @@ cv.svrepstat<-function(object,...){
 }
 
 coef.svrepstat<-function(object,...){
+  if (is.list(object)) object<-object[[1]]
   attr(object,"statistic")<-NULL
   attr(object,"deff")<-NULL
   attr(object,"var")<-NULL
@@ -983,8 +990,18 @@ coef.svrepstat<-function(object,...){
 }
 
 vcov.svrepstat<-function(object,...){
+  if(is.list(object)) object<-object[[1]]
   as.matrix(attr(object,"var"))
 }
+
+SE<-function(object,...){
+  UseMethod("SE")
+}
+
+SE.default<-function(object,...){
+  sqrt(diag(vcov(object,...)))
+}
+
 
 print.svrepstat<-function(x,...){
   if (is.list(x)){
@@ -1099,17 +1116,21 @@ svreptable<-function(formula, design, Ntotal=sum(weights(design, "sampling")), r
 }
 
 
+postStratify<-function(design,strata, population, partial=FALSE,...){
+  UseMethod("postStratify")
+}
 
-postStratify<-function(design, strata, population, partial=FALSE){
 
-  if(!inherits(design, "svyrep.design"))
-    stop("design must be a survey with replicate weights")
-  
+
+postStratify.svyrep.design<-function(design, strata, population, partial=FALSE,compress=NULL,...){
+
   if(inherits(strata,"formula")){
     mf<-substitute(model.frame(strata, data=design$variables))
     strata<-eval.parent(mf)
   }
   strata<-as.data.frame(strata)
+  if (is.null(compress))
+    compress<-inherits(design$repweights, "repweights_compressed")
 
   sampletable<-xtabs(design$pweights~.,data=strata)
   sampletable<-as.data.frame(sampletable)
@@ -1156,15 +1177,17 @@ postStratify<-function(design, strata, population, partial=FALSE){
 
   
   if (design$combined.weights){
-    replicateFreq<- rowsum(repweights, match(designlabel, both$label), reorder=TRUE)
+    replicateFreq<- rowsum(as.matrix(repweights), match(designlabel, both$label), reorder=TRUE)
     repreweight<-  both$Pop.Freq/replicateFreq
-    design$repweights <- design$repweights*repreweight[index]
+    design$repweights <- as.matrix(design$repweights)*repreweight[index]
   } else { 
-    replicateFreq<- rowsum(design$repweights*design$pweights, match(designlabel, both$label), reorder=TRUE)
+    replicateFreq<- rowsum(as.matrix(design$repweights)*design$pweights, match(designlabel, both$label), reorder=TRUE)
     repreweight<- both$Pop.Freq/replicateFreq
-    design$repweights <- design$repweights* (repreweight/reweight)[index,]
+    design$repweights <- as.matrix(design$repweights)* (repreweight/reweight)[index,]
   }
 
+  if (compress) design$repweights<-compressWeights(design$repweights)
+  
   design$call<-sys.call()
   
   design
@@ -1172,7 +1195,8 @@ postStratify<-function(design, strata, population, partial=FALSE){
 
 
 rake<-function(design, sample.margins, population.margins,
-               control=list(maxit=10, epsilon=1, verbose=FALSE)){
+               control=list(maxit=10, epsilon=1, verbose=FALSE),
+                 compress=NULL){
 
     if (!missing(control)){
         control.defaults<-formals(rake)$control
@@ -1184,6 +1208,9 @@ rake<-function(design, sample.margins, population.margins,
     if(!inherits(design, "svyrep.design"))
         stop("design must be a survey with replicate weights")
 
+    if (is.null(compress))
+      compress<-inherits(design$repweighs,"repweights_compressed")
+    
     if (length(sample.margins)!=length(population.margins))
         stop("sample.margins and population.margins do not match.")
 
@@ -1212,7 +1239,7 @@ rake<-function(design, sample.margins, population.margins,
     converged<-FALSE
     while(iter < control$maxit){
         for(i in 1:nmar){
-            design<-postStratify(design, strata[[i]], population.margins[[i]])
+            design<-postStratify(design, strata[[i]], population.margins[[i]],compress=FALSE)
         }
         newtable<-svreptable(formula(paste("~", paste(allterms,collapse="+"),sep="")),design)
         if (control$verbose)
@@ -1229,6 +1256,9 @@ rake<-function(design, sample.margins, population.margins,
     
     design$call<-sys.call()
 
+    if (compress)
+      design$repweights<-compressWeights(design$repweights)
+    
     if(!converged)
         warning("Raking did not converge after ", iter, " iterations.\n")
 

@@ -77,10 +77,18 @@ data frame, but only the data frame is used. See also
 \code{\link{subset.survey.design}} for a simple way to select
 subpopulations.
 
-The value of \code{options("survey.lonely.psu")} controls what happens
-to strata containing only one cluster (PSU).See \code{\link{svyCprod}}
-for details, especially if you have self-representing ("certainty") PSUs.
+\code{svydesign} will attempt to determine whether strata with only one
+cluster (PSU) are self-representing ("certainty") PSUs (based on
+sampling fraction of 1 or on a sampling weight of 1 when other sampling
+weights are all greater than 1). If the strata with one only PSU are not
+self-representing (or they are, but \code{svydesign} cannot tell) then
+the handling of these strata for variance computation is determined by
+\code{options("survey.lonely.psu")}. See \code{\link{svyCprod}} for details.
 
+
+If you have strata nested within clusters (eg within-region stratification on
+proportion Hispanic in the NHANES survey) use
+\code{\link{postStratify}} to add these as post-stratification variables.
 }
 \value{
 An object of class \code{survey.design}.

@@ -1,9 +1,9 @@
 svydesign               Survey sample analysis.
 subset.survey.design    Subset of survey
 update.survey.design    Add variables to a survey design
+postStratify            Post-stratify a survey
 svrepdesign             Replication-weight designs
 as.svrepdesign          Convert svydesign to svrepdesign
-postStratify            Post-stratify a svrepdesign
 rake                    Rake a svrepdesign
 subset.svyrep.design    Subset of svrepdesign
 update.svyrep.design    Add variables to svrepdesign
@@ -12,7 +12,9 @@ update.svyrep.design    Add variables to svrepdesign
 
 svyplot                 Survey-weighted graphics
 svyby                   Tables of statistics 
-
+ftable.svystat
+ftable.svrepstat
+ftable.svyby
                  -----
 
 svycoxph                Survey-weighted Cox models
@@ -37,6 +39,14 @@ svrepquantile
 svyreptable             Contingency tables
 svrepglm                glms with replication weights
 withReplicates          Replicate variances for arbitrary statistics
+
+                 ----
+
+nonresponse		create non-response object
+sparseCells		look for sparse cells
+neighbours		find neighbours of a cell
+joinCells		collapse a set of cells together
+weights.nonresponse	extract non-response weights
 
                  -----
 

@@ -11,14 +11,19 @@ svyby<-function(formula, by, design, FUN,...,  keep.var=FALSE,keep.names=TRUE){
   
   byfactor<-do.call("interaction", byfactors)
   uniques <- which(!duplicated(byfactors))
-  unwrap<-function(x) c(statistic=unclass(x),sd=sqrt(diag(as.matrix(attr(x,"var")))))
+  unwrap<-function(x) c(statistic=unclass(x),SE=sqrt(diag(as.matrix(attr(x,"var")))))
   
-  if (keep.var)
-    rval<-t(sapply(uniques, function(i) unwrap(FUN(formula,design[byfactor %in% byfactor[i],],...))))
-  else {
-    rval<-sapply(uniques, function(i) FUN(formula,design[byfactor %in% byfactor[i],],...))
+  if (keep.var){
+    rval<-t(sapply(uniques,
+                   function(i) unwrap(FUN(formula,design[byfactor %in% byfactor[i],],...))))
+    nstats<-NCOL(rval)/2
+  } else {
+    rval<-sapply(uniques,
+                 function(i) FUN(formula,design[byfactor %in% byfactor[i],],...))
     if (is.matrix(rval)) rval<-t(rval)
+    nstats<-NCOL(rval)
   }
+  
   if (NCOL(rval)>1)
     rval<-cbind(byfactors[uniques,,drop=FALSE], rval)
   else
@@ -29,9 +34,15 @@ svyby<-function(formula, by, design, FUN,...,  keep.var=FALSE,keep.names=TRUE){
 
   rval<-rval[do.call("order",rval),]
 
+  attr(rval,"svyby")<-list(margins=1:NCOL(byfactors),nstats=nstats,
+                           vars=keep.var,
+                           statistic=deparse(substitute(FUN)),
+                           variables= names(rval)[-(1:NCOL(byfactors))][1:nstats]
+                           )
   if (!keep.names)
     rownames(rval)<-1:NROW(rval)
   
   attr(rval,"call")<-sys.call()
+  class(rval)<-c("svyby","data.frame")
   rval
 }

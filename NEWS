@@ -1,13 +1,50 @@
+2.8   fix printing of svyby broken in 2.7
+
+      add ftable.svyby
+
+      postStratify for svydesign surveys.
+
+2.7-1 as.svrepdesign was giving the wrong weights for type="Fay" in 2.7
+
+2.7   Option compress=TRUE in as.svrepdesign to reduce size 
+      of replicate weight matrix (and in rake(), postStratify()). Also
+      function compressWeights() to do this to arbitrary replicate designs.
+
+      terms() reorders variables in interactions, which confused regTermTest
+      (Daniel Almirall)
+
+      Added extractor function SE() for standard errors (Andrew Robinson)
+
+      hadamard() now finds smaller Hadamard matrices.
+
+      svyCprod warns if a subset has only one PSU in some stratum (Gillian Raab)
+      
+      Added tests/lonely.psu.R
+
+      Added another option "average" for lonely.psu (Gillian Raab)
+
+      svydesign can now detect from sampling weights or fpc when a stratum
+      with a single PSU is self-representing, and in these cases 
+      options("survey.lonely.psu") is not used.
+
+      ftable.svystat and ftable.svrepstat to produce better tables of
+      percentages and totals.
+
+      Experimental set of functions to help in computing non-response weights 
+      (see ?nonresponse for details)
+
 2.6-2 Better handling of NAs in svyby
  
       Subsetting didn't work right for single-observation subsets.
 
-      svyglm and svycoxph had scoping problems when run inside a function
+      svyglm and svycoxph had scoping problems when run inside a 
+      function (Daniel Almirall)
  
       svyglm and svycoxph now accept weights (to be multiplied by 
       the sampling weights)
 
-      With R 2.0.0 less copying will occur.
+      With R 2.0.0 less copying will occur, especially when variables=
+      is not specified in a design
 
 2.6-1 Totals for factors give cell totals.
 
@@ -43,6 +80,7 @@
       Design effects for means and totals. (Gillian Raab)
 
 2.4   Make regTermTest work with svycoxph()
+
       Clearer output for print.svycoxph() (Daniella Gollinelli)
 
       Rao-Scott adjusted tests for contingency tables.

@@ -11,9 +11,9 @@
 }
 \usage{
 brrweights(strata, psu, match = NULL, small = c("fail", "split",
-"merge"), large = c("split", "merge", "fail"),only.weights=FALSE)
-jk1weights(psu,fpc=NULL, fpctype=c("population","fraction","correction"))
-jknweights(strata,psu, fpc=NULL, fpctype=c("population","fraction","correction"))
+"merge"), large = c("split", "merge", "fail"),fay.rho=0,only.weights=FALSE,compress=TRUE)
+jk1weights(psu,fpc=NULL, fpctype=c("population","fraction","correction"),compress=TRUE)
+jknweights(strata,psu, fpc=NULL, fpctype=c("population","fraction","correction"),compress=TRUE)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -24,8 +24,11 @@ jknweights(strata,psu, fpc=NULL, fpctype=c("population","fraction","correction")
   \item{large}{How to handle strata with more than two PSUs}
   \item{fpc}{Optional population (stratum) size or finite population correction }
   \item{fpctype}{How \code{fpc} is coded.}
+  \item{fay.rho}{Parameter for Fay's extended BRR method}
   \item{only.weights}{If \code{TRUE} return only the matrix of
     replicate weights}
+  \item{compress}{If \code{TRUE}, store the replicate weights in
+    compressed form}
 }
 \details{
   JK1 and JKn are  jackknife schemes for unstratified and stratified
@@ -39,6 +42,11 @@ jknweights(strata,psu, fpc=NULL, fpctype=c("population","fraction","correction")
   \code{fpctype="population"}, to specify sampling fractions use
   \code{fpctype="fraction"} and to specify the correction directly use
   \code{fpctype="correction"}
+  
+  The only reason not to use \code{compress=TRUE} is that it is new and
+  there is a greater possibility of bugs.  It reduces the number of
+  rows of the replicate weights matrix from the number of observations
+  to the number of PSUs.
   
   In BRR variance estimation each stratum is split in two to give
   half-samples. Balanced replicated weights are needed, where
@@ -72,6 +80,8 @@ For \code{brrweights} with \code{only.weights=FALSE} a list with elements
   \item{psu}{Distinct PSUs}
   \item{npairs}{Dimension of Hadamard matrix used in BRR construction}
   \item{sampler}{function returning replicate weights}
+  \item{compress}{Indicates whether the \code{sampler} returns per PSU
+    or per observation weights}
   For \code{jk1weights} and \code{jknweights} a data frame of replicate
   weights and the \code{scale} and \code{rscale} arguments to \code{\link{svrVar}}.
 }
