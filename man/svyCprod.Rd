@@ -30,10 +30,12 @@ unit. The options to handle this are \code{"fail"} to give an error,
 and \code{"adjust"} to center the stratum at the grand mean rather than
 the stratum mean.  The choice is controlled by setting
 \code{options(survey.lonely.psu)}. If this is not done the factory
-default is \code{"fail"}.  
-}
+default is \code{"fail"}. Using \code{"adjust"} is conservative, and it
+would often be better to combine strata in some intelligent way. The
+\code{"remove"} option is included because it might be needed for
+compatibility.  }
 \value{
-  A matrix
+  A covariance matrix
 }
 \author{Thomas Lumley}
 

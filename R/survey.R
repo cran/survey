@@ -83,7 +83,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
                          N=as.vector(tbl))
        }
        ## Now reduced to fpc per stratum
-       nstr<-table(strata)
+       nstr<-table(strata[!duplicated(ids[[1]])])
        
        if (all(fpc[,2]<1)){
          fpc[,2]<- nstr[match(as.character(fpc[,1]), names(nstr))]/fpc[,2]
@@ -104,32 +104,41 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
     rval
           }
 
-print.survey.design<-function(x,...){
+print.survey.design<-function(x,varnames=TRUE,design.summaries=TRUE,...){
   n<-NROW(x$cluster)
   if (!is.null(x$strata)) cat("Stratified ")
   un<-length(unique(x$cluster[,1]))
   if(n==un){
     cat("Independent Sampling design\n")
+    is.independent<-TRUE
   } else {
     cat(NCOL(x$cluster),"- level Cluster Sampling design\n")
     nn<-lapply(x$cluster,function(i) length(unique(i)))
     cat(paste("With (",paste(nn,collapse=","),") clusters.\n"))
+    is.independent<-FALSE
   }
-  cat("Probabilities:\n")
-  print(summary(x$prob))
-  if(!is.null(x$strata)){
-    cat("Stratum sizes: ")
-    print(table(x$strata))
+  if (design.summaries){
+    cat("Probabilities:\n")
+    print(summary(x$prob))
+    if(!is.null(x$strata)){
+      cat("Stratum sizes: \n")
+      a<-rbind(obs=table(x$strata),
+               PSU=if(!is.independent || !is.null(x$fpc))
+               table(x$strata[!duplicated(x$cluster[,1])]))
+      print(a)
+    }
+    if (!is.null(x$fpc)){
+      cat("Population stratum sizes (PSUs): \n")
+      print(x$fpc)
+    }
   }
-  if (!is.null(x$fpc)){
-    cat("Population stratum sizes: \n")
-    print(x$fpc)
+  if (varnames){
+    cat("Data variables:\n")
+    print(names(x$variables))
   }
-  cat("Data variables:\n")
-  print(names(x$variables))
   invisible(x)
 }
-     
+
 "[.survey.design"<-function (x,i, ...){
   
   if (!missing(i)){ 
@@ -195,7 +204,7 @@ summary.survey.design<-function(object,...){
 }
 
 print.summary.survey.design<-function(x,...){
-  print(x$design)
+  print(x$design,varnames=FALSE)
   cat("Unadjusted sample summaries:\n")
   print(x$summ)
   invisible(x)
@@ -352,7 +361,9 @@ svytable<-function(formula, design, Ntotal=design$fpc, round=FALSE){
      return(tbl)
    }
    ## adjusted and stratified
-   ff<-eval(substitute(lhs~strata+rhs,list(lhs=quote(weights), rhs=formula[[2]], strata=quote(design$strata))))
+   ff<-eval(substitute(lhs~strata+rhs,list(lhs=quote(weights),
+                                           rhs=formula[[2]],
+                                           strata=quote(design$strata))))
    tbl<-xtabs(ff, data=design$variables)
    ss<-match(sort(unique(design$strata)), Ntotal[,1])
    dm<-dim(tbl)
@@ -366,6 +377,59 @@ svytable<-function(formula, design, Ntotal=design$fpc, round=FALSE){
    tbl
 }
 
+svycoxph<-function(formula,design,...){
+  require(survival) || stop("Needs the survival package")
+  data<-design$variables 
+  
+  g<-match.call()
+  g$design<-NULL
+  g$var<-NULL
+  g$weights<-quote(.survey.prob.weights)
+  g[[1]]<-quote(coxph)      
+  
+  ##need to rescale weights for stability 
+  data$.survey.prob.weights<-(1/design$prob)/sum(1/design$prob)
+  if (!all(all.vars(formula) %in% names(data))) 
+    stop("all variables must be in design= argument")
+  g<-with(data,eval(g))
+  
+  nas<-attr(model.frame(g), "na.action")
+  if (length(nas))
+    design<-design[-nas,]
+  
+
+  g$var<-svyCprod(resid(g,"dfbeta",weighted=TRUE), design$strata,
+                  design$cluster[[1]], design$fpc)
+
+  g$naive.var<-NULL
+  
+  class(g)<-c("svycoxph",class(g))
+  g$call<-match.call()
+  g$survey.design<-design
+  g
+}
+
+print.svycoxph<-function(x,...){
+    print(x$survey.design, varnames=FALSE, design.summaries=FALSE,...)
+    NextMethod()
+}
+
+summary.svycoxph<-function(object,...){
+    print(object$survey.design,varnames=FALSE, design.summaries=FALSE,...)
+    NextMethod()
+}
+
+survfit.svycoxph<-function(object,...){
+    stop("No survfit method for survey models")
+}
+extractAIC.svycoxph<-function(fit,...){
+    stop("No AIC for survey models")
+}
+
+anova.svycoxph<-function(object,...){
+    stop("No anova method for survey models")
+}
+
 svyglm<-function(formula,design,...){
  
       data<-design$variables
@@ -376,7 +440,8 @@ svyglm<-function(formula,design,...){
       g$weights<-quote(.survey.prob.weights)
       g[[1]]<-quote(glm)      
 
-      data$.survey.prob.weights<-1/design$prob
+      ##need to rescale weights for stability in binomial
+      data$.survey.prob.weights<-(1/design$prob)/sum(1/design$prob)
       if (!all(all.vars(formula) %in% names(data))) 
 	stop("all variables must be in design= argument")
       g<-with(data,eval(g))
@@ -391,6 +456,12 @@ svyglm<-function(formula,design,...){
       g$call<-match.call()
       g$survey.design<-design
       g
+}
+
+print.svyglm<-function(x,...){
+  print(x$survey.design, varnames=FALSE, design.summaries=FALSE,...)
+  NextMethod()
+
 }
 
 vcov.svyglm<-function(object,...)  object$cov.unscaled
@@ -420,7 +491,7 @@ residuals.svyglm<-function(object,type = c("deviance", "pearson", "working",
 
 }
 
-summary.svyglm<-function (object, correlation = FALSE, show.design=FALSE,...) 
+summary.svyglm<-function (object, correlation = FALSE, ...) 
 {
     Qr <- object$qr
     est.disp <- TRUE
@@ -459,16 +530,15 @@ summary.svyglm<-function (object, correlation = FALSE, show.design=FALSE,...)
         dd <- sqrt(diag(covmat))
         ans$correlation <- covmat/outer(dd, dd)
     }
-    if (show.design)
-      ans$survey.design<-object$survey.design
+    
+    ans$survey.design<-object$survey.design
     class(ans) <- c("summary.svyglm","summary.glm")
     return(ans)
 }
 
 print.summary.svyglm<-function(x,...){
-    NextMethod("print")
-    if (!is.null(x$survey.design))
-      print(x$survey.design,...)
+  print(x$survey.design,varnames=FALSE,design.summaries=FALSE,...)
+  NextMethod("print")
 }
 
 logLik.svyglm<-function(object,...){

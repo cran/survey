@@ -2,7 +2,7 @@ svydesign               Survey sample analysis.
 
 svyquantile             Summary statistics for sample surveys
 svyglm                  Survey-weighted generalised linear models.
-
+svycoxph		Survey-weighed proportional hazards models.
 
 svymle                  Maximum likelihood estimation in complex
                         surveys

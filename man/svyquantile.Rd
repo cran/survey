@@ -56,7 +56,7 @@ processed by \code{ftable} for more attractive display.
 \value{
   The first three functions return vectors, the last returns an \code{\link{xtabs}} object. 
 }
-\references{ ~put references to the literature/web site here ~ }
+
 \author{Thomas Lumley}
 
 \seealso{ \code{\link{svydesign}}, \code{\link{svyCprod}}, \code{\link{mean}},\code{\link{var}}, \code{\link{quantile}}, \code{\link{xtabs}} }

@@ -15,8 +15,8 @@
   Specify a complex survey design.
 }
 \usage{
-svydesign(ids, probs=NULL, strata = NULL, variables = NULL, fpc=NULL, data = NULL,
-    nest = FALSE, check.strata = !nest, weights=NULL) 
+svydesign(ids, probs=NULL, strata = NULL, variables = NULL, fpc=NULL,
+data = NULL, nest = FALSE, check.strata = !nest, weights=NULL) 
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -54,14 +54,15 @@ svydesign(ids, probs=NULL, strata = NULL, variables = NULL, fpc=NULL, data = NUL
 
    The finite population correction can be specified either as the total
    population size in each stratum or as the fraction of the total
-   population that has been sampled. That is, sampling 100 individuals
-   from a population stratum of size 500 can be specified as 100 or as
-   100/500=0.2.  The finite population correction can be specified by a
-   vector with one element for each individual (in which case it is an
-   error for it to vary within a stratum) or as a data frame with one
-   row per stratum.  The first column of the data frame should be a
-   factor with the same levels as \code{strata} and the second column
-   the finite population correction.
+   population that has been sampled. In either case the relevant
+   population size is `primary sampling units', the largest clusters.
+   That is, sampling 100 units from a population stratum of size 500 can
+   be specified as 100 or as 100/500=0.2.  The finite population
+   correction can be specified by a vector with one element for each
+   individual (in which case it is an error for it to vary within a
+   stratum) or as a data frame with one row per stratum.  The first
+   column of the data frame should be a factor with the same levels as
+   \code{strata} and the second column the finite population correction.
 
 The \code{dim}, \code{"["} and \code{"[<-"} and na.action methods for
 \code{survey.design} objects operate on the dataframe specified by
@@ -74,7 +75,6 @@ data frame, but only the data frame is used.
 \value{
 An object of class \code{survey.design}.
 }
-\references{ ~put references to the literature/web site here ~ }
 \author{Thomas Lumley}
 
 

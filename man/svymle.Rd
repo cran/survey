@@ -7,7 +7,10 @@
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Maximum likelihood estimation in complex surveys}
 \description{
-Fits a user-specified likelihood parametrised by multiple linear predictors to data from a complex sample survey and computes the sandwich variance estimator of the coefficients.
+Fits a user-specified likelihood parametrised by multiple linear
+predictors to data from a complex sample survey and computes the
+sandwich variance estimator of the coefficients. Note that this function
+maximises an estimated population likelihood, it is not the sample MLE.
 }
 \usage{
 svymle(loglike, gradient = NULL, design, formulas, start = NULL, control

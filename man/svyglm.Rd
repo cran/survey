@@ -1,5 +1,6 @@
 \name{svyglm}
 \alias{svyglm}
+\alias{print.svyglm}
 \alias{summary.svyglm}
 \alias{print.summary.svyglm}
 \alias{vcov.svyglm}
@@ -14,7 +15,7 @@ Fit a generalised linear model to data from a complex survey design, with invers
 }
 \usage{
 svyglm(formula, design, ...)
-\method{summary}{svyglm}(object, correlation = FALSE, show.design = FALSE, ...) 
+\method{summary}{svyglm}(object, correlation = FALSE,  ...) 
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -23,7 +24,6 @@ svyglm(formula, design, ...)
   \item{\dots}{Other arguments passed to \code{glm} or \code{summary.glm} }
   \item{object}{A \code{svyglm} object}
   \item{correlation}{Include the correlation matrix of parameters?}
-  \item{show.design}{Include the survey design object?}
 }
 \details{
 Standard errors for cluster-sampled designs are computed using a
@@ -33,7 +33,7 @@ in GEEs).  Most of these computations are done in \code{\link{svyCprod}}.
 \value{
   An object of class \code{svyglm}.
 }
-\references{ ~put references to the literature/web site here ~ }
+
 \author{Thomas Lumley}
 
 

@@ -1,3 +1,9 @@
+1.0	No changes
+
+0.9-5   - finite population correction should be done with PSUs not 
+	  individuals
+	- added Cox models
+
 0.9-4	- svyCprod was computing n/(n-1) using number of observations, 
           not number of PSUs, and was averaging observations rather than 
  	  PSU means to compute stratum means. 
