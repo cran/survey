@@ -4,8 +4,9 @@ update.survey.design    Add variables to a survey design
 svrepdesign		Replication-weight designs
 as.svrepdesign		Convert svydesign to svrepdesign
 postStratify		Post-stratify a svrepdesign
+rake			Rake a svrepdesign
 
-svycoxph                Survey-weighted generalised linear models.
+svycoxph                Survey-weighted Cox models
 svyglm                  Survey-weighted generalised linear models.
 svyquantile             Summary statistics for sample surveys
 svytotal
@@ -18,12 +19,14 @@ svymle                  Maximum likelihood estimation in complex
 svrepmean		Summary statistics with replication weights
 svyreptable
 svreptotal
+svrepquantile
 svrepglm		glms with replication weights
 withReplicates		Replicate variances for arbitrary statistics
 
 Utility functions:
 svy.varcoef             Sandwich variance estimator for glms
 svyCprod                Computations for survey variances
+svrVar			Computations for replication variances
 jk1weights		create replication weights
 jknweights		create replication weights
 brrweights		create replication weights
@@ -33,3 +36,4 @@ regTermTest		Test terms in a regression model
 Data:
 fpc                     Small artificial example
 scd			Cardiac arrests example
+api			California Academic Performance Index

@@ -490,6 +490,11 @@ svrepquantile<-function(x,design,quantiles,method="linear",f=1, return.replicate
 
 svrVar<-function(thetas, scale, rscales,na.action=getOption("na.action")){
   thetas<-get(na.action)(thetas)
+  naa<-attr(thetas,"na.action")
+  if (!is.null(naa)){
+    rscales<-rscales[-naa]
+    warning(length(naa), " replicates gave NA results and were discarded.")
+  }
   if (length(dim(thetas))==2){
     meantheta<-colMeans(thetas)
     v<-crossprod( sweep(thetas,2, meantheta,"-")*sqrt(rscales))*scale
@@ -497,6 +502,7 @@ svrVar<-function(thetas, scale, rscales,na.action=getOption("na.action")){
     meantheta<-mean(thetas)
     v<- sum( (thetas-meantheta)^2*rscales)*scale
   }
+  attr(v,"na.replicates")<-naa
   return(v)
 }
 
@@ -872,6 +878,9 @@ print.svrepstat<-function(x,...){
     colnames(m)<-c(attr(x,"statistic"),"SE")
     printCoefmat(m)
   } else {stop("incorrect structure of svrepstat object")}
+  naa<-attr(vv,"na.replicates")
+  if (!is.null(naa))
+    cat("Note: NA results discarded for",length(naa),"replicates (",naa,")\n")
 }
 
 summary.svrepglm<-function (object, correlation = FALSE, ...) 

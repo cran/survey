@@ -1,3 +1,7 @@
+2.3-2 Fix for svyquantile confidence intervals.
+
+2.3-1 clearer warnings in svrVar when some replicates give NA . (Gillian Raab)
+
 2.3   svyquantile has confidence intervals, added svrepquantile.
 
 2.2-1 as.svrepdesign didn't pass options to brrweights (Fred Rohde)

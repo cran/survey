@@ -517,7 +517,7 @@ svyquantile<-function(x,design,quantiles,alpha=0.05,ci=FALSE, method="linear",f=
       
     computeCI<-function(xx,p){
     
-      U<-function(theta){ ((xx>theta)-(1-p))*w}
+      U<-function(theta){ ((xx>theta)-(1-p))}
       
       scoretest<-function(theta,qlimit){
         umean<-svymean(U(theta),design)
