@@ -57,7 +57,7 @@ be useful for testing sets of regression terms.
   sdf<-df[xi==1,]
 
   dxi<-svydesign(~0,~p,data=sdf)
-  m<-svyglm(y~x+z,data=sdf,family="gaussian",design=dxi)
+  m<-svyglm(y~x+z,family="gaussian",design=dxi)
   m1<-lm(y~x+z, data=sdf)
 
   summary(m1) ##wrong
@@ -73,12 +73,19 @@ be useful for testing sets of regression terms.
   sdf<-df[xi[df$id]==1,]
 
   dxi<-svydesign(~id,~clustp,data=sdf)
-  m<-svyglm(y~x+z,data=sdf,family="gaussian",design=dxi)
+  m<-svyglm(y~x+z,family="gaussian",design=dxi)
   m1<-lm(y~x+z,data=sdf)
  
   summary(m1) ##wrong
   summary(m)  ##right
   summary(mpop) ##whole population
+
+  ## subsets
+  msub<-svyglm(y~x+z,family="gaussian",design=dxi,subset=x>1)
+  summary(msub)
+  subdxi<-subset(dxi,x>1)
+  msub<-svyglm(y~x+z,family="gaussian",design=subdxi)
+  summary(msub)
 
  }
 \keyword{regression}% at least one, from doc/KEYWORDS

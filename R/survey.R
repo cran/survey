@@ -21,7 +21,8 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
      if(inherits(ids,"formula")) {
 	 mf<-substitute(model.frame(ids,data=data))   
 	 ids<-eval.parent(mf)
-	}
+	} else if (!is.null(ids))
+            ids<-data.frame(ids)
 
      if(inherits(probs,"formula")){
 	mf<-substitute(model.frame(probs,data=data))
@@ -31,7 +32,8 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
      if(inherits(weights,"formula")){
        mf<-substitute(model.frame(weights,data=data))
        weights<-eval.parent(mf)
-     }
+     } else if (!is.null(weights))
+         weights<-data.frame(weights)
      
      if(!is.null(weights)){
        if (!is.null(probs))
@@ -51,13 +53,15 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
          strata<-factor(strata)
      }
      
-     if (is.null(variables))
-       variables<-data
-     if (inherits(variables,"formula")){
-       mf<-substitute(model.frame(variables,data=data))
-       variables <- eval.parent(mf)
-     }
+    if (inherits(variables,"formula")){
+        mf<-substitute(model.frame(variables,data=data))
+        variables <- eval.parent(mf)
+    } else if (is.null(variables)){
+        variables<-data
+    } else
+        variables<-data.frame(variables)
 
+    
      if (inherits(fpc,"formula")){
        mf<-substitute(model.frame(fpc,data=data))
        fpc<-eval.parent(mf)
@@ -65,7 +69,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
          fpc<-fpc[,1]
      }
      
-    if (NCOL(ids)==0)
+    if (is.null(ids) || NCOL(ids)==0)
 	ids<-data.frame(.id=seq(length=NROW(variables)))
 
      ## force subclusters nested in clusters
@@ -120,8 +124,13 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
        
      }
 
-    if (NCOL(probs)==1) probs<-data.frame(probs)
+    if (is.numeric(probs) && length(probs)==1)
+        probs<-rep(probs, NROW(variables))
     
+    if (is.null(probs)) probs<-rep(1,NROW(variables))
+    
+    if (NCOL(probs)==1) probs<-data.frame(probs)
+
     rval<-list(cluster=ids)
     rval$strata<-strata
     rval$prob<- apply(probs,1,prod) 
@@ -302,68 +311,68 @@ svyCprod<-function(x, strata, psu, fpc, nPSU,
   }
 
   if(is.null(strata)){
-    x<-t(t(x)-colMeans(x))
+      x<-t(t(x)-colMeans(x))
   } else {
-    strata.means<-rowsum(x,strata, reorder=FALSE)/rowsum(rep(1,n),strata, reorder=FALSE)
-    if (!is.matrix(strata.means))
-      strata.means<-matrix(strata.means, ncol=NCOL(x))
-    x<- x- strata.means[ match(strata, unique(strata)),,drop=FALSE]
+      strata.means<-rowsum(x,strata, reorder=FALSE)/rowsum(rep(1,n),strata, reorder=FALSE)
+      if (!is.matrix(strata.means))
+          strata.means<-matrix(strata.means, ncol=NCOL(x))
+      x<- x- strata.means[ match(strata, unique(strata)),,drop=FALSE]
   }
   
   p<-NCOL(x)
   v<-matrix(0,p,p)
-
+  
   ss<-unique(strata)
   for(s in ss){
-    this.stratum <- strata %in% s
-
-    ## original number of PSUs in this stratum 
-    ## before missing data/subsetting
-    this.n <-nPSU[match(s,names(nPSU))]
-
-    this.df <- this.n/(this.n-1)	
-
-    if (is.null(fpc))
-      this.fpc <- 1
-    else{
-      this.fpc <- fpc[,2][ fpc[,1]==as.character(s)]
-      this.fpc <- (this.fpc - this.n)/this.fpc
-    }
-    
-    xs<-x[this.stratum,,drop=FALSE]
-    
-    ## stratum with only 1 cluster leads to undefined variance
-    if (this.n==1){
-      this.df<-1
-      lonely.psu<-match.arg(lonely.psu, c("remove","adjust","fail"))
-      if (lonely.psu=="fail")
-        stop("Stratum ",s, " has only one sampling unit.")
-      else
-        warning("Stratum ",s, " has only one sampling unit.")
-      if (lonely.psu=="adjust")
-        xs<-strata.means[match(s,ss),,drop=FALSE]
-    }
-
-    ## add it up
-    v<-v+crossprod(xs)*this.df*this.fpc
+      this.stratum <- strata %in% s
+      
+      ## original number of PSUs in this stratum 
+      ## before missing data/subsetting
+      this.n <-nPSU[match(s,names(nPSU))]
+      
+      this.df <- this.n/(this.n-1)	
+      
+      if (is.null(fpc))
+          this.fpc <- 1
+      else{
+          this.fpc <- fpc[,2][ fpc[,1]==as.character(s)]
+          this.fpc <- (this.fpc - this.n)/this.fpc
+      }
+      
+      xs<-x[this.stratum,,drop=FALSE]
+      
+      ## stratum with only 1 cluster leads to undefined variance
+      if (this.n==1){
+          this.df<-1
+          lonely.psu<-match.arg(lonely.psu, c("remove","adjust","fail"))
+          if (lonely.psu=="fail")
+              stop("Stratum ",s, " has only one sampling unit.")
+          else
+              warning("Stratum ",s, " has only one sampling unit.")
+          if (lonely.psu=="adjust")
+              xs<-strata.means[match(s,ss),,drop=FALSE]
+      }
+      
+      ## add it up
+      v<-v+crossprod(xs)*this.df*this.fpc
   }
-v
+  v
 }
 
 
 svymean<-function(x,design, na.rm=FALSE){
 
 	if (inherits(x,"formula"))
-		x<-model.frame(x,design$variables,na.action=na.pass)
+            x<-model.frame(x,design$variables,na.action=na.pass)
 	else if(typeof(x) %in% c("expression","symbol"))
-		x<-eval(x, design$variables)
-
+            x<-eval(x, design$variables)
+        
 	x<-as.matrix(x)
 
 	if (na.rm){
-	   nas<-rowSums(is.na(x))
-	   design<-design[nas==0,]
-	   x<-x[nas==0,,drop=FALSE]
+            nas<-rowSums(is.na(x))
+            design<-design[nas==0,]
+            x<-x[nas==0,,drop=FALSE]
 	}
 
 	pweights<-1/design$prob
@@ -373,19 +382,19 @@ svymean<-function(x,design, na.rm=FALSE){
 	v<-svyCprod(x*pweights/psum,design$strata,design$cluster[[1]], design$fpc, design$nPSU)
 	attr(average,"var")<-v
 	return(average)
-}
+    }
 
 svyvar<-function(x, design, na.rm=FALSE){
-
+    
 	if (inherits(x,"formula"))
-		x<-model.frame(x,design$variables,na.action=na.pass)
+            x<-model.frame(x,design$variables,na.action=na.pass)
 	else if(typeof(x) %in% c("expression","symbol"))
-		x<-eval(x, design$variables)
-
+            x<-eval(x, design$variables)
+        
 	xbar<-svymean(x,design, na.rm=na.rm)
 	if(NCOL(x)==1) {
-		x<-x-xbar
-		return(svymean(x*x,design, na.rm=na.rm))
+            x<-x-xbar
+            return(svymean(x*x,design, na.rm=na.rm))
 	}
 	x<-t(t(x)-xbar)
 	p<-NCOL(x)
@@ -394,47 +403,47 @@ svyvar<-function(x, design, na.rm=FALSE){
 	b<-x[,rep(1:p,each=p)]
 	v<-svymean(a*b,design, na.rm=na.rm)
 	matrix(v,ncol=p)
-}
+    }
 
 
 svyquantile<-function(x,design,quantiles,method="linear",f=1){
-
-     if (inherits(x,"formula"))
+    
+    if (inherits(x,"formula"))
 		x<-model.frame(x,design$variables)
-     else if(typeof(x) %in% c("expression","symbol"))
-		x<-eval(x, design$variables)
-     
+    else if(typeof(x) %in% c("expression","symbol"))
+        x<-eval(x, design$variables)
+    
      if(length(dim(x))){
-	   if(ncol(x)>1) stop("Invalid variable type")
-	   x<-x[,1]
-	}
-
-     w<-1/design$prob
-     oo<-order(x)
-     cum.w<-cumsum(w[oo])/sum(w)
-
-     
-     	cdf<-approxfun(cum.w,x[oo],method=method,f=f,
-		yleft=min(x),yright=max(x))
-     	return(cdf(quantiles))
+         if(ncol(x)>1) stop("Invalid variable type")
+         x<-x[,1]
+     }
+    
+    w<-1/design$prob
+    oo<-order(x)
+    cum.w<-cumsum(w[oo])/sum(w)
+    
+    
+    cdf<-approxfun(cum.w,x[oo],method=method,f=f,
+                   yleft=min(x),yright=max(x))
+    return(cdf(quantiles))
     
 }
-     
+
 
 
 svytable<-function(formula, design, Ntotal=design$fpc, round=FALSE){
    weights<-1/design$prob
-
+   
    ## unstratified or unadjusted.
    if (is.null(Ntotal) || length(Ntotal)==1){
-     ff<-eval(substitute(lhs~rhs,list(lhs=quote(weights), rhs=formula[[2]])))
-     tbl<-xtabs(ff, data=design$variables)
-     if (!is.null(Ntotal)) {
-       tbl<-tbl*sum(Ntotal)/sum(tbl)
-     }
-     if (round)
-       tbl<-round(tbl)
-     return(tbl)
+       ff<-eval(substitute(lhs~rhs,list(lhs=quote(weights), rhs=formula[[2]])))
+       tbl<-xtabs(ff, data=design$variables)
+       if (!is.null(Ntotal)) {
+           tbl<-tbl*sum(Ntotal)/sum(tbl)
+       }
+       if (round)
+           tbl<-round(tbl)
+       return(tbl)
    }
    ## adjusted and stratified
    ff<-eval(substitute(lhs~strata+rhs,list(lhs=quote(weights),
@@ -447,47 +456,47 @@ svytable<-function(formula, design, Ntotal=design$fpc, round=FALSE){
    tbl<-sweep(tbl,1,Ntotal[ss, 2]/apply(tbl,1,sum),"*")
    tbl<-apply(tbl, 2:length(dm), sum)
    if (round)
-     tbl<-round(tbl)
+       tbl<-round(tbl)
    class(tbl)<-c("xtabs","table")
    attr(tbl, "call")<-match.call()
    tbl
 }
 
 svycoxph<-function(formula,design,subset=NULL,...){
-  subset<-substitute(subset)
-  subset<-eval(subset,design$variables,parent.frame())
-  if (!is.null(subset))
-    design<-design[subset,]
-  
-  require(survival) || stop("Needs the survival package")
-  data<-design$variables 
-  
-  g<-match.call()
-  g$design<-NULL
-  g$var<-NULL
-  g$weights<-quote(.survey.prob.weights)
-  g[[1]]<-quote(coxph)      
-  
-  ##need to rescale weights for stability 
-  data$.survey.prob.weights<-(1/design$prob)/sum(1/design$prob)
-  if (!all(all.vars(formula) %in% names(data))) 
-    stop("all variables must be in design= argument")
-  g<-with(data,eval(g))
-  
-  nas<-attr(model.frame(g), "na.action")
-  if (length(nas))
-    design<-design[-nas,]
-  
-
-  g$var<-svyCprod(resid(g,"dfbeta",weighted=TRUE), design$strata,
-                  design$cluster[[1]], design$fpc,design$nPSU)
-
-  g$naive.var<-NULL
-  
-  class(g)<-c("svycoxph",class(g))
-  g$call<-match.call()
-  g$survey.design<-design
-  g
+    subset<-substitute(subset)
+    subset<-eval(subset,design$variables,parent.frame())
+    if (!is.null(subset))
+        design<-design[subset,]
+    
+    require(survival) || stop("Needs the survival package")
+    data<-design$variables 
+    
+    g<-match.call()
+    g$design<-NULL
+    g$var<-NULL
+    g$weights<-quote(.survey.prob.weights)
+    g[[1]]<-quote(coxph)      
+    
+    ##need to rescale weights for stability 
+    data$.survey.prob.weights<-(1/design$prob)/sum(1/design$prob)
+    if (!all(all.vars(formula) %in% names(data))) 
+        stop("all variables must be in design= argument")
+    g<-with(data,eval(g))
+    
+    nas<-attr(model.frame(g), "na.action")
+    if (length(nas))
+        design<-design[-nas,]
+    
+    
+    g$var<-svyCprod(resid(g,"dfbeta",weighted=TRUE), design$strata,
+                    design$cluster[[1]], design$fpc,design$nPSU)
+    
+    g$naive.var<-NULL
+    
+    class(g)<-c("svycoxph",class(g))
+    g$call<-match.call()
+    g$survey.design<-design
+    g
 }
 
 print.svycoxph<-function(x,...){
@@ -610,7 +619,7 @@ summary.svyglm<-function (object, correlation = FALSE, ...)
         "aic", "contrasts", "df.residual", "null.deviance", "df.null", 
         "iter")], list(deviance.resid = residuals(object, type = "deviance"), 
         aic = object$aic, coefficients = coef.table, dispersion = dispersion, 
-        df = c(object$rank, df.r), cov.unscaled = covmat, 
+        df = c(object$rank, df.r,NCOL(Qr$qr)), cov.unscaled = covmat, 
         cov.scaled = covmat))
     if (correlation) {
         dd <- sqrt(diag(covmat))
