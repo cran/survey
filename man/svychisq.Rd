@@ -13,7 +13,7 @@
 \usage{
 svytable(formula, design, Ntotal = design$fpc, round = FALSE)
 svreptable(formula, design, Ntotal = sum(weights(design, "sampling"))), round = FALSE)
-svychisq(formula, design, statistic = c("F",  "Chisq","Wald","adjWald"))
+svychisq(formula, design, statistic = c("F",  "Chisq","Wald","adjWald"),na.rm=TRUE)
 \method{summary}{svytable}(object, statistic = c("F",  "Chisq","Wald","adjWald"),...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -25,6 +25,7 @@ svychisq(formula, design, statistic = c("F",  "Chisq","Wald","adjWald"))
     to normalise to.}
   \item{round}{Should the table entries be rounded to the nearest
     integer?}
+  \item{na.rm}{Remove missing values}
   \item{object}{Output from \code{svytable}}
   \item{\dots}{Other arguments to \code{summary}, not used here}
  }

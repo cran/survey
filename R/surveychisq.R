@@ -4,21 +4,30 @@
 
 
 svychisq<-function(formula, design,
-                   statistic=c("F","Chisq","Wald","adjWald")){
+                   statistic=c("F","Chisq","Wald","adjWald"),
+                   na.rm=TRUE){
   if (ncol(attr(terms(formula),"factors"))>2)
     stop("Only 2-way tables at the moment")
   statistic<-match.arg(statistic)
-
+  
   if(!is.null(design$postStrata))
     warning("Post-stratification not implemented")
   
   rows<-formula[[2]][[2]]
   cols<-formula[[2]][[3]]
-  nr<-length(unique(design$variables[,as.character(rows)]))
-  nc<-length(unique(design$variables[,as.character(cols)]))
+  rowvar<-unique(design$variables[,as.character(rows)])
+  colvar<-unique(design$variables[,as.character(cols)])
+  returnNA<-FALSE
+  if ((any(is.na(rowvar),is.na(colvar)))){
+      rowvar<-na.omit(rowvar)
+      colvar<-na.omit(colvar)
+      returnNA<-!na.rm
+  }
+  nr<-length(rowvar)
+  nc<-length(colvar)
   
   fsat<-eval(bquote(~interaction(factor(.(rows)),factor(.(cols)))-1))
-  mm<-model.matrix(fsat,model.frame(fsat, design$variables))
+  mm<-model.matrix(fsat,model.frame(fsat, design$variables,na.action=na.pass))
   N<-nrow(mm)
   nu <- length(unique(design$cluster[,1]))-length(unique(design$strata))
 
@@ -36,10 +45,10 @@ svychisq<-function(formula, design,
   if(statistic %in% c("Wald", "adjWald")){
     frow<-eval(bquote(~factor(.(rows))-1))
     fcol<-eval(bquote(~factor(.(cols))-1))
-    mr<-model.matrix(frow, model.frame(frow,design$variables))
-    mc<-model.matrix(fcol, model.frame(fcol,design$variables))
+    mr<-model.matrix(frow, model.frame(frow,design$variables, na.action=na.pass))
+    mc<-model.matrix(fcol, model.frame(fcol,design$variables, na.action=na.pass))
     one<-rep(1,NROW(mc))
-    cells<-svytotal(~mm+mr+mc+one,design)
+    cells<-svytotal(~mm+mr+mc+one,design,na.rm=TRUE)
 
     Jcb <- cbind(diag(nr*nc),
                  -outer(mf1$rows,1:nr,"==")*rep(cells[(nr*nc)+nr+1:nc]/cells[(nr*nc)+nr+nc+1],each=nr),
@@ -59,16 +68,25 @@ svychisq<-function(formula, design,
       denomdf<-(nu-numdf+1)
       waldstat <- waldstat*denomdf/(numdf*nu)
     }
-    pearson$statistic<-waldstat
-    pearson$parameter<-c(ndf=numdf,ddf=denomdf)
-    pearson$p.value<-pf(pearson$statistic, numdf, denomdf, lower.tail=FALSE)
-    attr(pearson$statistic,"names")<-"F"
-    pearson$data.name<-deparse(sys.call())
-    pearson$method<-"Design-based Wald test of association"
+    if (returnNA){
+      pearson$statistic<-NA
+      pearson$parameter<-c(ndf=numdf,ddf=denomdf)
+      pearson$p.value<-NA
+      attr(pearson$statistic,"names")<-"F"
+      pearson$data.name<-deparse(sys.call())
+      pearson$method<-"Design-based Wald test of association"
+    } else {
+      pearson$statistic<-waldstat
+      pearson$parameter<-c(ndf=numdf,ddf=denomdf)
+      pearson$p.value<-pf(pearson$statistic, numdf, denomdf, lower.tail=FALSE)
+      attr(pearson$statistic,"names")<-"F"
+      pearson$data.name<-deparse(sys.call())
+      pearson$method<-"Design-based Wald test of association"
+    } 
     return(pearson)
   }
   
-  mean2<-svymean(mm,design)
+  mean2<-svymean(mm,design,na.rm=TRUE)
 
 
 
@@ -97,6 +115,11 @@ svychisq<-function(formula, design,
     pearson$p.value<-pchisq(pearson$statistic/mean(diag(Delta)),
                                df=NCOL(Delta),lower.tail=FALSE)
     pearson$parameter<-c(df=NCOL(Delta))
+  }
+
+  if (returnNA){
+    pearson$statistic<-NA
+    pearson$p.value<-NA
   }
   
   pearson$data.name<-deparse(sys.call())

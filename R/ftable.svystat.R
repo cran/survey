@@ -1,22 +1,33 @@
 
 
-ftable.svystat<-function(x,rownames,...){
+ftable.svystat<-function(x,rownames=NULL,...){
 
     m<-cbind(coef(x),SE(x))
     if (is.null(rownames))
         return(as.table(m))
 
     statname<-if (is.list(x)) attr(x[[1]],"statistic") else attr(x,"statistic")
+
+    deff<-attr(x,"deff")
+    has.deff<-!is.null(deff)
+    if (has.deff)
+      m<-cbind(m,diag(deff))
     
     rowdim<-sapply(rownames,length)
-    
-    mm<-array(m,dim=c(rowdim,NCOL(m)),
-             dimnames=c(as.list(rownames),
-             list(c(statname,"SE"))))
 
-    
-    ftable(mm,row.vars=length(rowdim)+0:1)
-
+    if (has.deff){
+      mm<-array(m,dim=c(rowdim,NCOL(m)),
+                dimnames=c(as.list(rownames),
+                  list(c(statname,"SE","Deff"))))
+      
+      ftable(mm,row.vars=length(rowdim)+0:1)
+    } else {
+      mm<-array(m,dim=c(rowdim,NCOL(m)),
+                dimnames=c(as.list(rownames),
+                  list(c(statname,"SE"))))
+     
+      ftable(mm,row.vars=length(rowdim)+0:1)
+    }
 
 }
 
@@ -25,7 +36,7 @@ ftable.svrepstat<-ftable.svystat
 ftable.svyby<-function(x,...){
   info<-attr(x,"svyby")
   margins<-info$margins
-  dimnames<-lapply(x[,margins],levels)
+  dimnames<-lapply(x[, margins, drop=FALSE],levels)
   dims<-sapply(dimnames,length)
   dims<-c(dims,variable=info$nstats)
   if (info$vars){

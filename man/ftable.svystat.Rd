@@ -34,6 +34,11 @@ b<-ftable(a, rownames=list(stype=c("E","H","M"),comp.imp=c("No","Yes")))
 b
 round(100*b,1)
 
+a<-svymean(~interaction(stype,comp.imp), design=dclus1, deff=TRUE)
+b<-ftable(a, rownames=list(stype=c("E","H","M"),comp.imp=c("No","Yes")))
+b
+round(100*b,1)
+
 rclus1<-as.svrepdesign(dclus1)
 a<-svreptotal(~interaction(stype,comp.imp), design=rclus1)
 b<-ftable(a, rownames=list(stype=c("E","H","M"),comp.imp=c("No","Yes")))

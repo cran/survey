@@ -1,3 +1,9 @@
+2.8-1   Make Deff estimates work with ftable. (for Gillian Raab)
+
+      ftable.svyby didn't work with a single by() variable (for Gillian Raab)
+
+      Missing values now allowed in svychisq(). (for Lee Siewersda)
+
 2.8   fix printing of svyby broken in 2.7
 
       add ftable.svyby
