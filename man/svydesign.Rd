@@ -100,7 +100,7 @@ An object of class \code{survey.design}.
   sdf<-df[xi==1,]
   
   #survey design object: independent sampling, 
-  dxi<-svydesign(~0,~p,data=sdf) 
+  dxi<-svydesign(~0,~p,data=sdf)
   dxi
   summary(dxi)
   svymean(sdf$x,dxi)	

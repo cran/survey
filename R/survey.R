@@ -119,10 +119,12 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
          stop("Over 100% sampling in some strata")
        
      }
-            
-     rval<-list(cluster=ids)
+
+    if (NCOL(probs)==1) probs<-data.frame(probs)
+    
+    rval<-list(cluster=ids)
     rval$strata<-strata
-    rval$prob<-apply(probs,1,prod)
+    rval$prob<- apply(probs,1,prod) 
     rval$allprob<-probs
     rval$call<-match.call()
     rval$variables<-variables
@@ -784,6 +786,7 @@ svymle<-function(loglike, gradient=NULL, design, formulas, start=NULL, control=l
 }
 
 coef.svymle<-function(object,...) object$par
+
 vcov.svymle<-function(object,stderr=c("robust","model"),...) {
     stderr<-match.arg(stderr)
     if (stderr=="robust"){
