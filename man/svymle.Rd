@@ -30,10 +30,21 @@ svymle(loglike, gradient = NULL, design, formulas, start = NULL, control
     standard sandwich estimator. See Details below.}
 }
 \details{
-The \code{design} object contains all the data and design information from the survey, so all the formulas refer to variables in this object.  The \code{formulas} argument needs to specify the response variable and a linear predictor for each freely varying argument of \code{loglike}.
+  The \code{design} object contains all the data and design information
+from the survey, so all the formulas refer to variables in this object.
+The \code{formulas} argument needs to specify the response variable and
+a linear predictor for each freely varying argument of \code{loglike}.
 
-Consider for example the \code{\link{dnorm}} function, with arguments \code{x}, \code{mean}, \code{sd} and \code{log}, and suppose we want to estimate  the mean of \code{y} as a linear function of a variable \code{z}, and to estimate a constant standard deviation.  The \code{log} argument must be fixed at \code{FALSE} to get the loglikelihood.  A \code{formulas} argument would be \code{list(~y, mean=~z, sd=~1)}. Note that the data variable \code{y} must be the first argument to \code{dnorm} and the first formula and that all the other formulas are labelled.  It is also permitted to have the data variable as the left-hand side of one of the formulas: eg
-\code{list( mean=y~z, sd=~1)}.
+Consider for example the \code{\link{dnorm}} function, with arguments
+\code{x}, \code{mean}, \code{sd} and \code{log}, and suppose we want to
+estimate the mean of \code{y} as a linear function of a variable
+\code{z}, and to estimate a constant standard deviation.  The \code{log}
+argument must be fixed at \code{FALSE} to get the loglikelihood.  A
+\code{formulas} argument would be \code{list(~y, mean=~z, sd=~1)}. Note
+that the data variable \code{y} must be the first argument to
+\code{dnorm} and the first formula and that all the other formulas are
+labelled.  It is also permitted to have the data variable as the
+left-hand side of one of the formulas: eg \code{list( mean=y~z, sd=~1)}.
 
 
 The usual variance estimator for MLEs in a survey sample is a `sandwich'

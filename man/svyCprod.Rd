@@ -18,11 +18,11 @@ svyCprod(x, strata, psu, fpc, lonely.psu=getOption("survey.lonely.psu"))
     \code{"fail"}. See Details below}
 }
 \details{
-The data are centered within each stratum.  The observations for each
-cluster are added, and the outer product is taken of the row vector
-resulting for each cluster.  This is added within strata, multiplied by
-a degrees-of-freedom correction and by a finite population correction
-(if supplied) and added across strata.
+ The observations for each cluster are added, then centred within each
+ stratum and the outer product is taken of the row vector resulting for
+ each cluster.  This is added within strata, multiplied by a
+ degrees-of-freedom correction and by a finite population correction (if
+ supplied) and added across strata.
 
 The variance formula gives 0/0 if a stratum contains only one sampling
 unit. The options to handle this are \code{"fail"} to give an error,

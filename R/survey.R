@@ -55,7 +55,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
      if (nest && NCOL(ids)>1){
       N<-ncol(ids)
       for(i in 2:(N)){
-         ids[,i]<-do.call("interaction",ids[,1:i],drop=TRUE)	
+         ids[,i]<-do.call("interaction",ids[,1:i,drop=TRUE])
       }
     }
      ## force clusters nested in strata
@@ -99,6 +99,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
     rval$call<-match.call()
     rval$variables<-variables
     rval$fpc<-fpc
+    rval$call<-sys.call()
     class(rval)<-"survey.design"
     rval
           }
@@ -204,24 +205,39 @@ svyCprod<-function(x, strata, psu, fpc,
                    lonely.psu=getOption("survey.lonely.psu")){
   x<-as.matrix(x)
   n<-NROW(x)
+
+  ##First collapse over PSUs
+
+  if (is.null(strata))
+    strata<-rep("1",n)
+  
+  if (!is.null(psu)){
+    x<-rowsum(x, psu, reorder=FALSE)
+    strata<-strata[!duplicated(psu)]
+    n<-NROW(x)
+  }
+  
   if(is.null(strata)){
     x<-t(t(x)-colMeans(x))
   } else {
-    strata<-as.character(strata)
-    ss<-sort(unique(strata))  ##factors don't work as for() indices.
-    strata.means<-as.matrix((rowsum(x,strata)/rowsum(rep(1,n),strata)))[match(strata,ss),,drop=FALSE]
-    x<- x- strata.means
+    strata<-as.character(strata) ##can't use factors as indices in for()
+    strata.means<-rowsum(x,strata, reorder=FALSE)/rowsum(rep(1,n),strata, reorder=FALSE)
+    if (!is.matrix(strata.means))
+      strata.means<-matrix(strata.means, ncol=NCOL(x))
+    x<- x- strata.means[ match(strata, unique(strata)),,drop=FALSE]
   }
+  
   p<-NCOL(x)
   v<-matrix(0,p,p)
-  if (is.null(strata)) {
-    strata<-rep(1,n)
-    ss<-1
-  }
+
+  ss<-unique(strata)
   for(s in ss){
     this.stratum <- strata %in% s
+
     this.n <-sum(this.stratum)
+    
     this.df <- this.n/(this.n-1)
+    
     if (is.null(fpc))
       this.fpc <- 1
     else{
@@ -229,10 +245,7 @@ svyCprod<-function(x, strata, psu, fpc,
       this.fpc <- (this.fpc - this.n)/this.fpc
     }
     
-    if(!is.null(psu))
-      xs<-as.matrix(rowsum(x[this.stratum,,drop=FALSE],psu[this.stratum],reorder=FALSE))
-    else
-      xs<-x
+    xs<-x[this.stratum,,drop=FALSE]
     
     ## stratum with only 1 cluster leads to 0/0 variance
     if (this.n==1){
@@ -243,13 +256,13 @@ svyCprod<-function(x, strata, psu, fpc,
       else
         warning("Stratum ",s, " has only one sampling unit.")
       if (lonely.psu=="adjust")
-        xs<-strata.means[this.stratum,,drop=FALSE]
+        xs<-strata.means[match(s,ss),,drop=FALSE]
     }
-    
+
+    ## add it up
     v<-v+crossprod(xs)*this.df*this.fpc
-    
   }
-  v
+v
 }
 
 
@@ -324,12 +337,32 @@ svyquantile<-function(x,design,quantiles,method="linear",f=1){
      
 
 
-svytable<-function(formula, design, Ntotal=design$fpc){
+svytable<-function(formula, design, Ntotal=design$fpc, round=FALSE){
    weights<-1/design$prob
-   ff<-eval(substitute(lhs~rhs,list(lhs=quote(weights), rhs=formula[[2]])))
+
+   ## unstratified or unadjusted.
+   if (is.null(Ntotal) || length(Ntotal)==1){
+     ff<-eval(substitute(lhs~rhs,list(lhs=quote(weights), rhs=formula[[2]])))
+     tbl<-xtabs(ff, data=design$variables)
+     if (!is.null(Ntotal)) {
+       tbl<-tbl*sum(Ntotal)/sum(tbl)
+     }
+     if (round)
+       tbl<-round(tbl)
+     return(tbl)
+   }
+   ## adjusted and stratified
+   ff<-eval(substitute(lhs~strata+rhs,list(lhs=quote(weights), rhs=formula[[2]], strata=quote(design$strata))))
    tbl<-xtabs(ff, data=design$variables)
-   if(!is.null(Ntotal))
-	tbl<-tbl*sum(Ntotal)/sum(tbl)
+   ss<-match(sort(unique(design$strata)), Ntotal[,1])
+   dm<-dim(tbl)
+   layer<-prod(dm[-1])
+   tbl<-sweep(tbl,1,Ntotal[ss, 2]/apply(tbl,1,sum),"*")
+   tbl<-apply(tbl, 2:length(dm), sum)
+   if (round)
+     tbl<-round(tbl)
+   class(tbl)<-c("xtabs","table")
+   attr(tbl, "call")<-match.call()
    tbl
 }
 
@@ -387,7 +420,7 @@ residuals.svyglm<-function(object,type = c("deviance", "pearson", "working",
 
 }
 
-summary.svyglm<-function (object, correlation = FALSE, ...) 
+summary.svyglm<-function (object, correlation = FALSE, show.design=FALSE,...) 
 {
     Qr <- object$qr
     est.disp <- TRUE
@@ -426,14 +459,16 @@ summary.svyglm<-function (object, correlation = FALSE, ...)
         dd <- sqrt(diag(covmat))
         ans$correlation <- covmat/outer(dd, dd)
     }
-    ans$survey.design<-object$survey.design
+    if (show.design)
+      ans$survey.design<-object$survey.design
     class(ans) <- c("summary.svyglm","summary.glm")
     return(ans)
 }
 
 print.summary.svyglm<-function(x,...){
     NextMethod("print")
-    print(x$survey.design,...)
+    if (!is.null(x$survey.design))
+      print(x$survey.design,...)
 }
 
 logLik.svyglm<-function(object,...){

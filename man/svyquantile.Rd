@@ -12,7 +12,7 @@ Compute means, variances, quantiles, and cross-tabulations for data from complex
 svyquantile(x, design, quantiles, method = "linear", f = 1)
 svymean(x, design, na.rm=FALSE) 
 svyvar(x, design, na.rm=FALSE) 
-svytable(formula, design, Ntotal = design$fpc) 
+svytable(formula, design, Ntotal = design$fpc, round = FALSE) 
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -23,13 +23,35 @@ svytable(formula, design, Ntotal = design$fpc)
   \item{f}{see \code{\link{approxfun}}}
   \item{na.rm}{Should missing values be removed?}
   \item{formula}{A one-sided formula specifying variables to be tabulated}
-  \item{Ntotal}{Table will be normalised to this total if not \code{NULL}}
+  \item{Ntotal}{A population total or set of population stratum totals
+    to normalise to.}
+  \item{round}{Should the table entries be rounded to the nearest integer?}
 }
 \details{
-    These functions perform weighted estimation, with each observation being weighted by the inverse of its sampling probability.  The \code{svymean} and \code{svyvar} functions also give precision estimates that incorporate the effects of stratification and clustering. The first three functions are similar to the standard functions whose names do not begin with \code{svy}.
+  
+These functions perform weighted estimation, with each observation being
+weighted by the inverse of its sampling probability.  The \code{svymean}
+and \code{svyvar} functions also give precision estimates that
+incorporate the effects of stratification and clustering. The first
+three functions are similar to the standard functions whose names do not
+begin with \code{svy}.
 
-The \code{svytable} function computes a weighted crosstabulation.  If the sampling probabilities supplied to \code{svydesign} were actual probabilities (rather than relative probabilities) this estimates a full population crosstabulation.  Otherwise it estimates only relative proportions and should be normalised to some convenient total such as 100 or 1.0 by specifying the \code{Ntotal} argument.
+The \code{svytable} function computes a weighted crosstabulation.  If
+the sampling probabilities supplied to \code{svydesign} were actual
+probabilities (rather than relative probabilities) this estimates a full
+population crosstabulation.  Otherwise it estimates only relative
+proportions and should be normalised to some convenient total such as
+100 or 1.0 by specifying the \code{Ntotal} argument.
 
+The \code{Ntotal} argument can be either a single number or a data frame
+whose first column is the sampling strata and second column the
+population size in each stratum.  In this second case the
+\code{svytable} command performs `post-stratification': tabulating
+and scaling to the population within strata and then adding up the
+strata.
+
+As with other \code{xtabs} objects, the output of \code{svytable} can be
+processed by \code{ftable} for more attractive display.
 }
 \value{
   The first three functions return vectors, the last returns an \code{\link{xtabs}} object. 
@@ -66,7 +88,8 @@ The \code{svytable} function computes a weighted crosstabulation.  If the sampli
   svyquantile(sdf$x,design=dxi,c(0.025,0.5,0.975))  #right
 
   table(sdf$z)  # sample table
-  svytable(~z, dxi) # estimated population table
+  svytable(~z, dxi, round=TRUE) # estimated population table
+
  }
 }
 \keyword{univar}% at least one, from doc/KEYWORDS

@@ -1,3 +1,8 @@
+0.9-4	- svyCprod was computing n/(n-1) using number of observations, 
+          not number of PSUs, and was averaging observations rather than 
+ 	  PSU means to compute stratum means. 
+	- Bug in handling multiple levels of cluster id in svydesign
+
 0.9-3:   Finite population correction.
  	 Adjustments for stratum with single PSU (Fred Rohde)
 	 Fixed svydesign(nest=TRUE) to work with strata

@@ -14,16 +14,21 @@ Fit a generalised linear model to data from a complex survey design, with invers
 }
 \usage{
 svyglm(formula, design, ...)
+\method{summary}{svyglm}(object, correlation = FALSE, show.design = FALSE, ...) 
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
   \item{formula}{Model formula}
   \item{design}{ \code{survey.design} object. Must contain all variables in the formula}
-  \item{\dots}{Other arguments passed to \code{glm} }
+  \item{\dots}{Other arguments passed to \code{glm} or \code{summary.glm} }
+  \item{object}{A \code{svyglm} object}
+  \item{correlation}{Include the correlation matrix of parameters?}
+  \item{show.design}{Include the survey design object?}
 }
 \details{
-Standard errors for cluster-sampled designs are computed using a linearisation estimate (equivalent to the Huber/White sandwich formula in GEEs). 
-This does not incorporate the finite-population correction, making standard errors potentially conservative.
+Standard errors for cluster-sampled designs are computed using a
+linearisation estimate (equivalent to the Huber/White sandwich formula
+in GEEs).  Most of these computations are done in \code{\link{svyCprod}}.
 }
 \value{
   An object of class \code{svyglm}.
@@ -32,7 +37,8 @@ This does not incorporate the finite-population correction, making standard erro
 \author{Thomas Lumley}
 
 
-\seealso{ \code{\link{svydesign}}, \code{\link{glm}}}
+\seealso{ \code{\link{svydesign}}, \code{\link{glm}},
+  \code{\link{svyCprod}}, \code{\link{svy.varcoef}}}
 
 \examples{
   ## Independent sampling
