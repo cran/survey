@@ -17,23 +17,29 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
         
     }
 
+
+    na.failsafe<-function(object,...){
+      if (NCOL(object)==0)
+        object
+      else na.fail(object)
+    }
     
      if(inherits(ids,"formula")) {
-	 mf<-substitute(model.frame(ids,data=data))   
+	 mf<-substitute(model.frame(ids,data=data,na.action=na.failsafe))   
 	 ids<-eval.parent(mf)
 	} else if (!is.null(ids))
-            ids<-data.frame(ids)
+            ids<-na.fail(data.frame(ids))
 
      if(inherits(probs,"formula")){
-	mf<-substitute(model.frame(probs,data=data))
+	mf<-substitute(model.frame(probs,data=data,na.action=na.failsafe))
 	probs<-eval.parent(mf)
 	}
      
      if(inherits(weights,"formula")){
-       mf<-substitute(model.frame(weights,data=data))
+       mf<-substitute(model.frame(weights,data=data,na.action=na.failsafe))
        weights<-eval.parent(mf)
      } else if (!is.null(weights))
-         weights<-data.frame(weights)
+         weights<-na.fail(data.frame(weights))
      
      if(!is.null(weights)){
        if (!is.null(probs))
@@ -42,13 +48,15 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
          probs<-1/weights
      }
 
+      
+
     if (!is.null(strata)){
       if(inherits(strata,"formula")){
-        mf<-substitute(model.frame(strata,data=data))
+        mf<-substitute(model.frame(strata,data=data, na.action=na.failsafe))
         strata<-eval.parent(mf)
       }
       if(is.list(strata))
-        strata<-do.call("interaction", strata)
+        strata<-na.fail(do.call("interaction", strata))
       if (!is.factor(strata))
         strata<-factor(strata)
       has.strata<-TRUE
@@ -67,7 +75,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
 
     
      if (inherits(fpc,"formula")){
-       mf<-substitute(model.frame(fpc,data=data))
+       mf<-substitute(model.frame(fpc,data=data,na.action=na.failsafe))
        fpc<-eval.parent(mf)
        if (length(fpc))
          fpc<-fpc[,1]
@@ -109,7 +117,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
 
        if (NCOL(ids)>1){
          if (all(fpc<1))
-           warning("FPC is not usually defined for multi-stage sampling")
+           warning("FPC is not currently supported for multi-stage sampling")
          else
            stop("Can't compute FPC from population size for multi-stage sampling")
        }
@@ -132,6 +140,14 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
        
      }
 
+    ## if FPC specified, but no weights, use it for weights
+    if (is.null(probs) && is.null(weights) && !is.null(fpc)){
+      pstr<-nstr[match(as.character(fpc[,1]), names(nstr))]/fpc[,2]
+      probs<-pstr[match(as.character(strata),as.character(fpc[,1]))]
+      probs<-as.vector(probs)
+    }
+
+    
     if (is.numeric(probs) && length(probs)==1)
         probs<-rep(probs, NROW(variables))
     
@@ -163,7 +179,7 @@ print.survey.design<-function(x,varnames=FALSE,design.summaries=FALSE,...){
   } else {
     cat(NCOL(x$cluster),"- level Cluster Sampling design\n")
     nn<-lapply(x$cluster,function(i) length(unique(i)))
-    cat(paste("With (",paste(nn,collapse=","),") clusters.\n"))
+    cat(paste("With (",paste(unlist(nn),collapse=","),") clusters.\n"))
     is.independent<-FALSE
   }
   print(x$call)
@@ -252,19 +268,17 @@ na.exclude.survey.design<-function(object,...){
 }
 
 
-update.survey.design<-function(object,vars=~.,...){
-	if (inherits(vars,"formula")){
-	   vars<-model.frame(vars,data=object$variables,na.action="na.pass")
-	   vv<- eval.parent(vars)
-	} else {
- 	   vars<-call("data.frame",vars)
-           vv <- cbind(object$variables, eval(vars, object$variables, parent.frame()))
-	}
- 	if(NROW(vv)!=NROW(object$variables))
-		stop("Number of observations changed.")
-        object$variables<-vv
-	object$call<-sys.call()
-        object 
+update.survey.design<-function(object,...){
+
+  dots<-substitute(list(...))[-1]
+  newnames<-names(dots)
+  
+  for(j in seq(along=dots)){
+    object$variables[,newnames[j]]<-eval(dots[[j]],object$variables, parent.frame())
+  }
+  
+  object$call<-sys.call()
+  object 
 }
 
 subset.survey.design<-function(x,subset,...){
@@ -301,7 +315,7 @@ svyCprod<-function(x, strata, psu, fpc, nPSU,
         names(nPSU)<-"1"
   }
   else
-    strata<-as.character(strata) ##can't use factors as indices in for()
+    strata<-as.character(strata) ##can't use factors as indices in for()'
 
   if (!is.null(psu)){
     x<-rowsum(x, psu, reorder=FALSE)
@@ -459,29 +473,87 @@ svyvar<-function(x, design, na.rm=FALSE){
     }
 
 
-svyquantile<-function(x,design,quantiles,method="linear",f=1){
+# svyquantile<-function(x,design,quantiles,method="linear",f=1){
     
+#     if (inherits(x,"formula"))
+# 		x<-model.frame(x,design$variables)
+#     else if(typeof(x) %in% c("expression","symbol"))
+#         x<-eval(x, design$variables)
+    
+#      if(length(dim(x))){
+#          if(ncol(x)>1) stop("Invalid variable type")
+#          x<-x[,1]
+#      }
+    
+#     w<-1/design$prob
+#     oo<-order(x)
+#     cum.w<-cumsum(w[oo])/sum(w)
+    
+    
+#     cdf<-approxfun(cum.w,x[oo],method=method,f=f,
+#                    yleft=min(x),yright=max(x))
+#     return(cdf(quantiles))
+    
+# }
+
+
+
+
+svyquantile<-function(x,design,quantiles,alpha=0.05,ci=FALSE, method="linear",f=1){
     if (inherits(x,"formula"))
 		x<-model.frame(x,design$variables)
     else if(typeof(x) %in% c("expression","symbol"))
         x<-eval(x, design$variables)
     
-     if(length(dim(x))){
-         if(ncol(x)>1) stop("Invalid variable type")
-         x<-x[,1]
-     }
+    w<-weights(design)
     
-    w<-1/design$prob
-    oo<-order(x)
-    cum.w<-cumsum(w[oo])/sum(w)
+    computeQuantiles<-function(xx){
+      oo<-order(xx)
+      cum.w<-cumsum(w[oo])/sum(w)
+      cdf<-approxfun(cum.w,xx[oo],method="linear",f=1,
+                     yleft=min(xx),yright=max(xx)) 
+      cdf(quantiles)
+    }
+      
+    computeCI<-function(xx,p){
     
-    
-    cdf<-approxfun(cum.w,x[oo],method=method,f=f,
-                   yleft=min(x),yright=max(x))
-    return(cdf(quantiles))
-    
-}
+      U<-function(theta){ ((xx>theta)-(1-p))*w}
+      
+      scoretest<-function(theta,qlimit){
+        umean<-svymean(U(theta),design)
+        umean/sqrt(attr(umean,"var"))-qlimit
+      }
 
+      iqr<-IQR(xx)
+      lower<-min(xx)+iqr/100
+      upper<-max(xx)-iqr/100
+      tol<-1/(100*sqrt(nrow(design)))
+      c(uniroot(scoretest,interval=c(lower,upper),qlimit=qnorm(alpha/2,lower.tail=FALSE),tol=tol)$root,
+        uniroot(scoretest,interval=c(lower,upper),qlimit=qnorm(alpha/2,lower.tail=TRUE),tol=tol)$root)
+    }
+
+    if (!is.null(dim(x)))
+      rval<-t(matrix(apply(x,2,computeQuantiles),nrow=length(quantiles),
+                   dimnames=list(as.character(round(quantiles,2)),colnames(x))))
+    else
+      rval<-computeQuantiles(x)
+
+    if (!ci) return(rval)
+
+    if (!is.null(dim(x)))
+      cis<-array(apply(x,2,function(xx) sapply(quantiles,function(qq) computeCI(xx,qq))),
+                 dim=c(2,length(quantiles),ncol(x)),
+                 dimnames=list(c("(lower","upper)"),
+                   as.character(round(quantiles,2)),
+                   colnames(x)))
+    else
+      cis<-sapply(quantiles, function(qq) computeCI(x,qq))
+
+    
+    list(quantiles=rval,CIs=cis)
+  
+    
+  }
 
 svyratio<-function(numerator, denominator, design){
 
@@ -542,9 +614,15 @@ svytable<-function(formula, design, Ntotal=design$fpc, round=FALSE){
    
    ## unstratified or unadjusted.
    if (is.null(Ntotal) || length(Ntotal)==1){
-       ff<-eval(substitute(lhs~rhs,list(lhs=quote(weights), rhs=formula[[2]])))
-       tbl<-xtabs(ff, data=design$variables)
+       if (length(formula)==3)
+           tblcall<-bquote(xtabs(I(weights*.(formula[[2]]))~.(formula[[3]]), data=design$variables))
+        else
+           tblcall<-bquote(xtabs(weights~.(formula[[2]]), data=design$variables))
+       tbl<-eval(tblcall)
        if (!is.null(Ntotal)) {
+         if(length(formula)==3)
+           tbl<-tbl/sum(Ntotal)
+         else
            tbl<-tbl*sum(Ntotal)/sum(tbl)
        }
        if (round)
@@ -552,14 +630,16 @@ svytable<-function(formula, design, Ntotal=design$fpc, round=FALSE){
        return(tbl)
    }
    ## adjusted and stratified
-   ff<-eval(substitute(lhs~strata+rhs,list(lhs=quote(weights),
-                                           rhs=formula[[2]],
-                                           strata=quote(design$strata))))
-   tbl<-xtabs(ff, data=design$variables)
+   if (length(formula)==3)
+           tblcall<-bquote(xtabs(I(weights*.(formula[[2]]))~design$strata+.(formula[[3]]), data=design$variables))
+   else
+           tblcall<-bquote(xtabs(weights~design$strata+.(formula[[2]]), data=design$variables))
+   tbl<-eval(tblcall)
+
    ss<-match(sort(unique(design$strata)), Ntotal[,1])
    dm<-dim(tbl)
    layer<-prod(dm[-1])
-   tbl<-sweep(tbl,1,Ntotal[ss, 2]/apply(tbl,1,sum),"*")
+      tbl<-sweep(tbl,1,Ntotal[ss, 2]/apply(tbl,1,sum),"*")
    tbl<-apply(tbl, 2:length(dm), sum)
    if (round)
        tbl<-round(tbl)
@@ -655,7 +735,7 @@ svyglm<-function(formula,design,subset=NULL,...){
       
       class(g)<-c("svyglm",class(g))
       g$call<-match.call()
-      g$survey.design<-design
+      g$survey.design<-design 
       g
 }
 
@@ -825,7 +905,6 @@ svymle<-function(loglike, gradient=NULL, design, formulas, start=NULL, control=l
      args<-c(args, ...)
      sum(do.call("loglike",args)*weights)
   }
-
 
   if (is.null(gradient)) {
      grad<-NULL

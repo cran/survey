@@ -4,7 +4,6 @@
 
 hadamard<-local({
   load(system.file("hadamard.rda",package="survey"))
-  ##load("../data/hadamard.rda")
   
   hadamard.doubler<-function(H){
     rbind(cbind(H,H),cbind(H,1-H))
@@ -235,7 +234,7 @@ as.svrepdesign<-function(design,type=c("auto","JK1","JKn","BRR","Fay"), fay.rho=
     pweights<-1/design$prob
   } else if (type %in% c("BRR","Fay")){
     ##BRR
-    r<-brrweights(design$strata, design$cluster[,1])
+    r<-brrweights(design$strata, design$cluster[,1],...)
     repweights<-sapply(1:r$npairs,r$sampler, fay.rho=fay.rho)
     
     pweights<-1/design$prob
@@ -297,6 +296,7 @@ svrepdesign<-function(variables=NULL,repweights=NULL, weights=NULL,
   if(inherits(repweights,"formula")){
     mf<-substitute(model.frame(repweights, data=data))
     repweights<-eval.parent(mf)
+    repweights<-na.fail(repweights)
   }
 
   if (is.null(repweights))
@@ -306,6 +306,7 @@ svrepdesign<-function(variables=NULL,repweights=NULL, weights=NULL,
   if(inherits(weights,"formula")){
     mf<-substitute(model.frame(weights, data=data))
     weights<-eval.parent(mf)
+    weights<-na.fail(weights)
   }
 
   if (is.null(weights)){
@@ -407,9 +408,26 @@ image.svyrep.design<-function(x, ..., col=grey(seq(.5,1,length=30)), type.=c("re
   x
 }
 
+
+update.svyrep.design<-function(object,...){
+
+  dots<-substitute(list(...))[-1]
+  newnames<-names(dots)
+  
+  for(j in seq(along=dots)){
+    object$variables[,newnames[j]]<-eval(dots[[j]],object$variables, parent.frame())
+  }
+  
+  object$call<-sys.call()
+  object 
+}
+
 weights.svyrep.design<-function(object,type=c("replication","sampling","analysis"),...){
   type<-match.arg(type)
-  switch(type,replication=object$repweights,sampling=object$pweights, analysis=if(object$combined.weights) object$repweights else object$repweights*object$pweights)
+  switch(type,
+         replication=object$repweights,
+         sampling=object$pweights,
+         analysis=if(object$combined.weights) object$repweights else object$repweights*object$pweights)
 }
 
 weights.survey.design<-function(object,...){
@@ -417,7 +435,61 @@ weights.survey.design<-function(object,...){
 }
 
 
-svrVar<-function(thetas, scale, rscales){
+svrepquantile<-function(x,design,quantiles,method="linear",f=1, return.replicates=FALSE){
+    if (!inherits(design,"svyrep.design"))
+      stop("Not a survey replicates object")
+    if (design$type %in% c("JK1","JKn"))
+      warning("Jackknife replicate weights may not give valid standard errors for quantiles")
+    if (design$type %in% "other")
+      warning("Not all replicate weight designs give valid standard errors for quantiles.")
+    if (inherits(x,"formula"))
+		x<-model.frame(x,design$variables)
+    else if(typeof(x) %in% c("expression","symbol"))
+        x<-eval(x, design$variables)
+    
+    
+    w<-weights(design,"analysis")
+    computeQuantiles<-function(xx){
+      oo<-order(xx)
+      cum.w<-apply(w,2,function(wi) cumsum(wi[oo])/sum(wi))
+    
+      qq<-apply(cum.w, 2,function(cum.wi) approx(cum.wi,xx[oo],method=method,f=f,
+                                                 yleft=min(xx),yright=max(xx),
+                                                 xout=quantiles,ties=max)$y)
+      if (length(quantiles)>1)
+        qq<-t(qq)
+      else
+        qq<-as.matrix(qq)
+      rval<-colMeans(qq)
+            
+      rval<-list(quantiles=rval,
+                 variances=diag(as.matrix(svrVar(qq,design$scale,design$rscales))))
+      if (return.replicates)
+        rval<-c(rval, list(replicates=qq))
+      rval
+    }
+
+    if (!is.null(dim(x)))
+      results<-apply(x,2,computeQuantiles)
+    else
+      results<-computeQuantiles(x)
+
+    rval<-matrix(sapply(results,"[[","quantiles"),ncol=NCOL(x),nrow=length(quantiles),
+                 dimnames=list(paste("q",round(quantiles,2),sep=""), names(x)))
+    vv<-matrix(sapply(results,"[[","variances"),ncol=NCOL(x),nrow=length(quantiles),
+                 dimnames=list(paste("q",round(quantiles,2),sep=""), names(x)))
+    attr(rval,"var")<-vv
+    attr(rval, "statistic")<-"quantiles"
+    if (return.replicates)
+      rval<-list(mean=rval, replicates=lapply(results,"[[","replicates"))
+    class(rval)<-"svrepstat"
+    rval
+
+}
+
+
+svrVar<-function(thetas, scale, rscales,na.action=getOption("na.action")){
+  thetas<-get(na.action)(thetas)
   if (length(dim(thetas))==2){
     meantheta<-colMeans(thetas)
     v<-crossprod( sweep(thetas,2, meantheta,"-")*sqrt(rscales))*scale
@@ -788,10 +860,18 @@ withReplicates<-function(design, theta,rho=NULL,..., scale.weights=FALSE, return
 print.svrepstat<-function(x,...){
   if (is.list(x)){
     x<-x[[1]]
-  } 
-  m<-cbind(x,sqrt(diag(as.matrix(attr(x,"var")))))
-  colnames(m)<-c(attr(x,"statistic"),"SE")
-  printCoefmat(m)
+  }
+  vv<-attr(x,"var")
+  if (!is.null(dim(x)) && length(x)==length(vv)){
+    cat("Statistic:\n")
+    printCoefmat(x)
+    cat("SE:\n")
+    print(sqrt(vv))
+  } else if(length(x)==NCOL(vv)){
+    m<-cbind(x,sqrt(diag(as.matrix(attr(x,"var")))))
+    colnames(m)<-c(attr(x,"statistic"),"SE")
+    printCoefmat(m)
+  } else {stop("incorrect structure of svrepstat object")}
 }
 
 summary.svrepglm<-function (object, correlation = FALSE, ...) 

@@ -65,6 +65,10 @@ with one entry for each replicate. To specify sampling fractions use
 \code{fpctype="fraction"} and to specify the correction directly use
 \code{fpctype="correction"}
 
+To generate your own replicate weights either use
+\code{\link{as.svrepdesign}} on a \code{survey.design} object, or see
+ \code{\link{brrweights}}, \code{\link{jk1weights}} and \code{\link{jknweights}}
+
 
 }
 \value{

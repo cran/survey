@@ -1,8 +1,18 @@
-2.0
+2.3   svyquantile has confidence intervals, added svrepquantile.
+
+2.2-1 as.svrepdesign didn't pass options to brrweights (Fred Rohde)
+
+2.2   published in Journal of Statistical Software  
+      - If population size is specified, but not weights or probabilities, 
+      work out the probabilities from the population size
+      - Clearer error message when some design information is NA (Tobias Verbeke)
+      - better update() methods
+
+2.0  Just a numbering change.
 
 1.9-3  Fix svytotal variance estimate
        as.svrepdesign wasn't handling unstratified cluster samples right.
-       Check for fpc in multistage samples.
+       Check for fpc in multistage samples, which we don't handle.
        add print method for basic survey statistics
        add rake()
        California API data.

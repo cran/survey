@@ -21,7 +21,7 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL)
 %- maybe also `usage' for other objects documented here.
 \arguments{
   \item{ids}{Formula or data frame specifying cluster ids from largest
-    level to smallest level, \code{~0} is a formula for no clusters.}
+    level to smallest level, \code{~0} or \code{~1} is a formula for no clusters.}
   \item{probs}{Formula or data frame specifying cluster sampling probabilities}
   \item{strata}{Formula or vector specifying strata, use \code{NULL} for no strata}
   \item{variables}{Formula or data frame specifying the variables
@@ -63,6 +63,10 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL)
    stratum) or as a data frame with one row per stratum.  The first
    column of the data frame should be a factor with the same levels as
    \code{strata} and the second column the finite population correction.
+   
+   If population sizes are specified but not sampling probabilities or
+   weights, the sampling probabilities will be computed from the
+   population sizes assuming simple random sampling within strata.
 
 The \code{dim}, \code{"["}, \code{"[<-"} and na.action methods for
 \code{survey.design} objects operate on the dataframe specified by
@@ -75,7 +79,7 @@ subpopulations.
 
 The value of \code{options("survey.lonely.psu")} controls what happens
 to strata containing only one cluster (PSU).See \code{\link{svyCprod}}
-for details.
+for details, especially if you have self-representing ("certainty") PSUs.
 
 }
 \value{

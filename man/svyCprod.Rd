@@ -43,9 +43,11 @@ way.
 
 The \code{"remove"}and \code{"certainty"} options give the same result,
 but \code{"certainty"} is intended for situations where there is only
-one PSU in the population stratum, which is sampled with certainty. With
-\code{"certainty"} no warning is generated for strata with only one PSU.
-The factory default is \code{"fail"}.
+one PSU in the population stratum, which is sampled with certainty (also
+called `self-representing' PSUs or strata). With \code{"certainty"} no
+warning is generated for strata with only one PSU.  The factory default
+is \code{"fail"}.
+
 }
 \value{
   A covariance matrix
