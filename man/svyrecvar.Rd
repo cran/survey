@@ -62,14 +62,16 @@ one.stage=getOption("survey.ultimate.cluster"))
   
 }
 \note{
-  
   A simple set of finite population corrections will only be exactly
   correct when each successive stage uses simple or stratified random
   sampling without replacement.  A correction under general unequal
   probability sampling (eg PPS) would require joint inclusion probabilities (or,
   at least, sampling probabilities for units not included in the sample),
   information not generally available.
-  
+
+  For a PPS survey the best option is probably to treat the survey as 
+  sampled with replacement by omitting the fpc argument.  This appears
+  to be the most widely used solution with other software.
 }
 
 

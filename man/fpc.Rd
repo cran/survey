@@ -50,12 +50,15 @@ fpc=~I(nh/Nh), variables=~x, data=fpc, nest=TRUE)
 
 svymean(~x, withfpc)
 
-withfpc<-svydesign(weights=~weight, ids=~interaction(stratid,psuid), strata=~stratid,
-fpc=~I(nh/Nh), variables=~x, data=fpc)
+withfpc<-svydesign(weights=~weight, ids=~interaction(stratid,psuid),
+strata=~stratid, fpc=~I(nh/Nh), variables=~x, data=fpc)
 
 svymean(~x, withfpc)
 
+withfpc<-svydesign(ids=~psuid, strata=~stratid, fpc=~Nh,
+ variables=~x,data=fpc,nest=TRUE)
 
+svymean(~x, withfpc)
 
 withfpc<-svydesign(ids=~psuid, strata=~stratid,
 fpc=~I(nh/Nh), variables=~x, data=fpc, nest=TRUE)

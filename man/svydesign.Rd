@@ -60,12 +60,12 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL)
    population size in each stratum or as the fraction of the total
    population that has been sampled. In either case the relevant
    population size is the sampling units.  That is, sampling 100 units
-   from a population stratum of size 500 can be specified as 100 or as
+   from a population stratum of size 500 can be specified as 500 or as
    100/500=0.2.
    
    If population sizes are specified but not sampling probabilities or
    weights, the sampling probabilities will be computed from the
-   population sizes assuming simple random sampling within strata.
+   population sizes assuming simple random sampling within strata. 
    
    For multistage sampling the \code{id} argument should specify a
    formula with the cluster identifiers at each stage.  If subsequent

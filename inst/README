@@ -1,8 +1,11 @@
 description.pdf         Reprint from Journal of Statistical Software. 
-                        Describes version 2.3
+                        Describes version 2.3, which is now quite old.
 
 ucla-examples.pdf       R versions of examples from the UCLA Academic 
                         Technology Services web site on survey analysis
 
 survey-vanderbilt.pdf   Slides from a talk at the Department of Biostatistics,
                         Vanderbilt University, 2005/2/16.
+
+twostage.pdf            Analysis examples for two-stage sampling, 
+			showing agreement with SUDAAN

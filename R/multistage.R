@@ -282,7 +282,7 @@ as.fpc<-function(df,strata,ids){
   if (ispopsize){
     popsize<-fpc
   } else {
-    popsize<-sampsize/(1-fpc)
+    popsize<-sampsize/(fpc)
   }
   if (any(popsize<sampsize))
     stop("FPC implies >100% sampling in some strata.")

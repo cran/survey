@@ -1,3 +1,10 @@
+2.9-1 Fixed typo in description of fpc in svydesign.Rd
+  
+      Added inst/twostage.pdf with examples of two-stage analyses.
+
+      Handling of fpc specified as proportion in the absence of weights 
+      was wrong.
+
 2.9   Added full multistage sampling, involving a redesign of the survey.design 
       object.  The old objects are deprecated; they may be converted with 
       as.svydesign2.   Use options(survey.ultimate.cluster=TRUE) to get 
