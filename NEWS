@@ -1,3 +1,12 @@
+2.0
+
+1.9-3  Fix svytotal variance estimate
+       as.svrepdesign wasn't handling unstratified cluster samples right.
+       Check for fpc in multistage samples.
+       add print method for basic survey statistics
+       add rake()
+       California API data.
+
 1.9-2	Added post-stratification of replicate-weights
 
 1.9-1   Bugfix: jknweights was requiring finite population correction.

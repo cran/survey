@@ -5,7 +5,7 @@
 \alias{summary.svymle}
 \alias{vcov.svymle}
 %- Also NEED an `\alias' for EACH other topic documented here.
-\title{Maximum likelihood estimation in complex surveys}
+\title{Maximum pseudolikelihood estimation in complex surveys}
 \description{
 Fits a user-specified likelihood parametrised by multiple linear
 predictors to data from a complex sample survey and computes the
@@ -72,40 +72,28 @@ model the \code{stderr="model"} should work fairly well.
 \seealso{\code{\link{svydesign}}, \code{\link{svyglm}}}
 
 \examples{
- ##simulate data
- df<-data.frame(x=rnorm(1000),z=rep(0:4,200))
- df$y<-with(df, 3+3*x*z)
- df$p<-with(df, exp(x)/(1+exp(x)))
- df$yy<-df$y+rnorm(1000)
- xi<-rbinom(1000,1,df$p)
- sdf<-df[xi==1,]
- 
- ## create design
- dxi<-svydesign(~0,~p,data=sdf)
+
+ data(api)
+
+ dstrat<-svydesign(id=~1, strata=~stype, weight=~pw, fpc=~fpc, data=apistrat)
+
  ## fit with glm
- m0 <- svyglm(y~x+z,family="gaussian",design=dxi)
+ m0 <- svyglm(api00~api99+ell,family="gaussian",design=dstrat)
  ## fit as mle (without gradient)
- m1 <- svymle(loglike=dnorm,gradient=NULL, design=dxi, formulas=list(mean=y~x+z, sd=~1),
-		start=list(c(0,0,0),c(1)), log=TRUE)
+ m1 <- svymle(loglike=dnorm,gradient=NULL, design=dstrat, formulas=list(mean=api00~api99+ell, sd=~1),start=list(c(80,1,0),c(20)), log=TRUE)
  ## with gradient
  gr<- function(x,mean,sd,log){
 	 dm<-2*(x - mean)/(2*sd^2)
 	 ds<-(x-mean)^2*(2*(2 * sd))/(2*sd^2)^2 - sqrt(2*pi)/(sd*sqrt(2*pi))
          cbind(dm,ds)
       }
- m2 <- svymle(loglike=dnorm,gradient=gr, design=dxi, formulas=list(mean=y~x+z, sd=~1),
-		start=list(c(2,5,0),c(4)), log=TRUE)
+ m2 <- svymle(loglike=dnorm,gradient=gr, design=dstrat,
+ formulas=list(mean=api00~api99+ell, sd=~1), start=list(c(80,1,0),c(20)), log=TRUE)
 
- ## For this misspecified model, stderr="model" is incorrect
+ summary(m0)
+ summary(m1,stderr="model")
  summary(m2)
- summary(m2, stderr="model") ##wrong!
 
- ## Now a correctly specified model: two stderr methods agree fairly well
- m3 <- svymle(loglike=dnorm,gradient=gr, design=dxi, formulas=list(mean=yy~x*z, sd=~1),
-		start=list(c(1,1,1,1),c(4)), log=TRUE)
-
- summary(m3)
- summary(m3, stderr="model")
  
 
 }

@@ -42,7 +42,7 @@ jk1weights<-function(psu, fpc=NULL, fpctype=c("population","fraction","correctio
       fpc <-switch(fpctype, population=(fpc-n)/fpc, fraction=1-fpc, correction=fpc)
       }
   repweights<-outer(psu, unq, "!=")*n/(n-1)
-  list(type="jk1", repweights=repweights,scale=fpc*(n-1)/n)
+  list(type="jk1", repweights=repweights,scale=(fpc*(n-1)/n))
 }
 
 
@@ -77,9 +77,9 @@ jknweights<-function(strata,psu, fpc=NULL, fpctype=c("population","fraction","co
    
   repweights<-matrix(1,ncol=length(unq), nrow=length(psu))
   counter<-0
-  rscales<-numeric(length(psu))
+  rscales<-numeric(length(unique(psu)))
   
-  for(ss in sunq){
+  for(ss in as.character(sunq)){
       thisfpc<-fpc[match(ss,names(fpc))]
       theseweights<-jk1weights(psu[strata %in% ss], fpc=thisfpc, fpctype=fpctype)
       repweights[strata %in% ss, counter+1:NCOL(theseweights$repweights)]<-theseweights$repweights
@@ -203,15 +203,15 @@ as.svrepdesign<-function(design,type=c("auto","JK1","JKn","BRR","Fay"), fay.rho=
   type<-match.arg(type)
 
   if (type=="auto"){
-    if (length(design$strata)==0)
+    if (!design$has.strata)
       type<-"JK1"
     else
       type<-"JKn"
   }
   
-  if (type=="JK1" && length(design$strata))
+  if (type=="JK1" && design$has.strata)
     stop("Can't use JK1 for a stratified design")
-  if (type!="JK1" && !length(design$strata))
+  if (type!="JK1" && !design$has.strata)
     stop("Must use JK1 for an unstratified design")
   
   fpctype<-"population"
@@ -353,7 +353,7 @@ svrepdesign<-function(variables=NULL,repweights=NULL, weights=NULL,
 
 
 print.svyrep.design<-function(x,...){
-  cat("Survey with replicate weights:\n")
+  cat("Survey with replicate weights:\nCall: ")
   print(x$call)
 }
 
@@ -364,28 +364,30 @@ summary.svyrep.design<-function(object,...){
 
 print.summary.svyrep.design<-function(x,...){
   cat("Survey with replicate weights:\n")
+  cat("Call: ")
   print(x$call)
   if (x$type=="Fay")
-    cat("Fay's variance method rho=",x$rho,"\n")
+    cat("Fay's variance method (rho=",x$rho,") ")
   if (x$type=="BRR")
     cat("Balanced Repeated Replicates\n")
   if (x$type=="JK1")
-    cat("Unstratified cluster jacknife.\n")
-  cat("with ",NCOL(x$repweights)," replicates\n")
+    cat("Unstratified cluster jacknife (JK1) ")
+  if (x$type=="JKn")
+    cat("Stratified cluster jackknife (JKn) ")
+  cat("with",NCOL(x$repweights),"replicates.\n")
   cat("Variables: \n")
   print(names(x$variables)) 
 }
 
 
-image.svyrep.design<-function(x, ..., col=grey(seq(0,1,length=30)), type=c("rep","total")){
-  type<-match.arg(type)
+image.svyrep.design<-function(x, ..., col=grey(seq(.5,1,length=30)), type.=c("rep","total")){
+  type<-match.arg(type.)
   m<-x$repweights
   if (type=="total"){
-    m<-m*pweights
-    zlim<-range(0,m)
-  } else zlim<-c(0,2)
-    
-  image(1:NCOL(m), 1:NROW(m), t(m), zlim=zlim, col=col, xlab="Replicate", ylab="Observation")
+    m<-m*x$pweights
+  } 
+  
+  image(1:NCOL(m), 1:NROW(m), t(m),  col=col, xlab="Replicate", ylab="Observation",...)
   invisible(NULL)
 }
 
@@ -467,11 +469,11 @@ svrepmean<-function(x,design, na.rm=FALSE, rho=NULL, return.replicates=FALSE)
 
   repmeans<-drop(t(repmeans))
   attr(rval,"var")<-svrVar(repmeans, scale, rscales)
-
+  attr(rval, "statistic")<-"mean"
   if (return.replicates)
-    return(list(mean=rval, replicates=repmeans))
-  else
-    return(rval)
+    rval<-list(mean=rval, replicates=repmeans)
+  class(rval)<-"svrepstat"
+  rval
 }
 
 
@@ -516,11 +518,13 @@ svreptotal<-function(x,design, na.rm=FALSE, rho=NULL, return.replicates=FALSE)
 
   repmeans<-drop(t(repmeans))
   attr(rval,"var")<-svrVar(repmeans, scale, rscales)
-
+  attr(rval,"statistic")<-"total"
   if (return.replicates)
-    return(list(mean=rval, replicates=repmeans))
-  else
-    return(rval)
+    rval<-list(mean=rval, replicates=repmeans)
+
+  class(rval)<-"svrepstat"
+  rval
+  
 }
 
 svrepglm<-function(formula, design, subset=NULL, ..., rho=NULL, return.replicates=FALSE, na.action){
@@ -620,7 +624,7 @@ print.summary.svyglm<-function (x, digits = max(3, getOption("digits") - 3), sym
 
   cat("\nCall:\n")
     cat(paste(deparse(x$call), sep = "\n", collapse = "\n"), 
-        "\n\n", sep = "")
+        "\n\n", sep = "") 
 
     cat("Survey design:\n")
     print(x$survey.design$call)
@@ -709,7 +713,7 @@ residuals.svrepglm<-function(object,type = c("deviance", "pearson", "working",
    	   y <- object$y
 	   mu <- object$fitted.values
     	   wts <- object$prior.weights
-	   r<-(y - mu) * sqrt(wts)/(sqrt(object$family$variance(mu))*sqrt(object$survey.design$pweights))
+	   r<-(y - mu) * sqrt(wts)/(sqrt(object$family$variance(mu))*sqrt(object$survey.design$pweights/sum(object$survey.design$pweights)))
 	   if (is.null(object$na.action)) 
         	r
     	   else 
@@ -728,7 +732,7 @@ extractAIC.svrepglm<-function(fit,...){
 }
 
 
-withReplicates<-function(design, theta,rho=NULL,..., return.replicates=FALSE){
+withReplicates<-function(design, theta,rho=NULL,..., scale.weights=FALSE, return.replicates=FALSE){
   
   wts<-design$repweights
   scale<-design$scale
@@ -748,10 +752,16 @@ withReplicates<-function(design, theta,rho=NULL,..., return.replicates=FALSE){
       scale<-scale/((1-rho)^2)
   }
 
-  pwts<-design$pweights/sum(design$pweights)
+  if (scale.weights)
+    pwts<-design$pweights/sum(design$pweights)
+  else
+    pwts<-design$pweights
+  
   if (!design$combined.weights)
     wts<-wts*pwts
-
+  else if (scale.weights)
+    wts<-sweep(wts,2, drop(colSums(wts)),"/")
+  
   data<-design$variables
 
   if (is.function(theta)){
@@ -767,9 +777,21 @@ withReplicates<-function(design, theta,rho=NULL,..., return.replicates=FALSE){
 
   attr(full,"var")<-v
   if (return.replicates)
-    list(theta=full, replicates=thetas)
+    rval<-list(theta=full, replicates=thetas)
   else
-    return(full)
+    rval<-full
+  attr(rval,"statistic")<-"theta"
+  class(rval)<-"svrepstat"
+  rval
+}
+
+print.svrepstat<-function(x,...){
+  if (is.list(x)){
+    x<-x[[1]]
+  } 
+  m<-cbind(x,sqrt(diag(as.matrix(attr(x,"var")))))
+  colnames(m)<-c(attr(x,"statistic"),"SE")
+  printCoefmat(m)
 }
 
 summary.svrepglm<-function (object, correlation = FALSE, ...) 
@@ -812,7 +834,8 @@ summary.svrepglm<-function (object, correlation = FALSE, ...)
         dd <- sqrt(diag(covmat))
         ans$correlation <- covmat/outer(dd, dd)
     }
-    
+
+    ans$aliased<-is.na(ans$coef)
     ans$survey.design<-list(call=object$survey.design$call,
                             type=object$survey.design$type)
     class(ans) <- c("summary.svyglm","summary.glm")
@@ -860,8 +883,8 @@ postStratify<-function(design, strata, population, partial=FALSE){
     stop("design must be a survey with replicate weights")
   
   if(inherits(strata,"formula")){
-    mf<-substitute(model.frame(variables, data=design$variables))
-    variables<-eval.parent(mf)
+    mf<-substitute(model.frame(strata, data=design$variables))
+    strata<-eval.parent(mf)
   }
   strata<-as.data.frame(strata)
 
@@ -876,10 +899,10 @@ postStratify<-function(design, strata, population, partial=FALSE){
   if (!all(names(strata) %in% names(population)))
     stop("Stratifying variables don't match")
   nn<- names(population) %in% names(strata)
-  if (sum(nn)!=1)
+  if (sum(!nn)!=1)
     stop("stratifying variables don't match")
 
-  names(population)[nn]<-"Pop.Freq"
+  names(population)[which(!nn)]<-"Pop.Freq"
   
   both<-merge(sampletable, population, by=names(strata), all=TRUE)
 
@@ -899,10 +922,10 @@ postStratify<-function(design, strata, population, partial=FALSE){
       print(both[onlypop,])
       stop("Some strata absent from sample: use partial=TRUE to ignore them.")
     }
-  }
+  } 
 
   reweight<-both$Pop.Freq/both$Freq
-  both$label <- do.call("interaction", both[,names(strata)])
+  both$label <- do.call("interaction", list(both[,names(strata)]))
   designlabel <- do.call("interaction", strata)
   index<-match(designlabel, both$label)
 
@@ -910,16 +933,82 @@ postStratify<-function(design, strata, population, partial=FALSE){
 
   
   if (design$combined.weights){
-    replicateFreq<- rowsum(repweights, match(designlabel, both$label), reorder=FALSE)
+    replicateFreq<- rowsum(repweights, match(designlabel, both$label), reorder=TRUE)
+    repreweight<-  both$Pop.Freq/replicateFreq
+    design$repweights <- design$repweights*repreweight[index]
+  } else { 
+    replicateFreq<- rowsum(design$repweights*design$pweights, match(designlabel, both$label), reorder=TRUE)
     repreweight<- both$Pop.Freq/replicateFreq
-    design$repweights <- design$repweights*repreweight[index,]
-  } else {
-    replicateFreq<- rowsum(design$repweights*design$pweights, match(designlabel, both$label), reorder=FALSE)
-    repreweight<- both$Pop.Freq/replicateFreq
-    design$repweights <- design$repweights*repreweight[index,]/reweight[,index]
+    design$repweights <- design$repweights* (repreweight/reweight)[index,]
   }
 
   design$call<-sys.call()
   
   design
+}
+
+
+rake<-function(design, sample.margins, population.margins,
+               control=list(maxit=10, epsilon=1, verbose=FALSE)){
+
+    if (!missing(control)){
+        control.defaults<-formals(rake)$control
+        for(n in names(control.defaults))
+            if(!(n %in% names(control)))
+                control[[n]]<-control.defaults[[n]]
+    }
+    
+    if(!inherits(design, "svyrep.design"))
+        stop("design must be a survey with replicate weights")
+
+    if (length(sample.margins)!=length(population.margins))
+        stop("sample.margins and population.margins do not match.")
+
+    nmar<-length(sample.margins)
+    
+    if (control$epsilon<1) 
+        epsilon<-control$epsilon*sum(design$pweights)
+    else
+        epsilon<-control$epsilon
+
+    
+    
+    strata<-lapply(sample.margins, function(margin)
+                   if(inherits(margin,"formula")){
+                       mf<-model.frame(margin, data=design$variables)
+                   }
+                   )
+    
+
+    allterms<-unlist(lapply(sample.margins,all.vars))
+    oldtable<-svreptable(formula(paste("~", paste(allterms,collapse="+"),sep="")),design)
+    if (control$verbose)
+        print(oldtable)
+
+    iter<-0
+    converged<-FALSE
+    while(iter < control$maxit){
+        for(i in 1:nmar){
+            design<-postStratify(design, strata[[i]], population.margins[[i]])
+        }
+        newtable<-svreptable(formula(paste("~", paste(allterms,collapse="+"),sep="")),design)
+        if (control$verbose)
+            print(newtable)
+
+        delta<-max(abs(oldtable-newtable))
+        if (delta<epsilon){
+            converged<-TRUE
+            break
+        }
+        oldtable<-newtable
+        iter<-iter+1
+    }
+    
+    design$call<-sys.call()
+
+    if(!converged)
+        warning("Raking did not converge after ", iter, " iterations.\n")
+
+    return(design)
+        
 }

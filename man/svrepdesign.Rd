@@ -2,7 +2,6 @@
 \alias{svrepdesign}
 \alias{[.svyrep.design}
 \alias{image.svyrep.design}
-\alias{weights.svyrep.design}
 \alias{print.svyrep.design}
 \alias{summary.svyrep.design}
 \alias{print.summary.svyrep.design}
@@ -18,6 +17,7 @@ svrepdesign(variables = NULL, repweights = NULL, weights = NULL, data =
 NULL, type = c("BRR", "Fay", "JK1","JKn","other"),
 combined.weights=FALSE, rho = NULL, 
 scale=NULL, rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"))
+\method{image}{svyrep.design}(x, ..., col=grey(seq(.5,1,length=30)), type.=c("rep","total"))
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -32,6 +32,10 @@ scale=NULL, rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"))
   \item{scale, rscales}{Scaling constant for variance, see Details
 below}
 \item{fpc,fpctype}{Finite population correction information}
+\item{x}{survey design with replicate weights}
+\item{...}{Other arguments to \code{\link{image}}}
+\item{col}{Colors}
+\item{type.}{\code{"rep"} for only the replicate weights, \code{"total"} for the replicate and sampling weights combined.}
 }
 \details{
   In the BRR method, the dataset is split into halves, and the
@@ -74,7 +78,12 @@ with one entry for each replicate. To specify sampling fractions use
 \seealso{\code{\link{as.svrepdesign}}, \code{\link{svydesign}}, \code{\link{brrweights}} }
 
 \examples{
-
+data(scd)
+# use BRR replicate weights from Levy and Lemeshow
+repweights<-2*cbind(c(1,0,1,0,1,0), c(1,0,0,1,0,1), c(0,1,1,0,0,1),
+c(0,1,0,1,1,0))
+scdrep<-svrepdesign(data=scd, type="BRR", repweights=repweights)
+svrepratio(~alive, ~arrests, scdrep)
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
 

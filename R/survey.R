@@ -42,17 +42,21 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
          probs<-1/weights
      }
 
-     if (!is.null(strata)){
-       if(inherits(strata,"formula")){
-         mf<-substitute(model.frame(strata,data=data))
-         strata<-eval.parent(mf)
-       }
-       if(is.list(strata))
-         strata<-do.call("interaction", strata)
-       if (!is.factor(strata))
-         strata<-factor(strata)
-     }
-     
+    if (!is.null(strata)){
+      if(inherits(strata,"formula")){
+        mf<-substitute(model.frame(strata,data=data))
+        strata<-eval.parent(mf)
+      }
+      if(is.list(strata))
+        strata<-do.call("interaction", strata)
+      if (!is.factor(strata))
+        strata<-factor(strata)
+      has.strata<-TRUE
+    } else {
+      strata<-factor(rep(1,NROW(ids)))
+      has.strata <-FALSE
+    }
+    
     if (inherits(variables,"formula")){
         mf<-substitute(model.frame(variables,data=data))
         variables <- eval.parent(mf)
@@ -80,7 +84,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
       }
     }
      ## force clusters nested in strata
-     if (nest && !is.null(strata) && NCOL(ids)){
+     if (nest && has.strata && NCOL(ids)){
        N<-NCOL(ids)
        for(i in 1:N)
          ids[,i]<-do.call("interaction", list(strata, ids[,i]))
@@ -97,15 +101,19 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
     ## Put degrees of freedom (# of PSUs in each stratum) in object, to 
     ## allow subpopulations
     if (NCOL(ids)){
-	if (is.null(strata)){
-	    nPSU<-length(unique(ids[,1]))
-	} else {
-	    nPSU<-table(strata[!duplicated(ids[,1])])
-        }
+        nPSU<-table(strata[!duplicated(ids[,1])])
     }
 
 
      if (!is.null(fpc)){
+
+       if (NCOL(ids)>1){
+         if (all(fpc<1))
+           warning("FPC is not usually defined for multi-stage sampling")
+         else
+           stop("Can't compute FPC from population size for multi-stage sampling")
+       }
+       
        ## Finite population correction: specified per observation
        if (is.numeric(fpc) && length(fpc)==NROW(variables)){
          tbl<-by(fpc,list(strata),unique)
@@ -133,6 +141,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
 
     rval<-list(cluster=ids)
     rval$strata<-strata
+    rval$has.strata<-has.strata
     rval$prob<- apply(probs,1,prod) 
     rval$allprob<-probs
     rval$call<-match.call()
@@ -146,7 +155,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
 
 print.survey.design<-function(x,varnames=FALSE,design.summaries=FALSE,...){
   n<-NROW(x$cluster)
-  if (!is.null(x$strata)) cat("Stratified ")
+  if (x$has.strata) cat("Stratified ")
   un<-length(unique(x$cluster[,1]))
   if(n==un){
     cat("Independent Sampling design\n")
@@ -161,7 +170,7 @@ print.survey.design<-function(x,varnames=FALSE,design.summaries=FALSE,...){
   if (design.summaries){
     cat("Probabilities:\n")
     print(summary(x$prob))
-    if(!is.null(x$strata)){
+    if(x$has.strata){
       cat("Stratum sizes: \n")
       a<-rbind(obs=table(x$strata),
 	       design.PSU=x$nPSU,
@@ -170,8 +179,12 @@ print.survey.design<-function(x,varnames=FALSE,design.summaries=FALSE,...){
       print(a)
     }
     if (!is.null(x$fpc)){
-      cat("Population stratum sizes (PSUs): \n")
-      print(x$fpc)
+      if (x$has.strata) {
+        cat("Population stratum sizes (PSUs): \n")
+        print(x$fpc)
+      } else {
+        cat("Population size (PSUs):",x$fpc[,2],"\n")
+      }
     }
   }
   if (varnames){
@@ -275,8 +288,8 @@ print.summary.survey.design<-function(x,...){
 }	
      
 svyCprod<-function(x, strata, psu, fpc, nPSU,
-                   lonely.psu=getOption("survey.lonely.psu")
-	){
+                   lonely.psu=getOption("survey.lonely.psu")){
+
   x<-as.matrix(x)
   n<-NROW(x)
 
@@ -384,37 +397,44 @@ svymean<-function(x,design, na.rm=FALSE){
 	x<-sweep(x,2,average)
 	v<-svyCprod(x*pweights/psum,design$strata,design$cluster[[1]], design$fpc, design$nPSU)
 	attr(average,"var")<-v
+        attr(average,"statistic")<-"mean"
+        class(average)<-"svystat"
 	return(average)
     }
 
 
+print.svystat<-function(x,...){
+  m<-cbind(x,sqrt(diag(attr(x,"var"))))
+  colnames(m)<-c(attr(x,"statistic"),"SE")
+  printCoefmat(m)
+}
 
 svytotal<-function(x,design, na.rm=FALSE){
 
   if (!inherits(design,"survey.design"))
     stop("design is not a survey design")
   
-	if (inherits(x,"formula"))
-            x<-model.frame(x,design$variables,na.action=na.pass)
-	else if(typeof(x) %in% c("expression","symbol"))
-            x<-eval(x, design$variables)
-        
-	x<-as.matrix(x)
+  if (inherits(x,"formula"))
+      x<-model.frame(x,design$variables,na.action=na.pass)
+  else if(typeof(x) %in% c("expression","symbol"))
+      x<-eval(x, design$variables)
 
-	if (na.rm){
-            nas<-rowSums(is.na(x))
-            design<-design[nas==0,]
-            x<-x[nas==0,,drop=FALSE]
-	}
+  x<-as.matrix(x)
+  
+  if (na.rm){
+    nas<-rowSums(is.na(x))
+    design<-design[nas==0,]
+    x<-x[nas==0,,drop=FALSE]
+  }
 
-	pweights<-1/design$prob
-	psum<-sum(pweights)
-	average<-colSums(x*pweights)
-	x<-sweep(x,2,average)
-	v<-svyCprod(x*pweights,design$strata,design$cluster[[1]], design$fpc, design$nPSU)
-	attr(average,"var")<-v
-	return(average)
-    }
+  N<-sum(1/design$prob)
+  m <- svymean(x, design, na.rm=na.rm)
+  total<-m*N
+  attr(total, "var")<-svyCprod(x/design$prob,design$strata, design$cluster[[1]], design$fpc, design$nPSU)
+  attr(total,"statistic")<-"total"
+  
+  return(total)
+}
 
 svyvar<-function(x, design, na.rm=FALSE){
     
@@ -434,6 +454,7 @@ svyvar<-function(x, design, na.rm=FALSE){
 	a<-matrix(rep(x,p),ncol=p*p)
 	b<-x[,rep(1:p,each=p)]
 	v<-svymean(a*b,design, na.rm=na.rm)
+        attr(v,"statistic")<-"var"
 	matrix(v,ncol=p)
     }
 
@@ -477,17 +498,19 @@ svyratio<-function(numerator, denominator, design){
     nd<-NCOL(denominator)
 
     all<-cbind(numerator,denominator)
-    allstats<-svymean(all,design)
+    allstats<-svytotal(all,design) 
     rval<-list(ratio=outer(allstats[1:nn],allstats[nn+1:nd],"/"))
 
 
     vars<-matrix(ncol=nd,nrow=nn)
     for(i in 1:nn){
       for(j in 1:nd){
-        r<-(numerator[,i]-rval$ratio[i,j]*denominator[,j])/sum(denominator[,j])
-        vars[i,j]<-svyCprod(r*1/design$prob,design$strata,design$cluster[[1]], design$fpc, design$nPSU)
+        r<-(numerator[,i]-rval$ratio[i,j]*denominator[,j])/sum(denominator[,j]/design$prob)
+        vars[i,j]<-svyCprod(r*1/design$prob, design$strata, design$cluster[[1]], design$fpc, design$nPSU)
       }
     }
+    colnames(vars)<-names(denominator)
+    rownames(vars)<-names(numerator)
     rval$var<-vars
     rval$call<-sys.call()
     class(rval)<-"svyratio"
@@ -659,7 +682,9 @@ residuals.svyglm<-function(object,type = c("deviance", "pearson", "working",
    	   y <- object$y
 	   mu <- object$fitted.values
     	   wts <- object$prior.weights
-	   r<-(y - mu) * sqrt(wts)*sqrt(object$survey.design$prob)/sqrt(object$family$variance(mu))
+           pwts<- 1/object$survey.design$prob
+           pwts<- pwts/sum(pwts)
+	   r<-(y - mu) * sqrt(wts/pwts)/(sqrt(object$family$variance(mu)))
 	   if (is.null(object$na.action)) 
         	r
     	   else 
@@ -708,14 +733,14 @@ summary.svyglm<-function (object, correlation = FALSE, ...)
         dd <- sqrt(diag(covmat))
         ans$correlation <- covmat/outer(dd, dd)
     }
-    
+    ans$aliased<-is.na(object$coef)
     ans$survey.design<-list(call=object$survey.design$call)
     class(ans) <- c("summary.svyglm","summary.glm")
     return(ans)
 }
 
 print.summary.svyglm<-function(x,...){
-  print(x$survey.design,varnames=FALSE,design.summaries=FALSE,...)
+  print(x$survey.design$call,varnames=FALSE,design.summaries=FALSE,...)
   NextMethod("print")
 }
 
@@ -846,7 +871,7 @@ svymle<-function(loglike, gradient=NULL, design, formulas, start=NULL, control=l
   dimnames(rval$hessian)<-list(parnms,parnms)
 
   if (is.null(gradient)) {
-	rval$inf<-solve(rval$hessian)
+	rval$invinf<-solve(-rval$hessian)
 	rval$scores<-NULL
 	rval$sandwich<-NULL
     }  else {
@@ -906,7 +931,7 @@ summary.svymle<-function(object,stderr=c("robust","model"),...){
     print(object$call)
     stderr<-match.arg(stderr)
     tbl<-data.frame(Coef=coef(object),SE=sqrt(diag(vcov(object,stderr=stderr))))
-    tbl$p.value<-2*(1-pnorm(abs(tbl$Coef/tbl$SE)))
+    tbl$p.value<-format.pval(2*(1-pnorm(abs(tbl$Coef/tbl$SE))), digits=3,eps=0.001)
     print(tbl)
     print(object$design)
 }

@@ -90,48 +90,17 @@ An object of class \code{survey.design}.
 }
 
 \examples{
-  #population
-  df<-data.frame(x=rnorm(1000),z=rep(0:4,200))
-  df$y<-with(df, 3+3*x*z)
-  #sampling fraction
-  df$p<-with(df, exp(x)/(1+exp(x)))
-  #sample
-  xi<-rbinom(1000,1,df$p)
-  sdf<-df[xi==1,]
-  
-  #survey design object: independent sampling, 
-  dxi<-svydesign(~0,~p,data=sdf)
-  dxi
-  summary(dxi)
-  svymean(sdf$x,dxi)	
-  svymean(~x,dxi)
-  svytable(~z, dxi)
+  data(api)
+# stratified sample
+dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
+# one-stage cluster sample
+dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
+# two-stage cluster sample
+dclus2<-svydesign(id=~dnum+snum, weights=~pw, data=apiclus2)
 
-   #cluster sampling: population
-   df$id<-rep(1:250,each=4)
-   df$clustp<-by(df,list(df$id),function(d) min(exp(d$x*d$z)/(1+exp(d$x*d$z))))[df$id]
-   xi<-rbinom(250,1,df$clustp[4*(1:250)])
-   sdf<-df[xi[df$id]==1,]
-   
-   #cluster sampling design
-   dxi<-svydesign(~id,~clustp,data=sdf)
-   
-   dxi
-   summary(dxi)
-   svymean(~x+z,dxi)
-
-   ## stratification
-   df<-data.frame(z=rep(1:4,each=200), y=rnorm(800, rep(1:4,each=200)))
-   xi<-c(sample(1:200,20), sample(201:400,20), sample(401:600,20), sample(601:800,20))
-   sdf<-df[xi,]
-   stratdx<-svydesign(id=~0,prob=~0,strata=~z,data=sdf)
-   unstrat<-svydesign(id=~0,prob=~0,data=sdf)
-   stratdx
-   unstrat
-   summary(stratdx)
-
-   svymean(~y, stratdx)  ##higher precision
-   svymean(~y, unstrat)
+## syntax for stratified cluster sample
+##(though the data weren't really sampled this way)
+svydesign(id=~dnum, strata=~stype, weights=~pw, data=apistrat, nest=TRUE)
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

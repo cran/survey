@@ -1,17 +1,17 @@
 
 R : Copyright 2003, The R Development Core Team
-Version 1.8.0 Under development (unstable) (2003-05-20)
+Version 1.8.0 Under development (unstable) (2003-08-20)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
-Type `license()' or `licence()' for distribution details.
+Type 'license()' or 'licence()' for distribution details.
 
 R is a collaborative project with many contributors.
-Type `contributors()' for more information.
+Type 'contributors()' for more information.
 
-Type `demo()' for some demos, `help()' for on-line help, or
-`help.start()' for a HTML browser interface to help.
-Type `q()' to quit R.
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for a HTML browser interface to help.
+Type 'q()' to quit R.
 
 > library(survey)
 > data(fpc)
@@ -22,77 +22,56 @@ Stratified Independent Sampling design
 svydesign(weights = ~weight, ids = ~psuid, strata = ~stratid, 
     variables = ~x, data = fpc, nest = TRUE)
 > svymean(~x,a)
-       x 
-5.448148 
-attr(,"var")
-          [,1]
-[1,] 0.5494787
+    mean     SE
+x 5.4481 0.7413
 > a<-svydesign(weights=~weight, ids=~0, strata=~stratid, variables=~x, data=fpc, nest=TRUE)
 > a
 Stratified Independent Sampling design
 svydesign(weights = ~weight, ids = ~0, strata = ~stratid, variables = ~x, 
     data = fpc, nest = TRUE)
 > svymean(~x,a)
-       x 
-5.448148 
-attr(,"var")
-          [,1]
-[1,] 0.5494787
+    mean     SE
+x 5.4481 0.7413
 > a<-svydesign(weights=1, ids=~0, strata=~stratid, variables=~x, data=fpc, nest=TRUE)
 > a
 Stratified Independent Sampling design
 svydesign(weights = 1, ids = ~0, strata = ~stratid, variables = ~x, 
     data = fpc, nest = TRUE)
 > svymean(~x,a)
-   x 
-44.2 
-attr(,"var")
-     [,1]
-[1,] 38.9
+  mean    SE
+x 44.2 6.237
 > a<-svydesign(ids=~0, strata=~stratid, variables=~x, data=fpc, nest=TRUE)
 > a
 Stratified Independent Sampling design
 svydesign(ids = ~0, strata = ~stratid, variables = ~x, data = fpc, 
     nest = TRUE)
 > svymean(~x,a)
-    x 
-5.525 
-attr(,"var")
-          [,1]
-[1,] 0.6078125
+   mean     SE
+x 5.525 0.7796
 > a<-svydesign(ids=~0, strata=~stratid, prob=~I(1/weight),variables=~x, data=fpc, nest=TRUE)
 > a
 Stratified Independent Sampling design
 svydesign(ids = ~0, strata = ~stratid, prob = ~I(1/weight), variables = ~x, 
     data = fpc, nest = TRUE)
 > svymean(~x,a)
-       x 
-5.448148 
-attr(,"var")
-          [,1]
-[1,] 0.5494787
+    mean     SE
+x 5.4481 0.7413
 > a<-svydesign(ids=~psuid, strata=~stratid, variables=~x, data=fpc, nest=TRUE)
 > a
 Stratified Independent Sampling design
 svydesign(ids = ~psuid, strata = ~stratid, variables = ~x, data = fpc, 
     nest = TRUE)
 > svymean(~x,a)
-    x 
-5.525 
-attr(,"var")
-          [,1]
-[1,] 0.6078125
+   mean     SE
+x 5.525 0.7796
 > a<-svydesign(ids=~psuid, variables=~x, data=fpc, nest=TRUE)
 > a
 1 - level Cluster Sampling design
 With ( 5 ) clusters.
 svydesign(ids = ~psuid, variables = ~x, data = fpc, nest = TRUE)
 > svymean(~x,a)
-    x 
-5.525 
-attr(,"var")
-          [,1]
-[1,] 0.7023193
+   mean    SE
+x 5.525 0.838
 > a<-svydesign(ids=~psuid, weights=~weight, variables=~x, data=fpc, nest=TRUE)
 > a
 1 - level Cluster Sampling design
@@ -100,11 +79,8 @@ With ( 5 ) clusters.
 svydesign(ids = ~psuid, weights = ~weight, variables = ~x, data = fpc, 
     nest = TRUE)
 > svymean(~x,a)
-       x 
-5.448148 
-attr(,"var")
-          [,1]
-[1,] 0.6300499
+    mean     SE
+x 5.4481 0.7938
 > a<-svydesign(ids=~stratid+psuid, weights=~weight, variables=~x, data=fpc)
 > a
 2 - level Cluster Sampling design
@@ -112,42 +88,49 @@ With ( 2,5 ) clusters.
 svydesign(ids = ~stratid + psuid, weights = ~weight, variables = ~x, 
     data = fpc)
 > svymean(~x,a)
-       x 
-5.448148 
-attr(,"var")
-          [,1]
-[1,] 0.2986645
+    mean     SE
+x 5.4481 0.5465
 > a<-svydesign(ids=~stratid+psuid, variables=~x, data=fpc)
 > a
 2 - level Cluster Sampling design
 With ( 2,5 ) clusters.
 svydesign(ids = ~stratid + psuid, variables = ~x, data = fpc)
 > svymean(~x,a)
-    x 
-5.525 
-attr(,"var")
-          [,1]
-[1,] 0.2691016
+   mean     SE
+x 5.525 0.5188
 > a<-svydesign(weights=fpc$weight, ids=fpc$psuid, strata=fpc$stratid, variables=fpc[,"x",drop=FALSE],  nest=TRUE)
 > a
 Stratified Independent Sampling design
 svydesign(weights = fpc$weight, ids = fpc$psuid, strata = fpc$stratid, 
     variables = fpc[, "x", drop = FALSE], nest = TRUE)
 > svymean(~x,a)
-       x 
-5.448148 
-attr(,"var")
-          [,1]
-[1,] 0.5494787
+    mean     SE
+x 5.4481 0.7413
 > a<-svydesign(weights=fpc$weight, ids=fpc$psuid, strata=fpc$stratid, variables=fpc[,4:6],  nest=TRUE)
 > a
 Stratified Independent Sampling design
 svydesign(weights = fpc$weight, ids = fpc$psuid, strata = fpc$stratid, 
     variables = fpc[, 4:6], nest = TRUE)
 > svymean(~x,a)
-       x 
-5.448148 
-attr(,"var")
-          [,1]
-[1,] 0.5494787
+    mean     SE
+x 5.4481 0.7413
+> 
+> a<-svydesign(weights=fpc$weight, ids=fpc$psuid,  variables=fpc[,4:6], fpc=rep(27,8))
+> a
+1 - level Cluster Sampling design
+With ( 5 ) clusters.
+svydesign(weights = fpc$weight, ids = fpc$psuid, variables = fpc[, 
+    4:6], fpc = rep(27, 8))
+> svymean(~x,a)
+    mean     SE
+x 5.4481 0.7165
+> 
+> a<-svydesign(weights=fpc$weight, ids=fpc$psuid,  strata=fpc$stratid, nest=TRUE, variables=fpc[,4:6], fpc=fpc$Nh)
+> a
+Stratified Independent Sampling design
+svydesign(weights = fpc$weight, ids = fpc$psuid, strata = fpc$stratid, 
+    nest = TRUE, variables = fpc[, 4:6], fpc = fpc$Nh)
+> svymean(~x,a)
+    mean    SE
+x 5.4481 0.616
 > 

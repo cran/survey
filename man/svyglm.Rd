@@ -62,46 +62,23 @@ be useful for testing sets of regression terms.
   \code{\link{svyCprod}}, \code{\link{svy.varcoef}},\code{\link{regTermTest}}}
 
 \examples{
-  ## Independent sampling
-  df<-data.frame(x=rnorm(1000),z=rep(0:4,200))
-  df$y<-with(df, 3+3*x*z)
-  df$p<-with(df, exp(x)/(1+exp(x)))
-  mpop<-lm(y~x+z, data=df) 
-  xi<-rbinom(1000,1,df$p)
-  sdf<-df[xi==1,]
 
-  dxi<-svydesign(~0,~p,data=sdf)
-  m<-svyglm(y~x+z,family="gaussian",design=dxi)
-  m1<-lm(y~x+z, data=sdf)
+  data(api)
 
-  summary(m1) ##wrong
-  summary(m)  ##right
-  summary(mpop) ##whole population
+  glm(api00~ell+meals+mobility, data=apipop)
 
-  ##cluster sampling
-  df$id<-rep(1:250,each=4)
-  df$clustp<-by(df,list(df$id),function(d) min(exp(d$x*d$z)/(1+exp(d$x*d$z))))[df$id]
-  mpop<-lm(y~x+z, data=df) 
+  dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
+  dclus2<-svydesign(id=~dnum+snum, weights=~pw, data=apiclus2)
+  rstrat<-as.svrepdesign(dstrat)
+  rclus2<-as.svrepdesign(dclus2)
 
-  xi<-rbinom(250,1,df$clustp[4*(1:250)])
-  sdf<-df[xi[df$id]==1,]
+  summary(svyglm(api00~ell+meals+mobility, design=dstrat))
+  summary(svyglm(api00~ell+meals+mobility, design=dclus2))
+  summary(svrepglm(api00~ell+meals+mobility, design=rstrat))
+  summary(svrepglm(api00~ell+meals+mobility, design=rclus2))
 
-  dxi<-svydesign(~id,~clustp,data=sdf)
-  drep<-as.svrepdesign(dxi)
-  m<-svyglm(y~x+z,family="gaussian",design=dxi)
-  mr<-svrepglm(y~x+z, family="gaussian", design=drep)
-  m1<-lm(y~x+z,data=sdf)
- 
-  summary(m1) ##wrong
-  summary(m)  ##right
-  summary(mpop) ##whole population
-
-  ## subsets
-  msub<-svyglm(y~x+z,family="gaussian",design=dxi,subset=x>1)
-  summary(msub)
-  subdxi<-subset(dxi,x>1)
-  msub<-svyglm(y~x+z,family="gaussian",design=subdxi)
-  summary(msub)
+  ## use quasibinomial, quasipoisson to avoid warning messages
+  summary(svyglm(sch.wide~ell+meals+mobility, design=dstrat, family=quasibinomial()))
 
  }
 \keyword{regression}% at least one, from doc/KEYWORDS

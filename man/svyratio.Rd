@@ -39,6 +39,27 @@ optionally a matrix of standard errors.
 \seealso{\code{\link{svydesign}} }
 
 \examples{
+data(scd)
+
+## survey design objects
+scddes<-svydesign(data=scd, prob=~1, id=~ambulance, strata=~ESA,
+nest=TRUE, fpc=rep(5,6))
+scdnofpc<-svydesign(data=scd, prob=~1, id=~ambulance, strata=~ESA,
+nest=TRUE)
+
+# convert to BRR replicate weights
+scd2brr <- as.svrepdesign(scdnofpc, type="BRR")
+
+# use BRR replicate weights from Levy and Lemeshow
+repweights<-2*cbind(c(1,0,1,0,1,0), c(1,0,0,1,0,1), c(0,1,1,0,0,1),
+c(0,1,0,1,1,0))
+scdrep<-svrepdesign(data=scd, type="BRR", repweights=repweights)
+
+# ratio estimates
+svyratio(~alive, ~arrests, design=scddes)
+svyratio(~alive, ~arrests, design=scdnofpc)
+svrepratio(~alive, ~arrests, design=scd2brr)
+svrepratio(~alive, ~arrests, design=scdrep)
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

@@ -5,6 +5,8 @@
 \alias{svymean}
 \alias{svrepmean}
 \alias{svytotal}
+\alias{print.svystat}
+\alias{print.svrepstat}
 \alias{svreptotal}
 \alias{svyvar}
 %- Also NEED an `\alias' for EACH other topic documented here.
@@ -79,33 +81,36 @@ processed by \code{ftable} for more attractive display.
 \seealso{ \code{\link{svydesign}}, \code{\link{svyCprod}}, \code{\link{mean}},\code{\link{var}}, \code{\link{quantile}}, \code{\link{xtabs}} }
 
 \examples{
- #population
-  df<-data.frame(x=rnorm(1000),z=rep(0:4,200))
-  df$y<-with(df, 3+3*x*z)
-  #sampling fraction
-  df$p<-with(df, exp(x)/(1+exp(x)))
-  #sample
-  xi<-rbinom(1000,1,df$p)
-  sdf<-df[xi==1,]
-  
-  #survey design object: independent sampling, 
-  dxi<-svydesign(~0,~p,data=sdf)
-  dxi
 
-  mean(df$x)		#right
-  mean(sdf$x)		#wrong
-  svymean(~x,dxi)	#right
+  data(api)
+  ## population
+  mean(apipop$api00)
+  quantile(apipop$api00,c(.25,.5,.75))
+  var(apipop$api00)
+  sum(apipop$enroll)
+  sum(apipop$api.stu)/sum(apipop$enroll)
+  xtabs(~sch.wide+comp.imp, data=apipop)
 
-  var(df$x)		#right
-  var(sdf$x)		#wrong
-  svyvar(~x,dxi)	#right
+  ## one-stage cluster sample
+  dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
+  summary(dclus1)
+  svymean(~api00, dclus1)
+  svyquantile(~api00, dclus1, c(.25,.5,.75))
+  svyvar(~api00, dclus1)
+  svytotal(~enroll, dclus1)
+  svyratio(~api.stu, ~enroll, dclus1)
+  svytable(~sch.wide+comp.imp, dclus1)
 
-  quantile(df$x,c(0.025,0.5,0.975))  #right
-  quantile(sdf$x,c(0.025,0.5,0.975))  #wrong
-  svyquantile(~x,design=dxi,c(0.025,0.5,0.975))  #right
 
-  table(sdf$z)  # sample table
-  svytable(~z, dxi, round=TRUE) # estimated population table
+  #stratified sample
+  dstrat<-svydesign(id=~1, strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
+  summary(dstrat)
+  svymean(~api00, dstrat)
+  svyquantile(~api00, dstrat, c(.25,.5,.75))
+  svyvar(~api00, dstrat)
+  svytotal(~enroll, dstrat)
+  svyratio(~api.stu, ~enroll, dstrat)
+  svytable(~sch.wide+comp.imp, dstrat)
 
   data(scd)
   repweights<-2*cbind(c(1,0,1,0,1,0), c(1,0,0,1,0,1), c(0,1,1,0,0,1),

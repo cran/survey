@@ -45,6 +45,13 @@ svrepratio(~alive, ~arrests, design=scd2brr)
 svrepratio(~alive, ~arrests, design=scd2jkn)
 svrepratio(~alive, ~arrests, design=scd2jknf)
 
+data(api)
+dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
+rclus1<-as.svrepdesign(dclus1)
+
+svrepmean(~api00, rclus1)
+svreptotal(~enroll, rclus1)
+
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
 

@@ -37,3 +37,11 @@ svymean(~x,a)
 a<-svydesign(weights=fpc$weight, ids=fpc$psuid, strata=fpc$stratid, variables=fpc[,4:6],  nest=TRUE)
 a
 svymean(~x,a)
+
+a<-svydesign(weights=fpc$weight, ids=fpc$psuid,  variables=fpc[,4:6], fpc=rep(27,8))
+a
+svymean(~x,a)
+
+a<-svydesign(weights=fpc$weight, ids=fpc$psuid,  strata=fpc$stratid, nest=TRUE, variables=fpc[,4:6], fpc=fpc$Nh)
+a
+svymean(~x,a)

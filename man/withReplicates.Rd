@@ -8,7 +8,7 @@ weights, \code{withReplicates} evaluates the statistic and produces a
 replicate-based estimate of variance.
 }
 \usage{
-withReplicates(design, theta, rho = NULL, ..., return.replicates=FALSE)
+withReplicates(design, theta, rho = NULL, ..., scale.weights=FALSE, return.replicates=FALSE)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -17,6 +17,8 @@ withReplicates(design, theta, rho = NULL, ..., return.replicates=FALSE)
   \item{rho}{If \code{design} uses BRR weights, \code{rho} optionally
     specifies the parameter for Fay's variance estimator.}
   \item{\dots}{Other arguments to \code{theta}}
+  \item{scale.weights}{Divide the probability weights by their sum (can
+    help with overflow problems)}
   \item{return.replicates}{Return the replicate estimates as well as
     the variance?}
 }
