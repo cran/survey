@@ -1,0 +1,541 @@
+svydesign<-function(ids,probs,strata=NULL,variables=NULL, data=NULL, nest=FALSE, check.strata=TRUE){
+
+     if(inherits(ids,"formula")) {
+	 mf<-substitute(model.frame(ids,data=data))   
+	 ids<-eval.parent(mf)
+	}
+
+     if(inherits(probs,"formula")){
+	mf<-substitute(model.frame(probs,data=data))
+	probs<-eval.parent(mf)
+	}
+
+    if(inherits(strata,"formula")){
+         mf<-substitute(model.frame(strata,data=data))
+	strata<-eval.parent(mf)
+     }
+     if(is.list(strata))
+	strata<-do.call("interaction", strata)
+
+     if (is.null(variables))
+	variables<-data
+     if (inherits(variables,"formula")){
+         mf<-substitute(model.frame(variables,data=data))
+	 variables <- eval.parent(mf)
+     }
+
+    if (NCOL(ids)==0)
+	ids<-data.frame(.id=seq(length=NROW(variables)))
+    if (nest && NCOL(ids)>1){
+      N<-ncol(ids)
+      for(i in 2:(N)){
+         ids[,i]<-do.call("interaction",ids[,1:i])	
+      }
+    }
+
+    if(check.strata && !is.null(strata) && NCOL(ids)){
+       sc<-rowSums(table(ids[,1],strata))
+       if(any(sc>1)) stop("Clusters not nested in strata")
+    }
+
+    rval<-list(cluster=ids)
+    rval$strata<-strata
+    rval$prob<-apply(probs,1,prod)
+    rval$allprob<-probs
+    rval$call<-match.call()
+    rval$variables<-variables
+    class(rval)<-"survey.design"
+    rval
+}
+
+print.survey.design<-function(x,...){
+ n<-NROW(x$cluster)
+ if (!is.null(x$strata)) cat("Stratified ")
+ un<-length(unique(x$cluster[,1]))
+ if(n==un){
+   cat("Independent Sampling design\n")
+  } else {
+   cat(NCOL(x$cluster),"- level Cluster Sampling design\n")
+   nn<-lapply(x$cluster,function(i) length(unique(i)))
+   cat(paste("With (",paste(nn,collapse=","),") clusters.\n"))
+  }
+  cat("Probabilities:\n")
+  print(summary(x$prob))
+  if(!is.null(x$strata)){
+    cat("Stratum sizes: ")
+    print(table(x$strata))
+  }
+  cat("Data variables:\n")
+  print(names(x$variables))
+  invisible(x)
+}
+
+"[.survey.design"<-function (x,i, ...){
+
+	if (!missing(i)){ 
+	   x$variables<-"[.data.frame"(x$variables,i,...)
+	   x$cluster<-x$cluster[i,,drop=FALSE]
+	   x$prob<-x$prob[i]
+	   x$allprob<-x$allprob[i,,drop=FALSE]
+	} else {
+	   x$variables<-x$variables[,...]
+	}
+
+	x
+}
+
+"[<-.survey.design"<-function(x, ...,value){
+	if (inherits(value, "survey.design"))
+	    value<-value$variables
+	x$variables[...]<-value
+	x
+}
+
+dim.survey.design<-function(x,...){
+	dim(x$variables)
+}
+
+na.fail.survey.design<-function(object,...){
+	tmp<-na.fail(object$variables,...)
+	object
+}
+
+na.omit.survey.design<-function(object,...){
+	tmp<-na.omit(object$variables,...)
+	omit<-attr(tmp,"na.action")
+	if (length(omit)){
+	   object$cluster<-object$cluster[-omit,,drop=FALSE]
+	   object$prob<-object$prob[-omit]
+	   object$allprob<-object$allprob[-omit,,drop=FALSE]
+	   object$variables<-tmp
+	   attr(object,"na.action")<-omit
+	}
+	object
+}
+
+na.exclude.survey.design<-function(object,...){
+	tmp<-na.exclude(object$variables,...)
+	exclude<-attr(tmp,"na.action")
+	if (length(exclude)){
+	   object$cluster<-object$cluster[-exclude,,drop=FALSE]
+	   object$prob<-object$prob[-exclude]
+	   object$allprob<-object$allprob[-exclude,,drop=FALSE]
+	   object$variables<-tmp
+	   attr(object,"na.action")<-exclude
+	}
+	object
+}
+
+
+summary.survey.design<-function(object,...){
+    rval<-list(design=object, summ= summary(object$variables))
+    class(rval)<-"summary.survey.design"
+    rval
+}
+
+print.summary.survey.design<-function(x,...){
+	print(x$design)
+	print(x$summ)
+	invisible(x)
+}	
+
+svyCprod<-function(x,strata,psu){
+    x<-as.matrix(x)
+    n<-NROW(x)
+    if(is.null(strata)){
+       x<-t(t(x)-colMeans(x))
+    } else {
+       ss<-sort(unique(strata))
+       strata.means<-as.matrix((rowsum(x,strata)/rowsum(rep(1,n),strata)))[match(strata,ss),,drop=FALSE]
+       x<- x- strata.means
+    }
+    p<-NCOL(x)
+    v<-matrix(0,p,p)
+    if (is.null(strata)) {
+	strata<-rep(1,n)
+    	ss<-1
+       }
+    for(s in ss){
+      this.stratum <- strata %in% s
+      if(!is.null(psu))
+	xs<-as.matrix(rowsum(x[this.stratum,,drop=FALSE],psu[this.stratum],reorder=FALSE))
+      else
+	xs<-x
+      v<-v+crossprod(xs)*sum(this.stratum)/(sum(this.stratum)-1)
+     }
+     v
+}
+
+svymean<-function(x,design, na.rm=FALSE){
+
+	if (inherits(x,"formula"))
+		x<-model.frame(x,design$variables,na.action=na.pass)
+	else if(typeof(x) %in% c("expression","symbol"))
+		x<-eval(x, design$variables)
+
+	x<-as.matrix(x)
+
+	if (na.rm){
+	   nas<-rowSums(is.na(x))
+	   design<-design[nas==0,]
+	   x<-x[nas==0,,drop=FALSE]
+	}
+
+	pweights<-1/design$prob
+	psum<-sum(pweights)
+	average<-colSums(x*pweights/psum)
+	x<-sweep(x,2,average)
+	v<-svyCprod(x*pweights/psum,design$strata,design$cluster[[1]])
+	attr(average,"var")<-v
+	return(average)
+}
+
+svyvar<-function(x, design, na.rm=FALSE){
+
+	if (inherits(x,"formula"))
+		x<-model.frame(x,design$variables,na.action=na.pass)
+	else if(typeof(x) %in% c("expression","symbol"))
+		x<-eval(x, design$variables)
+
+	xbar<-svymean(x,design, na.rm=na.rm)
+	if(NCOL(x)==1) {
+		x<-x-xbar
+		return(svymean(x*x,design, na.rm=na.rm))
+	}
+	x<-t(t(x)-xbar)
+	p<-NCOL(x)
+	n<-NROW(x)
+	a<-matrix(rep(x,p),ncol=p*p)
+	b<-x[,rep(1:p,each=p)]
+	v<-svymean(a*b,design, na.rm=na.rm)
+	matrix(v,ncol=p)
+}
+
+
+svyquantile<-function(x,design,quantiles,method="linear",f=1){
+
+     if (inherits(x,"formula"))
+		x<-model.frame(x,design$variables)
+     else if(typeof(x) %in% c("expression","symbol"))
+		x<-eval(x, design$variables)
+     
+     if(length(dim(x))){
+	   if(ncol(x)>1) stop("Invalid variable type")
+	   x<-x[,1]
+	}
+
+     w<-1/design$prob
+     oo<-order(x)
+     cum.w<-cumsum(w[oo])/sum(w)
+
+     
+     	cdf<-approxfun(cum.w,x[oo],method=method,f=f,
+		yleft=min(x),yright=max(x))
+     	return(cdf(quantiles))
+    
+}
+     
+
+
+svytable<-function(formula, design, Ntotal=NULL){
+   weights<-1/design$prob
+   ff<-eval(substitute(lhs~rhs,list(lhs=quote(weights), rhs=formula[[2]])))
+   tbl<-xtabs(ff, data=design$variables)
+   if(!is.null(Ntotal))
+	tbl<-tbl*Ntotal/sum(tbl)
+   tbl
+}
+
+svyglm<-function(formula,design,...){
+ 
+      data<-design$variables
+
+      g<-match.call()
+      g$design<-NULL
+      g$var<-NULL
+      g$weights<-quote(.survey.prob.weights)
+      g[[1]]<-quote(glm)      
+
+      data$.survey.prob.weights<-1/design$prob
+      if (!all(all.vars(formula) %in% names(data))) 
+	stop("all variables must be in design= argument")
+      g<-with(data,eval(g))
+
+      nas<-attr(model.frame(g), "na.action")
+      if (length(nas))
+	design<-design[-nas,]
+
+      g$cov.unscaled<-svy.varcoef(g,design)
+      
+      class(g)<-c("svyglm",class(g))
+      g$call<-match.call()
+      g$survey.design<-design
+      g
+}
+
+vcov.svyglm<-function(object,...)  object$cov.unscaled
+
+
+svy.varcoef<-function(glm.object,design){
+    Ainv<-summary(glm.object)$cov.unscaled
+    estfun<-model.matrix(glm.object)*resid(glm.object,"working")*glm.object$weights
+    B<-svyCprod(estfun,design$strata,design$cluster[[1]])
+    Ainv%*%B%*%Ainv
+}
+
+residuals.svyglm<-function(object,type = c("deviance", "pearson", "working", 
+    "response", "partial"),...){
+	type<-match.arg(type)
+	if (type=="pearson"){
+   	   y <- object$y
+	   mu <- object$fitted.values
+    	   wts <- object$prior.weights
+	   r<-(y - mu) * sqrt(wts)*sqrt(object$survey.design$prob)/sqrt(object$family$variance(mu))
+	   if (is.null(object$na.action)) 
+        	r
+    	   else 
+	        naresid(object$na.action, r)
+	} else 
+		NextMethod()
+
+}
+
+summary.svyglm<-function (object, correlation = FALSE, ...) 
+{
+    Qr <- object$qr
+    est.disp <- TRUE
+    df.r <- object$df.residual
+    dispersion<-svyvar(na.omit(resid(object,"pearson")), object$survey.design)
+    coef.p <- coef(object)
+    covmat<-vcov(object)
+    dimnames(covmat) <- list(names(coef.p), names(coef.p))
+    var.cf <- diag(covmat)
+    s.err <- sqrt(var.cf)
+    tvalue <- coef.p/s.err
+    dn <- c("Estimate", "Std. Error")
+    if (!est.disp) {
+        pvalue <- 2 * pnorm(-abs(tvalue))
+        coef.table <- cbind(coef.p, s.err, tvalue, pvalue)
+        dimnames(coef.table) <- list(names(coef.p), c(dn, "z value", 
+            "Pr(>|z|)"))
+    }
+    else if (df.r > 0) {
+        pvalue <- 2 * pt(-abs(tvalue), df.r)
+        coef.table <- cbind(coef.p, s.err, tvalue, pvalue)
+        dimnames(coef.table) <- list(names(coef.p), c(dn, "t value", 
+            "Pr(>|t|)"))
+    }
+    else {
+        coef.table <- cbind(coef.p, Inf)
+        dimnames(coef.table) <- list(names(coef.p), dn)
+    }
+    ans <- c(object[c("call", "terms", "family", "deviance", 
+        "aic", "contrasts", "df.residual", "null.deviance", "df.null", 
+        "iter")], list(deviance.resid = residuals(object, type = "deviance"), 
+        aic = object$aic, coefficients = coef.table, dispersion = dispersion, 
+        df = c(object$rank, df.r), cov.unscaled = covmat, 
+        cov.scaled = covmat))
+    if (correlation) {
+        dd <- sqrt(diag(covmat))
+        ans$correlation <- covmat/outer(dd, dd)
+    }
+    ans$survey.design<-object$survey.design
+    class(ans) <- c("summary.svyglm","summary.glm")
+    return(ans)
+}
+
+print.summary.svyglm<-function(x,...){
+    NextMethod("print")
+    print(x$survey.design,...)
+}
+
+logLik.svyglm<-function(object,...){
+   stop("svyglm not fitted by maximum likelihood.")
+}
+
+extractAIC.svyglm<-function(fit,...){
+    stop("svyglm not fitted by maximum likelihood")
+}
+
+
+svymle<-function(loglike, gradient=NULL, design, formulas, start=NULL, control=list(maxit=1000), na.action="na.fail", ...){
+  
+ method<-if(is.null(gradient)) "Nelder-Mead" else "BFGS"
+
+  if (!inherits(design,"survey.design")) 
+	stop("design is not a survey.design")
+
+  weights<-1/design$prob
+  wtotal<-sum(weights)
+  if (is.null(control$fnscale))
+      control$fnscale<- -wtotal
+  data<-design$variables
+
+## Get the response variable
+  nms<-names(formulas)
+  if (nms[1]==""){
+	if (inherits(formulas[[1]],"formula"))
+	  y<-eval.parent(model.frame(formulas[[1]],data=data,na.action=na.pass))
+	else
+	  y<-eval(y,data,parent.frame())
+	formulas[1]<-NULL
+	if (NCOL(y)>1) stop("Y has more than one column")
+    }   else {
+  	## one formula must have response
+	has.response<-sapply(formulas,length)==3
+	if (sum(has.response)!=1) stop("Need a response variable")
+	ff<-formulas[[which(has.response)]]
+	ff[[3]]<-1
+	y<-eval.parent(model.frame(ff,data=data,na.action=na.pass))
+	formulas[[which(has.response)]]<-delete.response(terms(formulas[[which(has.response)]]))
+        nms<-c("",nms)
+  }
+
+  if(length(which(nms==""))>1) stop("Formulas must have names")
+  
+  
+  mf<-vector("list",length(formulas))
+  for(i in 1:length(formulas)){
+	mf[[i]]<-eval.parent(model.frame(formulas[[i]], data=data, na.action=na.pass))
+  	if (NCOL(mf[[i]])==0) mf[[i]]<-NULL
+	}
+  mf<-as.data.frame(do.call("cbind",c(y,mf)))
+  names(mf)[1]<-"(Response)"
+  mf<-mf[,!duplicated(colnames(mf)),drop=FALSE]
+
+  mf<-get(na.action)(mf)  
+  nas<-attr(mf,"na.action")
+  if (length(nas))
+	design<-design[-nas,]
+
+  Y<-mf[,1]
+  mm<-lapply(formulas,model.matrix, data=mf)
+
+  ## parameter names
+  parnms<-lapply(mm,colnames)
+  for(i in 1:length(parnms))
+	parnms[[i]]<-paste(nms[i+1],parnms[[i]],sep=".")
+  parnms<-unlist(parnms)
+
+  # maps position in theta to model matrices
+  np<-c(0,cumsum(sapply(mm,NCOL)))
+
+
+  objectivefn<-function(theta,...){
+     args<-vector("list",length(nms))
+     args[[1]]<-Y
+     for(i in 2:length(nms))
+	args[[i]]<-mm[[i-1]]%*%theta[(np[i-1]+1):np[i]]
+     names(args)<-nms
+     args<-c(args, ...)
+     sum(do.call("loglike",args)*weights)
+  }
+
+
+  if (is.null(gradient)) {
+     grad<-NULL
+  } else {  
+     fnargs<-names(formals(loglike))[-1]
+     grargs<-names(formals(gradient))[-1]
+     if(!identical(fnargs,grargs)) stop("loglike and gradient have different arguments.")
+     reorder<-na.omit(match(grargs,nms[-1]))
+     ##FIXME: need to convert d/deta into d/dtheta using modelmatrix.
+     grad<-function(theta,...){
+       args<-vector("list",length(nms))
+       args[[1]]<-Y
+       for(i in 2:length(nms))
+	  args[[i]]<-drop(mm[[i-1]]%*%theta[(np[i-1]+1):np[i]])
+       names(args)<-nms
+       args<-c(args,...)
+       rval<-NULL
+       tmp<-do.call("gradient",args)
+       for(i in reorder){
+	   rval<-c(rval, colSums(as.matrix(tmp[,i]*weights*mm[[i]])))
+	}
+       drop(rval)
+     }
+  }
+
+  theta0<-numeric(np[length(np)])
+  if (is.list(start))
+      st<-do.call("c",start)
+  else
+      st<-start
+
+  if (length(st)==length(theta0)) {
+	theta0<-st
+  } else {
+	stop("starting values wrong length")
+  }
+
+  rval<-optim(theta0, objectivefn, grad,control=control,hessian=TRUE,method=method,...)
+ 
+  if (rval$conv!=0) warning("optim did not converge")
+
+  names(rval$par)<-parnms
+  dimnames(rval$hessian)<-list(parnms,parnms)
+
+  if (is.null(gradient)) {
+	rval$inf<-solve(rval$hessian)
+	rval$scores<-NULL
+	rval$sandwich<-NULL
+    }  else {
+       theta<-rval$par
+       args<-vector("list",length(nms))
+       args[[1]]<-Y
+       for(i in 2:length(nms))
+	  args[[i]]<-drop(mm[[i-1]]%*%theta[(np[i-1]+1):np[i]])
+       names(args)<-nms
+       args<-c(args,...)
+       deta<-do.call("gradient",args)
+       rval$scores<-NULL
+       for(i in reorder)
+       	 rval$scores<-cbind(rval$scores,deta[,i]*weights*mm[[i]])
+
+       rval$invinf<-solve(-rval$hessian)
+       dimnames(rval$invinf)<-list(parnms,parnms)
+
+       db<-rval$scores%*%rval$invinf
+
+       rval$sandwich<-svyCprod(db,design$strata,design$psu)
+       dimnames(rval$sandwich)<-list(parnms,parnms)
+     }
+  rval$call<-match.call()
+  rval$design<-design
+  class(rval)<-"svymle"
+  rval
+
+}
+
+coef.svymle<-function(object,...) object$par
+vcov.svymle<-function(object,stderr=c("robust","model"),...) {
+    stderr<-match.arg(stderr)
+    if (stderr=="robust"){
+	rval<-object$sandwich
+	if (is.null(rval)) {
+		p<-length(coef(object))
+		rval<-matrix(NA,p,p)
+	}
+    } else {
+        rval<-object$invinf*mean(1/object$design$prob)
+    }
+    rval
+}
+
+
+print.svymle<-function(x,...){
+  cat("Survey-sampled mle: \n")
+  print(x$call)
+  cat("Coef:  \n")
+  print(x$par)
+}
+
+summary.svymle<-function(object,stderr=c("robust","model"),...){
+    cat("Survey-sampled mle: \n")
+    print(object$call)
+    stderr<-match.arg(stderr)
+    tbl<-data.frame(Coef=coef(object),SE=sqrt(diag(vcov(object,stderr=stderr))))
+    tbl$p.value<-2*(1-pnorm(abs(tbl$Coef/tbl$SE)))
+    print(tbl)
+    print(object$design)
+}

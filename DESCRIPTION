@@ -1,0 +1,7 @@
+Package: survey
+Title: analysis of complex survey samples
+Description: Summary statistics, generalised linear models, and general maximum likelihood estimation for stratified, cluster-sampled, unequally weighted survey samples.
+Version: 0.9-1
+Author: Thomas Lumley
+Maintainer: Thomas Lumley <tlumley@u.washington.edu>
+License: LGPL 

@@ -1,0 +1,7 @@
+svy.varcoef             Sandwich variance estimator for glms
+svyCprod                Computations for survey variances
+svydesign               Survey sample analysis.
+svyglm                  Survey-weighted generalised linear models.
+svymle                  Maximum likelihood estimation in complex
+                        surveys
+svyquantile             Summary statistics for sample surveys
