@@ -1,0 +1,6 @@
+0.9-3:   Finite population correction.
+ 	 Adjustments for stratum with single PSU (Fred Rohde)
+	 Fixed svydesign(nest=TRUE) to work with strata
+
+0.9-1:	First release.
+

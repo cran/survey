@@ -12,7 +12,7 @@ Compute means, variances, quantiles, and cross-tabulations for data from complex
 svyquantile(x, design, quantiles, method = "linear", f = 1)
 svymean(x, design, na.rm=FALSE) 
 svyvar(x, design, na.rm=FALSE) 
-svytable(formula, design, Ntotal = NULL) 
+svytable(formula, design, Ntotal = design$fpc) 
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -37,7 +37,7 @@ The \code{svytable} function computes a weighted crosstabulation.  If the sampli
 \references{ ~put references to the literature/web site here ~ }
 \author{Thomas Lumley}
 
-\seealso{ \code{\link{svydesign}},\code{\link{mean}},\code{\link{var}}, \code{\link{quantile}}, \code{\link{xtabs}} }
+\seealso{ \code{\link{svydesign}}, \code{\link{svyCprod}}, \code{\link{mean}},\code{\link{var}}, \code{\link{quantile}}, \code{\link{xtabs}} }
 
 \examples{
  #population
