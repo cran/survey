@@ -1,10 +1,10 @@
 svydesign               Survey sample analysis.
 subset.survey.design    Subset of survey
 update.survey.design    Add variables to a survey design
-postStratify            Post-stratify a survey
+postStratify            Post-stratify a survey design
+rake                    Rake a survey design
 svrepdesign             Replication-weight designs
 as.svrepdesign          Convert svydesign to svrepdesign
-rake                    Rake a svrepdesign
 subset.svyrep.design    Subset of svrepdesign
 update.svyrep.design    Add variables to svrepdesign
 
@@ -15,6 +15,9 @@ svyby                   Tables of statistics
 ftable.svystat
 ftable.svrepstat
 ftable.svyby
+cv			extract coefficient of variation
+SE			extract standard error
+deff			extract design effect
                  -----
 
 svycoxph                Survey-weighted Cox models
@@ -58,7 +61,7 @@ jk1weights              create replication weights
 jknweights              create replication weights
 brrweights              create replication weights
 hadamard                Hadamard matrices
-regTermTest             Test terms in a regression model
+regTermTest             Test sets of terms in a regression model
 
                  -----
 Data:

@@ -896,10 +896,6 @@ svrepratio<-function(numerator,denominator, design){
     
 }
 
-cv.svrepratio <- function(object,...){
-  sqrt(object$var)/object$ratio
-
-}
 
 
 residuals.svrepglm<-function(object,type = c("deviance", "pearson", "working", 
@@ -974,13 +970,6 @@ withReplicates<-function(design, theta,rho=NULL,..., scale.weights=FALSE, return
   rval
 }
 
-cv.svrepstat<-function(object,...){
-  if (object<0) warning("CV may not be useful for negative statistics")
-  if (object==0)
-    return(NaN)
-  as.vector(sqrt(diag(as.matrix(attr(object,"var"))))/object)
-}
-
 coef.svrepstat<-function(object,...){
   if (is.list(object)) object<-object[[1]]
   attr(object,"statistic")<-NULL
@@ -993,6 +982,7 @@ vcov.svrepstat<-function(object,...){
   if(is.list(object)) object<-object[[1]]
   as.matrix(attr(object,"var"))
 }
+
 
 SE<-function(object,...){
   UseMethod("SE")
@@ -1204,13 +1194,12 @@ rake<-function(design, sample.margins, population.margins,
             if(!(n %in% names(control)))
                 control[[n]]<-control.defaults[[n]]
     }
-    
-    if(!inherits(design, "svyrep.design"))
-        stop("design must be a survey with replicate weights")
 
-    if (is.null(compress))
+    is.rep<-inherits(design,"svyrep.design")
+
+    if (is.rep && is.null(compress))
       compress<-inherits(design$repweighs,"repweights_compressed")
-    
+     
     if (length(sample.margins)!=length(population.margins))
         stop("sample.margins and population.margins do not match.")
 
@@ -1231,7 +1220,9 @@ rake<-function(design, sample.margins, population.margins,
     
 
     allterms<-unlist(lapply(sample.margins,all.vars))
-    oldtable<-svreptable(formula(paste("~", paste(allterms,collapse="+"),sep="")),design)
+    tabfn<-if (is.rep) svreptable else svytable
+    ff<-formula(paste("~", paste(allterms,collapse="+"),sep=""))
+    oldtable<-tabfn(ff, design)
     if (control$verbose)
         print(oldtable)
 
@@ -1241,7 +1232,7 @@ rake<-function(design, sample.margins, population.margins,
         for(i in 1:nmar){
             design<-postStratify(design, strata[[i]], population.margins[[i]],compress=FALSE)
         }
-        newtable<-svreptable(formula(paste("~", paste(allterms,collapse="+"),sep="")),design)
+        newtable<-tabfn(ff, design)
         if (control$verbose)
             print(newtable)
 
@@ -1256,7 +1247,7 @@ rake<-function(design, sample.margins, population.margins,
     
     design$call<-sys.call()
 
-    if (compress)
+    if (is.rep && compress)
       design$repweights<-compressWeights(design$repweights)
     
     if(!converged)

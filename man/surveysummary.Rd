@@ -14,7 +14,10 @@
 \alias{cv.svrepratio}
 \alias{cv.svrepstat}
 \alias{cv.svystat}
+\alias{cv.default}
 \alias{cv}
+\alias{deff}
+\alias{deff.default}
 \alias{svrepvar}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Summary statistics for sample surveys}
@@ -34,6 +37,7 @@ cv(object,...)
 \method{coef}{svrepstat}(object,...)
 \method{vcov}{svystat}(object,...)
 \method{vcov}{svrepstat}(object,...)
+deff(object, quietly=FALSE,...)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -44,6 +48,7 @@ cv(object,...)
   \item{return.replicates}{Return the replicate means?}
   \item{deff}{Return the design effect}
   \item{object}{The result of one of the other survey summary functions}
+  \item{quietly}{Don't warn when there is no design effect computed}
   \item{...}{additional arguments to \code{cv} methods,not currently used}
 }
 \details{
@@ -74,7 +79,7 @@ speaking this should be a simple random sample without replacement, we
 compute as if it were a simple random sample with replacement.
 
 The \code{cv} function computes the coefficient of variation of a
-statistic such as ratio, mean or total.
+statistic such as ratio, mean or total. 
 
 }
 \value{
@@ -136,6 +141,11 @@ statistic such as ratio, mean or total.
   # extracting statistic and variance
   coef(svytotal(~enroll,dstrat))
   vcov(svrepmean(~api00+api99,jkstrat))
+
+  # Design effect
+  a<-svymean(~api00, dclus1, deff=TRUE)
+  a
+  deff(a)
 
   # BRR method
   data(scd)

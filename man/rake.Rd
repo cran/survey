@@ -12,7 +12,7 @@ rake(design, sample.margins, population.margins, control = list(maxit =
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{design}{A survey design with replicate weights }
+  \item{design}{A survey object }
   \item{sample.margins}{list of formulas or data frames describing
     sample margins}
   \item{population.margins}{list of tables or data frames
@@ -21,9 +21,9 @@ rake(design, sample.margins, population.margins, control = list(maxit =
     iterations. Convergence is declared if the maximum change in a table
     entry is less than  \code{epsilon}. If \code{epsilon<1} it is
     taken to be a fraction of the total sampling weight. }
-  \item{compress}{Attempt to compress the new replicate weight matrix?
-    When \code{NULL}, will attempt to compress if the original weight
-    matrix was compressed}
+  \item{compress}{If \code{design} has replicate weights, attempt to
+    compress the new replicate weight matrix? When \code{NULL}, will
+    attempt to compress if the original weight matrix was compressed}
 }
 \details{
   The \code{sample.margins} should be in a format suitable for \code{\link{postStratify}}.

@@ -1,3 +1,9 @@
+2.8-3 postStratify for svydesign objects was giving too large standard errors
+ 
+      Add deff() to extract design effects.
+
+2.8-2 rewrite cv() to use coef() and SE()
+
 2.8-1   Make Deff estimates work with ftable. (for Gillian Raab)
 
       ftable.svyby didn't work with a single by() variable (for Gillian Raab)

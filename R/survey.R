@@ -368,6 +368,7 @@ postStratify.survey.design<-function(design, strata, population, partial=FALSE,.
   index<-match(designlabel, both$label)
 
   design$prob<-design$prob/reweight[index]
+  attr(index,"weights")<-1/design$prob
   design$postStrata<-c(design$postStrata,list(index))
   
   ## Do we need to iterate here a la raking to get design strata
@@ -387,9 +388,10 @@ svyCprod<-function(x, strata, psu, fpc, nPSU, certainty=NULL, postStrata=NULL,
   ## Remove post-stratum means, which may cut across PSUs
   if(!is.null(postStrata)){
     for (psvar in postStrata){
+      psw<-attr(psvar,"weights")
       postStrata<-as.factor(psvar)
-      psmeans<-rowsum(x,psvar,reorder=TRUE)/as.vector(table(factor(psvar)))
-      x<- x-psmeans[match(psvar,sort(unique(psvar))),]
+      psmeans<-rowsum(x/psw,psvar,reorder=TRUE)/as.vector(table(factor(psvar)))
+      x<- x-psmeans[match(psvar,sort(unique(psvar))),]*psw
     }
   }
 
@@ -560,13 +562,23 @@ vcov.svystat<-function(object,...){
   as.matrix(attr(object,"var"))
 }
 
+deff <- function(object,quietly=FALSE,...) UseMethod("deff")
+
+deff.default <- function(object, quietly=FALSE,...){
+  rval<-attr(object,"deff")
+  if (is.null(rval)) { 
+    if(!quietly)
+      warning("object has no design effect information")
+  } else rval<-diag(as.matrix(rval))
+  rval
+}
+
 cv<-function(object,...) UseMethod("cv")
 
-cv.svystat<-function(object,...){
-  if (object<0) warning("CV may not be useful for negative statistics")
-  if (object==0)
-    return(NaN)
-  as.vector(sqrt(diag(attr(object,"var")))/object)
+cv.default<-function(object,...){
+  rval<-SE(object)/coef(object)
+  if (rval<0) warning("CV may not be useful for negative statistics")
+  rval
 }
 
 svytotal<-function(x,design, na.rm=FALSE, deff=FALSE){
