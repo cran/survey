@@ -10,9 +10,4 @@ will be
        GPL), or a substitute found.
    --  svyglm and svycoxph use with(), which needs to be changed to eval.
 
-svymle() will take more effort but should be feasible
-   --  optim(), used in svymle(), needs to be replaced by nlmin or nlminb, 
-       which have different calling formats.
-   --  svymle() also makes fairly heavy use of lexical scope in defining
-       the objective function and gradient.  Lots of explicit argument
-       passing will have to be added.
+svymle() will take more effort but should be feasible. It makes fairly heavy use of lexical scope in defining the objective function and gradient.  Lots of explicit argument passing will have to be added.

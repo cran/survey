@@ -1,10 +1,15 @@
 svydesign               Survey sample analysis.
+subset.survey.design    Subset of survey
+update.survey.design    Add variables to a survey design
 
-svyquantile             Summary statistics for sample surveys
+svycoxph                Survey-weighted generalised linear models.
 svyglm                  Survey-weighted generalised linear models.
-svycoxph		Survey-weighed proportional hazards models.
-
+svyquantile             Summary statistics for sample surveys
 svymle                  Maximum likelihood estimation in complex
                         surveys
+
 svy.varcoef             Sandwich variance estimator for glms
 svyCprod                Computations for survey variances
+
+fpc                     Small artificial example
+

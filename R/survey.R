@@ -73,6 +73,17 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
        if(any(sc>1)) stop("Clusters not nested in strata")
     }
 
+    ## Put degrees of freedom (# of PSUs in each stratum) in object, to 
+    ## allow subpopulations
+    if (NCOL(ids)){
+	if (is.null(strata)){
+	    nPSU<-length(unique(ids[,1]))
+	} else {
+	    nPSU<-table(strata[!duplicated(ids[,1])])
+        }
+    }
+
+
      if (!is.null(fpc)){
        ## Finite population correction: specified per observation
        if (is.numeric(fpc) && length(fpc)==NROW(variables)){
@@ -100,11 +111,12 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
     rval$variables<-variables
     rval$fpc<-fpc
     rval$call<-sys.call()
+    rval$nPSU<-nPSU
     class(rval)<-"survey.design"
     rval
           }
 
-print.survey.design<-function(x,varnames=TRUE,design.summaries=TRUE,...){
+print.survey.design<-function(x,varnames=FALSE,design.summaries=FALSE,...){
   n<-NROW(x$cluster)
   if (!is.null(x$strata)) cat("Stratified ")
   un<-length(unique(x$cluster[,1]))
@@ -117,13 +129,15 @@ print.survey.design<-function(x,varnames=TRUE,design.summaries=TRUE,...){
     cat(paste("With (",paste(nn,collapse=","),") clusters.\n"))
     is.independent<-FALSE
   }
+  print(x$call)
   if (design.summaries){
     cat("Probabilities:\n")
     print(summary(x$prob))
     if(!is.null(x$strata)){
       cat("Stratum sizes: \n")
       a<-rbind(obs=table(x$strata),
-               PSU=if(!is.independent || !is.null(x$fpc))
+	       design.PSU=x$nPSU,
+               actual.PSU=if(!is.independent || !is.null(x$fpc))
                table(x$strata[!duplicated(x$cluster[,1])]))
       print(a)
     }
@@ -142,7 +156,7 @@ print.survey.design<-function(x,varnames=TRUE,design.summaries=TRUE,...){
 "[.survey.design"<-function (x,i, ...){
   
   if (!missing(i)){ 
-    x$variables<-"[.data.frame"(x$variables,i,...)
+    x$variables<-"[.data.frame"(x$variables,i,...,drop=FALSE)
     x$cluster<-x$cluster[i,,drop=FALSE]
     x$prob<-x$prob[i]
     x$allprob<-x$allprob[i,,drop=FALSE]
@@ -197,39 +211,77 @@ na.exclude.survey.design<-function(object,...){
 }
 
 
+update.survey.design<-function(object,vars=~.,...){
+	if (inherits(vars,"formula")){
+	   vars<-model.frame(vars,data=object$variables,na.action="na.pass")
+	   vv<- eval.parent(vars)
+	} else {
+ 	   vars<-call("data.frame",vars)
+           vv <- cbind(object$variables, eval(vars, object$variables, parent.frame()))
+	} 	if(NROW(vv)!=NROW(object$variables))
+		stop("Number of observations changed.")
+        object$variables<-vv
+	object$call<-sys.call()
+        object 
+}
+
+subset.survey.design<-function(x,subset,...){
+        e <- substitute(subset)        r <- eval(e, x$variables, parent.frame())        r <- r & !is.na(r) 
+        x<-x[r,]
+	x$call<-sys.call()
+	x
+}
+
 summary.survey.design<-function(object,...){
-  rval<-list(design=object, summ= summary(object$variables))
-  class(rval)<-"summary.survey.design"
-  rval
+  class(object)<-"summary.survey.design"
+  object
 }
 
 print.summary.survey.design<-function(x,...){
-  print(x$design,varnames=FALSE)
-  cat("Unadjusted sample summaries:\n")
-  print(x$summ)
-  invisible(x)
+  y<-x
+  class(y)<-"survey.design"
+  print(y,varnames=TRUE,design.summaries=TRUE,...)
 }	
      
-svyCprod<-function(x, strata, psu, fpc,
-                   lonely.psu=getOption("survey.lonely.psu")){
+svyCprod<-function(x, strata, psu, fpc, nPSU,
+                   lonely.psu=getOption("survey.lonely.psu")
+	){
   x<-as.matrix(x)
   n<-NROW(x)
 
   ##First collapse over PSUs
 
-  if (is.null(strata))
+  if (is.null(strata)){
     strata<-rep("1",n)
-  
+    if (!is.null(nPSU))
+        names(nPSU)<-"1"
+  }
+  else
+    strata<-as.character(strata) ##can't use factors as indices in for()
+
   if (!is.null(psu)){
     x<-rowsum(x, psu, reorder=FALSE)
     strata<-strata[!duplicated(psu)]
     n<-NROW(x)
   }
   
+  if (!is.null(nPSU)){
+      obsn<-table(strata)
+      dropped<-nPSU[match(names(obsn),names(nPSU))]-obsn
+      if(sum(dropped)){
+        xtra<-matrix(0,ncol=NCOL(x),nrow=sum(dropped))
+        strata<-c(strata,rep(names(dropped),dropped))
+      	if(is.matrix(x))
+	   x<-rbind(x,xtra)
+        else
+	   x<-c(x,xtra)
+        n<-NROW(x)
+      }
+  }
+
   if(is.null(strata)){
     x<-t(t(x)-colMeans(x))
   } else {
-    strata<-as.character(strata) ##can't use factors as indices in for()
     strata.means<-rowsum(x,strata, reorder=FALSE)/rowsum(rep(1,n),strata, reorder=FALSE)
     if (!is.matrix(strata.means))
       strata.means<-matrix(strata.means, ncol=NCOL(x))
@@ -243,10 +295,12 @@ svyCprod<-function(x, strata, psu, fpc,
   for(s in ss){
     this.stratum <- strata %in% s
 
-    this.n <-sum(this.stratum)
-    
-    this.df <- this.n/(this.n-1)
-    
+    ## original number of PSUs in this stratum 
+    ## before missing data/subsetting
+    this.n <-nPSU[match(s,names(nPSU))]
+
+    this.df <- this.n/(this.n-1)	
+
     if (is.null(fpc))
       this.fpc <- 1
     else{
@@ -256,7 +310,7 @@ svyCprod<-function(x, strata, psu, fpc,
     
     xs<-x[this.stratum,,drop=FALSE]
     
-    ## stratum with only 1 cluster leads to 0/0 variance
+    ## stratum with only 1 cluster leads to undefined variance
     if (this.n==1){
       this.df<-1
       lonely.psu<-match.arg(lonely.psu, c("remove","adjust","fail"))
@@ -294,7 +348,7 @@ svymean<-function(x,design, na.rm=FALSE){
 	psum<-sum(pweights)
 	average<-colSums(x*pweights/psum)
 	x<-sweep(x,2,average)
-	v<-svyCprod(x*pweights/psum,design$strata,design$cluster[[1]], design$fpc)
+	v<-svyCprod(x*pweights/psum,design$strata,design$cluster[[1]], design$fpc, design$nPSU)
 	attr(average,"var")<-v
 	return(average)
 }
@@ -377,7 +431,12 @@ svytable<-function(formula, design, Ntotal=design$fpc, round=FALSE){
    tbl
 }
 
-svycoxph<-function(formula,design,...){
+svycoxph<-function(formula,design,subset=NULL,...){
+  subset<-substitute(subset)
+  subset<-eval(subset,design$variables,parent.frame())
+  if (!is.null(subset))
+    design<-design[subset,]
+  
   require(survival) || stop("Needs the survival package")
   data<-design$variables 
   
@@ -399,7 +458,7 @@ svycoxph<-function(formula,design,...){
   
 
   g$var<-svyCprod(resid(g,"dfbeta",weighted=TRUE), design$strata,
-                  design$cluster[[1]], design$fpc)
+                  design$cluster[[1]], design$fpc,design$nPSU)
 
   g$naive.var<-NULL
   
@@ -430,8 +489,13 @@ anova.svycoxph<-function(object,...){
     stop("No anova method for survey models")
 }
 
-svyglm<-function(formula,design,...){
- 
+svyglm<-function(formula,design,subset=NULL,...){
+
+      subset<-substitute(subset)
+      subset<-eval(subset,design$variables,parent.frame())
+      if (!is.null(subset))
+        design<-design[subset,]
+      
       data<-design$variables
 
       g<-match.call()
@@ -470,7 +534,7 @@ vcov.svyglm<-function(object,...)  object$cov.unscaled
 svy.varcoef<-function(glm.object,design){
     Ainv<-summary(glm.object)$cov.unscaled
     estfun<-model.matrix(glm.object)*resid(glm.object,"working")*glm.object$weights
-    B<-svyCprod(estfun,design$strata,design$cluster[[1]],design$fpc)
+    B<-svyCprod(estfun,design$strata,design$cluster[[1]],design$fpc, design$nPSU)
     Ainv%*%B%*%Ainv
 }
 
@@ -689,7 +753,7 @@ svymle<-function(loglike, gradient=NULL, design, formulas, start=NULL, control=l
 
        db<-rval$scores%*%rval$invinf
 
-       rval$sandwich<-svyCprod(db,design$strata,design$psu, design$fpc)
+       rval$sandwich<-svyCprod(db,design$strata,design$psu, design$fpc, design$nPSU)
        dimnames(rval$sandwich)<-list(parnms,parnms)
      }
   rval$call<-match.call()
@@ -732,5 +796,8 @@ summary.svymle<-function(object,stderr=c("robust","model"),...){
     print(object$design)
 }
 
-if (is.null(getOption("survey.lonely.psu")))
-  options(survey.lonely.psu="fail")
+
+.First.lib<-function(...){
+    if (is.null(getOption("survey.lonely.psu")))
+        options(survey.lonely.psu="fail")
+}

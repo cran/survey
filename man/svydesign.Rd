@@ -64,12 +64,18 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL)
    column of the data frame should be a factor with the same levels as
    \code{strata} and the second column the finite population correction.
 
-The \code{dim}, \code{"["} and \code{"[<-"} and na.action methods for
+The \code{dim}, \code{"["}, \code{"[<-"} and na.action methods for
 \code{survey.design} objects operate on the dataframe specified by
 \code{variables} and ensure that the design information is properly
 updated to correspond to the new data frame.  With the \code{"[<-"}
 method the new value can be a \code{survey.design} object instead of a
-data frame, but only the data frame is used.
+data frame, but only the data frame is used. See also
+\code{\link{subset.survey.design}} for a simple way to select
+subpopulations.
+
+The value of \code{options("survey.lonely.psu")} controls what happens
+to strata containing only one cluster (PSU).See \code{\link{svyCprod}}
+for details.
 
 }
 \value{
@@ -78,7 +84,10 @@ An object of class \code{survey.design}.
 \author{Thomas Lumley}
 
 
-\seealso{ \code{\link{svyglm}}, \code{\link{svymean}}, \code{\link{svyvar}}, \code{\link{svytable}}, \code{\link{svyquantile}}}
+\seealso{ \code{\link{svyglm}}, \code{\link{svymean}}, \code{\link{svyvar}}, \code{\link{svytable}}, \code{\link{svyquantile}},
+\code{\link{subset.survey.design},
+\code{\link{update.survey.design}}}
+}
 
 \examples{
   #population

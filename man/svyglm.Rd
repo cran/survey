@@ -14,22 +14,24 @@
 Fit a generalised linear model to data from a complex survey design, with inverse-probability weighting and with standard errors corrected for cluster sampling.
 }
 \usage{
-svyglm(formula, design, ...)
+svyglm(formula, design,subset=NULL, ...)
 \method{summary}{svyglm}(object, correlation = FALSE,  ...) 
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
   \item{formula}{Model formula}
-  \item{design}{ \code{survey.design} object. Must contain all variables in the formula}
+  \item{design}{ \code{survey.design} object. Must contain all variables
+    in the formula}
+  \item{subset}{Expression to select a subpopulation}
   \item{\dots}{Other arguments passed to \code{glm} or \code{summary.glm} }
   \item{object}{A \code{svyglm} object}
   \item{correlation}{Include the correlation matrix of parameters?}
 }
 \details{
-Standard errors for cluster-sampled designs are computed using a
-linearisation estimate (equivalent to the Huber/White sandwich formula
-in GEEs).  Most of these computations are done in \code{\link{svyCprod}}.
-}
+  Standard errors for cluster-sampled designs are computed using a
+linearisation estimate (in the absence of strata this is equivalent to
+the Huber/White sandwich formula in GEEs).  Most of these computations
+are done in \code{\link{svyCprod}}.  }
 \value{
   An object of class \code{svyglm}.
 }

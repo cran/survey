@@ -1,3 +1,5 @@
+1.1   Added subset, update methods.  Variance estimation is now correct for 	subpopulations produced with select.
+
 1.0	No changes
 
 0.9-5   - finite population correction should be done with PSUs not 
