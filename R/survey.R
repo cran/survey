@@ -66,7 +66,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
     }
     
     if (inherits(variables,"formula")){
-        mf<-substitute(model.frame(variables,data=data))
+        mf<-substitute(model.frame(variables,data=data,na.action=na.pass))
         variables <- eval.parent(mf)
     } else if (is.null(variables)){
         variables<-data
@@ -387,13 +387,25 @@ svyCprod<-function(x, strata, psu, fpc, nPSU,
 }
 
 
+
 svymean<-function(x,design, na.rm=FALSE,deff=FALSE){
 
   if (!inherits(design,"survey.design"))
     stop("design is not a survey design")
   
-  if (inherits(x,"formula"))
-    x<-model.frame(x,design$variables,na.action=na.pass)
+  if (inherits(x,"formula")){
+    ## do the right thing with factors
+    mf<-model.frame(x,design$variables,na.action=na.pass)
+    xx<-lapply(attr(terms(x),"variables")[-1],
+               function(tt) model.matrix(eval(bquote(~0+.(tt))),mf))
+    cols<-sapply(xx,NCOL)
+    x<-matrix(nrow=NROW(xx[[1]]),ncol=sum(cols))
+    scols<-c(0,cumsum(cols))
+    for(i in 1:length(xx)){
+      x[,scols[i]+1:cols[i]]<-xx[[i]]
+    }
+    colnames(x)<-do.call("c",lapply(xx,colnames))
+  }
   else if(typeof(x) %in% c("expression","symbol"))
     x<-eval(x, design$variables)
   
@@ -434,14 +446,44 @@ print.svystat<-function(x,...){
   printCoefmat(m)
 }
 
+coef.svystat<-function(object,...){
+  attr(object,"statistic")<-NULL
+  attr(object,"deff")<-NULL
+  attr(object,"var")<-NULL
+  unclass(object)
+}
+
+vcov.svystat<-function(object,...){
+  as.matrix(attr(object,"var"))
+}
+
+cv<-function(object,...) UseMethod("cv")
+
+cv.svystat<-function(object,...){
+  if (object<0) warning("CV may not be useful for negative statistics")
+  if (object==0)
+    return(NaN)
+  as.vector(sqrt(diag(attr(object,"var")))/object)
+}
+
 svytotal<-function(x,design, na.rm=FALSE, deff=FALSE){
 
   if (!inherits(design,"survey.design"))
     stop("design is not a survey design")
   
-  if (inherits(x,"formula"))
-      x<-model.frame(x,design$variables,na.action=na.pass)
-  else if(typeof(x) %in% c("expression","symbol"))
+    if (inherits(x,"formula")){
+    ## do the right thing with factors
+    mf<-model.frame(x,design$variables,na.action=na.pass)
+    xx<-lapply(attr(terms(x),"variables")[-1],
+               function(tt) model.matrix(eval(bquote(~0+.(tt))),mf))
+    cols<-sapply(xx,NCOL)
+    x<-matrix(nrow=NROW(xx[[1]]),ncol=sum(cols))
+    scols<-c(0,cumsum(cols))
+    for(i in 1:length(xx)){
+      x[,scols[i]+1:cols[i]]<-xx[[i]]
+    }
+    colnames(x)<-do.call("c",lapply(xx,colnames))
+  } else if(typeof(x) %in% c("expression","symbol"))
       x<-eval(x, design$variables)
 
   x<-as.matrix(x)
@@ -486,6 +528,7 @@ svyvar<-function(x, design, na.rm=FALSE){
 	v<-svymean(a*b,design, na.rm=na.rm)
 	v<-matrix(v,ncol=p)
         attr(v,"statistic")<-"variance"
+        v
     }
 
 svyquantile<-function(x,design,quantiles,alpha=0.05,ci=FALSE, method="linear",f=1){
@@ -596,17 +639,21 @@ predict.svyratio<-function(object, total, se=TRUE,...){
     return(object$ratio*total)
 }
 
-svytable<-function(formula, design, Ntotal=design$fpc, round=FALSE){
+cv.svyratio<-function(object,...){
+  object$ratio/sqrt(object$var)
+}
 
-  if (!inherits(design,"survey.design")) stop("design must be a survey design")
-    weights<-1/design$prob
+svytable<-function(formula, design, Ntotal=design$fpc, round=FALSE){
   
-   ## unstratified or unadjusted.
-   if (is.null(Ntotal) || length(Ntotal)==1){
-       if (length(formula)==3)
-           tblcall<-bquote(xtabs(I(weights*.(formula[[2]]))~.(formula[[3]]), data=design$variables))
-        else
-           tblcall<-bquote(xtabs(weights~.(formula[[2]]), data=design$variables))
+  if (!inherits(design,"survey.design")) stop("design must be a survey design")
+  weights<-1/design$prob
+  
+  ## unstratified or unadjusted.
+  if (is.null(Ntotal) || length(Ntotal)==1){
+     if (length(formula)==3)
+         tblcall<-bquote(xtabs(I(weights*.(formula[[2]]))~.(formula[[3]]), data=design$variables))
+       else
+          tblcall<-bquote(xtabs(weights~.(formula[[2]]), data=design$variables))
        tbl<-eval(tblcall)
        if (!is.null(Ntotal)) {
          if(length(formula)==3)
@@ -619,22 +666,22 @@ svytable<-function(formula, design, Ntotal=design$fpc, round=FALSE){
        return(tbl)
    }
    ## adjusted and stratified
-   if (length(formula)==3)
-           tblcall<-bquote(xtabs(I(weights*.(formula[[2]]))~design$strata+.(formula[[3]]), data=design$variables))
-   else
-           tblcall<-bquote(xtabs(weights~design$strata+.(formula[[2]]), data=design$variables))
-   tbl<-eval(tblcall)
-
-   ss<-match(sort(unique(design$strata)), Ntotal[,1])
-   dm<-dim(tbl)
-   layer<-prod(dm[-1])
-      tbl<-sweep(tbl,1,Ntotal[ss, 2]/apply(tbl,1,sum),"*")
-   tbl<-apply(tbl, 2:length(dm), sum)
-   if (round)
-       tbl<-round(tbl)
-   class(tbl)<-c("svytable","xtabs", "table")
-   attr(tbl, "call")<-match.call()
-   tbl
+  if (length(formula)==3)
+    tblcall<-bquote(xtabs(I(weights*.(formula[[2]]))~design$strata+.(formula[[3]]), data=design$variables))
+  else
+    tblcall<-bquote(xtabs(weights~design$strata+.(formula[[2]]), data=design$variables))
+  tbl<-eval(tblcall)
+  
+  ss<-match(sort(unique(design$strata)), Ntotal[,1])
+  dm<-dim(tbl)
+  layer<-prod(dm[-1])
+  tbl<-sweep(tbl,1,Ntotal[ss, 2]/apply(tbl,1,sum),"*")
+  tbl<-apply(tbl, 2:length(dm), sum)
+  if (round)
+    tbl<-round(tbl)
+  class(tbl)<-c("svytable","xtabs", "table")
+  attr(tbl, "call")<-match.call()
+  tbl
 }
 
 svycoxph<-function(formula,design,subset=NULL,...){

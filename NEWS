@@ -1,3 +1,21 @@
+2.6   Design effects were broken for multiple means computed at once.
+      
+      Add coefficient of variation for mean, total, ratio,...
+
+      variables= argument of svydesign works with missing data (Tobias Verbeke)
+
+      Fix reference to Binder (1991) (Tobias Verbeke)
+
+      Means and totals for factors now give cell means/totals.
+
+      coef and vcov methods for svystat and svrepstat.
+
+      Another tiny example dataset from the VPLX manual
+      
+      svrepvar was incorrect for multiple variables simultaneously
+
+      Better error messages for missing data in svrVar.
+
 2.5   Wald tests for association in contingency tables.
 
       svyplot() for weighted graphics (some of these require "hexbin")

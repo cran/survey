@@ -92,7 +92,7 @@ jknweights<-function(strata,psu, fpc=NULL, fpctype=c("population","fraction","co
 
 
 brrweights<-function(strata,psu, match=NULL, small=c("fail","split","merge"),
-                     large=c("split","merge","fail")){
+                     large=c("split","merge","fail"),only.weights=FALSE){
 
   small<-match.arg(small)
   large<-match.arg(large)
@@ -183,9 +183,11 @@ brrweights<-function(strata,psu, match=NULL, small=c("fail","split","merge"),
     wa[match(psu,psunq)]*(2-fay.rho)+wb[match(psu,psunq)]*fay.rho
   }
 
-
-  list(weights=weights, wstrata=weightstrata, strata=sunq, psu=psunq,
-       npairs=NCOL(H),sampler=sampler)
+  if (only.weights)
+    sapply(1:NCOL(H),sampler,fay.rho=0)
+  else
+    list(weights=weights, wstrata=weightstrata, strata=sunq, psu=psunq,
+         npairs=NCOL(H),sampler=sampler)
 
 }
   
@@ -289,7 +291,7 @@ svrepdesign<-function(variables=NULL,repweights=NULL, weights=NULL,
     variables<-data
     
   if(inherits(variables,"formula")){
-    mf<-substitute(model.frame(variables, data=data))
+    mf<-substitute(model.frame(variables, data=data,na.action=na.pass))
     variables<-eval.parent(mf)
   }
     
@@ -306,7 +308,7 @@ svrepdesign<-function(variables=NULL,repweights=NULL, weights=NULL,
   if(inherits(weights,"formula")){
     mf<-substitute(model.frame(weights, data=data))
     weights<-eval.parent(mf)
-    weights<-na.fail(weights)
+    weights<-drop(as.matrix(na.fail(weights)))
   }
 
   if (is.null(weights)){
@@ -502,7 +504,10 @@ svrVar<-function(thetas, scale, rscales,na.action=getOption("na.action")){
   naa<-attr(thetas,"na.action")
   if (!is.null(naa)){
     rscales<-rscales[-naa]
-    warning(length(naa), " replicates gave NA results and were discarded.")
+    if (length(rscales))
+      warning(length(naa), " replicates gave NA results and were discarded.")
+    else
+      stop("All replicates contained NAs")
   }
   if (length(dim(thetas))==2){
     meantheta<-colMeans(thetas)
@@ -518,7 +523,8 @@ svrVar<-function(thetas, scale, rscales,na.action=getOption("na.action")){
 
 svrepvar<-function(x, design, na.rm=FALSE, rho=NULL, return.replicates=FALSE){
 
-  if (!inherits(design,"svyrep.design")) stop("design is not a replicate survey design")
+  if (!inherits(design,"svyrep.design"))
+    stop("design is not a replicate survey design")
   
   if (inherits(x,"formula"))
     x<-model.frame(x,design$variables,na.action=na.pass)
@@ -552,7 +558,7 @@ svrepvar<-function(x, design, na.rm=FALSE, rho=NULL, return.replicates=FALSE){
 
   v<-function(w){
     xbar<-colSums(w*x)/sum(w)
-    xdev<-sweep(x,1,xbar,"-")
+    xdev<-sweep(x,2,xbar,"-")
     colSums(xdev*xdev*w)/sum(w)
   }
   rval<-v(design$pweights)
@@ -573,11 +579,30 @@ svrepmean<-function(x,design, na.rm=FALSE, rho=NULL, return.replicates=FALSE,def
 {
   if (!inherits(design,"svyrep.design")) stop("design is not a replicate survey design")
   
-  if (inherits(x,"formula"))
-    x<-model.frame(x,design$variables,na.action=na.pass)
-  else if(typeof(x) %in% c("expression","symbol"))
+  if (inherits(x,"formula")){
+    ## do the right thing with factors
+    mf<-model.frame(x,design$variables,na.action=na.pass)
+    xx<-lapply(attr(terms(x),"variables")[-1],
+               function(tt) model.matrix(eval(bquote(~0+.(tt))),mf))
+    cols<-sapply(xx,NCOL)
+    x<-matrix(nrow=NROW(xx[[1]]),ncol=sum(cols))
+    scols<-c(0,cumsum(cols))
+    for(i in 1:length(xx)){
+      x[,scols[i]+1:cols[i]]<-xx[[i]]
+    }
+    colnames(x)<-do.call("c",lapply(xx,colnames))
+  }  else if(typeof(x) %in% c("expression","symbol"))
     x<-eval(x, design$variables)
 
+  
+  x<-as.matrix(x)
+  
+  if (na.rm){
+    nas<-rowSums(is.na(x))
+    design<-design[nas==0,]
+    x<-x[nas==0,,drop=FALSE]
+  }
+  
   wts<-design$repweights
   scale<-design$scale
   rscales<-design$rscales
@@ -591,15 +616,6 @@ svrepmean<-function(x,design, na.rm=FALSE, rho=NULL, return.replicates=FALSE,def
       stop("You cannot specify rho for this design")
   }
   
-  
-  x<-as.matrix(x)
-  
-  if (na.rm){
-    nas<-rowSums(is.na(x))
-    design<-design[nas==0,]
-    x[is.na(x)]<-0
-  }
-  
   if (!design$combined.weights)
     wts<-wts*design$pweights
   
@@ -608,6 +624,7 @@ svrepmean<-function(x,design, na.rm=FALSE, rho=NULL, return.replicates=FALSE,def
   repmeans<-apply(wts,2, function(w)  colSums(w*x)/sum(w))
 
   repmeans<-drop(t(repmeans))
+
   attr(rval,"var") <- v <- svrVar(repmeans, scale, rscales)
   attr(rval, "statistic")<-"mean"
   if (return.replicates)
@@ -626,9 +643,19 @@ svreptotal<-function(x,design, na.rm=FALSE, rho=NULL, return.replicates=FALSE, d
 {
   if (!inherits(design,"svyrep.design")) stop("design is not a replicate survey design")
   
-  if (inherits(x,"formula"))
-    x<-model.frame(x,design$variables,na.action=na.pass)
-  else if(typeof(x) %in% c("expression","symbol"))
+  if (inherits(x,"formula")){
+    ## do the right thing with factors
+    mf<-model.frame(x,design$variables,na.action=na.pass)
+    xx<-lapply(attr(terms(x),"variables")[-1],
+               function(tt) model.matrix(eval(bquote(~0+.(tt))),mf))
+    cols<-sapply(xx,NCOL)
+    x<-matrix(nrow=NROW(xx[[1]]),ncol=sum(cols))
+    scols<-c(0,cumsum(cols))
+    for(i in 1:length(xx)){
+      x[,scols[i]+1:cols[i]]<-xx[[i]]
+    }
+    colnames(x)<-do.call("c",lapply(xx,colnames))
+  }   else if(typeof(x) %in% c("expression","symbol"))
     x<-eval(x, design$variables)
 
   wts<-as.matrix(design$repweights)
@@ -850,7 +877,12 @@ svrepratio<-function(numerator,denominator, design){
   class(rval)<-"svyratio"
   rval
     
-  }
+}
+
+cv.svrepratio <- function(object,...){
+  sqrt(object$var)/object$ratio
+
+}
 
 
 residuals.svrepglm<-function(object,type = c("deviance", "pearson", "working", 
@@ -930,6 +962,24 @@ withReplicates<-function(design, theta,rho=NULL,..., scale.weights=FALSE, return
   attr(rval,"statistic")<-"theta"
   class(rval)<-"svrepstat"
   rval
+}
+
+cv.svrepstat<-function(object,...){
+  if (object<0) warning("CV may not be useful for negative statistics")
+  if (object==0)
+    return(NaN)
+  as.vector(sqrt(diag(as.matrix(attr(object,"var"))))/object)
+}
+
+coef.svrepstat<-function(object,...){
+  attr(object,"statistic")<-NULL
+  attr(object,"deff")<-NULL
+  attr(object,"var")<-NULL
+  unclass(object)
+}
+
+vcov.svrepstat<-function(object,...){
+  as.matrix(attr(object,"var"))
 }
 
 print.svrepstat<-function(x,...){

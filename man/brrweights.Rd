@@ -11,7 +11,7 @@
 }
 \usage{
 brrweights(strata, psu, match = NULL, small = c("fail", "split",
-"merge"), large = c("split", "merge", "fail"))
+"merge"), large = c("split", "merge", "fail"),only.weights=FALSE)
 jk1weights(psu,fpc=NULL, fpctype=c("population","fraction","correction"))
 jknweights(strata,psu, fpc=NULL, fpctype=c("population","fraction","correction"))
 }
@@ -24,6 +24,8 @@ jknweights(strata,psu, fpc=NULL, fpctype=c("population","fraction","correction")
   \item{large}{How to handle strata with more than two PSUs}
   \item{fpc}{Optional population (stratum) size or finite population correction }
   \item{fpctype}{How \code{fpc} is coded.}
+  \item{only.weights}{If \code{TRUE} return only the matrix of
+    replicate weights}
 }
 \details{
   JK1 and JKn are  jackknife schemes for unstratified and stratified
@@ -56,10 +58,13 @@ jknweights(strata,psu, fpc=NULL, fpctype=c("population","fraction","correction")
   \code{match} variable is used to sort PSUs before merging, to give
   approximate matching on this variable.
   
+  If you want more control than this you should probably construct your
+  own weights using the Hadamard matrices produced by \code{\link{hadamard}}
+  
 
 }
 \value{
-For \code{brrweights} a list with elements
+For \code{brrweights} with \code{only.weights=FALSE} a list with elements
   \item{weights}{two-column matrix indicating the weight for each
     half-stratum in one particular set  of split samples}
   \item{wstrata}{New stratum variable incorporating merged or split strata}

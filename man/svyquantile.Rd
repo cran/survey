@@ -51,7 +51,7 @@ svrepquantile(x, design, quantiles, method = "linear", f = 1, return.replicates=
   \code{\link{as.svrepdesign}}, \code{\link{svrepdesign}}}
 \references{
   Binder DA (1991) Use of estimating functions for interval estimation
-  from complex surveys. \emph{Journal of Official Statistics}  1991: 34-42
+  from complex surveys. \emph{Proceedings of the ASA Survey Research Methods Section}  1991: 34-42
   Shao J, Tu D (1995) \emph{The Jackknife and Bootstrap}. Springer.  
   }
 \examples{
