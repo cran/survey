@@ -117,7 +117,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
        ## Now reduced to fpc per stratum
        nstr<-table(strata[!duplicated(ids[[1]])])
        
-       if (all(fpc[,2]<1)){
+       if (all(fpc[,2]<=1)){
          fpc[,2]<- nstr[match(as.character(fpc[,1]), names(nstr))]/fpc[,2]
        } else if (any(fpc[,2]<nstr[match(as.character(fpc[,1]), names(nstr))]))
          stop("Over 100% sampling in some strata")
@@ -127,7 +127,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
     if (is.numeric(probs) && length(probs)==1)
         probs<-rep(probs, NROW(variables))
     
-    if (is.null(probs)) probs<-rep(1,NROW(variables))
+    if (length(probs)==0) probs<-rep(1,NROW(variables))
     
     if (NCOL(probs)==1) probs<-data.frame(probs)
 
@@ -142,7 +142,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
     rval$nPSU<-nPSU
     class(rval)<-"survey.design"
     rval
-          }
+  }
 
 print.survey.design<-function(x,varnames=FALSE,design.summaries=FALSE,...){
   n<-NROW(x$cluster)
@@ -344,13 +344,13 @@ svyCprod<-function(x, strata, psu, fpc, nPSU,
       ## stratum with only 1 cluster leads to undefined variance
       if (this.n==1){
           this.df<-1
-          lonely.psu<-match.arg(lonely.psu, c("remove","adjust","fail"))
+          lonely.psu<-match.arg(lonely.psu, c("remove","adjust","fail","certainty"))
           if (lonely.psu=="fail")
               stop("Stratum ",s, " has only one sampling unit.")
-          else
+          else if (lonely.psu!="certainty")
               warning("Stratum ",s, " has only one sampling unit.")
           if (lonely.psu=="adjust")
-              xs<-strata.means[match(s,ss),,drop=FALSE]
+            xs<-strata.means[match(s,ss),,drop=FALSE]
       }
       
       ## add it up
@@ -362,6 +362,9 @@ svyCprod<-function(x, strata, psu, fpc, nPSU,
 
 svymean<-function(x,design, na.rm=FALSE){
 
+  if (!inherits(design,"survey.design"))
+    stop("design is not a survey design")
+  
 	if (inherits(x,"formula"))
             x<-model.frame(x,design$variables,na.action=na.pass)
 	else if(typeof(x) %in% c("expression","symbol"))
@@ -380,6 +383,35 @@ svymean<-function(x,design, na.rm=FALSE){
 	average<-colSums(x*pweights/psum)
 	x<-sweep(x,2,average)
 	v<-svyCprod(x*pweights/psum,design$strata,design$cluster[[1]], design$fpc, design$nPSU)
+	attr(average,"var")<-v
+	return(average)
+    }
+
+
+
+svytotal<-function(x,design, na.rm=FALSE){
+
+  if (!inherits(design,"survey.design"))
+    stop("design is not a survey design")
+  
+	if (inherits(x,"formula"))
+            x<-model.frame(x,design$variables,na.action=na.pass)
+	else if(typeof(x) %in% c("expression","symbol"))
+            x<-eval(x, design$variables)
+        
+	x<-as.matrix(x)
+
+	if (na.rm){
+            nas<-rowSums(is.na(x))
+            design<-design[nas==0,]
+            x<-x[nas==0,,drop=FALSE]
+	}
+
+	pweights<-1/design$prob
+	psum<-sum(pweights)
+	average<-colSums(x*pweights)
+	x<-sweep(x,2,average)
+	v<-svyCprod(x*pweights,design$strata,design$cluster[[1]], design$fpc, design$nPSU)
 	attr(average,"var")<-v
 	return(average)
     }
@@ -430,9 +462,60 @@ svyquantile<-function(x,design,quantiles,method="linear",f=1){
 }
 
 
+svyratio<-function(numerator, denominator, design){
+
+    if (inherits(numerator,"formula"))
+		numerator<-model.frame(numerator,design$variables)
+    else if(typeof(numerator) %in% c("expression","symbol"))
+        numerator<-eval(numerator, design$variables)
+    if (inherits(denominator,"formula"))
+		denominator<-model.frame(denominator,design$variables)
+    else if(typeof(denominator) %in% c("expression","symbol"))
+        denominator<-eval(denominator, design$variables)
+
+    nn<-NCOL(numerator)
+    nd<-NCOL(denominator)
+
+    all<-cbind(numerator,denominator)
+    allstats<-svymean(all,design)
+    rval<-list(ratio=outer(allstats[1:nn],allstats[nn+1:nd],"/"))
+
+
+    vars<-matrix(ncol=nd,nrow=nn)
+    for(i in 1:nn){
+      for(j in 1:nd){
+        r<-(numerator[,i]-rval$ratio[i,j]*denominator[,j])/sum(denominator[,j])
+        vars[i,j]<-svyCprod(r*1/design$prob,design$strata,design$cluster[[1]], design$fpc, design$nPSU)
+      }
+    }
+    rval$var<-vars
+    rval$call<-sys.call()
+    class(rval)<-"svyratio"
+    rval
+    
+  }
+
+print.svyratio<-function(x,...){
+  cat("Ratio estimator: ")
+  print(x$call)
+  cat("Ratios=\n")
+  print(x$ratio)
+  cat("SEs=\n")
+  print(sqrt(x$var))
+  invisible(NULL)
+}
+
+predict.svyratio<-function(object, total, se=TRUE,...){
+  if (se)
+    return(list(total=object$ratio*total,se=sqrt(object$var)*total))
+  else
+    return(object$ratio*total)
+}
 
 svytable<-function(formula, design, Ntotal=design$fpc, round=FALSE){
-   weights<-1/design$prob
+
+    if (!inherits(design,"survey.design")) stop("design must be a survey design")
+    weights<-1/design$prob
    
    ## unstratified or unadjusted.
    if (is.null(Ntotal) || length(Ntotal)==1){
@@ -523,7 +606,7 @@ anova.svycoxph<-function(object,...){
 svyglm<-function(formula,design,subset=NULL,...){
 
       subset<-substitute(subset)
-      subset<-eval(subset,design$variables,parent.frame())
+      subset<-eval(subset, design$variables, parent.frame())
       if (!is.null(subset))
         design<-design[subset,]
       
@@ -539,7 +622,7 @@ svyglm<-function(formula,design,subset=NULL,...){
       data$.survey.prob.weights<-(1/design$prob)/sum(1/design$prob)
       if (!all(all.vars(formula) %in% names(data))) 
 	stop("all variables must be in design= argument")
-      g<-with(data,eval(g))
+      g<-with(data, eval(g))
 
       nas<-attr(model.frame(g), "na.action")
       if (length(nas))
@@ -626,7 +709,7 @@ summary.svyglm<-function (object, correlation = FALSE, ...)
         ans$correlation <- covmat/outer(dd, dd)
     }
     
-    ans$survey.design<-object$survey.design
+    ans$survey.design<-list(call=object$survey.design$call)
     class(ans) <- c("summary.svyglm","summary.glm")
     return(ans)
 }

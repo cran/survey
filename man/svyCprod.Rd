@@ -17,7 +17,7 @@ svyCprod(x, strata, psu, fpc, nPSU,
   \item{fpc}{A data frame of population stratum sizes or \code{NULL}}
   \item{nPSU}{Table of original sample stratum sizes (or \code{NULL})}
   \item{lonely.psu}{One of \code{"remove"}, \code{"adjust"},
-    \code{"fail"}. See Details below}
+    \code{"fail"}, \code{"certainty"}. See Details below}
 
 }
 \details{
@@ -33,15 +33,20 @@ svyCprod(x, strata, psu, fpc, nPSU,
 
 The variance formula gives 0/0 if a stratum contains only one sampling
 unit. The options to handle this are \code{"fail"} to give an error,
-\code{"remove"} to give a variance contribution of 0 for the stratum,
-and \code{"adjust"} to center the stratum at the grand mean rather than
-the stratum mean.  The choice is controlled by setting
-\code{options(survey.lonely.psu)}. If this is not done the factory
-default is \code{"fail"}. Using \code{"adjust"} is conservative, and it
-would often be better to combine strata in some intelligent way. The
-\code{"remove"} option is included because it might be needed for
-compatibility.  The factory default is \code{"fail"}
- }
+\code{"remove"} or \code{"certainty"} to give a variance contribution of
+0 for the stratum, and \code{"adjust"} to center the stratum at the
+grand mean rather than the stratum mean.  The choice is controlled by
+setting \code{options(survey.lonely.psu)}. If this is not done the
+factory default is \code{"fail"}. Using \code{"adjust"} is conservative,
+and it would often be better to combine strata in some intelligent
+way.
+
+The \code{"remove"}and \code{"certainty"} options give the same result,
+but \code{"certainty"} is intended for situations where there is only
+one PSU in the population stratum, which is sampled with certainty. With
+\code{"certainty"} no warning is generated for strata with only one PSU.
+The factory default is \code{"fail"}.
+}
 \value{
   A covariance matrix
 }

@@ -1,0 +1,852 @@
+##
+## BRR and Fay's replication method for variances.
+##
+
+hadamard<-local({
+  load(system.file("hadamard.rda",package="survey"))
+  ##load("../data/hadamard.rda")
+  
+  hadamard.doubler<-function(H){
+    rbind(cbind(H,H),cbind(H,1-H))
+  }
+  
+  function(n){
+    m<-n-(n %% 4)
+    precooked<- which(m < hadamard.sizes)
+    if (length(precooked))
+      return(hadamard.list[[min(precooked)]])
+    
+    bestfit<- which.min(log(hadamard.sizes/(m+4), 2) %% 1)
+    
+    ndoubles<-log(hadamard.sizes[bestfit]/(m+4), 2)
+    H<-hadamard.list[[bestfit]]
+    for(i in 1:ndoubles)
+      H<-hadamard.doubler(H)
+    
+    H
+  }
+})
+
+
+jk1weights<-function(psu, fpc=NULL, fpctype=c("population","fraction","correction")){
+    fpctype<-match.arg(fpctype)
+  unq<-unique(psu)
+  n<-length(unq)
+  if (is.null(fpc))
+      fpc<-1
+  else {
+      fpc<-unique(fpc)
+      if (length(fpc)>1) stop("More than one fpc value given")
+      if (fpc<0) stop("Negative finite population correction")
+      if (fpctype=="population" && fpc<n) stop("Population size smaller than sample size. No can do.")
+      fpc <-switch(fpctype, population=(fpc-n)/fpc, fraction=1-fpc, correction=fpc)
+      }
+  repweights<-outer(psu, unq, "!=")*n/(n-1)
+  list(type="jk1", repweights=repweights,scale=fpc*(n-1)/n)
+}
+
+
+jknweights<-function(strata,psu, fpc=NULL, fpctype=c("population","fraction","correction")){
+
+  sunq<-unique(strata)
+  unq<-unique(psu)
+  nstrat<-length(sunq)
+  n<-length(strata)
+
+  fpctype<-match.arg(fpctype)
+  
+  if (is.null(fpc)){
+      fpc<-rep(1,nstrat)
+      names(fpc)<-as.character(sunq)
+  } else if (length(fpc)==n){
+      if (length(unique(fpc))>nstrat)
+          stop("More distinct fpc values than strata")
+      fpc<-sapply(sunq, function(ss) fpc[match(ss,strata)])
+      names(fpc)<-as.character(sunq)
+  } else if (length(fpc)==1) {
+      fpc<-rep(fpc,nstrat)
+      names(fpc)<-as.character(sunq)
+  } else if (length(fpc)==nstrat){
+      nn<-names(fpc)
+      if (is.null(nn)) names(fpc)<-as.character(sunq)
+      if (!all(names(fpc) %in% as.character(sunq)))
+          stop("fpc has names that do not match the stratum identifiers")
+  }
+
+   
+  repweights<-matrix(1,ncol=length(unq), nrow=length(psu))
+  counter<-0
+  rscales<-numeric(length(psu))
+  
+  for(ss in sunq){
+      thisfpc<-fpc[match(ss,names(fpc))]
+      theseweights<-jk1weights(psu[strata %in% ss], fpc=thisfpc, fpctype=fpctype)
+      repweights[strata %in% ss, counter+1:NCOL(theseweights$repweights)]<-theseweights$repweights
+      rscales[counter+1:NCOL(theseweights$repweights)]<-theseweights$scale
+      counter<-counter+NCOL(theseweights$repweights)
+  }
+  
+  list(type="jkn", repweights=repweights, rscales=rscales, scale=1)
+}
+
+
+
+brrweights<-function(strata,psu, match=NULL, small=c("fail","split","merge"),
+                     large=c("split","merge","fail")){
+
+  small<-match.arg(small)
+  large<-match.arg(large)
+
+  strata<-as.character(strata)
+  
+  ssize<-table(strata[!duplicated(psu)])
+  if (any(ssize<2) && small=="fail")
+    stop("Some strata have fewer than 2 PSUs")
+  if (any(ssize>2) && large=="fail")
+    stop("Some strata have more than 2 PSUs")
+
+  unq<-which(!duplicated(psu))
+  sunq<-strata[unq]
+  psunq<-psu[unq]
+  weights<-matrix(ncol=2,nrow=length(unq))
+  weightstrata<-numeric(length(unq))
+  
+  if (length(match)==length(strata))
+    match<-match[unq]
+  if (is.null(match))
+    match<-unq  ## default is to match by dataset order
+  oo<-order(sunq,match)
+
+  upto <- 0
+  
+  if(any(ssize==1)){
+    smallstrata<-names(ssize)[ssize==1]
+    if(small=="split"){
+      weights[sunq %in% smallstrata,1]<- 0.5
+      weights[sunq %in% smallstrata,2]<- 0.5
+      weightstrata[sunq %in% smallstrata]<-1:length(smallstrata)
+      upto<-length(smallstrata)
+    } else {
+      ##small=="merge"
+      if (length(smallstrata) > 1){
+        weights[oo,][sunq[oo] %in% smallstrata, 1]<-rep(0:1,length.out=length(smallstrata))
+        weights[oo,][sunq[oo] %in% smallstrata, 2]<-rep(1:0,length.out=length(smallstrata))
+        if(length(smallstrata) %% 2==0)
+          weightstrata[oo][sunq[oo] %in% smallstrata]<-rep(1:(length(smallstrata) %/%2), 2)
+        else
+          weightstrata[oo][sunq[oo] %in% smallstrata]<-c(1,rep(1:(length(smallstrata) %/%2), 2))
+        upto<-length(smallstrata) %/% 2
+      } else stop("Can't merge with a single small stratum")
+    }
+  }
+
+  if (any(ssize>2)){
+    largestrata<-names(ssize)[ssize>2]
+    if (large=="split"){
+      if (any(ssize[largestrata] %%2 ==1))
+        stop("Can't split with odd numbers of PSUs in a stratum")
+      ## make substrata of size 2
+      for(ss in largestrata){
+        weights[oo,][sunq[oo] %in% ss, 1]<-rep(0:1,length.out=ssize[ss])
+        weights[oo,][sunq[oo] %in% ss, 2]<-rep(1:0,length.out=ssize[ss])
+        weightstrata[oo][sunq[oo] %in% ss]<-upto+rep(1:(ssize[ss] %/%2),each=2)
+        upto<-upto+(ssize[ss] %/% 2)
+      }
+    } else {
+      ## make two substrata.
+      halfsize<-ssize[largestrata] %/%2
+      otherhalfsize<-ssize[largestrata] - halfsize
+      reps<-as.vector(rbind(halfsize,otherhalfsize))
+      nlarge<-length(halfsize)
+      weights[oo,][sunq[oo] %in% largestrata, 1]<-rep(rep(0:1,nlarge),reps) 
+      weights[oo,][sunq[oo] %in% largestrata, 2]<-rep(rep(1:0,nlarge),reps)
+      weightstrata[oo][sunq[oo] %in% largestrata]<-upto+rep(1:length(largestrata),ssize[largestrata])
+      upto<-upto+length(largestrata)
+    }
+  }
+  if(any(ssize==2)){
+    goodstrata<-names(ssize)[ssize==2]
+    weights[oo,][sunq[oo] %in% goodstrata, 1]<-rep(0:1,length(goodstrata))
+    weights[oo,][sunq[oo] %in% goodstrata, 2]<-rep(1:0,length(goodstrata))
+    weightstrata[oo][sunq[oo] %in% goodstrata]<-upto+rep(1:length(goodstrata),each=2)
+    upto<-upto+length(goodstrata)
+  }
+  
+  H<-hadamard(upto)
+  ii<-1:upto
+  jj<-1:length(weightstrata)
+  sampler<-function(i, fay.rho=0){
+    h<-H[1+ii, i]+1
+    col<-h[match(weightstrata,ii)]
+    wa<-weights[cbind(jj,col)]
+    wb<-weights[cbind(jj,3-col)]
+    wa[match(psu,psunq)]*(2-fay.rho)+wb[match(psu,psunq)]*fay.rho
+  }
+
+
+  list(weights=weights, wstrata=weightstrata, strata=sunq, psu=psunq,
+       npairs=NCOL(H),sampler=sampler)
+
+}
+  
+
+  
+
+
+##
+## Designs with replication weights rather than survey structure.
+##
+
+as.svrepdesign<-function(design,type=c("auto","JK1","JKn","BRR","Fay"), fay.rho=0,...){
+
+  type<-match.arg(type)
+
+  if (type=="auto"){
+    if (length(design$strata)==0)
+      type<-"JK1"
+    else
+      type<-"JKn"
+  }
+  
+  if (type=="JK1" && length(design$strata))
+    stop("Can't use JK1 for a stratified design")
+  if (type!="JK1" && !length(design$strata))
+    stop("Must use JK1 for an unstratified design")
+  
+  fpctype<-"population"
+  if (is.null(design$fpc)){
+      fpc<-NULL
+  } else if (type %in% c("Fay","BRR")){
+      warning("Finite population correction dropped in conversion")
+  } else {
+      fpc<-design$fpc[,2]
+      names(fpc)<-design$fpc[,1]
+  }
+
+  
+  if (type=="JK1"){
+    ##JK1
+    r<-jk1weights(design$cluster[,1], fpc=fpc,fpctype=fpctype)
+    repweights<-r$repweights
+    scale<-r$scale
+    rscales<-rep(1, NCOL(repweights))
+    type<-"JK1"
+    pweights<-1/design$prob
+  } else if (type %in% c("BRR","Fay")){
+    ##BRR
+    r<-brrweights(design$strata, design$cluster[,1])
+    repweights<-sapply(1:r$npairs,r$sampler, fay.rho=fay.rho)
+    
+    pweights<-1/design$prob
+    if (length(pweights)==1)
+      pweights<-rep(pweights, NROW(design$variables))
+    
+    if (fay.rho==0)
+      type<-"BRR"
+    else
+      type<-"Fay"
+
+    rscales<-rep(1,r$npairs)
+    scale<-1/(r$npairs*(1-fay.rho)^2)
+    
+  } else if (type=="JKn"){
+    ##JKn
+    r<-jknweights(design$strata,design$cluster[,1], fpc=fpc,fpctype=fpctype)
+    pweights<-1/design$prob
+    repweights<-r$repweights
+    scale<-1
+    rscales<-r$rscales
+  } else stop("Can't happen")
+  
+  rval<-list(variables=design$variables, pweights=pweights, scale=scale, rscales=rscales,
+             repweights=as.matrix(repweights),type=type, rho=fay.rho,call=sys.call(), combined.weights=FALSE)
+  
+  class(rval)<-"svyrep.design"
+  rval
+}
+
+
+
+
+svrepdesign<-function(variables=NULL,repweights=NULL, weights=NULL,
+     data=NULL,type=c("BRR","Fay","JK1", "JKn","other"), combined.weights=FALSE, rho=NULL,
+     scale=NULL,rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"))
+{
+  
+  type<-match.arg(type)
+  
+  if(type=="Fay" && is.null(rho))
+    stop("With type='Fay' you must supply the correct rho")
+  
+  if (type %in% c("JK1","JKn")  && !is.null(rho))
+    warning("rho not relevant to JK1 design: ignored.")
+  
+  if (type %in% c("other")  && !is.null(rho))
+    warning("rho not relevant to JK1 design: ignored.")
+
+  
+  if(is.null(variables))
+    variables<-data
+    
+  if(inherits(variables,"formula")){
+    mf<-substitute(model.frame(variables, data=data))
+    variables<-eval.parent(mf)
+  }
+    
+  if(inherits(repweights,"formula")){
+    mf<-substitute(model.frame(repweights, data=data))
+    repweights<-eval.parent(mf)
+  }
+
+  if (is.null(repweights))
+    stop("You must provide replication weights")
+  
+  
+  if(inherits(weights,"formula")){
+    mf<-substitute(model.frame(weights, data=data))
+    weights<-eval.parent(mf)
+  }
+
+  if (is.null(weights)){
+    warning("No sampling weights provided: equal probability assumed")
+    weights<-rep(1,NROW(repweights))
+  }
+
+    
+  if (type == "BRR")
+    scale<-1/ncol(repweights)
+  if (type=="Fay")
+    scale <-1/(ncol(repweights)*(1-rho)^2)
+  if (type=="JK1" && is.null(scale)) {
+    if(!combined.weights){
+      warning("scale (n-1)/n not provided: guessing from weights")
+      scale<-1/max(repweights[,1])
+    } else stop("Must provide scale (n-1)/n for combined JK1 weights")
+  }
+  
+  if (type =="JKn" && is.null(rscales))
+    if (!combined.weights) {
+      warning("rscales (n-1)/n not provided:guessing from weights")
+      rscales<-1/apply(repweights,2,max)
+    } else stop("Must provide rscales for combined JKn weights")
+  
+  if (is.null(rscales)) rscales<-rep(1,NCOL(repweights))
+
+  if (!is.null(fpc)){
+      if (missing(fpctype)) stop("Must specify fpctype")
+      fpctype<-match.arg(fpctype)
+      if (type %in% c("BRR","Fay")) stop("fpc not available for this type")
+      if (length(fpc)!=length(rscales)) stop("fpc is wrong length")
+      if (any(fpc>1) || any(fpc<0)) stop("Illegal fpc value")
+      fpc<-switch(fpctype,correction=fpc,fraction=1-fpc)
+      rscales<-rscales*fpc
+  }
+  
+  
+  rval<-list(variables=variables, pweights=weights, repweights=as.matrix(repweights),type=type, scale=scale, rscales=rscales,  rho=rho,call=sys.call(), combined.weights=combined.weights)
+  
+  class(rval)<-"svyrep.design"
+  rval
+  
+}
+
+
+print.svyrep.design<-function(x,...){
+  cat("Survey with replicate weights:\n")
+  print(x$call)
+}
+
+summary.svyrep.design<-function(object,...){
+  class(object)<-c("summary.svyrep.design", class(object))
+  object
+}
+
+print.summary.svyrep.design<-function(x,...){
+  cat("Survey with replicate weights:\n")
+  print(x$call)
+  if (x$type=="Fay")
+    cat("Fay's variance method rho=",x$rho,"\n")
+  if (x$type=="BRR")
+    cat("Balanced Repeated Replicates\n")
+  if (x$type=="JK1")
+    cat("Unstratified cluster jacknife.\n")
+  cat("with ",NCOL(x$repweights)," replicates\n")
+  cat("Variables: \n")
+  print(names(x$variables)) 
+}
+
+
+image.svyrep.design<-function(x, ..., col=grey(seq(0,1,length=30)), type=c("rep","total")){
+  type<-match.arg(type)
+  m<-x$repweights
+  if (type=="total"){
+    m<-m*pweights
+    zlim<-range(0,m)
+  } else zlim<-c(0,2)
+    
+  image(1:NCOL(m), 1:NROW(m), t(m), zlim=zlim, col=col, xlab="Replicate", ylab="Observation")
+  invisible(NULL)
+}
+
+"[.svyrep.design"<-function(x, i, j, drop=FALSE){
+  if (!missing(i)){
+    pwt<-x$pweights
+    if (is.data.frame(pwt)) pwt<-pwt[[1]]
+    x$pweights<-pwt[i]
+    x$repweights<-x$repweights[i,]
+    if (!missing(j))
+      x$variables<-x$variables[i,j]
+    else
+      x$variables<-x$variables[i,]
+  } else {
+    x$variables<-x$variables[,j]
+  }
+  x
+}
+
+weights.svyrep.design<-function(object,type=c("replication","sampling","analysis"),...){
+  type<-match.arg(type)
+  switch(type,replication=object$repweights,sampling=object$pweights, analysis=if(object$combined.weights) object$repweights else object$repweights*object$pweights)
+}
+
+weights.survey.design<-function(object,...){
+  return(1/object$prob)
+}
+
+
+svrVar<-function(thetas, scale, rscales){
+  if (length(dim(thetas))==2){
+    meantheta<-colMeans(thetas)
+    v<-crossprod( sweep(thetas,2, meantheta,"-")*sqrt(rscales))*scale
+  }  else {
+    meantheta<-mean(thetas)
+    v<- sum( (thetas-meantheta)^2*rscales)*scale
+  }
+  return(v)
+}
+
+
+svrepmean<-function(x,design, na.rm=FALSE, rho=NULL, return.replicates=FALSE)
+{
+  if (!inherits(design,"svyrep.design")) stop("design is not a replicate survey design")
+  
+  if (inherits(x,"formula"))
+    x<-model.frame(x,design$variables,na.action=na.pass)
+  else if(typeof(x) %in% c("expression","symbol"))
+    x<-eval(x, design$variables)
+
+  wts<-design$repweights
+  scale<-design$scale
+  rscales<-design$rscales
+  if (design$type=="Fay" ){
+    if (!is.null(rho))
+      stop("The replication weights have fixed rho: you cannot specify it here.")
+  } else  if (design$type=="BRR"){
+    rho<-design$rho
+  } else if (design$type %in% c("JK1","JKn","other")){
+    if(!is.null(rho))
+      stop("You cannot specify rho for this design")
+  }
+  
+  
+  x<-as.matrix(x)
+  
+  if (na.rm){
+    nas<-rowSums(is.na(x))
+    design<-design[nas==0,]
+    x[is.na(x)]<-0
+  }
+  
+  if (!design$combined.weights)
+    wts<-wts*design$pweights
+  
+  rval<-colSums(design$pweights*x)/sum(design$pweights)
+  
+  repmeans<-apply(wts,2, function(w)  colSums(w*x)/sum(w))
+
+  repmeans<-drop(t(repmeans))
+  attr(rval,"var")<-svrVar(repmeans, scale, rscales)
+
+  if (return.replicates)
+    return(list(mean=rval, replicates=repmeans))
+  else
+    return(rval)
+}
+
+
+
+svreptotal<-function(x,design, na.rm=FALSE, rho=NULL, return.replicates=FALSE)
+{
+  if (!inherits(design,"svyrep.design")) stop("design is not a replicate survey design")
+  
+  if (inherits(x,"formula"))
+    x<-model.frame(x,design$variables,na.action=na.pass)
+  else if(typeof(x) %in% c("expression","symbol"))
+    x<-eval(x, design$variables)
+
+  wts<-as.matrix(design$repweights)
+  scale<-design$scale
+  rscales<-design$rscales
+  if (design$type=="Fay" ){
+    if (!is.null(rho))
+      stop("The replication weights have fixed rho: you cannot specify it here.")
+  } else  if (design$type=="BRR"){
+    rho<-design$rho
+  } else if (design$type %in% c("JK1","JKn","other")){
+    if(!is.null(rho))
+      stop("You cannot specify rho for this design")
+  }
+  
+  
+  x<-as.matrix(x)
+  
+  if (na.rm){
+    nas<-rowSums(is.na(x))
+    design<-design[nas==0,]
+    x[is.na(x)]<-0
+  }
+  
+  if (!design$combined.weights)
+    wts<-wts*design$pweights
+  
+  rval<-colSums(design$pweights*x)
+  
+  repmeans<-apply(wts,2, function(w)  colSums(w*x))
+
+  repmeans<-drop(t(repmeans))
+  attr(rval,"var")<-svrVar(repmeans, scale, rscales)
+
+  if (return.replicates)
+    return(list(mean=rval, replicates=repmeans))
+  else
+    return(rval)
+}
+
+svrepglm<-function(formula, design, subset=NULL, ..., rho=NULL, return.replicates=FALSE, na.action){
+
+      subset<-substitute(subset)
+      subset<-eval(subset, design$variables, parent.frame())
+      if (!is.null(subset))
+        design<-design[subset,]
+      
+      data<-design$variables
+
+
+      g<-match.call()
+      g$design<-NULL
+      g$var<-g$rho<-g$return.replicates<-NULL
+      g$weights<-quote(.survey.prob.weights)
+      g[[1]]<-quote(glm)      
+      g$model<-TRUE
+      g$x<-TRUE
+      g$y<-TRUE
+      
+      scale<-design$scale
+      rscales<-design$rscales
+      if (design$type=="Fay" ){
+        if (!is.null(rho))
+          stop("The replication weights have fixed rho: you cannot specify it here.")
+        wts<-design$repweights
+        rho<-design$rho
+      } else if (design$type %in% c("JK1","JKn","other")){
+        if(!is.null(rho))
+          stop("You cannot specify rho for this design")
+        wts<-design$repweights
+      } else if (design$type=="BRR"){
+        if (is.null(rho))
+          rho<-0 
+        wts<-ifelse(design$repweights==2, 2-rho, rho)
+        if (rho!=0) scale<-scale/((1-rho)^2)
+      }
+    
+      pwts<-design$pweights/sum(design$pweights)
+      if (is.data.frame(pwts)) pwts<-pwts[[1]]
+      
+      if (!all(all.vars(formula) %in% names(data))) 
+	stop("all variables must be in design= argument")
+      .survey.prob.weights<-pwts
+      full<-with(data,eval(g))
+
+      nas<-attr(full$model, "na.action")
+ 
+      betas<-matrix(ncol=length(coef(full)),nrow=ncol(design$repweights))
+
+      if (!design$combined.weights)
+        wts<-wts*pwts
+
+      if (length(nas))
+        wts<-wts[-nas,]
+      XX<-full$x
+      YY<-full$y
+      beta0<-coef(full)
+      if(is.null(full$offset))
+          offs<-rep(0,nrow(XX))
+      else
+          offs<-full$offset
+      incpt<-as.logical(attr(terms(full),"intercept"))
+      fam<-full$family
+      contrl<-full$control
+      for(i in 1:NCOL(wts)){
+        betas[i,]<-glm.fit(XX, YY, weights = wts[,i],
+             start =beta0,
+             offset = offs,
+             family = fam, control = contrl,
+             intercept = incpt)$coefficients
+      }
+
+      full$model<-NULL
+      full$x<-NULL
+      
+      if (length(nas))
+	design<-design[-nas,]
+
+      v<-svrVar(betas,scale, rscales)
+      
+      full$cov.unscaled<-v
+      if (return.replicates) full$replicates<-betas
+      
+      class(full)<-c("svrepglm","svyglm",class(full))
+      full$call<-match.call()
+      full$survey.design<-design
+      full
+}
+
+
+print.summary.svyglm<-function (x, digits = max(3, getOption("digits") - 3), symbolic.cor = x$symbolic.cor, 
+    signif.stars = getOption("show.signif.stars"), ...) 
+{
+  if (!exists("printCoefmat")) printCoefmat<-print.coefmat
+
+  cat("\nCall:\n")
+    cat(paste(deparse(x$call), sep = "\n", collapse = "\n"), 
+        "\n\n", sep = "")
+
+    cat("Survey design:\n")
+    print(x$survey.design$call)
+   
+        if (!is.null(df <- x$df) && (nsingular <- df[3] - df[1])) 
+            cat("\nCoefficients: (", nsingular, " not defined because of singularities)\n", 
+                sep = "")
+        else cat("\nCoefficients:\n")
+        coefs <- x$coefficients
+        if (!is.null(aliased <- is.na(x$coefficients)) && any(aliased)) {
+            cn <- names(aliased)
+            coefs <- matrix(NA, length(aliased), 4, dimnames = list(cn, 
+                colnames(coefs)))
+            coefs[!aliased, ] <- x$coefficients
+        }
+        printCoefmat(coefs, digits = digits, signif.stars = signif.stars, 
+            na.print = "NA", ...)
+    
+    cat("\n(Dispersion parameter for ", x$family$family, " family taken to be ", 
+        format(x$dispersion), ")\n\n",  "Number of Fisher Scoring iterations: ", 
+        x$iter, "\n", sep = "")
+    correl <- x$correlation
+    if (!is.null(correl)) {
+        p <- NCOL(correl)
+        if (p > 1) {
+            cat("\nCorrelation of Coefficients:\n")
+            if (is.logical(symbolic.cor) && symbolic.cor) {
+                print(symnum(correl, abbr.col = NULL))
+            }
+            else {
+                correl <- format(round(correl, 2), nsmall = 2, 
+                  digits = digits)
+                correl[!lower.tri(correl)] <- ""
+                print(correl[-1, -p, drop = FALSE], quote = FALSE)
+            }
+        }
+    }
+    cat("\n")
+    invisible(x)
+}
+
+
+    
+
+svrepratio<-function(numerator,denominator, design){
+
+  if (!inherits(design, "svyrep.design")) stop("design must be a svyrepdesign object")
+  
+    if (inherits(numerator,"formula"))
+		numerator<-model.frame(numerator,design$variables)
+    else if(typeof(numerator) %in% c("expression","symbol"))
+        numerator<-eval(numerator, design$variables)
+    if (inherits(denominator,"formula"))
+		denominator<-model.frame(denominator,design$variables)
+    else if(typeof(denominator) %in% c("expression","symbol"))
+        denominator<-eval(denominator, design$variables)
+
+    nn<-NCOL(numerator)
+    nd<-NCOL(denominator)
+
+    all<-cbind(numerator,denominator)
+    allstats<-svrepmean(all,design, return.replicates=TRUE)
+  
+  rval<-list(ratio=outer(allstats$mean[1:nn],allstats$mean[nn+1:nd],"/"))
+
+  vars<-matrix(nrow=nn,ncol=nd)
+  for(i in 1:nn){
+    for(j in 1:nd){
+      vars[i,j]<-svrVar(allstats$replicates[,i]/allstats$replicates[,nn+j], design$scale, design$rscales)
+    }
+  }
+                  
+
+  rval$var<-vars
+  rval$call<-sys.call()
+  class(rval)<-"svyratio"
+  rval
+    
+  }
+
+
+residuals.svrepglm<-function(object,type = c("deviance", "pearson", "working", 
+    "response", "partial"),...){
+	type<-match.arg(type)
+	if (type=="pearson"){
+   	   y <- object$y
+	   mu <- object$fitted.values
+    	   wts <- object$prior.weights
+	   r<-(y - mu) * sqrt(wts)/(sqrt(object$family$variance(mu))*sqrt(object$survey.design$pweights))
+	   if (is.null(object$na.action)) 
+        	r
+    	   else 
+	        naresid(object$na.action, r)
+	} else 
+		NextMethod()
+
+}
+
+logLik.svrepglm<-function(object,...){
+   stop("svrepglm not fitted by maximum likelihood.")
+}
+
+extractAIC.svrepglm<-function(fit,...){
+    stop("svrepglm not fitted by maximum likelihood")
+}
+
+
+withReplicates<-function(design, theta,rho=NULL,..., return.replicates=FALSE){
+  
+  wts<-design$repweights
+  scale<-design$scale
+  rscales<-design$rscales
+  if (design$type=="Fay" ){
+    if (!is.null(rho))
+      stop("The replication weights have fixed rho: you cannot specify it here.")
+    rho<-design$rho
+  } else if (design$type %in% c("JK1","JKn","other")){
+    if(!is.null(rho))
+      stop("You cannot specify rho for this design")
+  } else if (design$type=="BRR"){
+    if (is.null(rho))
+      rho<-0
+    wts<-ifelse(design$repweights==2, 2-rho, rho)
+    if (rho!=0)
+      scale<-scale/((1-rho)^2)
+  }
+
+  pwts<-design$pweights/sum(design$pweights)
+  if (!design$combined.weights)
+    wts<-wts*pwts
+
+  data<-design$variables
+
+  if (is.function(theta)){
+    full<-theta(pwts,data,...)
+    thetas<-drop(t(apply(wts,2, function(ww) theta(ww, data, ...))))
+  } else{
+    .weights<-pwts
+    full<-with(data, eval(theta))
+    thetas<-drop(t(apply(wts,2, function(.weights) with(data, eval(theta)))))
+  }
+
+  v<-svrVar(thetas, scale, rscales)
+
+  attr(full,"var")<-v
+  if (return.replicates)
+    list(theta=full, replicates=thetas)
+  else
+    return(full)
+}
+
+summary.svrepglm<-function (object, correlation = FALSE, ...) 
+{
+    Qr <- object$qr
+    est.disp <- TRUE
+    df.r <- object$df.residual
+    presid<-resid(object,"pearson")
+    dispersion<- sum(  object$survey.design$pweights*presid^2,na.rm=TRUE)/sum(object$survey.design$pweights)
+    coef.p <- coef(object)
+    covmat<-vcov(object)
+    dimnames(covmat) <- list(names(coef.p), names(coef.p))
+    var.cf <- diag(covmat)
+    s.err <- sqrt(var.cf)
+    tvalue <- coef.p/s.err
+    dn <- c("Estimate", "Std. Error")
+    if (!est.disp) {
+        pvalue <- 2 * pnorm(-abs(tvalue))
+        coef.table <- cbind(coef.p, s.err, tvalue, pvalue)
+        dimnames(coef.table) <- list(names(coef.p), c(dn, "z value", 
+            "Pr(>|z|)"))
+    }
+    else if (df.r > 0) {
+        pvalue <- 2 * pt(-abs(tvalue), df.r)
+        coef.table <- cbind(coef.p, s.err, tvalue, pvalue)
+        dimnames(coef.table) <- list(names(coef.p), c(dn, "t value", 
+            "Pr(>|t|)"))
+    }
+    else {
+        coef.table <- cbind(coef.p, Inf)
+        dimnames(coef.table) <- list(names(coef.p), dn)
+    }
+    ans <- c(object[c("call", "terms", "family", "deviance", 
+        "aic", "contrasts", "df.residual", "null.deviance", "df.null", 
+        "iter")], list(deviance.resid = residuals(object, type = "deviance"), 
+        aic = object$aic, coefficients = coef.table, dispersion = dispersion, 
+        df = c(object$rank, df.r,NCOL(Qr$qr)), cov.unscaled = covmat, 
+        cov.scaled = covmat))
+    if (correlation) {
+        dd <- sqrt(diag(covmat))
+        ans$correlation <- covmat/outer(dd, dd)
+    }
+    
+    ans$survey.design<-list(call=object$survey.design$call,
+                            type=object$survey.design$type)
+    class(ans) <- c("summary.svyglm","summary.glm")
+    return(ans)
+}
+
+
+svreptable<-function(formula, design, Ntotal=sum(weights(design, "sampling")), round=FALSE){
+   weights<-design$pweights
+   if (is.data.frame(weights)) weights<-weights[[1]]
+   ## unstratified or unadjusted.
+   if (is.null(Ntotal) || length(Ntotal)==1){
+       ff<-eval(substitute(lhs~rhs,list(lhs=quote(weights), rhs=formula[[2]])))
+       tbl<-xtabs(ff, data=design$variables)
+       if (!is.null(Ntotal)) {
+           tbl<-tbl*sum(Ntotal)/sum(tbl)
+       }
+       if (round)
+           tbl<-round(tbl)
+       return(tbl)
+   }
+   ## adjusted and stratified
+   ff<-eval(substitute(lhs~strata+rhs,list(lhs=quote(weights),
+                                           rhs=formula[[2]],
+                                           strata=quote(design$strata))))
+   tbl<-xtabs(ff, data=design$variables)
+   ss<-match(sort(unique(design$strata)), Ntotal[,1])
+   dm<-dim(tbl)
+   layer<-prod(dm[-1])
+   tbl<-sweep(tbl,1,Ntotal[ss, 2]/apply(tbl,1,sum),"*")
+   tbl<-apply(tbl, 2:length(dm), sum)
+   if (round)
+       tbl<-round(tbl)
+   class(tbl)<-c("svytable", "xtabs","table")
+   attr(tbl, "call")<-match.call()
+
+   tbl
+}

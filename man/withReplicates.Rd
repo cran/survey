@@ -1,0 +1,56 @@
+\name{withReplicates}
+\alias{withReplicates}
+%- Also NEED an `\alias' for EACH other topic documented here.
+\title{Compute variances by replicate weighting}
+\description{
+Given a function or expression computing a statistic based on sampling
+weights, \code{withReplicates} evaluates the statistic and produces a
+replicate-based estimate of variance.
+}
+\usage{
+withReplicates(design, theta, rho = NULL, ..., return.replicates=FALSE)
+}
+%- maybe also `usage' for other objects documented here.
+\arguments{
+  \item{design}{A survey design with replicate weights (eg from \code{\link{svrepdesign}})}
+  \item{theta}{A function or expression: see Details below}
+  \item{rho}{If \code{design} uses BRR weights, \code{rho} optionally
+    specifies the parameter for Fay's variance estimator.}
+  \item{\dots}{Other arguments to \code{theta}}
+  \item{return.replicates}{Return the replicate estimates as well as
+    the variance?}
+}
+\details{
+  If \code{theta} is a function its first argument will be a vector of
+  weights and the second argument will be a data frame containing the
+  variables from the design object. 
+  
+  If it is an expression, the sampling weights will be available as the
+  variable \code{.weights}.  Variables in the design object will also
+  be in scope.  It is possible to use global variables in the
+  expression, but unwise, as they may be masked by local variables
+  inside \code{withReplicates}.
+}
+\value{
+  If \code{return.replicates=FALSE},  the weighted statistic, with the
+  variance matrix as the \code{"var"} attribute. If
+  \code{return.replicates=TRUE}, a list with elements \code{theta} for
+  the usual return value and \code{replicates} for the replicates.
+}
+\seealso{ \code{\link{svrepdesign}}, \code{\link{as.svrepdesign}}, \code{\link{svrVar}}}
+
+\examples{
+data(scd)
+repweights<-2*cbind(c(1,0,1,0,1,0), c(1,0,0,1,0,1), c(0,1,1,0,0,1),
+c(0,1,0,1,1,0))
+scdrep<-svrepdesign(data=scd, type="BRR", repweights=repweights)
+
+a<-svrepratio(~alive, ~arrests, design=scdrep)
+print(a$ratio)
+print(a$var)
+withReplicates(scdrep, quote(sum(.weights*alive)/sum(.weights*arrests)))
+withReplicates(scdrep, function(w,data) sum(w*data$alive)/sum(w*data$arrests))
+}
+\keyword{survey}% at least one, from doc/KEYWORDS
+
+

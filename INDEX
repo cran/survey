@@ -1,16 +1,34 @@
 svydesign               Survey sample analysis.
 subset.survey.design    Subset of survey
 update.survey.design    Add variables to a survey design
+svrepdesign		Replication-weight designs
+as.svrepdesign		Convert svydesign to svrepdesign
 
 svycoxph                Survey-weighted generalised linear models.
 svyglm                  Survey-weighted generalised linear models.
 svyquantile             Summary statistics for sample surveys
-regTermTest		Test terms in a regression model
+svytotal
+svymean
+svyvar
+svytable	 
 svymle                  Maximum likelihood estimation in complex
                         surveys
 
+svrepmean		Summary statistics with replication weights
+svyreptable
+svreptotal
+svrepglm		glms with replication weights
+withReplicates		Replicate variances for arbitrary statistics
+
+Utility functions:
 svy.varcoef             Sandwich variance estimator for glms
 svyCprod                Computations for survey variances
+jk1weights		create replication weights
+jknweights		create replication weights
+brrweights		create replication weights
+hadamard		Hadamard matrices
+regTermTest		Test terms in a regression model
 
+Data:
 fpc                     Small artificial example
-
+scd			Cardiac arrests example
