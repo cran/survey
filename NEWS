@@ -1,3 +1,16 @@
+2.6-2 Better handling of NAs in svyby
+ 
+      Subsetting didn't work right for single-observation subsets.
+
+      svyglm and svycoxph had scoping problems when run inside a function
+ 
+      svyglm and svycoxph now accept weights (to be multiplied by 
+      the sampling weights)
+
+      With R 2.0.0 less copying will occur.
+
+2.6-1 Totals for factors give cell totals.
+
 2.6   Design effects were broken for multiple means computed at once.
       
       Add coefficient of variation for mean, total, ratio,...
@@ -6,7 +19,7 @@
 
       Fix reference to Binder (1991) (Tobias Verbeke)
 
-      Means and totals for factors now give cell means/totals.
+      Means for factors now give cell means.
 
       coef and vcov methods for svystat and svrepstat.
 

@@ -14,9 +14,9 @@ svyby<-function(formula, by, design, FUN,...,  keep.var=FALSE,keep.names=TRUE){
   unwrap<-function(x) c(statistic=unclass(x),sd=sqrt(diag(as.matrix(attr(x,"var")))))
   
   if (keep.var)
-    rval<-t(sapply(uniques, function(i) unwrap(FUN(formula,design[byfactor==byfactor[i],],...))))
+    rval<-t(sapply(uniques, function(i) unwrap(FUN(formula,design[byfactor %in% byfactor[i],],...))))
   else {
-    rval<-sapply(uniques, function(i) FUN(formula,design[byfactor==byfactor[i],],...))
+    rval<-sapply(uniques, function(i) FUN(formula,design[byfactor %in% byfactor[i],],...))
     if (is.matrix(rval)) rval<-t(rval)
   }
   if (NCOL(rval)>1)
@@ -25,7 +25,7 @@ svyby<-function(formula, by, design, FUN,...,  keep.var=FALSE,keep.names=TRUE){
     rval <-cbind(byfactors[uniques,,drop=FALSE], statistic=rval)
 
   if (keep.names)
-    rownames(rval)<-as.character(byfactor[uniques])
+    rownames(rval)<-paste(byfactor[uniques])
 
   rval<-rval[do.call("order",rval),]
 

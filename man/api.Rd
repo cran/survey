@@ -13,13 +13,10 @@ information for all schools with at least 100 students and for various
 probability samples of the data.
 }
 \usage{
-data(apipop)
-data(apistrat)
-data(apiclus1)
-data(apiclus2)
+data(api)
 }
 \format{
-  The full population data in \code{pop} are a data frame with 6194 observations on the following 37 variables.
+  The full population data in \code{apipop} are a data frame with 6194 observations on the following 37 variables.
   \describe{
     \item{cds}{Unique identifier}
     \item{stype}{Elementary/Middle/High School}
@@ -65,9 +62,9 @@ data(apiclus2)
   corrections to variance.
 }
 \details{
-  \code{pop} is the entire population,
- \code{clus1} is a cluster sample of school districts, \code{strat} is
-  a sample stratified by \code{stype}, and \code{clus2} is a two-stage
+  \code{apipop} is the entire population,
+ \code{apiclus1} is a cluster sample of school districts, \code{apistrat} is
+  a sample stratified by \code{stype}, and \code{apiclus2} is a two-stage
   cluster sample of schools within districts. 
 }
 \source{

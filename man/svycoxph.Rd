@@ -1,6 +1,7 @@
 \name{svycoxph}
 \alias{svycoxph}
 \alias{print.svycoxph}
+\alias{model.frame.svycoxph}
 \alias{summary.svycoxph}
 \alias{anova.svycoxph}
 \alias{extractAIC.svycoxph}

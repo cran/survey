@@ -219,7 +219,7 @@ print.survey.design<-function(x,varnames=FALSE,design.summaries=FALSE,...){
     x$allprob<-x$allprob[i,,drop=FALSE]
     x$strata<-x$strata[i]
   } else {
-    x$variables<-x$variables[,...]
+    x$variables<-x$variables[,...,drop=FALSE]
   }
   
   x
@@ -694,18 +694,26 @@ svycoxph<-function(formula,design,subset=NULL,...){
     data<-design$variables 
     
     g<-match.call()
+    g$formula<-eval.parent(g$formula)
     g$design<-NULL
     g$var<-NULL
-    g$weights<-quote(.survey.prob.weights)
-    g[[1]]<-quote(coxph)      
+    if (is.null(g$weights))
+      g$weights<-quote(.survey.prob.weights)
+    else
+      g$weights<-bquote(.survey.prob.weights*.(g$weights))
+    g[[1]]<-quote(coxph)
+    g$data<-quote(data)
     
     ##need to rescale weights for stability 
     data$.survey.prob.weights<-(1/design$prob)/sum(1/design$prob)
     if (!all(all.vars(formula) %in% names(data))) 
         stop("all variables must be in design= argument")
-    g<-with(data,eval(g))
+    g<-with(list(data=data),eval(g))
+    g$call<-match.call()
+    class(g)<-c("svycoxph",class(g))
+    g$survey.design<-design
     
-    nas<-attr(model.frame(g), "na.action")
+    nas<-g$na.action
     if (length(nas))
         design<-design[-nas,]
     
@@ -719,10 +727,29 @@ svycoxph<-function(formula,design,subset=NULL,...){
     g$rscore<-NULL
     g$score<-NA
     
-    class(g)<-c("svycoxph",class(g))
-    g$call<-match.call()
-    g$survey.design<-design
     g
+}
+
+
+model.frame.svycoxph<-function(formula,...){
+  f<-formula$call
+  env <- environment(formula(formula))
+  if (is.null(env)) 
+    env <- parent.frame()
+
+  f[[1]]<-as.name("model.frame")
+  f$data<-quote(data)
+  f$design<-NULL
+  f$formula<-formula(formula)
+  if (is.null(f$weights))
+    f$weights<-quote(.survey.prob.weights)
+  else 
+    f$weights<-bquote(.survey.prob.weights*.(f$weights))
+  design<-formula$survey.design
+  data<-design$variables
+  data$.survey.prob.weights<-(1/design$prob)/sum(1/design$prob)
+
+  with(list(data=data), eval(f))
 }
 
 print.svycoxph<-function(x,...){
@@ -756,18 +783,23 @@ svyglm<-function(formula,design,subset=NULL,...){
       data<-design$variables
 
       g<-match.call()
+      g$formula<-eval.parent(g$formula)
       g$design<-NULL
       g$var<-NULL
-      g$weights<-quote(.survey.prob.weights)
+      if (is.null(g$weights))
+        g$weights<-quote(.survey.prob.weights)
+      else 
+        g$weights<-bquote(.survey.prob.weights*.(g$weights))
+      g$data<-quote(data)
       g[[1]]<-quote(glm)      
 
       ##need to rescale weights for stability in binomial
       data$.survey.prob.weights<-(1/design$prob)/sum(1/design$prob)
       if (!all(all.vars(formula) %in% names(data))) 
 	stop("all variables must be in design= argument")
-      g<-with(data, eval(g))
+      g<-with(list(data=data), eval(g))
 
-      nas<-attr(model.frame(g), "na.action")
+      nas<-g$na.action
       if (length(nas))
 	design<-design[-nas,]
 

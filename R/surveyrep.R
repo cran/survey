@@ -259,10 +259,11 @@ as.svrepdesign<-function(design,type=c("auto","JK1","JKn","BRR","Fay"), fay.rho=
     scale<-1
     rscales<-r$rscales
   } else stop("Can't happen")
-  
-  rval<-list(variables=design$variables, pweights=pweights, scale=scale, rscales=rscales,
-             repweights=as.matrix(repweights),type=type, rho=fay.rho,call=sys.call(), combined.weights=FALSE)
-  
+
+  rval<-list(repweights=as.matrix(repweights), pweights=pweights,
+             type=type, rho=fay.rho,scale=scale, rscales=rscales,
+             call=sys.call(), combined.weights=FALSE)
+  rval$variables <- design$variables  
   class(rval)<-"svyrep.design"
   rval
 }
@@ -347,8 +348,11 @@ svrepdesign<-function(variables=NULL,repweights=NULL, weights=NULL,
   }
   
   
-  rval<-list(variables=variables, pweights=weights, repweights=as.matrix(repweights),type=type, scale=scale, rscales=rscales,  rho=rho,call=sys.call(), combined.weights=combined.weights)
-  
+  rval<-list(type=type, scale=scale, rscales=rscales,  rho=rho,call=sys.call(),
+             combined.weights=combined.weights)
+  rval$variables<-variables
+  rval$pweights<-weights
+  rval$repweights<-repweights
   class(rval)<-"svyrep.design"
   rval
   
@@ -399,13 +403,13 @@ image.svyrep.design<-function(x, ..., col=grey(seq(.5,1,length=30)), type.=c("re
     pwt<-x$pweights
     if (is.data.frame(pwt)) pwt<-pwt[[1]]
     x$pweights<-pwt[i]
-    x$repweights<-x$repweights[i,]
+    x$repweights<-x$repweights[i,,drop=FALSE]
     if (!missing(j))
-      x$variables<-x$variables[i,j]
+      x$variables<-x$variables[i,j, drop=FALSE]
     else
-      x$variables<-x$variables[i,]
+      x$variables<-x$variables[i,,drop=FALSE]
   } else {
-    x$variables<-x$variables[,j]
+    x$variables<-x$variables[,j,drop=FALSE]
   }
   x
 }

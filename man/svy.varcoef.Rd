@@ -17,7 +17,6 @@ svy.varcoef(glm.object, design)
 }
 \author{ Thomas Lumley}
 
- ~Make other sections like WARNING with \section{WARNING }{....} ~
 
 \seealso{\code{\link{svyglm}},\code{\link{svydesign}}, \code{\link{svyCprod}} }
 
