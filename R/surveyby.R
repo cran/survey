@@ -11,7 +11,7 @@ svyby<-function(formula, by, design, FUN,...,  keep.var=FALSE,keep.names=TRUE){
   
   byfactor<-do.call("interaction", byfactors)
   uniques <- which(!duplicated(byfactors))
-  unwrap<-function(x) c(statistic=unclass(x),sd=sqrt(diag(attr(x,"var"))))
+  unwrap<-function(x) c(statistic=unclass(x),sd=sqrt(diag(as.matrix(attr(x,"var")))))
   
   if (keep.var)
     rval<-t(sapply(uniques, function(i) unwrap(FUN(formula,design[byfactor==byfactor[i],],...))))

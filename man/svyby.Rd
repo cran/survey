@@ -13,7 +13,7 @@ svyby(formula, by, design, FUN, ..., keep.var = FALSE, keep.names = TRUE)
   \item{formula}{A formula specifying the variables to pass to \code{FUN} }
   \item{by}{A formula specifying factors that define subsets, or a list
     of factors.}
-  \item{design}{A \code{svydesign} object}
+  \item{design}{A \code{svydesign} or \code{svrepdesign} object}
   \item{FUN}{A function taking a formula and survey design object as its
   first two arguments.}
   \item{\dots}{Other arguments to \code{FUN}}
@@ -34,6 +34,14 @@ svyby(~api99, ~stype, dclus1, svymean)
 svyby(~api99, ~stype, dclus1, svyquantile, quantiles=0.5)
 svyby(~api99, list(school.type=apiclus1$stype), dclus1, svymean)
 svyby(~api99+api00, ~stype+sch.wide, dclus1, svymean, keep.var=TRUE)
+
+rclus1<-as.svrepdesign(dclus1)
+
+svyby(~api99, ~stype, rclus1, svrepmean)
+svyby(~api99, ~stype, rclus1, svrepquantile, quantiles=0.5)
+svyby(~api99, list(school.type=apiclus1$stype), rclus1, svrepmean)
+svyby(~api99+api00, ~stype+sch.wide, rclus1, svrepmean, keep.var=TRUE)
+
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

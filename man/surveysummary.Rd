@@ -6,17 +6,19 @@
 \alias{print.svrepstat}
 \alias{svreptotal}
 \alias{svyvar}
+\alias{svrepvar}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Summary statistics for sample surveys}
 \description{
 Compute means, variances, ratios and totals for data from complex surveys.
 }
 \usage{
-svymean(x, design, na.rm=FALSE) 
-svrepmean(x, design, na.rm=FALSE, rho=NULL, return.replicates=FALSE) 
+svymean(x, design, na.rm=FALSE,deff=FALSE) 
+svrepmean(x, design, na.rm=FALSE, rho=NULL, return.replicates=FALSE, deff=FALSE) 
 svyvar(x, design, na.rm=FALSE) 
-svytotal(x, design, na.rm=FALSE) 
-svreptotal(x, design, na.rm=FALSE, rho=NULL, return.replicates=FALSE) 
+svrepvar(x, design, na.rm=FALSE, rho=NULL, return.replicates=FALSE) 
+svytotal(x, design, na.rm=FALSE,deff=FALSE) 
+svreptotal(x, design, na.rm=FALSE, rho=NULL, return.replicates=FALSE, deff=FALSE) 
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -25,6 +27,7 @@ svreptotal(x, design, na.rm=FALSE, rho=NULL, return.replicates=FALSE)
   \item{na.rm}{Should missing values be removed?}
   \item{rho}{parameter for Fay's variance estimator in a BRR design}
   \item{return.replicates}{Return the replicate means?}
+  \item{deff}{Return the design effect}
 }
 \details{
   
@@ -37,6 +40,11 @@ The \code{svytotal} and \code{svreptotal} functions estimate a
 population total.  Use \code{predict} on \code{\link{svyratio}},
 \code{\link{svrepratio}}, \code{\link{svyglm}}, \code{\link{svrepglm}}
 to get ratio or regression estimates of totals.
+
+The design effect compares the variance of a mean or total to the
+variance of a simple random sample of the same size.  Although strictly
+speaking this should be a simple random sample without replacement, we
+compute as if it were a simple random sample with replacement.
 
 }
 \value{
@@ -65,10 +73,10 @@ to get ratio or regression estimates of totals.
   ## one-stage cluster sample
   dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
   summary(dclus1)
-  svymean(~api00, dclus1)
+  svymean(~api00, dclus1, deff=TRUE)
   svyquantile(~api00, dclus1, c(.25,.5,.75))
   svyvar(~api00, dclus1)
-  svytotal(~enroll, dclus1)
+  svytotal(~enroll, dclus1, deff=TRUE)
   svyratio(~api.stu, ~enroll, dclus1)
 
   #stratified sample
@@ -84,6 +92,7 @@ to get ratio or regression estimates of totals.
   jkstrat<-as.svrepdesign(dstrat)
   summary(jkstrat)
   svrepmean(~api00, jkstrat)
+  svrepvar(~api00,jkstrat)
   svrepquantile(~api00, jkstrat, c(.25,.5,.75))
   svreptotal(~enroll, jkstrat)
   svrepratio(~api.stu, ~enroll, jkstrat)

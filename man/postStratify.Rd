@@ -27,15 +27,34 @@ postStratify(design, strata, population, partial = FALSE)
   lists frequencies and the other columns list the unique combinations
   of strata variables (the format produced by \code{as.data.frame}
   acting on a \code{table} object).
+  
+  A table must have named dimnames to indicate the variable
+  names. 
 }
 \value{
  A new survey design object.
 }
 \references{ }
 
-\seealso{\code{\link{as.svrepdesign}}, \code{svrepdesign} }
+\seealso{\code{\link{as.svrepdesign}}, \code{\link{svrepdesign}}, \code{\link{rake}} }
 \examples{
+data(api)
+dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
+rclus1<-as.svrepdesign(dclus1)
+
+svrepmean(~api00, rclus1)
+svreptotal(~enroll, rclus1)
+
+# post-stratify on school type
+pop.types <- data.frame(stype=c("E","H","M"), Freq=c(4421,755,1018))
+#or: pop.types <- xtabs(~stype, data=apipop)
+#or: pop.types <- table(stype=apipop$stype)
+
+rclus1p<-postStratify(rclus1, ~stype, pop.types)
+summary(rclus1p)
+svrepmean(~api00, rclus1p)
+svreptotal(~enroll, rclus1p)
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
-
+\keyword{manip}

@@ -5,23 +5,31 @@ svrepdesign		Replication-weight designs
 as.svrepdesign		Convert svydesign to svrepdesign
 postStratify		Post-stratify a svrepdesign
 rake			Rake a svrepdesign
-
+subset.svyrep.design    Subset of svrepdesign
+update.svyrep.design	Add variables to svrepdesign
+                 -----
+svyplot			Survey-weighted graphics
+svyby			Tables of statistics 
+                 -----
 svycoxph                Survey-weighted Cox models
 svyglm                  Survey-weighted generalised linear models.
 svyquantile             Summary statistics for sample surveys
 svytotal
 svymean
 svyvar
-svytable	 
-svymle                  Maximum likelihood estimation in complex
+svytable		Contingency tables
+svychisq		Tests for two-way tables
+svymle                  Maximum pseudolikelihood estimation in complex
                         surveys
-
+                 -----
 svrepmean		Summary statistics with replication weights
 svyreptable
 svreptotal
 svrepquantile
 svrepglm		glms with replication weights
 withReplicates		Replicate variances for arbitrary statistics
+
+		 -----
 
 Utility functions:
 svy.varcoef             Sandwich variance estimator for glms
@@ -33,6 +41,7 @@ brrweights		create replication weights
 hadamard		Hadamard matrices
 regTermTest		Test terms in a regression model
 
+		 -----
 Data:
 fpc                     Small artificial example
 scd			Cardiac arrests example

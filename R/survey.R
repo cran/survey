@@ -387,43 +387,54 @@ svyCprod<-function(x, strata, psu, fpc, nPSU,
 }
 
 
-svymean<-function(x,design, na.rm=FALSE){
+svymean<-function(x,design, na.rm=FALSE,deff=FALSE){
 
   if (!inherits(design,"survey.design"))
     stop("design is not a survey design")
   
-	if (inherits(x,"formula"))
-            x<-model.frame(x,design$variables,na.action=na.pass)
-	else if(typeof(x) %in% c("expression","symbol"))
-            x<-eval(x, design$variables)
-        
-	x<-as.matrix(x)
-
-	if (na.rm){
-            nas<-rowSums(is.na(x))
+  if (inherits(x,"formula"))
+    x<-model.frame(x,design$variables,na.action=na.pass)
+  else if(typeof(x) %in% c("expression","symbol"))
+    x<-eval(x, design$variables)
+  
+  x<-as.matrix(x)
+  
+  if (na.rm){
+    nas<-rowSums(is.na(x))
             design<-design[nas==0,]
-            x<-x[nas==0,,drop=FALSE]
-	}
-
-	pweights<-1/design$prob
-	psum<-sum(pweights)
-	average<-colSums(x*pweights/psum)
-	x<-sweep(x,2,average)
-	v<-svyCprod(x*pweights/psum,design$strata,design$cluster[[1]], design$fpc, design$nPSU)
-	attr(average,"var")<-v
-        attr(average,"statistic")<-"mean"
-        class(average)<-"svystat"
-	return(average)
-    }
+    x<-x[nas==0,,drop=FALSE]
+  }
+  
+  pweights<-1/design$prob
+  psum<-sum(pweights)
+  average<-colSums(x*pweights/psum)
+  x<-sweep(x,2,average)
+  v<-svyCprod(x*pweights/psum,design$strata,design$cluster[[1]], design$fpc, design$nPSU)
+  attr(average,"var")<-v
+  attr(average,"statistic")<-"mean"
+  class(average)<-"svystat"
+  if (deff){
+    vsrs<-svyvar(x,design,na.rm=na.rm)/NROW(design$cluster)
+    attr(average, "deff")<-v/vsrs
+  }
+  
+  return(average)
+}
 
 
 print.svystat<-function(x,...){
   m<-cbind(x,sqrt(diag(attr(x,"var"))))
-  colnames(m)<-c(attr(x,"statistic"),"SE")
+  deff<-attr(x,"deff")
+  if (is.null(deff)){
+    colnames(m)<-c(attr(x,"statistic"),"SE")
+  } else {
+    m<-cbind(m,diag(as.matrix(deff)))
+    colnames(m)<-c(attr(x,"statistic"),"SE","DEff")
+  }
   printCoefmat(m)
 }
 
-svytotal<-function(x,design, na.rm=FALSE){
+svytotal<-function(x,design, na.rm=FALSE, deff=FALSE){
 
   if (!inherits(design,"survey.design"))
     stop("design is not a survey design")
@@ -444,9 +455,12 @@ svytotal<-function(x,design, na.rm=FALSE){
   N<-sum(1/design$prob)
   m <- svymean(x, design, na.rm=na.rm)
   total<-m*N
-  attr(total, "var")<-svyCprod(x/design$prob,design$strata, design$cluster[[1]], design$fpc, design$nPSU)
+  attr(total, "var")<-v<-svyCprod(x/design$prob,design$strata, design$cluster[[1]], design$fpc, design$nPSU)
   attr(total,"statistic")<-"total"
-  
+  if (deff){
+    vsrs<-svyvar(x,design)*sum(weights(design)^2)
+    attr(total,"deff")<-v/vsrs
+  }
   return(total)
 }
 
@@ -460,7 +474,9 @@ svyvar<-function(x, design, na.rm=FALSE){
 	xbar<-svymean(x,design, na.rm=na.rm)
 	if(NCOL(x)==1) {
             x<-x-xbar
-            return(svymean(x*x,design, na.rm=na.rm))
+            v<-svymean(x*x,design, na.rm=na.rm)
+            attr(v,"statistic")<-"variance"
+            return(v)
 	}
 	x<-t(t(x)-xbar)
 	p<-NCOL(x)
@@ -468,36 +484,9 @@ svyvar<-function(x, design, na.rm=FALSE){
 	a<-matrix(rep(x,p),ncol=p*p)
 	b<-x[,rep(1:p,each=p)]
 	v<-svymean(a*b,design, na.rm=na.rm)
-        attr(v,"statistic")<-"var"
-	matrix(v,ncol=p)
+	v<-matrix(v,ncol=p)
+        attr(v,"statistic")<-"variance"
     }
-
-
-# svyquantile<-function(x,design,quantiles,method="linear",f=1){
-    
-#     if (inherits(x,"formula"))
-# 		x<-model.frame(x,design$variables)
-#     else if(typeof(x) %in% c("expression","symbol"))
-#         x<-eval(x, design$variables)
-    
-#      if(length(dim(x))){
-#          if(ncol(x)>1) stop("Invalid variable type")
-#          x<-x[,1]
-#      }
-    
-#     w<-1/design$prob
-#     oo<-order(x)
-#     cum.w<-cumsum(w[oo])/sum(w)
-    
-    
-#     cdf<-approxfun(cum.w,x[oo],method=method,f=f,
-#                    yleft=min(x),yright=max(x))
-#     return(cdf(quantiles))
-    
-# }
-
-
-
 
 svyquantile<-function(x,design,quantiles,alpha=0.05,ci=FALSE, method="linear",f=1){
     if (inherits(x,"formula"))
@@ -643,7 +632,7 @@ svytable<-function(formula, design, Ntotal=design$fpc, round=FALSE){
    tbl<-apply(tbl, 2:length(dm), sum)
    if (round)
        tbl<-round(tbl)
-   class(tbl)<-c("xtabs","table")
+   class(tbl)<-c("svytable","xtabs", "table")
    attr(tbl, "call")<-match.call()
    tbl
 }

@@ -1,3 +1,16 @@
+2.5   Wald tests for association in contingency tables.
+
+      svyplot() for weighted graphics (some of these require "hexbin")
+
+      Examples for rake(), postStratify()
+
+      svyby() works for svrepdesign analyses as well
+      added subset.svyrep.design()
+
+      svrepvar() added
+
+      Design effects for means and totals. (Gillian Raab)
+
 2.4   Make regTermTest work with svycoxph()
       Clearer output for print.svycoxph() (Daniella Gollinelli)
 

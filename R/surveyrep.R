@@ -409,6 +409,15 @@ image.svyrep.design<-function(x, ..., col=grey(seq(.5,1,length=30)), type.=c("re
 }
 
 
+subset.svyrep.design<-function(x,subset,...){
+        e <- substitute(subset)
+        r <- eval(e, x$variables, parent.frame())
+        r <- r & !is.na(r) 
+        x<-x[r,]
+	x$call<-sys.call()
+	x
+}
+
 update.svyrep.design<-function(object,...){
 
   dots<-substitute(list(...))[-1]
@@ -507,7 +516,60 @@ svrVar<-function(thetas, scale, rscales,na.action=getOption("na.action")){
 }
 
 
-svrepmean<-function(x,design, na.rm=FALSE, rho=NULL, return.replicates=FALSE)
+svrepvar<-function(x, design, na.rm=FALSE, rho=NULL, return.replicates=FALSE){
+
+  if (!inherits(design,"svyrep.design")) stop("design is not a replicate survey design")
+  
+  if (inherits(x,"formula"))
+    x<-model.frame(x,design$variables,na.action=na.pass)
+  else if(typeof(x) %in% c("expression","symbol"))
+    x<-eval(x, design$variables)
+
+  wts<-design$repweights
+  scale<-design$scale
+  rscales<-design$rscales
+  if (design$type=="Fay" ){
+    if (!is.null(rho))
+      stop("The replication weights have fixed rho: you cannot specify it here.")
+  } else  if (design$type=="BRR"){
+    rho<-design$rho
+  } else if (design$type %in% c("JK1","JKn","other")){
+    if(!is.null(rho))
+      stop("You cannot specify rho for this design")
+  }
+  
+  
+  x<-as.matrix(x)
+  
+  if (na.rm){
+    nas<-rowSums(is.na(x))
+    design<-design[nas==0,]
+    x[is.na(x)]<-0
+  }
+  
+  if (!design$combined.weights)
+    wts<-wts*design$pweights
+
+  v<-function(w){
+    xbar<-colSums(w*x)/sum(w)
+    xdev<-sweep(x,1,xbar,"-")
+    colSums(xdev*xdev*w)/sum(w)
+  }
+  rval<-v(design$pweights)
+  
+  repvars<-apply(wts,2, v)
+
+  repvars<-drop(t(repvars))
+  attr(rval,"var")<-svrVar(repvars, scale, rscales)
+  attr(rval, "statistic")<-"variance"
+  if (return.replicates)
+    rval<-list(variance=rval, replicates=repvars)
+  class(rval)<-"svrepstat"
+  rval
+
+}
+
+svrepmean<-function(x,design, na.rm=FALSE, rho=NULL, return.replicates=FALSE,deff=FALSE)
 {
   if (!inherits(design,"svyrep.design")) stop("design is not a replicate survey design")
   
@@ -546,17 +608,21 @@ svrepmean<-function(x,design, na.rm=FALSE, rho=NULL, return.replicates=FALSE)
   repmeans<-apply(wts,2, function(w)  colSums(w*x)/sum(w))
 
   repmeans<-drop(t(repmeans))
-  attr(rval,"var")<-svrVar(repmeans, scale, rscales)
+  attr(rval,"var") <- v <- svrVar(repmeans, scale, rscales)
   attr(rval, "statistic")<-"mean"
   if (return.replicates)
     rval<-list(mean=rval, replicates=repmeans)
+  if (deff){
+    vsrs<-svrepvar(x,design,na.rm=na.rm, return.replicates=FALSE)/length(design$pweights)
+    attr(rval,"deff") <- v/vsrs
+  }
   class(rval)<-"svrepstat"
   rval
 }
 
 
 
-svreptotal<-function(x,design, na.rm=FALSE, rho=NULL, return.replicates=FALSE)
+svreptotal<-function(x,design, na.rm=FALSE, rho=NULL, return.replicates=FALSE, deff=FALSE)
 {
   if (!inherits(design,"svyrep.design")) stop("design is not a replicate survey design")
   
@@ -595,11 +661,14 @@ svreptotal<-function(x,design, na.rm=FALSE, rho=NULL, return.replicates=FALSE)
   repmeans<-apply(wts,2, function(w)  colSums(w*x))
 
   repmeans<-drop(t(repmeans))
-  attr(rval,"var")<-svrVar(repmeans, scale, rscales)
+  attr(rval,"var")<-v<-svrVar(repmeans, scale, rscales)
   attr(rval,"statistic")<-"total"
   if (return.replicates)
     rval<-list(mean=rval, replicates=repmeans)
-
+  if (deff){
+    vsrs<-svrepvar(x,design, return.replicates=FALSE, na.rm=na.rm)*sum(design$pweights^2)
+    attr(rval,"deff")<-v/vsrs
+  }
   class(rval)<-"svrepstat"
   rval
   
@@ -868,16 +937,27 @@ print.svrepstat<-function(x,...){
     x<-x[[1]]
   }
   vv<-attr(x,"var")
+  deff<-attr(x, "deff")
   if (!is.null(dim(x)) && length(x)==length(vv)){
     cat("Statistic:\n")
     printCoefmat(x)
     cat("SE:\n")
     print(sqrt(vv))
+    if (!is.null(deff)){
+      cat("Design Effect:\n")
+      printCoefmat()
+    }
   } else if(length(x)==NCOL(vv)){
-    m<-cbind(x,sqrt(diag(as.matrix(attr(x,"var")))))
-    colnames(m)<-c(attr(x,"statistic"),"SE")
+    m<-cbind(x,sqrt(diag(as.matrix(vv))))
+    if (is.null(deff))
+      colnames(m)<-c(attr(x,"statistic"),"SE")
+    else {
+      m<-cbind(m,diag(as.matrix(deff)))
+      colnames(m)<-c(attr(x,"statistic"),"SE","DEff")
+    }
     printCoefmat(m)
   } else {stop("incorrect structure of svrepstat object")}
+
   naa<-attr(vv,"na.replicates")
   if (!is.null(naa))
     cat("Note: NA results discarded for",length(naa),"replicates (",naa,")\n")
