@@ -5,8 +5,10 @@ regTermTest<-function(model,test.terms, null=NULL){
         
 	tt<-attr(terms(model),"term.labels")
 	aa<-attr(model.matrix(model),"assign")
+        if(inherits(model,"coxph") && attr(terms(model),"intercept"))
+          aa<-aa[-1]
 	index<-which(aa %in% match(test.terms,tt))
-
+        
 	beta<-coef(model)[index]
         if (!is.null(NULL))
             beta<-beta-null

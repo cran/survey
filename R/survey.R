@@ -609,9 +609,9 @@ predict.svyratio<-function(object, total, se=TRUE,...){
 
 svytable<-function(formula, design, Ntotal=design$fpc, round=FALSE){
 
-    if (!inherits(design,"survey.design")) stop("design must be a survey design")
+  if (!inherits(design,"survey.design")) stop("design must be a survey design")
     weights<-1/design$prob
-   
+  
    ## unstratified or unadjusted.
    if (is.null(Ntotal) || length(Ntotal)==1){
        if (length(formula)==3)
@@ -678,6 +678,10 @@ svycoxph<-function(formula,design,subset=NULL,...){
                     design$cluster[[1]], design$fpc,design$nPSU)
     
     g$naive.var<-NULL
+    g$wald.test<-coef(g)%*%solve(g$var,coef(g))
+    g$loglik<-c(NA,NA)
+    g$rscore<-NULL
+    g$score<-NA
     
     class(g)<-c("svycoxph",class(g))
     g$call<-match.call()
