@@ -47,8 +47,8 @@ data(api)
 dclus1 <- svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
 rclus1 <- as.svrepdesign(dclus1)
 
-svrepmean(~api00, rclus1)
-svreptotal(~enroll, rclus1)
+svymean(~api00, rclus1)
+svytotal(~enroll, rclus1)
 
 ## population marginal totals for each stratum
 pop.types <- data.frame(stype=c("E","H","M"), Freq=c(4421,755,1018))
@@ -56,28 +56,28 @@ pop.schwide <- data.frame(sch.wide=c("No","Yes"), Freq=c(1072,5122))
 
 rclus1r <- rake(rclus1, list(~stype,~sch.wide), list(pop.types, pop.schwide))
 
-svrepmean(~api00, rclus1r)
-svreptotal(~enroll, rclus1r)
+svymean(~api00, rclus1r)
+svytotal(~enroll, rclus1r)
 
 ## marginal totals correspond to population
 xtabs(~stype, apipop)
-svreptable(~stype, rclus1r, round=TRUE)
+svytable(~stype, rclus1r, round=TRUE)
 xtabs(~sch.wide, apipop)
-svreptable(~sch.wide, rclus1r, round=TRUE)
+svytable(~sch.wide, rclus1r, round=TRUE)
 
 ## joint totals don't correspond 
 xtabs(~stype+sch.wide, apipop)
-svreptable(~stype+sch.wide, rclus1r, round=TRUE)
+svytable(~stype+sch.wide, rclus1r, round=TRUE)
 
 ## compare to joint post-stratification
 ## (only possible if joint population table is known)
 ##
 pop.table <- xtabs(~stype+sch.wide,apipop)
 rclus1ps <- postStratify(rclus1, ~stype+sch.wide, pop.table)
-svreptable(~stype+sch.wide, rclus1ps, round=TRUE)
+svytable(~stype+sch.wide, rclus1ps, round=TRUE)
 
-svrepmean(~api00, rclus1ps)
-svreptotal(~enroll, rclus1ps)
+svymean(~api00, rclus1ps)
+svytotal(~enroll, rclus1ps)
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

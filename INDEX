@@ -7,17 +7,21 @@ svrepdesign             Replication-weight designs
 as.svrepdesign          Convert svydesign to svrepdesign
 subset.svyrep.design    Subset of svrepdesign
 update.svyrep.design    Add variables to svrepdesign
+as.svydesign2           Convert a old svydesign object to
+                        the new format.
 
                  -----
 
 svyplot                 Survey-weighted graphics
+svyhist                 Survey-weight histogram
 svyby                   Tables of statistics 
-ftable.svystat
+ftable.svystat          Formatted tables of statistics
 ftable.svrepstat
 ftable.svyby
 cv			extract coefficient of variation
 SE			extract standard error
 deff			extract design effect
+
                  -----
 
 svycoxph                Survey-weighted Cox models
@@ -34,13 +38,6 @@ svymle                  Maximum pseudolikelihood estimation in complex
 
                  -----
 
-svrepmean               Summary statistics with replication weights
-svreptotal
-svrepvar
-svrepratio
-svrepquantile
-svyreptable             Contingency tables
-svrepglm                glms with replication weights
 withReplicates          Replicate variances for arbitrary statistics
 
                  ----
@@ -56,11 +53,14 @@ weights.nonresponse	extract non-response weights
 Utility functions:
 svy.varcoef             Sandwich variance estimator for glms
 svyCprod                Computations for survey variances
+svyrecvar               Computations for multistage samples
 svrVar                  Computations for replication variances
 jk1weights              create replication weights
 jknweights              create replication weights
+bootweights             create replication weights
 brrweights              create replication weights
 hadamard                Hadamard matrices
+paley                   Paley-type Hadamard matrices
 regTermTest             Test sets of terms in a regression model
 
                  -----
@@ -69,4 +69,4 @@ fpc                     Small artificial example
 scd                     Cardiac arrests example
 api                     California Academic Performance Index
 crowd                   Small example from VPLX manual
-
+mu284                   Two-stage sample from MU284 population

@@ -3,6 +3,7 @@
 \alias{[.svyrep.design}
 \alias{image.svyrep.design}
 \alias{print.svyrep.design}
+\alias{model.frame.svyrep.design}
 \alias{summary.svyrep.design}
 \alias{print.summary.svyrep.design}
 %- Also NEED an `\alias' for EACH other topic documented here.
@@ -14,7 +15,7 @@ data structure for such a survey.
 }
 \usage{
 svrepdesign(variables = NULL, repweights = NULL, weights = NULL, data =
-NULL, type = c("BRR", "Fay", "JK1","JKn","other"),
+NULL, type = c("BRR", "Fay", "JK1","JKn","bootstrap","other"),
 combined.weights=FALSE, rho = NULL, 
 scale=NULL, rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"))
 \method{image}{svyrep.design}(x, ..., col=grey(seq(.5,1,length=30)), type.=c("rep","total"))
@@ -59,23 +60,27 @@ below}
   be specified, otherwise they can be guessed from the weights.
 
 
-A finite population correction may be specified for \code{type="other"},
-\code{type="JK1"} and \code{type="JKn"}.  \code{fpc} must be a vector
-with one entry for each replicate. To specify sampling fractions use
-\code{fpctype="fraction"} and to specify the correction directly use
-\code{fpctype="correction"}
+  A finite population correction may be specified for \code{type="other"},
+  \code{type="JK1"} and \code{type="JKn"}.  \code{fpc} must be a vector
+  with one entry for each replicate. To specify sampling fractions use
+  \code{fpctype="fraction"} and to specify the correction directly use
+  \code{fpctype="correction"}
 
-To generate your own replicate weights either use
-\code{\link{as.svrepdesign}} on a \code{survey.design} object, or see
- \code{\link{brrweights}}, \code{\link{jk1weights}} and \code{\link{jknweights}}
-
+  To generate your own replicate weights either use
+  \code{\link{as.svrepdesign}} on a \code{survey.design} object, or see
+  \code{\link{brrweights}}, \code{\link{jk1weights}} and \code{\link{jknweights}}
+  
+  The \code{model.frame} method extracts the observed data.
 
 }
 \value{
   Object of class \code{svyrep.design}, with methods for \code{print},
   \code{summary}, \code{weights}, \code{image}.
 }
-\references{Levy and Lemeshow. "Sampling of Populations". Wiley. }
+\references{Levy and Lemeshow. "Sampling of Populations". Wiley.
+  Shao and Tu. "The Jackknife and Bootstrap." Springer.
+}
+
 \note{To use replication-weight analyses on a survey specified by
   sampling design, use \code{as.svrepdesign} to convert it. }
 
@@ -87,7 +92,7 @@ data(scd)
 repweights<-2*cbind(c(1,0,1,0,1,0), c(1,0,0,1,0,1), c(0,1,1,0,0,1),
 c(0,1,0,1,1,0))
 scdrep<-svrepdesign(data=scd, type="BRR", repweights=repweights)
-svrepratio(~alive, ~arrests, scdrep)
+svyratio(~alive, ~arrests, scdrep)
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
 

@@ -10,10 +10,17 @@
   by the user.
 }
 \usage{
-brrweights(strata, psu, match = NULL, small = c("fail", "split",
-"merge"), large = c("split", "merge", "fail"),fay.rho=0,only.weights=FALSE,compress=TRUE)
-jk1weights(psu,fpc=NULL, fpctype=c("population","fraction","correction"),compress=TRUE)
-jknweights(strata,psu, fpc=NULL, fpctype=c("population","fraction","correction"),compress=TRUE)
+brrweights(strata, psu, match = NULL,
+              small = c("fail","split","merge"),
+              large = c("split", "merge", "fail"),
+              fay.rho=0, only.weights=FALSE,
+              compress=TRUE)
+jk1weights(psu,fpc=NULL,
+              fpctype=c("population","fraction","correction"),
+              compress=TRUE)
+jknweights(strata,psu, fpc=NULL,
+              fpctype=c("population","fraction","correction"),
+              compress=TRUE)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -85,7 +92,10 @@ For \code{brrweights} with \code{only.weights=FALSE} a list with elements
   For \code{jk1weights} and \code{jknweights} a data frame of replicate
   weights and the \code{scale} and \code{rscale} arguments to \code{\link{svrVar}}.
 }
-\references{Levy and Lemeshow "Sampling of Populations". Wiley.}
+\references{Levy and Lemeshow "Sampling of Populations". Wiley.
+  
+  Shao and Tu "The Jackknife and Bootstrap". Springer.
+}
 
 \seealso{\code{\link{hadamard}}, \code{\link{as.svrepdesign}},
   \code{\link{svrVar}}}

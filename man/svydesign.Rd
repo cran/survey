@@ -1,10 +1,15 @@
 \name{svydesign}
 \alias{svydesign}
+\alias{oldsvydesign}
 \alias{summary.survey.design}
+\alias{summary.survey.design2}
 \alias{print.summary.survey.design}
+\alias{print.summary.survey.design2}
 \alias{print.survey.design}
-\alias{[.survey.design}
+\alias{print.survey.design2}
 \alias{[<-.survey.design}
+\alias{[.survey.design2}
+\alias{model.frame.survey.design}
 \alias{na.omit.survey.design}
 \alias{na.exclude.survey.design}
 \alias{na.fail.survey.design}
@@ -16,7 +21,7 @@
 }
 \usage{
 svydesign(ids, probs=NULL, strata = NULL, variables = NULL, fpc=NULL,
-data = NULL, nest = FALSE, check.strata = !nest, weights=NULL) 
+data = NULL, nest = FALSE, check.strata = !nest, weights=NULL)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -31,9 +36,8 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL)
   \item{weights}{Formula or vector specifying sampling weights as an
     alternative to \code{prob}}
   \item{data}{Data frame to look up variables in the formula arguments}
-  \item{nest}{If \code{TRUE}, relabel cluster ids to enforce nesting, eg
-  if ids at second level of sampling are reused within first-level
-  units}
+  \item{nest}{If \code{TRUE}, relabel cluster ids to enforce nesting
+    within strata}
   \item{check.strata}{If \code{TRUE}, check that clusters are nested in strata}.
 }
 \details{
@@ -51,23 +55,32 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL)
    sampled. It may not be appropriate if the target of inference is the
    process generating the data rather than the statistics of a
    particular finite population.
-
+   
    The finite population correction can be specified either as the total
    population size in each stratum or as the fraction of the total
    population that has been sampled. In either case the relevant
-   population size is `primary sampling units', the largest clusters.
-   That is, sampling 100 units from a population stratum of size 500 can
-   be specified as 100 or as 100/500=0.2.  The finite population
-   correction can be specified by a vector with one element for each
-   individual (in which case it is an error for it to vary within a
-   stratum) or as a data frame with one row per stratum.  The first
-   column of the data frame should be a factor with the same levels as
-   \code{strata} and the second column the finite population correction.
+   population size is the sampling units.  That is, sampling 100 units
+   from a population stratum of size 500 can be specified as 100 or as
+   100/500=0.2.
    
    If population sizes are specified but not sampling probabilities or
    weights, the sampling probabilities will be computed from the
    population sizes assuming simple random sampling within strata.
-
+   
+   For multistage sampling the \code{id} argument should specify a
+   formula with the cluster identifiers at each stage.  If subsequent
+   stages are stratified \code{strata} should also be specified as a
+   formula with stratum identifiers at each stage.  The population size
+   for each level of sampling should also be specified in \code{fpc}.
+   If \code{fpc} is not specified then sampling is assumed to be with
+   replacement at the top level and only the first stage of cluster is
+   used in computing variances. If \code{fpc} is specified but for fewer
+   stages than \code{id}, sampling is assumed to be complete for
+   subsequent stages.   The variance calculations for
+   multistage sampling assume simple or stratified random sampling
+   within clusters at each stage except possibly the last.
+   
+   
 The \code{dim}, \code{"["}, \code{"[<-"} and na.action methods for
 \code{survey.design} objects operate on the dataframe specified by
 \code{variables} and ensure that the design information is properly
@@ -77,29 +90,37 @@ data frame, but only the data frame is used. See also
 \code{\link{subset.survey.design}} for a simple way to select
 subpopulations.
 
-\code{svydesign} will attempt to determine whether strata with only one
-cluster (PSU) are self-representing ("certainty") PSUs (based on
-sampling fraction of 1 or on a sampling weight of 1 when other sampling
-weights are all greater than 1). If the strata with one only PSU are not
-self-representing (or they are, but \code{svydesign} cannot tell) then
-the handling of these strata for variance computation is determined by
-\code{options("survey.lonely.psu")}. See \code{\link{svyCprod}} for details.
+The \code{model.frame} method extracts the observed data.
 
 
-If you have strata nested within clusters (eg within-region stratification on
-proportion Hispanic in the NHANES survey) use
-\code{\link{postStratify}} to add these as post-stratification variables.
+ If the strata with one only PSU are not self-representing (or they are,
+but \code{svydesign} cannot tell based on \code{fpc}) then the handling
+of these strata for variance computation is determined by
+\code{options("survey.lonely.psu")}.  See \code{\link{svyCprod}} for
+details.
+
+
 }
+
+\note{
+  Use \code{oldsvydesign}, which has the same arguments, to create
+  objects with the structure used before version 2.9.
+  }
+
 \value{
 An object of class \code{survey.design}.
 }
 \author{Thomas Lumley}
 
 
-\seealso{ \code{\link{svyglm}}, \code{\link{svymean}}, \code{\link{svyvar}}, \code{\link{svytable}}, \code{\link{svyquantile}},
-\code{\link{subset.survey.design},
-\code{\link{update.survey.design}}}
+\seealso{
+  \code{\link{postStratify}} for post-stratification,
+  \code{\link{as.svrepdesign}} for converting to replicate weight designs,
+  \code{\link{subset.survey.design}} for domain estimates,
+  \code{\link{update.survey.design}} to add variables.
 }
+
+
 
 \examples{
   data(api)
@@ -107,8 +128,14 @@ An object of class \code{survey.design}.
 dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
 # one-stage cluster sample
 dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
-# two-stage cluster sample
-dclus2<-svydesign(id=~dnum+snum, weights=~pw, data=apiclus2)
+# two-stage cluster sample: weights computed from population sizes.
+dclus2<-svydesign(id=~dnum+snum, fpc=~fpc1+fpc2, data=apiclus2)
+
+## multistage sampling has no effect when fpc is not given, so
+## these are equivalent.
+dclus2wr<-svydesign(id=~dnum+snum, weights=weights(dclus2), data=apiclus2)
+dclus2wr2<-svydesign(id=~dnum, weights=weights(dclus2), data=apiclus2)
+
 
 ## syntax for stratified cluster sample
 ##(though the data weren't really sampled this way)

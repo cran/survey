@@ -1,5 +1,7 @@
 \name{svyglm}
 \alias{svyglm}
+\alias{svyglm.survey.design}
+\alias{svyglm.svyrep.design}
 \alias{svrepglm}
 \alias{print.svyglm}
 \alias{summary.svyglm}
@@ -16,11 +18,12 @@
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Survey-weighted generalised linear models.}
 \description{
-Fit a generalised linear model to data from a complex survey design, with inverse-probability weighting and with standard errors corrected for cluster sampling.
+Fit a generalised linear model to data from a complex survey design,
+with inverse-probability weighting and design-based standard errors.
 }
 \usage{
-svyglm(formula, design, subset=NULL, ...)
-svrepglm(formula, design, subset=NULL, ..., rho=NULL,
+\method{svyglm}{survey.design}(formula, design, subset=NULL, ...)
+\method{svyglm}{svyrep.design}(formula, design, subset=NULL, ..., rho=NULL,
 return.replicates=FALSE, na.action)
 \method{summary}{svyglm}(object, correlation = FALSE,  ...) 
 }
@@ -32,20 +35,14 @@ return.replicates=FALSE, na.action)
   \item{subset}{Expression to select a subpopulation}
   \item{\dots}{Other arguments passed to \code{glm} or
     \code{summary.glm} }
-  \item{rho}{For replicate BRR designs, to specify the paramter for
-    Fay's variance method}
+  \item{rho}{For replicate BRR designs, to specify the parameter for
+    Fay's variance method, giving weights of \code{rho} and \code{2-rho}}
   \item{return.replicates}{Return the replicates as a component of the result?}
   \item{object}{A \code{svyglm} object}
   \item{correlation}{Include the correlation matrix of parameters?}
   \item{na.action}{Handling of NAs}
 }
 \details{
-In \code{svyglm}, standard errors for cluster-sampled designs are computed using a
-linearisation estimate (in the absence of strata this is equivalent to
-the Huber/White sandwich formula in GEEs).  Most of these computations
-are done in \code{\link{svyCprod}}.  In \code{svrepglm}, replicate
-weight methods are used.
-
 There is no \code{anova} method for \code{svyglm} as the models are not
 fitted by maximum likelihood. The function \code{\link{regTermTest}} may
 be useful for testing sets of regression terms.
@@ -59,7 +56,7 @@ be useful for testing sets of regression terms.
 
 \seealso{ \code{\link{svydesign}},
   \code{\link{svrepdesign}},\code{\link{as.svrepdesign}}, \code{\link{glm}},
-  \code{\link{svyCprod}}, \code{\link{svy.varcoef}},\code{\link{regTermTest}}}
+  \code{\link{regTermTest}}}
 
 \examples{
 
@@ -74,8 +71,8 @@ be useful for testing sets of regression terms.
 
   summary(svyglm(api00~ell+meals+mobility, design=dstrat))
   summary(svyglm(api00~ell+meals+mobility, design=dclus2))
-  summary(svrepglm(api00~ell+meals+mobility, design=rstrat))
-  summary(svrepglm(api00~ell+meals+mobility, design=rclus2))
+  summary(svyglm(api00~ell+meals+mobility, design=rstrat))
+  summary(svyglm(api00~ell+meals+mobility, design=rclus2))
 
   ## use quasibinomial, quasipoisson to avoid warning messages
   summary(svyglm(sch.wide~ell+meals+mobility, design=dstrat, family=quasibinomial()))

@@ -1,14 +1,17 @@
 \name{weights.survey.design}
 \alias{weights.survey.design}
 \alias{weights.svyrep.design}
+\alias{weights.survey_fpc}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Survey design weights}
 \description{
-Extract weights from a survey design object
+Extract weights from a survey design object.
 }
 \usage{
 \method{weights}{survey.design}(object, ...)
-\method{weights}{svyrep.design}(object, type=c("replication","sampling","analysis"), ...)
+\method{weights}{svyrep.design}(object,
+type=c("replication","sampling","analysis"), ...)
+\method{weights}{survey_fpc}(object,...)
 } 
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -22,7 +25,8 @@ Extract weights from a survey design object
   vector or matrix of weights
 }
 
-\seealso{\code{\link{svydesign}}, \code{\link{svrepdesign}} }
+\seealso{\code{\link{svydesign}}, \code{\link{svrepdesign}},
+  \code{\link{as.fpc}} }
 
 \examples{
 data(scd)

@@ -2,7 +2,8 @@
 ##  tables of statistics.
 ##
 
-svyby<-function(formula, by, design, FUN,...,  keep.var=FALSE,keep.names=TRUE){
+svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=FALSE,
+                keep.names=TRUE){
 
   if (inherits(by, "formula"))
     byfactors<-model.frame(by, design$variables, na.action=na.pass)
@@ -11,18 +12,33 @@ svyby<-function(formula, by, design, FUN,...,  keep.var=FALSE,keep.names=TRUE){
   
   byfactor<-do.call("interaction", byfactors)
   uniques <- which(!duplicated(byfactors))
-  unwrap<-function(x) c(statistic=unclass(x),SE=sqrt(diag(as.matrix(attr(x,"var")))))
+
   
   if (keep.var){
+      unwrap <- function(x){
+          if(!is.null(attr(x, "deff")))
+              c(statistic = unclass(x),
+                SE = sqrt(diag(as.matrix(attr(x, "var")))),
+                DEff = deff(x))
+          else c(statistic = unclass(x),
+                 SE = sqrt(diag(as.matrix(attr(x, "var")))))
+      }
+
     rval<-t(sapply(uniques,
-                   function(i) unwrap(FUN(formula,design[byfactor %in% byfactor[i],],...))))
-    nstats<-NCOL(rval)/2
+                   function(i) unwrap(FUN(formula,design[byfactor %in% byfactor[i],],deff=deff,...))))
   } else {
-    rval<-sapply(uniques,
-                 function(i) FUN(formula,design[byfactor %in% byfactor[i],],...))
-    if (is.matrix(rval)) rval<-t(rval)
-    nstats<-NCOL(rval)
+      unwrap2 <- function(x){
+          if(!is.null(attr(x, "deff")))
+              c(statistic = unclass(x),
+                DEff = deff(x))
+          else c(statistic = unclass(x))
+      }
+      rval<-sapply(uniques,
+                   function(i) unwrap2(FUN(formula,design[byfactor %in% byfactor[i],],deff=deff,...)))
+      if (is.matrix(rval)) rval<-t(rval)
   }
+
+  nstats<-NCOL(rval)/(1+keep.var+deff)
   
   if (NCOL(rval)>1)
     rval<-cbind(byfactors[uniques,,drop=FALSE], rval)
@@ -36,6 +52,7 @@ svyby<-function(formula, by, design, FUN,...,  keep.var=FALSE,keep.names=TRUE){
 
   attr(rval,"svyby")<-list(margins=1:NCOL(byfactors),nstats=nstats,
                            vars=keep.var,
+                           deffs=deff,
                            statistic=deparse(substitute(FUN)),
                            variables= names(rval)[-(1:NCOL(byfactors))][1:nstats]
                            )

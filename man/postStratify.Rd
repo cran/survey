@@ -7,7 +7,8 @@
 \description{
  Post-stratification adjusts the sampling and replicate weights so that
  the joint distribution of a set of post-stratifying variables matches
- the known population joint distribution.
+ the known population joint distribution. Use \code{\link{rake}} when
+ the full joint distribution is not available.
 }
 \usage{
 postStratify(design, strata, population, partial = FALSE, ...)
@@ -40,15 +41,37 @@ postStratify(design, strata, population, partial = FALSE, ...)
   weight matrix (in particular if the post-stratification variables have
   many values and cut  across PSUs).
   
-  The method for \code{survey.design} objects should be used only in
-  fairly large samples as the resulting standard errors use a
-  simple first-order approximation.
+  If a \code{svydesign} object is to be converted to a replication
+  design the post-stratification should be performed after conversion.
+ 
+  
+  The variance estimate for replication designs follows the same
+  procedure as Valliant (1993) described for estimating totals.  I
+  believe the variance estimate for \code{svydesign} objects is the same
+  as that of Valliant (1993) applied to the estimating functions, and
+  thus the same as Rao et al (2002), at least in the case where the full
+  joint distribution of the stratifying variables is available.
   
 }
+
+\note{
+  If the sampling weights are already post-stratified there will be no
+  change in point estimates after \code{postStratify} but the standard
+  error estimates will decrease to correctly reflect the post-stratification.
+  See  \url{http://www.dcs.napier.ac.uk/peas/exemplar1.htm} for an example.
+}
+
 \value{
  A new survey design object.
 }
-\references{ }
+\references{
+Valliant R (1993) Post-stratification and conditional variance
+estimation. JASA 88: 89-96  
+  
+Rao JNK, Yung W, Hidiroglou MA (2002)   Estimating equations for the
+analysis of survey data using poststratification information. Sankhya
+64 Series A Part 2, 364-378.
+}
 
 \seealso{\code{\link{as.svrepdesign}}, \code{\link{svrepdesign}},
   \code{\link{rake}}, \code{\link{compressWeights}} }
@@ -57,8 +80,8 @@ data(api)
 dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
 rclus1<-as.svrepdesign(dclus1)
 
-svrepmean(~api00, rclus1)
-svreptotal(~enroll, rclus1)
+svymean(~api00, rclus1)
+svytotal(~enroll, rclus1)
 
 # post-stratify on school type
 pop.types <- data.frame(stype=c("E","H","M"), Freq=c(4421,755,1018))
@@ -67,8 +90,8 @@ pop.types <- data.frame(stype=c("E","H","M"), Freq=c(4421,755,1018))
 
 rclus1p<-postStratify(rclus1, ~stype, pop.types)
 summary(rclus1p)
-svrepmean(~api00, rclus1p)
-svreptotal(~enroll, rclus1p)
+svymean(~api00, rclus1p)
+svytotal(~enroll, rclus1p)
 
 
 ## and for svydesign objects

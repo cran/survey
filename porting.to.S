@@ -3,6 +3,10 @@ With the exception of svymle, porting this code to S-PLUS should not  be
 too difficult. I do not have the time or interest to maintain an S-PLUS 
 port, but would be happy to answer questions.
 
+It would be sufficient to port the functions for survey.design2 and
+svyrep.design objects, as survey.design objects are deprecated.
+
+
 The main differences will be
    --  eval.parent() needs to be replaced with eval(   ,sys.parent())
    --  The names of some of the components of a glm object may need to
@@ -22,5 +26,6 @@ The main differences will be
 
 svymle() will take more effort but should be feasible. It makes fairly
 heavy use of lexical scope in defining the objective function and
-gradient.  Lots of explicit argument passing will have to be added. 
+gradient.  Lots of explicit argument passing would have to be added. It might
+be best just to omit this function.
 

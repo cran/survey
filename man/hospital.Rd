@@ -9,11 +9,12 @@ The \code{hospital} data frame has 15 rows and 5 columns.
 \format{
   This data frame contains the following columns:
   \describe{
-    \item{hospno}{a numeric vector}
-    \item{oblevel}{a numeric vector}
-    \item{weighta}{a numeric vector}
-    \item{tothosp}{a numeric vector}
-    \item{births}{a numeric vector}
+    \item{hospno}{Hospital id}
+    \item{oblevel}{level of obstetric care}
+    \item{weighta}{Weights, as given by the original reference}
+    \item{tothosp}{total hospitalisations}
+    \item{births}{births}
+    \item{weightats}{Weights, as given in the source}
   }
 }
 \source{
@@ -30,5 +31,6 @@ hosprep<-as.svrepdesign(hospdes)
 
 svytotal(~births, design=hospdes)
 svreptotal(~births, design=hosprep)
-}
+
+}}
 \keyword{datasets}

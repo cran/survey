@@ -1,5 +1,8 @@
 \name{svycoxph}
 \alias{svycoxph}
+\alias{svycoxph.survey.design2}
+\alias{svycoxph.survey.design}
+\alias{svycoxph.svyrep.design}
 \alias{print.svycoxph}
 \alias{model.frame.svycoxph}
 \alias{summary.svycoxph}
@@ -9,7 +12,7 @@
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Survey-weighted generalised linear models.}
 \description{
-Fit a generalised linear model to data from a complex survey design, with inverse-probability weighting and with standard errors corrected for cluster sampling.
+Fit a proportional hazards model to data from a complex survey design, with inverse-probability weighting and with standard errors corrected for cluster sampling.
 }
 \usage{
 svycoxph(formula, design,subset=NULL, ...)
@@ -38,13 +41,25 @@ do with the stratification of the sampling.
 
 \author{Thomas Lumley}
 
-
+\references{Binder DA. (1992) Fitting Cox's proportional hazards models
+  from survey data. Biometrika 79: 139-147}
 \seealso{ \code{\link{svydesign}}, \code{\link{coxph}},
   \code{\link{svyCprod}}}
 
 \examples{
+## Somewhat unrealistic example of nonresponse bias.
+data(pbc, package="survival")
 
- }
+biasmodel<-glm(I(trt>0)~age*edema,data=pbc)
+pbc$randprob<-fitted(biasmodel)
+
+dpbc<-svydesign(id=~1, prob=~randprob, strata=~edema, data=subset(pbc,trt>0))
+rpbc<-as.svrepdesign(dpbc)
+
+svycoxph(Surv(time,status)~log(bili)+protime+alb,design=dpbc)
+
+svycoxph(Surv(time,status)~log(bili)+protime+alb,design=rpbc)
+}
 \keyword{regression}% at least one, from doc/KEYWORDS
 \keyword{survival}% at least one, from doc/KEYWORDS
 \keyword{survey}% at least one, from doc/KEYWORDS

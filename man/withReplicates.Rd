@@ -47,7 +47,7 @@ repweights<-2*cbind(c(1,0,1,0,1,0), c(1,0,0,1,0,1), c(0,1,1,0,0,1),
 c(0,1,0,1,1,0))
 scdrep<-svrepdesign(data=scd, type="BRR", repweights=repweights)
 
-a<-svrepratio(~alive, ~arrests, design=scdrep)
+a<-svyratio(~alive, ~arrests, design=scdrep)
 print(a$ratio)
 print(a$var)
 withReplicates(scdrep, quote(sum(.weights*alive)/sum(.weights*arrests)))

@@ -6,7 +6,7 @@
 Compute survey statistics on subsets of a survey defined by factors. 
 }
 \usage{
-svyby(formula, by, design, FUN, ..., keep.var = FALSE, keep.names = TRUE)
+svyby(formula, by, design, FUN, ..., deff=FALSE,keep.var = FALSE, keep.names = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -17,6 +17,7 @@ svyby(formula, by, design, FUN, ..., keep.var = FALSE, keep.names = TRUE)
   \item{FUN}{A function taking a formula and survey design object as its
   first two arguments.}
   \item{\dots}{Other arguments to \code{FUN}}
+  \item{deff}{Request a design effect from \code{FUN}}
   \item{keep.var}{If \code{FUN} returns a \code{svystat} object, extract
   standard errors from it}
   \item{keep.names}{Define row names based on the subsets}
@@ -24,6 +25,11 @@ svyby(formula, by, design, FUN, ..., keep.var = FALSE, keep.names = TRUE)
 
 \value{
   A data frame showing the factors and the results of \code{FUN}
+}
+
+\note{ Asking for a design effect (\code{deff=TRUE}) from a function
+  that does not produce one will cause an error or incorrect formatting
+  of the output.
 }
 \seealso{\code{\link{svytable}} and \code{\link{ftable.svystat}} for
   contingency tables, \code{\link{ftable.svyby}} for pretty-printing of \code{svyby} }
@@ -34,14 +40,16 @@ dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
 svyby(~api99, ~stype, dclus1, svymean)
 svyby(~api99, ~stype, dclus1, svyquantile, quantiles=0.5)
 svyby(~api99, list(school.type=apiclus1$stype), dclus1, svymean)
+svyby(~api99+api00, ~stype, dclus1, svymean, deff=TRUE)
 svyby(~api99+api00, ~stype+sch.wide, dclus1, svymean, keep.var=TRUE)
 
 rclus1<-as.svrepdesign(dclus1)
 
-svyby(~api99, ~stype, rclus1, svrepmean)
-svyby(~api99, ~stype, rclus1, svrepquantile, quantiles=0.5)
-svyby(~api99, list(school.type=apiclus1$stype), rclus1, svrepmean)
-svyby(~api99+api00, ~stype+sch.wide, rclus1, svrepmean, keep.var=TRUE)
+svyby(~api99, ~stype, rclus1, svymean)
+svyby(~api99, ~stype, rclus1, svyquantile, quantiles=0.5)
+svyby(~api99, list(school.type=apiclus1$stype), rclus1, svymean)
+svyby(~enroll,~stype, rclus1,svytotal, deff=TRUE)
+svyby(~api99+api00, ~stype+sch.wide, rclus1, svymean, keep.var=TRUE)
 
 
 }

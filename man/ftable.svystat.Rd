@@ -40,14 +40,18 @@ b
 round(100*b,1)
 
 rclus1<-as.svrepdesign(dclus1)
-a<-svreptotal(~interaction(stype,comp.imp), design=rclus1)
+a<-svytotal(~interaction(stype,comp.imp), design=rclus1)
 b<-ftable(a, rownames=list(stype=c("E","H","M"),comp.imp=c("No","Yes")))
 b
 round(b)
 
-a<-svyby(~api99 + api00, ~stype + sch.wide, rclus1, svrepmean, keep.var=TRUE)
+a<-svyby(~api99 + api00, ~stype + sch.wide, rclus1, svymean, keep.var=TRUE)
 ftable(a)
 print(ftable(a),digits=2)
+
+b<-svyby(~api99 + api00, ~stype + sch.wide, rclus1, svymean, keep.var=TRUE, deff=TRUE)
+ftable(b)
+print(ftable(b),digits=2)
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

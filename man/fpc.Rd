@@ -55,11 +55,14 @@ fpc=~I(nh/Nh), variables=~x, data=fpc)
 
 svymean(~x, withfpc)
 
-fpctbl<-data.frame(strata=c(1,2), sizes=c(15,12))
 
-withfpc<-svydesign(weights=~weight, ids=~psuid, strata=~stratid, fpc=fpctbl, variables=~x, data=fpc, nest=TRUE)
+
+withfpc<-svydesign(ids=~psuid, strata=~stratid,
+fpc=~I(nh/Nh), variables=~x, data=fpc, nest=TRUE)
 
 svymean(~x, withfpc)
+
+
 
 }
 \keyword{datasets}

@@ -1,0 +1,57 @@
+
+R : Copyright 2005, The R Foundation for Statistical Computing
+Version 2.1.0 Under development (unstable) (2005-01-31), ISBN 3-900051-07-0
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for a HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(survey)
+> data(fpc)
+> dfpc<-svydesign(id=~psuid,strat=~stratid,weight=~weight,data=fpc,nest=TRUE)
+> dsub<-subset(dfpc,x>4)
+> (m1<-svymean(~x,design=dsub))
+   mean     SE
+x 6.195 0.7555
+> 
+> ## These should give the same domain estimates and standard errors
+> (m2<-svyby(~x,~I(x>4),design=dfpc, svymean,keep.var=TRUE))
+      I(x > 4) statistic.x        SE
+FALSE    FALSE    3.314286 0.3117042
+TRUE      TRUE    6.195000 0.7555129
+Warning messages:
+1: Stratum (1) has only one PSU at stage 1 in: onestrat(x[index, , drop = FALSE], clusters[index], nPSU[index][1],  
+2: Stratum (2) has only one PSU at stage 1 in: onestrat(x[index, , drop = FALSE], clusters[index], nPSU[index][1],  
+> m3<-svyglm(x~I(x>4)+0,design=dfpc)
+> summary(m3)
+
+Call:
+svyglm.survey.design(formula = x ~ I(x > 4) + 0, design = dfpc)
+
+Survey design:
+svydesign(id = ~psuid, strat = ~stratid, weight = ~weight, data = fpc, 
+    nest = TRUE)
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+I(x > 4)FALSE   3.3143     0.3117   10.63 4.08e-05 ***
+I(x > 4)TRUE    6.1950     0.7555    8.20 0.000177 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+(Dispersion parameter for gaussian family taken to be 2.237706)
+
+Number of Fisher Scoring iterations: 2
+
+> 
+> stopifnot(identical(TRUE,all.equal(m2$SE, SE(m3))))
+> 
+> 

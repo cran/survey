@@ -7,7 +7,7 @@
   strata/cluster survey design object. 
 }
 \usage{
-as.svrepdesign(design, type=c("auto", "JK1", "JKn", "BRR", "Fay"),
+as.svrepdesign(design, type=c("auto", "JK1", "JKn", "BRR", "bootstrap","Fay"),
 fay.rho = 0, ..., compress=TRUE)
 }
 %- maybe also `usage' for other objects documented here.
@@ -26,7 +26,9 @@ fay.rho = 0, ..., compress=TRUE)
   Object of class \code{svrep.design}.
 }
 
-\seealso{\code{\link{brrweights}}, \code{\link{svydesign}}, \code{\link{svrepdesign}}}
+\seealso{\code{\link{brrweights}}, \code{\link{svydesign}},
+  \code{\link{svrepdesign}}, \code{\link{bootweights}}
+}
 
 \examples{
 data(scd)
@@ -46,15 +48,26 @@ scd2jknf <- as.svrepdesign(scddes, type="JKn")
 
 svrepratio(~alive, ~arrests, design=scd2brr)
 svrepratio(~alive, ~arrests, design=scd2fay)
-svrepratio(~alive, ~arrests, design=scd2jkn)
-svrepratio(~alive, ~arrests, design=scd2jknf)
+svyratio(~alive, ~arrests, design=scd2jkn)
+svyratio(~alive, ~arrests, design=scd2jknf)
 
 data(api)
+## one-stage cluster sample
 dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
+## convert to JK1 jackknife
 rclus1<-as.svrepdesign(dclus1)
+## convert to bootstrap
+bclus1<-as.svrepdesign(dclus1,type="bootstrap", replicates=100)
 
-svrepmean(~api00, rclus1)
-svreptotal(~enroll, rclus1)
+svymean(~api00, dclus1)
+svytotal(~enroll, dclus1)
+
+svymean(~api00, rclus1)
+svytotal(~enroll, rclus1)
+
+svymean(~api00, bclus1)
+svytotal(~enroll, bclus1)
+
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

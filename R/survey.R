@@ -1,4 +1,4 @@
-svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
+oldsvydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
                     data=NULL, nest=FALSE, check.strata=!nest,weights=NULL){
 
     ## less memory-hungry version for sparse tables
@@ -187,6 +187,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
   }
 
 print.survey.design<-function(x,varnames=FALSE,design.summaries=FALSE,...){
+  .svycheck(x)
   n<-NROW(x$cluster)
   if (x$has.strata) cat("Stratified ")
   un<-length(unique(x$cluster[,1]))
@@ -196,7 +197,7 @@ print.survey.design<-function(x,varnames=FALSE,design.summaries=FALSE,...){
   } else {
     cat(NCOL(x$cluster),"- level Cluster Sampling design\n")
     nn<-lapply(x$cluster,function(i) length(unique(i)))
-    cat(paste("With (",paste(unlist(nn),collapse=","),") clusters.\n"))
+    cat(paste("With (",paste(unlist(nn),collapse=", "),") clusters.\n",sep=""))
     is.independent<-FALSE
   }
   print(x$call)
@@ -235,6 +236,15 @@ print.survey.design<-function(x,varnames=FALSE,design.summaries=FALSE,...){
     x$prob<-x$prob[i]
     x$allprob<-x$allprob[i,,drop=FALSE]
     x$strata<-x$strata[i]
+     if (!is.null(x$postStrata)){
+      ps<-x$postStrata
+      for (j in length(ps)){
+        w<-attr(ps[[j]],"weights")
+        ps[[j]]<-ps[[j]][i]
+        attr(ps[[j]],"weights")<-w[i]
+      }
+      x$postStrata<-ps
+    }
   } else {
     x$variables<-x$variables[,...,drop=FALSE]
   }
@@ -262,9 +272,7 @@ na.omit.survey.design<-function(object,...){
   tmp<-na.omit(object$variables,...)
   omit<-attr(tmp,"na.action")
   if (length(omit)){
-    object$cluster<-object$cluster[-omit,,drop=FALSE]
-    object$prob<-object$prob[-omit]
-    object$allprob<-object$allprob[-omit,,drop=FALSE]
+    object<-object[-omit,]
     object$variables<-tmp
     attr(object,"na.action")<-omit
   }
@@ -275,9 +283,7 @@ na.exclude.survey.design<-function(object,...){
 	tmp<-na.exclude(object$variables,...)
 	exclude<-attr(tmp,"na.action")
 	if (length(exclude)){
-	   object$cluster<-object$cluster[-exclude,,drop=FALSE]
-	   object$prob<-object$prob[-exclude]
-	   object$allprob<-object$allprob[-exclude,,drop=FALSE]
+           object<-object[-exclude,]
 	   object$variables<-tmp
 	   attr(object,"na.action")<-exclude
 	}
@@ -464,7 +470,8 @@ svyCprod<-function(x, strata, psu, fpc, nPSU, certainty=NULL, postStrata=NULL,
       this.certain<-certainty[names(certainty) %in% s]
       
       ## stratum with only 1 design cluster leads to undefined variance
-      lonely.psu<-match.arg(lonely.psu, c("remove","adjust","fail","certainty","average"))
+      lonely.psu<-match.arg(lonely.psu, c("remove","adjust","fail",
+                                          "certainty","average"))
       if (this.n==1 && !this.certain){
         this.df<-1
         if (lonely.psu=="fail")
@@ -492,7 +499,12 @@ svyCprod<-function(x, strata, psu, fpc, nPSU, certainty=NULL, postStrata=NULL,
 
 
 
-svymean<-function(x,design, na.rm=FALSE,deff=FALSE){
+svymean<-function(x, design,na.rm=FALSE,...){
+  .svycheck(design)
+  UseMethod("svymean",design)
+}
+
+svymean.survey.design<-function(x,design, na.rm=FALSE,deff=FALSE,...){
 
   if (!inherits(design,"survey.design"))
     stop("design is not a survey design")
@@ -531,7 +543,9 @@ svymean<-function(x,design, na.rm=FALSE,deff=FALSE){
   attr(average,"statistic")<-"mean"
   class(average)<-"svystat"
   if (deff){
-    vsrs<-svyvar(x,design,na.rm=na.rm)/NROW(design$cluster)
+    nobs<-NROW(design$cluster)
+    vsrs<-svyvar(x,design,na.rm=na.rm)/nobs
+    vsrs<-vsrs*(psum-nobs)/psum
     attr(average, "deff")<-v/vsrs
   }
   
@@ -541,12 +555,12 @@ svymean<-function(x,design, na.rm=FALSE,deff=FALSE){
 
 print.svystat<-function(x,...){
   m<-cbind(x,sqrt(diag(attr(x,"var"))))
-  deff<-attr(x,"deff")
-  if (is.null(deff)){
-    colnames(m)<-c(attr(x,"statistic"),"SE")
+  hasdeff<-!is.null(attr(x,"deff"))
+  if (hasdeff) {
+      m<-cbind(m,deff(x))
+      colnames(m)<-c(attr(x,"statistic"),"SE","DEff")
   } else {
-    m<-cbind(m,diag(as.matrix(deff)))
-    colnames(m)<-c(attr(x,"statistic"),"SE","DEff")
+      colnames(m)<-c(attr(x,"statistic"),"SE")
   }
   printCoefmat(m)
 }
@@ -581,7 +595,12 @@ cv.default<-function(object,...){
   rval
 }
 
-svytotal<-function(x,design, na.rm=FALSE, deff=FALSE){
+
+svytotal<-function(x,design,na.rm=FALSE,...){
+  .svycheck(design)
+  UseMethod("svytotal",design)
+}
+svytotal.survey.design<-function(x,design, na.rm=FALSE, deff=FALSE,...){
 
   if (!inherits(design,"survey.design"))
     stop("design is not a survey design")
@@ -617,12 +636,17 @@ svytotal<-function(x,design, na.rm=FALSE, deff=FALSE){
   attr(total,"statistic")<-"total"
   if (deff){
     vsrs<-svyvar(x,design)*sum(weights(design)^2)
+    vsrs<-vsrs*(N-NROW(design$cluster))/N
     attr(total,"deff")<-v/vsrs
   }
   return(total)
 }
 
-svyvar<-function(x, design, na.rm=FALSE){
+svyvar<-function(x, design, na.rm=FALSE,...){
+  .svycheck(design)
+  UseMethod("svyvar",design)
+}
+svyvar.survey.design<-function(x, design, na.rm=FALSE,...){
     
 	if (inherits(x,"formula"))
             x<-model.frame(x,design$variables,na.action=na.pass)
@@ -647,7 +671,11 @@ svyvar<-function(x, design, na.rm=FALSE){
         v
     }
 
-svyquantile<-function(x,design,quantiles,alpha=0.05,ci=FALSE, method="linear",f=1){
+svyquantile<-function(x,design,quantiles,...) UseMethod("svyquantile", design)
+
+svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
+                                    ci=FALSE, method="linear",f=1,
+                                    interval.type=c("Wald","score"),...){
     if (inherits(x,"formula"))
 		x<-model.frame(x,design$variables)
     else if(typeof(x) %in% c("expression","symbol"))
@@ -655,15 +683,15 @@ svyquantile<-function(x,design,quantiles,alpha=0.05,ci=FALSE, method="linear",f=
     
     w<-weights(design)
     
-    computeQuantiles<-function(xx){
+    computeQuantiles<-function(xx,p=quantiles){
       oo<-order(xx)
       cum.w<-cumsum(w[oo])/sum(w)
       cdf<-approxfun(cum.w,xx[oo],method="linear",f=1,
                      yleft=min(xx),yright=max(xx)) 
-      cdf(quantiles)
+      cdf(p)
     }
       
-    computeCI<-function(xx,p){
+    computeScoreCI<-function(xx,p){
     
       U<-function(theta){ ((xx>theta)-(1-p))}
       
@@ -676,10 +704,25 @@ svyquantile<-function(x,design,quantiles,alpha=0.05,ci=FALSE, method="linear",f=
       lower<-min(xx)+iqr/100
       upper<-max(xx)-iqr/100
       tol<-1/(100*sqrt(nrow(design)))
-      c(uniroot(scoretest,interval=c(lower,upper),qlimit=qnorm(alpha/2,lower.tail=FALSE),tol=tol)$root,
-        uniroot(scoretest,interval=c(lower,upper),qlimit=qnorm(alpha/2,lower.tail=TRUE),tol=tol)$root)
+      c(uniroot(scoretest,interval=c(lower,upper),
+                qlimit=qnorm(alpha/2,lower.tail=FALSE),tol=tol)$root,
+        uniroot(scoretest,interval=c(lower,upper),
+                qlimit=qnorm(alpha/2,lower.tail=TRUE),tol=tol)$root)
     }
 
+    computeWaldCI<-function(xx,p){
+        theta0<-computeQuantiles(xx,p)
+        U<- ((xx>theta0)-(1-p))
+        wtest<-svymean(U,design)
+        p.up<-p+qnorm(alpha/2,lower.tail=FALSE)*SE(wtest)
+        p.low<-p+qnorm(alpha/2,lower.tail=TRUE)*SE(wtest)
+        oo<-order(xx)
+        cum.w<-cumsum(w[oo])/sum(w)
+        approx(cum.w,xx[oo],xout=c(p.low,p.up), method="linear",f=1,
+                     yleft=min(xx),yright=max(xx))$y 
+
+    }
+    
     if (!is.null(dim(x)))
       rval<-t(matrix(apply(x,2,computeQuantiles),nrow=length(quantiles),
                    dimnames=list(as.character(round(quantiles,2)),colnames(x))))
@@ -688,6 +731,9 @@ svyquantile<-function(x,design,quantiles,alpha=0.05,ci=FALSE, method="linear",f=
 
     if (!ci) return(rval)
 
+    interval.type<-match.arg(interval.type)
+    computeCI<-switch(interval.type, score=computeScoreCI, Wald=computeWaldCI)
+    
     if (!is.null(dim(x)))
       cis<-array(apply(x,2,function(xx) sapply(quantiles,function(qq) computeCI(xx,qq))),
                  dim=c(2,length(quantiles),ncol(x)),
@@ -698,12 +744,31 @@ svyquantile<-function(x,design,quantiles,alpha=0.05,ci=FALSE, method="linear",f=
       cis<-sapply(quantiles, function(qq) computeCI(x,qq))
 
     
-    list(quantiles=rval,CIs=cis)
-  
-    
+    rval<-list(quantiles=rval,CIs=cis)
+
+    if (is.null(dim(x)))
+        ses<-(cis[2,]-cis[1,])/(2*qnorm(alpha/2,lower.tail=FALSE))
+    else
+        ses<-(cis[2,,]-cis[1,,])/(2*qnorm(alpha/2,lower.tail=FALSE))
+    attr(rval,"SE")<-ses
+    class(rval)<-"svyquantile"
+    rval
   }
 
-svyratio<-function(numerator, denominator, design){
+SE.svyquantile<-function(object,...){
+    attr(object,"SE")
+}
+
+print.svyquantile<-function(x,...){
+    print(list(quantiles=x$quantiles, CIs=x$CIs))
+}
+
+svyratio<-function(numerator,denominator, design,...){
+  .svycheck(design)
+  UseMethod("svyratio",design)
+}
+
+svyratio.survey.design<-function(numerator, denominator, design,...){
 
     if (inherits(numerator,"formula"))
 		numerator<-model.frame(numerator,design$variables)
@@ -760,13 +825,17 @@ cv.svyratio<-function(object,...){
   object$ratio/sqrt(object$var)
 }
 
-svytable<-function(formula, design, Ntotal=design$fpc, round=FALSE){
+svytable<-function(formula, design, ...){
+    UseMethod("svytable",design)
+}
+
+svytable.survey.design<-function(formula, design, Ntotal=NULL, round=FALSE,...){
   
   if (!inherits(design,"survey.design")) stop("design must be a survey design")
   weights<-1/design$prob
   
-  ## unstratified or unadjusted.
-  if (is.null(Ntotal) || length(Ntotal)==1){
+  ## unstratified or unadjusted
+  if (length(Ntotal)<=1 || !design$has.strata){
      if (length(formula)==3)
          tblcall<-bquote(xtabs(I(weights*.(formula[[2]]))~.(formula[[3]]), data=design$variables))
        else
@@ -784,12 +853,12 @@ svytable<-function(formula, design, Ntotal=design$fpc, round=FALSE){
    }
    ## adjusted and stratified
   if (length(formula)==3)
-    tblcall<-bquote(xtabs(I(weights*.(formula[[2]]))~design$strata+.(formula[[3]]), data=design$variables))
+    tblcall<-bquote(xtabs(I(weights*.(formula[[2]]))~design$strata[,1]+.(formula[[3]]), data=design$variables))
   else
-    tblcall<-bquote(xtabs(weights~design$strata+.(formula[[2]]), data=design$variables))
+    tblcall<-bquote(xtabs(weights~design$strata[,1]+.(formula[[2]]), data=design$variables))
   tbl<-eval(tblcall)
   
-  ss<-match(sort(unique(design$strata)), Ntotal[,1])
+  ss<-match(sort(unique(design$strata[,1])), Ntotal[,1])
   dm<-dim(tbl)
   layer<-prod(dm[-1])
   tbl<-sweep(tbl,1,Ntotal[ss, 2]/apply(tbl,1,sum),"*")
@@ -802,6 +871,10 @@ svytable<-function(formula, design, Ntotal=design$fpc, round=FALSE){
 }
 
 svycoxph<-function(formula,design,subset=NULL,...){
+  .svycheck(design)
+  UseMethod("svycoxph",design)
+}
+svycoxph.survey.design<-function(formula,design,subset=NULL,...){
     subset<-substitute(subset)
     subset<-eval(subset,design$variables,parent.frame())
     if (!is.null(subset))
@@ -834,8 +907,12 @@ svycoxph<-function(formula,design,subset=NULL,...){
     if (length(nas))
         design<-design[-nas,]
     
-    
-    g$var<-svyCprod(resid(g,"dfbeta",weighted=TRUE), design$strata,
+    if (inherits(design,"survey.design2"))
+      g$var<-svyrecvar(resid(g,"dfbeta",weighted=TRUE), design$cluster,
+                    design$strata, design$fpc,
+                    postStrata=design$postStrata)
+    else 
+      g$var<-svyCprod(resid(g,"dfbeta",weighted=TRUE), design$strata,
                     design$cluster[[1]], design$fpc,design$nPSU,
                     design$certainty,design$postStrata)
     
@@ -891,7 +968,12 @@ anova.svycoxph<-function(object,...){
     stop("No anova method for survey models")
 }
 
-svyglm<-function(formula,design,subset=NULL,...){
+svyglm<-function(formula, design, ...){
+  .svycheck(design)
+  UseMethod("svyglm",design)
+}
+
+svyglm.survey.design<-function(formula,design,subset=NULL,...){
 
       subset<-substitute(subset)
       subset<-eval(subset, design$variables, parent.frame())
@@ -941,10 +1023,14 @@ vcov.svyglm<-function(object,...)  object$cov.unscaled
 svy.varcoef<-function(glm.object,design){
     Ainv<-summary(glm.object)$cov.unscaled
     estfun<-model.matrix(glm.object)*resid(glm.object,"working")*glm.object$weights
-    B<-svyCprod(estfun,design$strata,design$cluster[[1]],design$fpc, design$nPSU,
-                design$certainty,design$postStrata)
+    if (inherits(design,"survey.design2"))
+      B<-svyrecvar(estfun,design$cluster,design$strata,design$fpc,postStrata=design$postStrata)
+    else
+      B<-svyCprod(estfun,design$strata,design$cluster[[1]],design$fpc, design$nPSU,
+                  design$certainty,design$postStrata)
+
     Ainv%*%B%*%Ainv
-}
+  }
 
 residuals.svyglm<-function(object,type = c("deviance", "pearson", "working", 
     "response", "partial"),...){
@@ -1161,9 +1247,13 @@ svymle<-function(loglike, gradient=NULL, design, formulas, start=NULL, control=l
        dimnames(rval$invinf)<-list(parnms,parnms)
 
        db<-rval$scores%*%rval$invinf
-
-       rval$sandwich<-svyCprod(db,design$strata,design$psu, design$fpc, design$nPSU,
-                               design$certainty, design$postStrata)
+       if (inherits(design,"survey.design2"))
+         rval$sandwich<-svyrecvar(db,design$cluster,design$strata, design$fpc, 
+                               postStrata=design$postStrata)
+       else
+         rval$sandwich<-svyCprod(db,design$strata,design$cluster[[1]],
+                                 design$fpc, design$nPSU,
+                                 design$certainty, design$postStrata)
        dimnames(rval$sandwich)<-list(parnms,parnms)
      }
   rval$call<-match.call()
@@ -1207,11 +1297,22 @@ summary.svymle<-function(object,stderr=c("robust","model"),...){
     print(object$design)
 }
 
-
+model.frame.survey.design<-function(formula,...){
+  formula$variables
+}
+model.frame.svyrep.design<-function(formula,...){
+  formula$variables
+}
 
 .First.lib<-function(...){
-    if (is.null(getOption("survey.lonely.psu")))
-        options(survey.lonely.psu="fail")
+  if (is.null(getOption("survey.lonely.psu")))
+    options(survey.lonely.psu="fail")
+  if (is.null(getOption("survey.ultimate.cluster")))
+    options(survey.ultimate.cluster=FALSE)
+  if (is.null(getOption("survey.want.obsolete")))
+    options(survey.want.obsolete=FALSE)
+  if (is.null(getOption("survey.adjust.domain.lonely")))
+    options(survey.adjust.domain.lonely=FALSE)
 }
 
 

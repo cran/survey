@@ -42,12 +42,12 @@ scdrep<-svrepdesign(data=scd, type="BRR", repweights=repweights)
 # ratio estimates
 svyratio(~alive, ~arrests, design=scddes)
 svyratio(~alive, ~arrests, design=scdnofpc)
-svrepratio(~alive, ~arrests, design=scd2brr)
-svrepratio(~alive, ~arrests, design=scdrep)
+svyratio(~alive, ~arrests, design=scd2brr)
+svyratio(~alive, ~arrests, design=scdrep)
 
 # or a logistic regression
-summary(svyglm(cbind(alive,arrests-alive)~1, family=binomial, design=scdnofpc))
-summary(svrepglm(cbind(alive,arrests-alive)~1, family=binomial, design=scdrep))
+summary(svyglm(cbind(alive,arrests-alive)~1, family=quasibinomial, design=scdnofpc))
+summary(svyglm(cbind(alive,arrests-alive)~1, family=quasibinomial, design=scdrep))
 
 }
 \keyword{datasets}

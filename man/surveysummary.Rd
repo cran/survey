@@ -1,11 +1,19 @@
 \name{surveysummary}
 \alias{svymean}
+\alias{svymean.survey.design}
+\alias{svymean.survey.design2}
+\alias{svymean.svyrep.design}
 \alias{svrepmean}
 \alias{svytotal}
+\alias{svytotal.survey.design}
+\alias{svytotal.survey.design2}
+\alias{svytotal.svyrep.design}
 \alias{print.svystat}
 \alias{print.svrepstat}
 \alias{svreptotal}
 \alias{svyvar}
+\alias{svyvar.survey.design}
+\alias{svyvar.svyrep.design}
 \alias{coef.svystat}
 \alias{vcov.svystat}
 \alias{coef.svrepstat}
@@ -25,13 +33,15 @@
 Compute means, variances, ratios and totals for data from complex surveys.
 }
 \usage{
-svymean(x, design, na.rm=FALSE,deff=FALSE) 
-svrepmean(x, design, na.rm=FALSE, rho=NULL, return.replicates=FALSE, deff=FALSE) 
-svyvar(x, design, na.rm=FALSE) 
-svrepvar(x, design, na.rm=FALSE, rho=NULL, return.replicates=FALSE) 
-svytotal(x, design, na.rm=FALSE,deff=FALSE) 
-svreptotal(x, design, na.rm=FALSE, rho=NULL, return.replicates=FALSE,
-deff=FALSE)
+\method{svymean}{survey.design}(x, design, na.rm=FALSE,deff=FALSE,...) 
+\method{svymean}{svyrep.design}(x, design, na.rm=FALSE, rho=NULL,
+  return.replicates=FALSE, deff=FALSE,...) 
+\method{svyvar}{survey.design}(x, design, na.rm=FALSE,...) 
+\method{svyvar}{svyrep.design}(x, design, na.rm=FALSE, rho=NULL,
+   return.replicates=FALSE,...) 
+\method{svytotal}{survey.design}(x, design, na.rm=FALSE,deff=FALSE,...) 
+\method{svytotal}{svyrep.design}(x, design, na.rm=FALSE, rho=NULL,
+   return.replicates=FALSE, deff=FALSE,...)
 cv(object,...)
 \method{coef}{svystat}(object,...)
 \method{coef}{svrepstat}(object,...)
@@ -74,9 +84,11 @@ population total.  Use \code{predict} on \code{\link{svyratio}},
 to get ratio or regression estimates of totals.
 
 The design effect compares the variance of a mean or total to the
-variance of a simple random sample of the same size.  Although strictly
-speaking this should be a simple random sample without replacement, we
-compute as if it were a simple random sample with replacement.
+variance from a study of the same size using simple random sampling
+without replacement. Note that the design effect will be incorrect if
+the weights have been rescaled so that they are not reciprocals of
+sampling probabilities.
+
 
 The \code{cv} function computes the coefficient of variation of a
 statistic such as ratio, mean or total. 
@@ -127,20 +139,20 @@ statistic such as ratio, mean or total.
   # replicate weights - jackknife (this is slow)
   jkstrat<-as.svrepdesign(dstrat)
   summary(jkstrat)
-  svrepmean(~api00, jkstrat)
-  svrepmean(~factor(stype),jkstrat)
-  svrepvar(~api00,jkstrat)
-  svrepquantile(~api00, jkstrat, c(.25,.5,.75))
-  svreptotal(~enroll, jkstrat)
-  svrepratio(~api.stu, ~enroll, jkstrat)
+  svymean(~api00, jkstrat)
+  svymean(~factor(stype),jkstrat)
+  svyvar(~api00,jkstrat)
+  svyquantile(~api00, jkstrat, c(.25,.5,.75))
+  svytotal(~enroll, jkstrat)
+  svyratio(~api.stu, ~enroll, jkstrat)
 
   # coefficients of variation
   cv(svytotal(~enroll,dstrat))
-  cv(svrepratio(~api.stu, ~enroll, jkstrat))
+  cv(svyratio(~api.stu, ~enroll, jkstrat))
 
   # extracting statistic and variance
   coef(svytotal(~enroll,dstrat))
-  vcov(svrepmean(~api00+api99,jkstrat))
+  vcov(svymean(~api00+api99,jkstrat))
 
   # Design effect
   a<-svymean(~api00, dclus1, deff=TRUE)
@@ -152,7 +164,7 @@ statistic such as ratio, mean or total.
   repweights<-2*cbind(c(1,0,1,0,1,0), c(1,0,0,1,0,1), c(0,1,1,0,0,1),
               c(0,1,0,1,1,0))
   scdrep<-svrepdesign(data=scd, type="BRR", repweights=repweights)
-  svrepmean(~arrests+alive, design=scdrep)
+  svymean(~arrests+alive, design=scdrep)
 
  }
 }

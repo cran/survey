@@ -2,6 +2,9 @@
 \alias{svyratio}
 \alias{svrepratio}
 \alias{print.svyratio}
+\alias{svyratio.survey.design}
+\alias{svyratio.survey.design2}
+\alias{svyratio.svyrep.design}
 \alias{predict.svyratio}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Ratio estimation}
@@ -10,8 +13,8 @@ Ratio estimation and estimates of totals based on ratios for complex
 survey samples.
 }
 \usage{
-svyratio(numerator, denominator, design)
-svrepratio(numerator, denominator, design)
+\method{svyratio}{survey.design2}(numerator, denominator, design,...)
+\method{svyratio}{svyrep.design}(numerator, denominator, design,...)
 \method{predict}{svyratio}(object, total, se=TRUE,...)
 }
 %- maybe also `usage' for other objects documented here.
@@ -25,7 +28,7 @@ svrepratio(numerator, denominator, design)
   \item{total}{vector of population totals for the denominator variables in
     \code{object}}
   \item{se}{Return standard errors?}
-  \item{...}{Other unused arguments to \code{predict}}
+  \item{...}{Other unused arguments for other methods}
 }
 
 \value{
@@ -58,8 +61,8 @@ scdrep<-svrepdesign(data=scd, type="BRR", repweights=repweights)
 # ratio estimates
 svyratio(~alive, ~arrests, design=scddes)
 svyratio(~alive, ~arrests, design=scdnofpc)
-svrepratio(~alive, ~arrests, design=scd2brr)
-svrepratio(~alive, ~arrests, design=scdrep)
+svyratio(~alive, ~arrests, design=scd2brr)
+svyratio(~alive, ~arrests, design=scdrep)
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

@@ -1,14 +1,69 @@
+2.9   Added full multistage sampling, involving a redesign of the survey.design 
+      object.  The old objects are deprecated; they may be converted with 
+      as.svydesign2.   Use options(survey.ultimate.cluster=TRUE) to get 
+      the same one-stage standard errors as earlier versions and
+      options(survey.want.obsolete=TRUE) to turn off the annoying warnings 
+      about old-style survey objects.  If you must create old-style survey
+      objects use oldsvydesign().
+
+      As a consequence of the redesign, most of the svyxxx functions
+      are now generic, with methods for both svydesign and svrepdesign
+      objects. Use svymean instead of svrepmean, for example.
+
+      Added more Hadamard matrices, including the Paley construction. 
+      brrweights() now finds designs of nearly optimal size for most surveys.
+
+      Faster svymean, svytotal for replicates, with less memory use.
+
+      Added "bootstrap" option for as.svrepdesign
+
+      svyby and ftable.svyby now handle Deff (expanded from a suggestion
+      by Tobias Verbeke)
+
+      svyhist() for probability-weighted histograms
+
+      added svycoxph() for replicate weight designs
+
+      The "lonely.psu" corrections will be applied to strata with a single
+      PSU in a subset (domain) if options("survey.adjust.domain.lonely") 
+      is TRUE.  The default is FALSE.
+
+      subset.survey.design was not working for post-stratified designs.
+
+      Added a PDF file with examples from UCLA ATS web site, including 
+      comparisons with WesVar and SUDAAN. (inst/ucla-examples.pdf)
+
+      Added slides from a talk at Vanderbilt University. 
+      (inst/survey-vanderbilt.pdf)
+
+      Fixed Deff to use simple random sampling without replacement. 
+      
+      Much faster confidence intervals for quantiles based on inverting a
+      Wald test are now default. These are less accurate in small
+      samples; the old method is still available.
+      (based on suggestion from Gillian Raab)
+
+
+2.8-4 Added a whole lot more references to the documentation.
+      
+      data(hospital) now has two sets of weights, one matching the
+      UCLA ATS site and one matching the original reference.
+      (from Tobias Verbeke)
+
+      summary.svyrep.design was reporting 1 replicates for compressed 
+      weights (but still computing correctly)
+
 2.8-3 postStratify for svydesign objects was giving too large standard errors
  
       Add deff() to extract design effects.
 
 2.8-2 rewrite cv() to use coef() and SE()
 
-2.8-1   Make Deff estimates work with ftable. (for Gillian Raab)
+2.8-1 Make Deff estimates work with ftable. (for Gillian Raab)
 
       ftable.svyby didn't work with a single by() variable (for Gillian Raab)
 
-      Missing values now allowed in svychisq(). (for Lee Siewersda)
+      Missing values now allowed in svychisq(). (for Lee Sieswerda)
 
 2.8   fix printing of svyby broken in 2.7
 
@@ -29,7 +84,8 @@
 
       hadamard() now finds smaller Hadamard matrices.
 
-      svyCprod warns if a subset has only one PSU in some stratum (Gillian Raab)
+      svyCprod warns if a subset has only one PSU in some stratum 
+      (Gillian Raab)
       
       Added tests/lonely.psu.R
 
@@ -101,16 +157,18 @@
 
 2.3-2 Fix for svyquantile confidence intervals.
 
-2.3-1 clearer warnings in svrVar when some replicates give NA . (Gillian Raab)
+2.3-1 clearer warnings in svrVar when some replicates give NA . 
+      (for Gillian Raab)
 
 2.3   svyquantile has confidence intervals, added svrepquantile.
 
-2.2-1 as.svrepdesign didn't pass options to brrweights (Fred Rohde)
+2.2-1 as.svrepdesign didn't pass options to brrweights (for Fred Rohde)
 
 2.2   published in Journal of Statistical Software  
       - If population size is specified, but not weights or probabilities, 
       work out the probabilities from the population size
-      - Clearer error message when some design information is NA (Tobias Verbeke)
+      - Clearer error message when some design information is NA 
+        (for Tobias Verbeke)
       - better update() methods
 
 2.0  Just a numbering change.
