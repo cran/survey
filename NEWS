@@ -1,3 +1,7 @@
+1.9-2	Added post-stratification of replicate-weights
+
+1.9-1   Bugfix: jknweights was requiring finite population correction.
+
 1.9 	- "certainty" option for single-PSU strata
         - Replication weight analyses (alpha version)
 

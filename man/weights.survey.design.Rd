@@ -1,6 +1,6 @@
 \name{weights.survey.design}
 \alias{weights.survey.design}
-\alias{weights.svrep.design}
+\alias{weights.svyrep.design}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Survey design weights}
 \description{

@@ -58,6 +58,7 @@ jknweights<-function(strata,psu, fpc=NULL, fpctype=c("population","fraction","co
   if (is.null(fpc)){
       fpc<-rep(1,nstrat)
       names(fpc)<-as.character(sunq)
+      fpctype<-"correction"
   } else if (length(fpc)==n){
       if (length(unique(fpc))>nstrat)
           stop("More distinct fpc values than strata")
@@ -849,4 +850,76 @@ svreptable<-function(formula, design, Ntotal=sum(weights(design, "sampling")), r
    attr(tbl, "call")<-match.call()
 
    tbl
+}
+
+
+
+postStratify<-function(design, strata, population, partial=FALSE){
+
+  if(!inherits(design, "svyrep.design"))
+    stop("design must be a survey with replicate weights")
+  
+  if(inherits(strata,"formula")){
+    mf<-substitute(model.frame(variables, data=design$variables))
+    variables<-eval.parent(mf)
+  }
+  strata<-as.data.frame(strata)
+
+  sampletable<-xtabs(design$pweights~.,data=strata)
+  sampletable<-as.data.frame(sampletable)
+
+  if (inherits(population,"table"))
+    population<-as.data.frame(population)
+  else if (!is.data.frame(population))
+    stop("population must be a table or dataframe")
+
+  if (!all(names(strata) %in% names(population)))
+    stop("Stratifying variables don't match")
+  nn<- names(population) %in% names(strata)
+  if (sum(nn)!=1)
+    stop("stratifying variables don't match")
+
+  names(population)[nn]<-"Pop.Freq"
+  
+  both<-merge(sampletable, population, by=names(strata), all=TRUE)
+
+  samplezero <- both$Freq %in% c(0, NA)
+  popzero <- both$Pop.Freq %in% c(0, NA)
+  both<-both[!(samplezero & popzero),]
+  
+  if (any(onlysample<- popzero & !samplezero)){
+    print(both[onlysample,])
+    stop("Strata in sample absent from population. This Can't Happen")
+  }
+  if (any(onlypop <- samplezero & !popzero)){
+    if (partial){
+      both<-both[!onlypop,]
+      warning("Some strata absent from sample: ignored")
+    } else {
+      print(both[onlypop,])
+      stop("Some strata absent from sample: use partial=TRUE to ignore them.")
+    }
+  }
+
+  reweight<-both$Pop.Freq/both$Freq
+  both$label <- do.call("interaction", both[,names(strata)])
+  designlabel <- do.call("interaction", strata)
+  index<-match(designlabel, both$label)
+
+  design$pweights<-design$pweights*reweight[index]
+
+  
+  if (design$combined.weights){
+    replicateFreq<- rowsum(repweights, match(designlabel, both$label), reorder=FALSE)
+    repreweight<- both$Pop.Freq/replicateFreq
+    design$repweights <- design$repweights*repreweight[index,]
+  } else {
+    replicateFreq<- rowsum(design$repweights*design$pweights, match(designlabel, both$label), reorder=FALSE)
+    repreweight<- both$Pop.Freq/replicateFreq
+    design$repweights <- design$repweights*repreweight[index,]/reweight[,index]
+  }
+
+  design$call<-sys.call()
+  
+  design
 }

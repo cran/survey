@@ -5,7 +5,9 @@
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Compute replicate weights }
 \description{
-  Compute replicate weights from a survey design.
+  Compute replicate weights from a survey design. These functions are
+  usually called from \code{\link{as.svrepdesign}} rather than directly
+  by the user.
 }
 \usage{
 brrweights(strata, psu, match = NULL, small = c("fail", "split",

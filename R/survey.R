@@ -313,7 +313,7 @@ svyCprod<-function(x, strata, psu, fpc, nPSU,
   if(is.null(strata)){
       x<-t(t(x)-colMeans(x))
   } else {
-      strata.means<-rowsum(x,strata, reorder=FALSE)/rowsum(rep(1,n),strata, reorder=FALSE)
+      strata.means<-drop(rowsum(x,strata, reorder=FALSE))/drop(rowsum(rep(1,n),strata, reorder=FALSE))
       if (!is.matrix(strata.means))
           strata.means<-matrix(strata.means, ncol=NCOL(x))
       x<- x- strata.means[ match(strata, unique(strata)),,drop=FALSE]
@@ -912,8 +912,10 @@ summary.svymle<-function(object,stderr=c("robust","model"),...){
 }
 
 
+
 .First.lib<-function(...){
     if (is.null(getOption("survey.lonely.psu")))
         options(survey.lonely.psu="fail")
 }
+
 

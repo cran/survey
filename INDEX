@@ -3,6 +3,7 @@ subset.survey.design    Subset of survey
 update.survey.design    Add variables to a survey design
 svrepdesign		Replication-weight designs
 as.svrepdesign		Convert svydesign to svrepdesign
+postStratify		Post-stratify a svrepdesign
 
 svycoxph                Survey-weighted generalised linear models.
 svyglm                  Survey-weighted generalised linear models.
