@@ -1,4 +1,5 @@
 \name{surveyoptions}
+\alias{surveyoptions}
 \alias{survey.lonely.psu}
 \alias{survey.ultimate.cluster}
 \alias{survey.adjust.domain.lonely}
@@ -16,10 +17,10 @@
     When \code{options("survey.ultimate.cluster")} is \code{TRUE},
     standard error estimation is based on independence of PSUs at the
     first stage of sampling, without using any information about
-    subsequent stages (this is what Stata and many other packages
-    do). When \code{FALSE}, finite population corrections and variances
-    are estimated recursively. See \code{\link{svyrecvar}} for more
-    information.
+    subsequent stages (this is what Stata (before version 9) and many
+    other packages do). When \code{FALSE}, finite population corrections
+    and variances are estimated recursively. See \code{\link{svyrecvar}}
+    for more information.
     
     Handling of strata with a single PSU that are not certainty PSUs is
     controlled by \code{options("survey.lonely.psu")}. The default
@@ -35,11 +36,13 @@
     \code{options("survey.adjust.domain.lonely")} is \code{TRUE} and
     \code{options("survey.lonely.psu")} is \code{"average"} or
     \code{"adjust"} the same adjustment for lonely PSUs will be used
-    within a domain.
+    within a domain. Note that this adjustment is not available for
+    replicate-weight designs, nor (currently) for raked,
+    post-stratified, or calibrated designs.
     
     The fourth option is \code{options("survey.want.obsolete")}. This
     controls the warnings about using the deprecated pre-2.9.0 survey
-    design objects.
+    design objects. 
     
   }
   

@@ -1,6 +1,6 @@
 
 R : Copyright 2005, The R Foundation for Statistical Computing
-Version 2.1.0 Under development (unstable) (2005-01-31), ISBN 3-900051-07-0
+Version 2.1.0 beta (2005-04-12), ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -161,6 +161,62 @@ Stratum (406) has only one PSU at stage 1 in: onestrat(x[index, , drop = FALSE],
 > svymean(~api00,ds1)
         mean     SE
 api00 645.14 5.8909
+Warning message:
+Stratum (406) has only one PSU at stage 1 in: onestrat(x[index, , drop = FALSE], clusters[index], nPSU[index][1],  
+> 
+> ## with adjustment
+> options(survey.adjust.domain.lonely=TRUE)
+> ds<-svydesign(id = ~1, weights = ~pw, strata = ~dnum, data = subset(apiclus1,dnum !=413))
+> ds1<-ds[-31,]
+> summary(ds1)
+Stratified Independent Sampling design
+svydesign(id = ~1, weights = ~pw, strata = ~dnum, data = subset(apiclus1, 
+    dnum != 413))
+Probabilities:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.02954 0.02954 0.02954 0.02954 0.02954 0.02954 
+Stratum Sizes: 
+           61 135 178 197 255 406 437 448 510 568 637 716 778 815
+obs        13  34   4  13  16   1   4  12  21   9  11  37   2   4
+design.PSU 13  34   4  13  16   2   4  12  21   9  11  37   2   4
+actual.PSU 13  34   4  13  16   1   4  12  21   9  11  37   2   4
+Data variables:
+ [1] "cds"      "stype"    "name"     "sname"    "snum"     "dname"   
+ [7] "dnum"     "cname"    "cnum"     "flag"     "pcttest"  "api00"   
+[13] "api99"    "target"   "growth"   "sch.wide" "comp.imp" "both"    
+[19] "awards"   "meals"    "ell"      "yr.rnd"   "mobility" "acs.k3"  
+[25] "acs.46"   "acs.core" "pct.resp" "not.hsg"  "hsg"      "some.col"
+[31] "col.grad" "grad.sch" "avg.ed"   "full"     "emer"     "enroll"  
+[37] "api.stu"  "fpc"      "pw"      
+> 
+> options(survey.lonely.psu="fail")
+> try(svymean(~api00,ds1))
+        mean     SE
+api00 645.14 5.8909
+Warning message:
+Stratum (406) has only one PSU at stage 1 in: onestrat(x[index, , drop = FALSE], clusters[index], nPSU[index][1],  
+> options(survey.lonely.psu="remove")
+> svymean(~api00,ds1)
+        mean     SE
+api00 645.14 5.8909
+Warning message:
+Stratum (406) has only one PSU at stage 1 in: onestrat(x[index, , drop = FALSE], clusters[index], nPSU[index][1],  
+> options(survey.lonely.psu="certainty")
+> svymean(~api00,ds1)
+        mean     SE
+api00 645.14 5.8909
+Warning message:
+Stratum (406) has only one PSU at stage 1 in: onestrat(x[index, , drop = FALSE], clusters[index], nPSU[index][1],  
+> options(survey.lonely.psu="adjust")
+> svymean(~api00,ds1)
+        mean     SE
+api00 645.14 5.9119
+Warning message:
+Stratum (406) has only one PSU at stage 1 in: onestrat(x[index, , drop = FALSE], clusters[index], nPSU[index][1],  
+> options(survey.lonely.psu="average")
+> svymean(~api00,ds1)
+        mean     SE
+api00 645.14 6.0914
 Warning message:
 Stratum (406) has only one PSU at stage 1 in: onestrat(x[index, , drop = FALSE], clusters[index], nPSU[index][1],  
 > 

@@ -48,3 +48,20 @@ options(survey.lonely.psu="adjust")
 svymean(~api00,ds1)
 options(survey.lonely.psu="average")
 svymean(~api00,ds1)
+
+## with adjustment
+options(survey.adjust.domain.lonely=TRUE)
+ds<-svydesign(id = ~1, weights = ~pw, strata = ~dnum, data = subset(apiclus1,dnum !=413))
+ds1<-ds[-31,]
+summary(ds1)
+
+options(survey.lonely.psu="fail")
+try(svymean(~api00,ds1))
+options(survey.lonely.psu="remove")
+svymean(~api00,ds1)
+options(survey.lonely.psu="certainty")
+svymean(~api00,ds1)
+options(survey.lonely.psu="adjust")
+svymean(~api00,ds1)
+options(survey.lonely.psu="average")
+svymean(~api00,ds1)

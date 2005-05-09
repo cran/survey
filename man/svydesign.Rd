@@ -81,14 +81,14 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL)
    within clusters at each stage except possibly the last.
    
    
-The \code{dim}, \code{"["}, \code{"[<-"} and na.action methods for
-\code{survey.design} objects operate on the dataframe specified by
-\code{variables} and ensure that the design information is properly
-updated to correspond to the new data frame.  With the \code{"[<-"}
-method the new value can be a \code{survey.design} object instead of a
-data frame, but only the data frame is used. See also
-\code{\link{subset.survey.design}} for a simple way to select
-subpopulations.
+   The \code{dim}, \code{"["}, \code{"[<-"} and na.action methods for
+   \code{survey.design} objects operate on the dataframe specified by
+   \code{variables} and ensure that the design information is properly
+   updated to correspond to the new data frame.  With the \code{"[<-"}
+   method the new value can be a \code{survey.design} object instead of a
+   data frame, but only the data frame is used. See also
+   \code{\link{subset.survey.design}} for a simple way to select
+   subpopulations.
 
 The \code{model.frame} method extracts the observed data.
 

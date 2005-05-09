@@ -42,11 +42,11 @@ Compute means, variances, ratios and totals for data from complex surveys.
 \method{svytotal}{survey.design}(x, design, na.rm=FALSE,deff=FALSE,...) 
 \method{svytotal}{svyrep.design}(x, design, na.rm=FALSE, rho=NULL,
    return.replicates=FALSE, deff=FALSE,...)
-cv(object,...)
 \method{coef}{svystat}(object,...)
 \method{coef}{svrepstat}(object,...)
 \method{vcov}{svystat}(object,...)
 \method{vcov}{svrepstat}(object,...)
+cv(object,...)
 deff(object, quietly=FALSE,...)
 }
 %- maybe also `usage' for other objects documented here.
@@ -56,7 +56,7 @@ deff(object, quietly=FALSE,...)
   \item{na.rm}{Should cases with missing values be dropped?}
   \item{rho}{parameter for Fay's variance estimator in a BRR design}
   \item{return.replicates}{Return the replicate means?}
-  \item{deff}{Return the design effect}
+  \item{deff}{Return the design effect (see below)}
   \item{object}{The result of one of the other survey summary functions}
   \item{quietly}{Don't warn when there is no design effect computed}
   \item{...}{additional arguments to \code{cv} methods,not currently used}
@@ -69,7 +69,9 @@ table functions, these also give precision estimates that incorporate
 the effects of stratification and clustering.
 
 Factor variables are converted to sets of indicator variables for each
-category in computing means and totals.
+category in computing means and totals. Combining this with the
+\code{\link{interaction}} function, allows crosstabulations. See
+\code{\link{ftable.svystat}} for formatting the output.
 
 With \code{na.rm=TRUE}, all cases with missing data are removed. With
 \code{na.rm=FALSE} cases with missing data are not removed and so will
@@ -87,7 +89,10 @@ The design effect compares the variance of a mean or total to the
 variance from a study of the same size using simple random sampling
 without replacement. Note that the design effect will be incorrect if
 the weights have been rescaled so that they are not reciprocals of
-sampling probabilities.
+sampling probabilities.  To obtain an estimate of the design effect
+comparing to simple random sampling with replacement, which does not
+have this requirement, use \code{deff="replace"}. This with-replacement
+design effect is the square of Kish's "deft".
 
 
 The \code{cv} function computes the coefficient of variation of a
@@ -104,8 +109,7 @@ statistic such as ratio, mean or total.
 \author{Thomas Lumley}
 
 \seealso{ \code{\link{svydesign}}, \code{\link{as.svrepdesign}},
-  \code{\link{svrepdesign}}, \code{\link{svyCprod}}, \code{\link{mean}},
-  \code{\link{var}}, \code{\link{svyquantile}} }
+  \code{\link{svrepdesign}},  \code{\link{svyquantile}} ,  \code{\link{ftable.svystat}}}
 
 \examples{
 
@@ -122,6 +126,7 @@ statistic such as ratio, mean or total.
   summary(dclus1)
   svymean(~api00, dclus1, deff=TRUE)
   svymean(~factor(stype),dclus1)
+  svymean(~interaction(stype, comp.imp), dclus1)
   svyquantile(~api00, dclus1, c(.25,.5,.75))
   svyvar(~api00, dclus1)
   svytotal(~enroll, dclus1, deff=TRUE)
@@ -135,7 +140,7 @@ statistic such as ratio, mean or total.
   svyvar(~api00, dstrat)
   svytotal(~enroll, dstrat)
   svyratio(~api.stu, ~enroll, dstrat)
-
+  
   # replicate weights - jackknife (this is slow)
   jkstrat<-as.svrepdesign(dstrat)
   summary(jkstrat)
@@ -155,8 +160,11 @@ statistic such as ratio, mean or total.
   vcov(svymean(~api00+api99,jkstrat))
 
   # Design effect
-  a<-svymean(~api00, dclus1, deff=TRUE)
-  a
+  svymean(~api00, dstrat, deff=TRUE)
+  svymean(~api00, dstrat, deff="replace")
+  svymean(~api00, jkstrat, deff=TRUE)
+  svymean(~api00, jkstrat, deff="replace")
+ (a<-svytotal(~enroll, dclus1, deff=TRUE))
   deff(a)
 
   # BRR method

@@ -11,13 +11,15 @@ Extract weights from a survey design object.
 \method{weights}{survey.design}(object, ...)
 \method{weights}{svyrep.design}(object,
 type=c("replication","sampling","analysis"), ...)
-\method{weights}{survey_fpc}(object,...)
+\method{weights}{survey_fpc}(object,final=TRUE,...)
 } 
 %- maybe also `usage' for other objects documented here.
 \arguments{
   \item{object}{Survey design object}
   \item{type}{Type of weights: \code{"analysis"} combines sampling and
     replication weights.}
+  \item{final}{If \code{FALSE} return a data frame with sampling
+    weights at each stage of sampling.}
   \item{\dots}{Other arguments ignored }
 }
 

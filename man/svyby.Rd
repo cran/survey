@@ -6,7 +6,7 @@
 Compute survey statistics on subsets of a survey defined by factors. 
 }
 \usage{
-svyby(formula, by, design, FUN, ..., deff=FALSE,keep.var = FALSE, keep.names = TRUE)
+svyby(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE, keep.names = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -29,7 +29,8 @@ svyby(formula, by, design, FUN, ..., deff=FALSE,keep.var = FALSE, keep.names = T
 
 \note{ Asking for a design effect (\code{deff=TRUE}) from a function
   that does not produce one will cause an error or incorrect formatting
-  of the output.
+  of the output. The same will occur with \code{keep.var=TRUE} if the
+  function does not compute a standard error.
 }
 \seealso{\code{\link{svytable}} and \code{\link{ftable.svystat}} for
   contingency tables, \code{\link{ftable.svyby}} for pretty-printing of \code{svyby} }
@@ -38,10 +39,12 @@ data(api)
 dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
 
 svyby(~api99, ~stype, dclus1, svymean)
-svyby(~api99, ~stype, dclus1, svyquantile, quantiles=0.5)
+svyby(~api99, ~stype, dclus1, svyquantile, quantiles=0.5,ci=TRUE)
+## without ci=TRUE svyquantile does not compute standard errors
+svyby(~api99, ~stype, dclus1, svyquantile, quantiles=0.5, keep.var=FALSE)
 svyby(~api99, list(school.type=apiclus1$stype), dclus1, svymean)
 svyby(~api99+api00, ~stype, dclus1, svymean, deff=TRUE)
-svyby(~api99+api00, ~stype+sch.wide, dclus1, svymean, keep.var=TRUE)
+svyby(~api99+api00, ~stype+sch.wide, dclus1, svymean, keep.var=FALSE)
 
 rclus1<-as.svrepdesign(dclus1)
 
@@ -49,7 +52,7 @@ svyby(~api99, ~stype, rclus1, svymean)
 svyby(~api99, ~stype, rclus1, svyquantile, quantiles=0.5)
 svyby(~api99, list(school.type=apiclus1$stype), rclus1, svymean)
 svyby(~enroll,~stype, rclus1,svytotal, deff=TRUE)
-svyby(~api99+api00, ~stype+sch.wide, rclus1, svymean, keep.var=TRUE)
+svyby(~api99+api00, ~stype+sch.wide, rclus1, svymean, keep.var=FALSE)
 
 
 }

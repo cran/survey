@@ -40,8 +40,11 @@ rake(design, sample.margins, population.margins, control = list(maxit =
  A raked survey design. 
 }
 
-\seealso{\code{\link{as.svrepdesign}}, \code{\link{svrepdesign}},
-  \code{\link{postStratify}}, \code{\link{compressWeights}} }
+\seealso{
+  \code{\link{postStratify}}, \code{\link{compressWeights}}
+  
+  \code{\link{calibrate}} for other ways to use auxiliary information.
+}
 \examples{
 data(api)
 dclus1 <- svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
@@ -69,6 +72,13 @@ svytable(~sch.wide, rclus1r, round=TRUE)
 xtabs(~stype+sch.wide, apipop)
 svytable(~stype+sch.wide, rclus1r, round=TRUE)
 
+## Do it for a design without replicate weights
+dclus1r<-rake(dclus1, list(~stype,~sch.wide), list(pop.types, pop.schwide))
+
+svymean(~api00, dclus1r)
+svytotal(~enroll, dclus1r)
+
+
 ## compare to joint post-stratification
 ## (only possible if joint population table is known)
 ##
@@ -79,6 +89,11 @@ svytable(~stype+sch.wide, rclus1ps, round=TRUE)
 svymean(~api00, rclus1ps)
 svytotal(~enroll, rclus1ps)
 
+## Example of raking with partial joint distributions
+pop.imp<-data.frame(comp.imp=c("No","Yes"),Freq=c(1712,4482))
+dclus1r2<-rake(dclus1, list(~stype+sch.wide, ~comp.imp),
+               list(pop.table, pop.imp))
+svymean(~api00, dclus1r2)
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
 \keyword{manip}

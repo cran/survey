@@ -14,7 +14,7 @@ maximises an estimated population likelihood, it is not the sample MLE.
 }
 \usage{
 svymle(loglike, gradient = NULL, design, formulas, start = NULL, control
-= list(maxit=1000), na.action="na.fail", ...)
+= list(maxit=1000), na.action="na.fail", method=NULL, ...)
 \method{summary}{svymle}(object, stderr=c("robust", "model"),...)
 }
 %- maybe also `usage' for other objects documented here.
@@ -26,6 +26,7 @@ svymle(loglike, gradient = NULL, design, formulas, start = NULL, control
   \item{start}{Starting values for parameters}
   \item{control}{control options for \code{\link{optim}}}
   \item{na.action}{Handling of \code{NA}s}
+  \item{method}{passed to \code{\link{optim}}}
   \item{\dots}{Arguments to \code{loglike} and \code{gradient} that are
     not to be optimised over.}
   \item{object}{\code{svymle} object}

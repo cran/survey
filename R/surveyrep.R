@@ -443,17 +443,6 @@ svrepdesign<-function(variables=NULL,repweights=NULL, weights=NULL,
 
 
 print.svyrep.design<-function(x,...){
-  cat("Survey with replicate weights:\nCall: ")
-  print(x$call)
-}
-
-summary.svyrep.design<-function(object,...){
-  class(object)<-c("summary.svyrep.design", class(object))
-  object
-}
-
-print.summary.svyrep.design<-function(x,...){
-  cat("Survey with replicate weights:\n")
   cat("Call: ")
   print(x$call)
   if (x$type=="Fay")
@@ -466,11 +455,22 @@ print.summary.svyrep.design<-function(x,...){
     cat("Stratified cluster jackknife (JKn) ")
   if (x$type=="bootstrap")
     cat("Survey bootstrap ")
-  nweights<-if (inherits(x$repweights, "repweights_compressed")) NCOL(x$repweights$weights)  else NCOL(x$repweights)
+  nweights<-ncol(x$repweights)
   cat("with", nweights,"replicates.\n")
+}
+
+summary.svyrep.design<-function(object,...){
+  class(object)<-c("summary.svyrep.design", class(object))
+  object
+}
+
+print.summary.svyrep.design<-function(x,...){
+  class(x)<-class(x)[-1]
+  print(x)
   cat("Variables: \n")
   print(names(x$variables)) 
 }
+
 
 
 image.svyrep.design<-function(x, ..., col=grey(seq(.5,1,length=30)),
@@ -724,11 +724,12 @@ svymean.svyrep.design<-svrepmean<-function(x,design, na.rm=FALSE, rho=NULL,
   attr(rval, "statistic")<-"mean"
   if (return.replicates)
     rval<-list(mean=rval, replicates=repmeans)
-  if (deff){
+  if (is.character(deff) || deff){
       nobs<-length(design$pweights)
       npop<-sum(design$pweights)
-      vsrs<-svrepvar(x,design,na.rm=na.rm, return.replicates=FALSE)/length(design$pweights)
-      vsrs<-vsrs*(npop-nobs)/npop
+      vsrs<-unclass(svrepvar(x,design,na.rm=na.rm, return.replicates=FALSE))/length(design$pweights)
+      if (deff!="replace")
+        vsrs<-vsrs*(npop-nobs)/npop
       attr(rval,"deff") <- v/vsrs
   }
   class(rval)<-"svrepstat"
@@ -795,9 +796,10 @@ svytotal.svyrep.design<-svreptotal<-function(x,design, na.rm=FALSE, rho=NULL,
   attr(rval,"statistic")<-"total"
   if (return.replicates)
     rval<-list(mean=rval, replicates=repmeans)
-  if (deff){
-    vsrs<-svrepvar(x,design, return.replicates=FALSE, na.rm=na.rm)*sum(design$pweights^2)
-    vsrs<-vsrs*(sum(design$pweights)-length(design$pweights))/sum(design$pweights)
+  if (is.character(deff) || deff){
+    vsrs<-unclass(svrepvar(x,design, return.replicates=FALSE, na.rm=na.rm))*sum(design$pweights^2)
+    if (deff!="replace")
+      vsrs<-vsrs*(sum(design$pweights)-length(design$pweights))/sum(design$pweights)
     attr(rval,"deff")<-v/vsrs
   }
   class(rval)<-"svrepstat"
@@ -1170,7 +1172,7 @@ print.svrepstat<-function(x,...){
     if (is.null(deff))
       colnames(m)<-c(attr(x,"statistic"),"SE")
     else {
-      m<-cbind(m,deff(m))
+      m<-cbind(m,deff(x))
       colnames(m)<-c(attr(x,"statistic"),"SE","DEff")
     }
     printCoefmat(m)
@@ -1390,9 +1392,13 @@ rake<-function(design, sample.margins, population.margins,
     if (control$verbose)
         print(oldtable)
 
+    oldpoststrata<-design$postStrata
     iter<-0
     converged<-FALSE
     while(iter < control$maxit){
+        ## we don't want to accumulate more poststrata with each iteration
+        design$postStrata<-oldpoststrata
+        
         for(i in 1:nmar){
             design<-postStratify(design, strata[[i]],
                                  population.margins[[i]],

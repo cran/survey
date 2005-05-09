@@ -1,0 +1,21 @@
+ - Score-based confidence intervals for glms
+
+ - More general HT estimator for sampling without replacement
+ 	- using joint inclusion probabilities
+	- using population first-order inclusion probabilities
+	- using Overton's approximation and sample inclusion probabilities
+
+ - Calibration estimators
+	- Poststratifying to a logistic model as for two-phase case-control
+	  and marginal structural models
+	- GREG estimators
+
+ - Survival curve estimation (the standard errors are the only 
+	non-trivial part of this)
+
+ - Large data sets: design object with references to data stored in a 
+   database. Probably no regression models.
+
+ - GEE. 
+
+ - Parametric survival models.

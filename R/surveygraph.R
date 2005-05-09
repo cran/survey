@@ -25,19 +25,40 @@ svyplot<-function(formula,
            symbols(X,Y,circles=sqrt(W),inches=inches,...)
          },
          hex={
-           tmp<-hcell(X,Y)
-           rval<-hexbin(X,Y)
-           rval$cnt<-tapply(W,tmp$cell,sum)
-           rval$xcm<-tapply(1:length(X), tmp$cell,
+           if (exists("hcell")) {
+             ## old version of hexbin
+             rval<-hexbin(X,Y)
+             cell<-hcell(X,Y)$cell
+             rval$cnt<-tapply(W,cell,sum)
+           rval$xcm<-tapply(1:length(X), cell,
                           function(ii) weighted.mean(X[ii],W[ii]))
-           rval$ycm<-tapply(1:length(Y), tmp$cell,
+           rval$ycm<-tapply(1:length(Y), cell,
                            function(ii) weighted.mean(Y[ii],W[ii]))
+           } else {
+             ## new version
+             rval<-hexbin(X,Y,ID=TRUE)
+             cell<-rval@cID
+             rval@count<-as.vector(tapply(W,cell,sum))
+             rval@xcm<-as.vector(tapply(1:length(X), cell,
+                              function(ii) weighted.mean(X[ii],W[ii])))
+             rval@ycm<-as.vector(tapply(1:length(Y), cell,
+                              function(ii) weighted.mean(Y[ii],W[ii])))
+           }
+           
            plot(rval,legend=legend,style="centroids",...)
          },
          grayhex={
-           tmp<-hcell(X,Y)
-           rval<-hexbin(X,Y)
-           rval$cnt<-tapply(W,tmp$cell,sum)
+           if (exists("hcell")) {
+             ## old version of hexbin
+             rval<-hexbin(X,Y)
+             cell<-hcell(X,Y)$cell
+             rval$cnt<-tapply(W,cell,sum)
+         } else {
+             ## new version
+             rval<-hexbin(X,Y,ID=TRUE)
+             cell<-rval@cID
+             rval@count<-as.vector(tapply(W,cell,sum))
+           }
            plot(rval, legend=legend,...)
          },
          subsample={

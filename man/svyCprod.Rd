@@ -11,17 +11,17 @@ before version 2.9, \code{onestage} is called by \code{\link{svyrecvar}}
 for post-2.9 design objects.
 }
 \usage{
-svyCprod(x, strata, psu, fpc, nPSU,certainty=NULL, postStrata=NULL
+svyCprod(x, strata, psu, fpc, nPSU,certainty=NULL, postStrata=NULL,
       lonely.psu=getOption("survey.lonely.psu"))
 onestage(x, strata, clusters, nPSU, fpc,
-      lonely.psu=getOption("survey.lonely.psu"),stage=0)
+      lonely.psu=getOption("survey.lonely.psu"),stage=0,cal)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
   \item{x}{A vector or matrix}
   \item{strata}{A vector of stratum indicators (may be \code{NULL} for \code{svyCprod})}
-  \item{psu,clusters}{A vector of cluster indicators (may be \code{NULL}
-  for \code{svyCprod})}
+  \item{psu}{A vector of cluster indicators (may be \code{NULL})}
+  \item{clusters}{A vector of cluster indicators }
   \item{fpc}{A data frame (\code{svyCprod}) or vector (\code{onestage})
     of population stratum sizes, or \code{NULL}}
   \item{nPSU}{Table (\code{svyprod}) or vector (\code{onestage})
@@ -33,7 +33,7 @@ onestage(x, strata, clusters, nPSU, fpc,
     \code{"fail"}, \code{"certainty"}, \code{"average"}. See Details
     below}
   \item{stage}{Used internally to track the depth of recursion}
-
+  \item{cal}{Used to pass calibration information at stages below the population}
 }
 \details{
  The observations for each cluster are added, then centered within each
@@ -81,10 +81,10 @@ For strata with a single PSU in a subset (domain) the variance formula
 gives a value that is well-defined and positive, but not typically
 correct. If \code{options("survey.adjust.domain.lonely")} is \code{TRUE}
 and \code{options("survey.lonely.psu")} is \code{"adjust"} or
-\code{"average"}, strata with a single PSU in a subset will be treated
-like those with a single PSU in the sample.  I am not aware of any
-theoretical study of this procedure, but it should at least be
-conservative.
+\code{"average"}, and no post-stratification or G-calibration has been
+done, strata with a single PSU in a subset will be treated like those
+with a single PSU in the sample.  I am not aware of any theoretical
+study of this procedure, but it should at least be conservative.
 
 }
 \value{
@@ -94,7 +94,7 @@ conservative.
 
 \references{Binder, David A. (1983).  On the variances of asymptotically normal estimators from complex surveys.  International Statistical Review, 51, 279- 292. }
 
-\seealso{\code{\link{svydesign}}, \code{\link{svyrecvar}}, \code{\link{svy.varcoef}}, \code{\link{postStratify}} }
+\seealso{\code{\link{svydesign}}, \code{\link{svyrecvar}}, \code{\link{surveyoptions}}, \code{\link{postStratify}} }
 
 \examples{
 }

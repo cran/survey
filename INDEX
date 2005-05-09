@@ -3,6 +3,7 @@ subset.survey.design    Subset of survey
 update.survey.design    Add variables to a survey design
 postStratify            Post-stratify a survey design
 rake                    Rake a survey design
+calibrate		G-calibration (GREG) for survey designs
 svrepdesign             Replication-weight designs
 as.svrepdesign          Convert svydesign to svrepdesign
 subset.svyrep.design    Subset of svrepdesign

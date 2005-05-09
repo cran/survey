@@ -5,7 +5,10 @@
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Subset of survey}
 \description{
-Restrict a survey design to a subpopulation, keeping the original design information about number of clusters, strata. 
+Restrict a survey design to a subpopulation, keeping the original design
+information about number of clusters, strata.   If the design has no
+post-stratification or calibration data the subset will use
+proportionately less memory.
 }
 \usage{
 \method{subset}{survey.design}(x, subset, ...)

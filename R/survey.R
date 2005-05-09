@@ -231,19 +231,16 @@ print.survey.design<-function(x,varnames=FALSE,design.summaries=FALSE,...){
 "[.survey.design"<-function (x,i, ...){
   
   if (!missing(i)){ 
-    x$variables<-"[.data.frame"(x$variables,i,...,drop=FALSE)
-    x$cluster<-x$cluster[i,,drop=FALSE]
-    x$prob<-x$prob[i]
-    x$allprob<-x$allprob[i,,drop=FALSE]
-    x$strata<-x$strata[i]
-     if (!is.null(x$postStrata)){
-      ps<-x$postStrata
-      for (j in length(ps)){
-        w<-attr(ps[[j]],"weights")
-        ps[[j]]<-ps[[j]][i]
-        attr(ps[[j]],"weights")<-w[i]
-      }
-      x$postStrata<-ps
+    if (is.calibrated(design)){
+      tmp<-x$prob[i,]
+      x$prob<-rep(Inf, length(x$prob))
+      x$prob[i,]<-tmp
+    } else {
+      x$variables<-"[.data.frame"(x$variables,i,...,drop=FALSE)
+      x$cluster<-x$cluster[i,,drop=FALSE]
+      x$prob<-x$prob[i]
+      x$allprob<-x$allprob[i,,drop=FALSE]
+      x$strata<-x$strata[i]
     }
   } else {
     x$variables<-x$variables[,...,drop=FALSE]
@@ -481,8 +478,7 @@ svyCprod<-function(x, strata, psu, fpc, nPSU, certainty=NULL, postStrata=NULL,
         if (lonely.psu=="adjust")
           xs<-strata.means[match(s,ss),,drop=FALSE]
       } else if (obsn[match(s,names(obsn))]==1 && !this.certain){
-        ## stratum with only 1 cluster left after subsetting leads to zero variance, which
-        ## is standard but presumably undesirable.
+        ## stratum with only 1 cluster left after subsetting 
         warning("Stratum ",s," has only one PSU in this subset.")
         if (lonely.psu=="adjust")
           xs<-strata.means[match(s,ss),,drop=FALSE]
@@ -542,7 +538,7 @@ svymean.survey.design<-function(x,design, na.rm=FALSE,deff=FALSE,...){
   attr(average,"var")<-v
   attr(average,"statistic")<-"mean"
   class(average)<-"svystat"
-  if (deff){
+  if (is.character(deff) || deff){
     nobs<-NROW(design$cluster)
     vsrs<-svyvar(x,design,na.rm=na.rm)/nobs
     vsrs<-vsrs*(psum-nobs)/psum
@@ -631,10 +627,11 @@ svytotal.survey.design<-function(x,design, na.rm=FALSE, deff=FALSE,...){
   N<-sum(1/design$prob)
   m <- svymean(x, design, na.rm=na.rm)
   total<-m*N
-  attr(total, "var")<-v<-svyCprod(x/design$prob,design$strata, design$cluster[[1]], design$fpc,
+  attr(total, "var")<-v<-svyCprod(x/design$prob,design$strata,
+                                  design$cluster[[1]], design$fpc,
                                   design$nPSU,design$certainty,design$postStrata)
   attr(total,"statistic")<-"total"
-  if (deff){
+  if (is.character(deff) || deff){
     vsrs<-svyvar(x,design)*sum(weights(design)^2)
     vsrs<-vsrs*(N-NROW(design$cluster))/N
     attr(total,"deff")<-v/vsrs
@@ -763,6 +760,10 @@ print.svyquantile<-function(x,...){
     print(list(quantiles=x$quantiles, CIs=x$CIs))
 }
 
+SE.svyratio<-function(object,...){
+  sqrt(object$var)
+}
+
 svyratio<-function(numerator,denominator, design,...){
   .svycheck(design)
   UseMethod("svyratio",design)
@@ -804,6 +805,15 @@ svyratio.survey.design<-function(numerator, denominator, design,...){
     
   }
 
+print.svyratio_separate<-function(x,...){
+  cat("Stratified ratio estimate: ")
+  print(x$call)
+  for(r in x$ratios) {
+    print(r)
+  }
+  invisible(x)
+}
+
 print.svyratio<-function(x,...){
   cat("Ratio estimator: ")
   print(x$call)
@@ -821,8 +831,39 @@ predict.svyratio<-function(object, total, se=TRUE,...){
     return(object$ratio*total)
 }
 
+predict.svyratio_separate<-function(object, total, se=TRUE,...){
+
+  if (length(total)!=length(object$ratios))
+    stop("Number of strata differ in ratio object and totals.")
+  if (!is.null(names(total)) && !is.null(levels(object$strata))){
+    if (!setequal(names(total), levels(object$strata)))
+      warning("Names of strata differ in ratio object and totals")
+    else if (!all(names(total)==levels(object$strata))){
+      warning("Reordering supplied totals to make their names match the ratio object")
+      total<-total[match(names(total),levels(object$strata))]
+    }
+  }
+  totals<-mapply(predict, object=object$ratios, total=total,se=se,...,SIMPLIFY=FALSE)
+
+  if(se){
+    rval<-totals[[1]]$total
+    v<-totals[[1]]$se^2
+    for(ti in totals[-1]) {
+      rval<-rval+ti$total
+      v<-v+ti$se^2
+    }
+    list(total=rval,se=sqrt(v))
+  } else {
+    rval<-totals[[1]]
+    for (ti in totals[-1]) rval<-rval+ti
+    rval
+  }
+
+}
+
+
 cv.svyratio<-function(object,...){
-  object$ratio/sqrt(object$var)
+  sqrt(object$var)/object$ratio
 }
 
 svytable<-function(formula, design, ...){
@@ -1110,9 +1151,11 @@ extractAIC.svyglm<-function(fit,...){
 }
 
 
-svymle<-function(loglike, gradient=NULL, design, formulas, start=NULL, control=list(maxit=1000), na.action="na.fail", ...){
-  
- method<-if(is.null(gradient)) "Nelder-Mead" else "BFGS"
+svymle<-function(loglike, gradient=NULL, design, formulas,
+                 start=NULL, control=list(maxit=1000),
+                 na.action="na.fail", method=NULL,...){
+  if(is.null(method))
+    method<-if(is.null(gradient)) "Nelder-Mead" else "BFGS"
 
   if (!inherits(design,"survey.design")) 
 	stop("design is not a survey.design")
@@ -1131,7 +1174,7 @@ svymle<-function(loglike, gradient=NULL, design, formulas, start=NULL, control=l
 	else
 	  y<-eval(y,data,parent.frame())
 	formulas[1]<-NULL
-	if (NCOL(y)>1) stop("Y has more than one column")
+	if (FALSE && NCOL(y)>1) stop("Y has more than one column")
     }   else {
   	## one formula must have response
 	has.response<-sapply(formulas,length)==3
@@ -1188,9 +1231,9 @@ svymle<-function(loglike, gradient=NULL, design, formulas, start=NULL, control=l
   } else {  
      fnargs<-names(formals(loglike))[-1]
      grargs<-names(formals(gradient))[-1]
-     if(!identical(fnargs,grargs)) stop("loglike and gradient have different arguments.")
+     if(!identical(fnargs,grargs))
+       stop("loglike and gradient have different arguments.")
      reorder<-na.omit(match(grargs,nms[-1]))
-     ##FIXME: need to convert d/deta into d/dtheta using modelmatrix.
      grad<-function(theta,...){
        args<-vector("list",length(nms))
        args[[1]]<-Y
@@ -1219,7 +1262,9 @@ svymle<-function(loglike, gradient=NULL, design, formulas, start=NULL, control=l
 	stop("starting values wrong length")
   }
 
-  rval<-optim(theta0, objectivefn, grad,control=control,hessian=TRUE,method=method,...)
+  
+  rval<-optim(theta0, objectivefn, grad,control=control,
+              hessian=TRUE,method=method,...)
  
   if (rval$conv!=0) warning("optim did not converge")
 

@@ -29,7 +29,7 @@ svychisq<-function(formula, design,
   fsat<-eval(bquote(~interaction(factor(.(rows)),factor(.(cols)))-1))
   mm<-model.matrix(fsat,model.frame(fsat, design$variables,na.action=na.pass))
   N<-nrow(mm)
-  nu <- length(unique(design$cluster[,1]))-length(unique(design$strata))
+  nu <- length(unique(design$cluster[,1]))-length(unique(design$strata[,1]))
 
 
   warn<-options(warn=-1) ## turn off the small-cell count warning.

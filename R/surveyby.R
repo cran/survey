@@ -2,7 +2,7 @@
 ##  tables of statistics.
 ##
 
-svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=FALSE,
+svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
                 keep.names=TRUE){
 
   if (inherits(by, "formula"))
@@ -18,10 +18,10 @@ svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=FALSE,
       unwrap <- function(x){
           if(!is.null(attr(x, "deff")))
               c(statistic = unclass(x),
-                SE = sqrt(diag(as.matrix(attr(x, "var")))),
+                SE = SE(x),
                 DEff = deff(x))
           else c(statistic = unclass(x),
-                 SE = sqrt(diag(as.matrix(attr(x, "var")))))
+                 SE = SE(x))
       }
 
     rval<-t(sapply(uniques,

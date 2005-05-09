@@ -46,11 +46,9 @@ postStratify(design, strata, population, partial = FALSE, ...)
  
   
   The variance estimate for replication designs follows the same
-  procedure as Valliant (1993) described for estimating totals.  I
-  believe the variance estimate for \code{svydesign} objects is the same
-  as that of Valliant (1993) applied to the estimating functions, and
-  thus the same as Rao et al (2002), at least in the case where the full
-  joint distribution of the stratifying variables is available.
+  procedure as Valliant (1993) described for estimating totals. Rao et
+  al (2002) describe this procedure for estimating functions (and also
+  the GREG or g-calibration procedure, see \code{\link{calibrate}})
   
 }
 
@@ -73,8 +71,11 @@ analysis of survey data using poststratification information. Sankhya
 64 Series A Part 2, 364-378.
 }
 
-\seealso{\code{\link{as.svrepdesign}}, \code{\link{svrepdesign}},
-  \code{\link{rake}}, \code{\link{compressWeights}} }
+\seealso{
+  \code{\link{rake}}, \code{\link{calibrate}} for other things to do
+  with auxiliary information
+  
+  \code{\link{compressWeights}} for information on compressing weights}
 \examples{
 data(api)
 dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)

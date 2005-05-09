@@ -39,9 +39,11 @@ Compute quantiles for data from complex surveys.
   \code{interval.type}. If \code{"Wald"}, a 95\% Wald confidence
   interval is constructed for the proportion below the estimated
   quantile. The inverse of the estimated CDF is used to map this to a
-  confidence interval for the quantile.
+  confidence interval for the quantile. This is the method of
+  Woodruff (1952).
   
-  If \code{interval.type="score"} we use the method of Francisco-Fuller, which
+  If \code{interval.type="score"} we use a method described by Binder
+  (1991) and due originally to Francisco and Fuller (1986), which
   corresponds to inverting a robust score test.  At the upper and lower
   limits of the confidence interval, a test of the null hypothesis that
   the cumulative distribution function is equal to the target quantile
@@ -54,8 +56,7 @@ Compute quantiles for data from complex surveys.
   For replicate-weight designs, ordinary replication-based standard errors
   are computed.  These are typically not valid for the JK1 and JKn jackknife
   designs. They are valid for BRR and Fay's method, and for some
-  bootstrap-based designs.
-
+  bootstrap-based designs. 
   
 }
 \value{
@@ -73,8 +74,15 @@ Compute quantiles for data from complex surveys.
   from complex surveys. \emph{Proceedings of the ASA Survey Research
     Methods Section}  1991: 34-42
   
+  Francisco CA, Fuller WA (1986) Estimation of the distribution
+  function with a complex survey. Technical Report, Iowa State
+  University.
+  
   Shao J, Tu D (1995) \emph{The Jackknife and Bootstrap}. Springer.  
-  }
+  
+  Woodruff RS (1952) Confidence intervals for medians and other
+  position measures. JASA 57, 622-627.  
+}
 \examples{
 
   data(api)

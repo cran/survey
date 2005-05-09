@@ -10,9 +10,13 @@
 "[.repweights_compressed"<-function(x,i,...,drop=FALSE){
   if (!missing(i)){
     x$index<-x$index[i]
-    x$weights<-x$weights[,...,drop=FALSE]
+    if(!missing(...))
+      x$weights<-x$weights[,...,drop=FALSE]
   } else{
-    x$weights<-x$weights[,...,drop=FALSE]
+      ## this is faster than just subscripting x$weights (!)
+      x<-list(index=x$index,
+              weights=x$weights[,...,drop=FALSE])
+      class(x)<-"repweights_compressed"
   }
   x
 }
@@ -20,6 +24,7 @@
 "as.matrix.repweights_compressed"<-function(x,...){
   x$weights[x$index,,drop=FALSE]
 }
+
 "as.vector.repweights_compressed"<-function(x,...){
   as.vector(x$weights[x$index,])
 }

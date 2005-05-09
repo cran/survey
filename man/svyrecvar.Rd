@@ -19,7 +19,8 @@ one.stage=getOption("survey.ultimate.cluster"))
   \item{stratas}{Strata for each stage }
   \item{fpcs}{Information on population and sample size for each stage,
     created by \code{\link{as.fpc}}}
-  \item{postStrata}{post-stratification information as created by \code{\link{postStratify}} }
+  \item{postStrata}{post-stratification information as created by
+    \code{\link{postStratify}} or \code{\link{calibrate}} }
   \item{lonely.psu}{How to handle strata with a single PSU}
   \item{one.stage}{If \code{TRUE}, compute a one-stage
     (ultimate-cluster) estimator}

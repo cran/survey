@@ -1,3 +1,42 @@
+3.0   Added simple GREG (G-calibration) estimators with calibrate() 
+
+      Added deff="replace" option to compute design effects comparing to
+      simple random sampling with replacement, eg for designs where the weights
+      do not sum to the population size. (for Gillian Raab)
+
+      Added more references for median estimation.
+
+      Added separate ratio estimator of totals for stratified
+      samples. (for Renzo Vettori)
+
+      cv.svyratio was inverted.
+
+      rake() on survey design objects was accumulating cruft in the
+      postStrata component on each iteration.
+
+      Subsetting of raked designs without replicate weights was 
+      broken (Steve Roberts)
+
+      Standard errors were wrong for some domain estimates in 
+      post-stratified models without replicate weights.
+      
+      More extensive tests comparing domain estimates to equivalent 
+      ratio and regression formulations.
+
+      Changed default in svyby to keep.var=TRUE
+
+      Prettier stratum labels.
+
+      New homepage at  http://faculty.washington.edu/tlumley/survey/
+
+      svyplot(type="hex") works with both pre1.0 and post1.0 versions 
+      of the hexbin package.
+
+      Fixed svychisq denominator degrees of freedom for stratified designs 
+      for bug introduced by multistage revision. (Takahiro Tsuchiya)
+      
+
+
 2.9-1 Fixed typo in description of fpc in svydesign.Rd
   
       Added inst/twostage.pdf with examples of two-stage analyses.
@@ -5,7 +44,7 @@
       Handling of fpc specified as proportion in the absence of weights 
       was wrong.
 
-2.9   Added full multistage sampling, involving a redesign of the survey.design 
+2.9   Added full multistage sampling, involving a redesign of the survey.design
       object.  The old objects are deprecated; they may be converted with 
       as.svydesign2.   Use options(survey.ultimate.cluster=TRUE) to get 
       the same one-stage standard errors as earlier versions and

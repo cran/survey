@@ -59,7 +59,6 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
 
       
 
-    allstrata<-as.data.frame(matrix(1, nrow=NROW(ids), ncol=NCOL(ids)))
     
     if (!is.null(strata)){
       if(inherits(strata,"formula")){
@@ -69,11 +68,12 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
       if (!is.list(strata))
         strata<-data.frame(strata=strata)
       has.strata<-TRUE
-      allstrata[seq(length=nrow(strata)),seq(length=ncol(strata))]<-strata
     } else {
       has.strata <-FALSE
+      strata<-as.data.frame(matrix(1, nrow=NROW(ids), ncol=NCOL(ids)))
+      
     }
-    strata<-allstrata
+
     
     if (inherits(variables,"formula")){
         mf<-substitute(model.frame(variables,data=data,na.action=na.pass))
@@ -134,7 +134,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
         warning("No weights or probabilities supplied, assuming equal probability")
         probs<-rep(1,nrow(ids))
       } else {
-        probs<-1/weights(fpc) 
+        probs<-1/weights(fpc, final=FALSE)
       }
     }
       
@@ -159,7 +159,8 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
     rval
   }
 
-onestrat<-function(x,cluster,nPSU,fpc, lonely.psu,stratum=NULL,stage=1){
+onestrat<-function(x,cluster,nPSU,fpc, lonely.psu,stratum=NULL,stage=1,cal=cal){
+  
   x<-rowsum(x,cluster)
   nsubset<-nrow(x)
   if (nsubset<nPSU)
@@ -201,11 +202,11 @@ onestrat<-function(x,cluster,nPSU,fpc, lonely.psu,stratum=NULL,stage=1){
 }
 
 
-onestage<-function(x, strata, clusters, nPSU, fpc, lonely.psu=getOption("survey.lonely.psu"),stage=0){
+onestage<-function(x, strata, clusters, nPSU, fpc, lonely.psu=getOption("survey.lonely.psu"),stage=0, cal){
   stratvars<-tapply(1:NROW(x), list(factor(strata)), function(index){
     onestrat(x[index,,drop=FALSE], clusters[index],
              nPSU[index][1], fpc[index][1],
-             lonely.psu=lonely.psu,stratum=strata[index][1], stage=stage)
+             lonely.psu=lonely.psu,stratum=strata[index][1], stage=stage,cal=cal)
   })
   p<-NCOL(x)
   nstrat<-length(unique(strata))
@@ -219,41 +220,66 @@ svyrecvar<-function(x, clusters,  stratas, fpcs, postStrata=NULL,
                     one.stage=getOption("survey.ultimate.cluster")){
 
   x<-as.matrix(x)
-  
+  cal<-NULL
   
   ## Remove post-stratum means, which may cut across clusters
+  ## Also center the data using any "g-calibration" models
   if(!is.null(postStrata)){
     for (psvar in postStrata){
-      psw<-attr(psvar,"weights")
-      postStrata<-as.factor(psvar)
-      psmeans<-rowsum(x/psw,psvar,reorder=TRUE)/as.vector(table(factor(psvar)))
-      x<- x-psmeans[match(psvar,sort(unique(psvar))),]*psw
+      if (inherits(psvar, "greg_calibration")) {
+        if (psvar$stage==0){
+          ## G-calibration at population level
+          x<-qr.resid(psvar$qr,x/(psvar$w))*psvar$w
+        } else {
+          ## G-calibration within clusters
+          cal<-c(cal, list(psvar))
+        }
+      } else {
+        ## ordinary post-stratification
+        psw<-attr(psvar, "weights")
+        postStrata<-as.factor(psvar)
+        psmeans<-rowsum(x/psw,psvar,reorder=TRUE)/as.vector(table(factor(psvar)))
+        x<- x-psmeans[match(psvar,sort(unique(psvar))),]*psw
+      }
     }
   }
-
   
   multistage(x, clusters,stratas,fpcs$sampsize, fpcs$popsize,
              lonely.psu=getOption("survey.lonely.psu"),
-             one.stage=one.stage,stage=1)
+             one.stage=one.stage,stage=1,cal=cal)
 }
 
 multistage<-function(x, clusters,  stratas, nPSUs, fpcs,
                     lonely.psu=getOption("survey.lonely.psu"),
-                     one.stage=FALSE,stage){
+                     one.stage=FALSE,stage,cal){
   
   n<-NROW(x)
-
+ 
+  
   v <- onestage(x,stratas[,1], clusters[,1], nPSUs[,1],
-                fpcs[,1], lonely.psu=lonely.psu,stage=stage)
+                fpcs[,1], lonely.psu=lonely.psu,stage=stage,cal=cal)
   
   if (!one.stage && !is.null(fpcs) && NCOL(clusters)>1) {
     v.sub<-by(1:n, list(clusters[,1]), function(index){
+      ## residuals for G-calibration using population information
+      ## only on clusters at this stage.
+      for(cali in cal){
+        if (cali$stage != stage)
+          next
+        j<-match(clusters[index,1],cali$index)
+        if (length(unique(j))!=1)
+          stop("Internal problem in g-calibration data: stage",stage,
+               ", cluster", clus)
+        j<-j[[1]]
+        x[index,]<-qr.resid(cali$qr[[j]], x[index,,drop=FALSE]/cali$w[[j]])*cali$w[[j]]
+      }
       multistage(x[index,,drop=FALSE], clusters[index,-1,drop=FALSE],
                  stratas[index,-1,drop=FALSE], nPSUs[index,-1,drop=FALSE],
                  fpcs[index,-1,drop=FALSE],
                  lonely.psu=lonely.psu,one.stage=one.stage-1,
-                 stage=stage+1)*nPSUs[index[1],1]/fpcs[index[1],1]
+                 stage=stage+1,cal=cal)*nPSUs[index[1],1]/fpcs[index[1],1]
     })
+    
     for(i in 1:length(v.sub))
       v<-v+v.sub[[i]]
   }
@@ -293,12 +319,16 @@ as.fpc<-function(df,strata,ids){
   rval
 }
 
-"weights.survey_fpc"<-function(object,...){
+"weights.survey_fpc"<-function(object,final=TRUE,...){
   if (is.null(object$popsize) || any(object$popsize>1e12))
     stop("Weights not supplied and can't be computed from fpc.")
-  pop<-apply(object$popsize,1,prod)
-  samp<-apply(object$sampsize,1,prod)
-  pop/samp
+  if (final) {
+    pop<-apply(object$popsize,1,prod)
+    samp<-apply(object$sampsize,1,prod)
+    pop/samp
+  } else {
+    object$popsize/object$sampsize
+  }
 }
 
 
@@ -416,27 +446,39 @@ as.svydesign2<-function(object){
 }
 
     
-"[.survey.design2"<-function (x,i, ...){
-  
+"[.survey.design2"<-function (x,i, ..., drop=TRUE){
   if (!missing(i)){ 
-    x$variables<-"[.data.frame"(x$variables,i,...,drop=FALSE)
-    x$cluster<-x$cluster[i,,drop=FALSE]
-    x$prob<-x$prob[i]
-    x$allprob<-x$allprob[i,,drop=FALSE]
-    x$strata<-x$strata[i,,drop=FALSE]
-    x$fpc$sampsize<-x$fpc$sampsize[i,,drop=FALSE]
-    x$fpc$popsize<-x$fpc$popsize[i,,drop=FALSE]
-    if (!is.null(x$postStrata)){
-      ps<-x$postStrata
-      for (j in length(ps)){
-        w<-attr(ps[[j]],"weights")
-        ps[[j]]<-ps[[j]][i]
-        attr(ps[[j]],"weights")<-w[i]
+      if (is.calibrated(x) || !drop){
+          ## Set weights to zero: no memory saving possible
+          ## There should be an easier way to complement a subscript..
+          if (is.logical(i))
+              x$prob[!i]<-Inf
+          else if (is.numeric(i) && length(i))
+              x$prob[-i]<-Inf
+          else {
+              tmp<-x$prob[i,]
+              x$prob<-rep(Inf, length(x$prob))
+              x$prob[i,]<-tmp
+          }
+          index<-is.finite(x$prob)
+          psu<-!duplicated(x$cluster[index,1])
+          tt<-table(x$strata[index,1][psu])
+          if(any(tt==1)){
+              warning(sum(tt==1)," strata have only one PSU in this subset.")
+          }
+      } else {
+          ## subset everything.
+          x$variables<-"[.data.frame"(x$variables,i,...,drop=FALSE)
+          x$cluster<-x$cluster[i,,drop=FALSE]
+          x$prob<-x$prob[i]
+          x$allprob<-x$allprob[i,,drop=FALSE]
+          x$strata<-x$strata[i,,drop=FALSE]
+          x$fpc$sampsize<-x$fpc$sampsize[i,,drop=FALSE]
+          x$fpc$popsize<-x$fpc$popsize[i,,drop=FALSE]
       }
-      x$postStrata<-ps
-    }
+      
   } else {
-    x$variables<-x$variables[,...,drop=FALSE]
+      x$variables<-x$variables[,...,drop=FALSE]
   }
   
   x
@@ -476,9 +518,12 @@ svytotal.survey.design2<-function(x,design, na.rm=FALSE, deff=FALSE,...){
                                    postStrata=design$postStrata)
     attr(total,"statistic")<-"total"
 
-    if (deff){
+    if (is.character(deff) || deff){
       nobs<-NROW(design$cluster)
-      vsrs<-svyvar(x,design,na.rm=na.rm)*sum(weights(design)^2)*(N-nobs)/N
+      if (deff=="replace")
+        vsrs<-svyvar(x,design,na.rm=na.rm)*sum(weights(design)^2)*(N-nobs)/N
+      else
+        vsrs<-svyvar(x,design,na.rm=na.rm)*sum(weights(design)^2)
       attr(total, "deff")<-v/vsrs
     }
     
@@ -522,17 +567,45 @@ svymean.survey.design2<-function(x,design, na.rm=FALSE,deff=FALSE,...){
   attr(average,"var")<-v
   attr(average,"statistic")<-"mean"
   class(average)<-"svystat"
-  if (deff){
+  if (is.character(deff) || deff){
       nobs<-NROW(design$cluster)
-      vsrs<-svyvar(x,design,na.rm=na.rm)*(psum-nobs)/(psum*nobs)
+      if(deff=="replace"){
+        vsrs<-svyvar(x,design,na.rm=na.rm)/(nobs)
+      } else {
+        if(psum<nobs) {
+          vsrs<-NA*v
+          warning("Sample size greater than population size: are weights correctly scaled?")
+        } else{
+          vsrs<-svyvar(x,design,na.rm=na.rm)*(psum-nobs)/(psum*nobs)
+        }
+      }
       attr(average, "deff")<-v/vsrs
   }
   
   return(average)
 }
 
-svyratio.survey.design2<-function(numerator, denominator, design,...){
+svyratio.survey.design2<-function(numerator, denominator, design, separate=FALSE,...){
 
+    if (separate){
+      strats<-sort(unique(design$strata[,1]))
+      if (!design$has.strata)
+        warning("Separate and combined ratio estimators are the same for unstratified designs")
+      rval<-list(ratios=lapply(strats,
+                   function(s) {
+                     tmp<-svyratio(numerator, denominator,
+                                   subset(design, design$strata[,1] %in% s),
+                                   separate=FALSE,...)
+                     tmp$call<-bquote(Stratum==.(s))
+                     tmp}))
+      names(rval$ratios)<-strats
+   
+      class(rval)<-c("svyratio_separate")
+      rval$call<-sys.call()
+      rval$strata<-strats
+      return(rval)
+    }
+  
     if (inherits(numerator,"formula"))
 		numerator<-model.frame(numerator,design$variables)
     else if(typeof(numerator) %in% c("expression","symbol"))

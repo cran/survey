@@ -14,7 +14,7 @@
 }
 \usage{
 \method{svytable}{survey.design}(formula, design, Ntotal = NULL, round = FALSE,...)
-\method{svytable}{svyrep.design}(formula, design, Ntotal = sum(weights(design, "sampling"))), round = FALSE,...)
+\method{svytable}{svyrep.design}(formula, design, Ntotal = sum(weights(design, "sampling")), round = FALSE,...)
 svychisq(formula, design, statistic = c("F",  "Chisq","Wald","adjWald"),na.rm=TRUE)
 \method{summary}{svytable}(object, statistic = c("F",  "Chisq","Wald","adjWald"),...)
 }
@@ -29,25 +29,29 @@ svychisq(formula, design, statistic = c("F",  "Chisq","Wald","adjWald"),na.rm=TR
     integer?}
   \item{na.rm}{Remove missing values}
   \item{object}{Output from \code{svytable}}
-  \item{\dots}{Other arguments to \code{summary}, not used here}
+  \item{...}{Other arguments to \code{summary}, not used here}
  }
 \details{
  
 The \code{svytable} and \code{svreptable} function compute a weighted
-crosstabulation.  If the sampling probabilities supplied to
-\code{svydesign} were actual probabilities (rather than relative
-probabilities) this estimates a full population crosstabulation.
-Otherwise it estimates only relative proportions and should be
-normalised to some convenient total such as 100 or 1.0 by specifying the
-\code{Ntotal} argument.  If the formula has a left-hand side the mean or sum of this
- variable rather than the frequency is tabulated
+crosstabulation.  In many cases it is easier to use
+\code{\link{svytotal}} or \code{\link{svymean}}, which also produce
+standard errors, design effects, etc.
 
-The \code{Ntotal} argument can be either a single number or a data frame
+ If the sampling probabilities supplied to \code{svydesign} were actual
+ probabilities (rather than relative probabilities) this estimates a
+ full population crosstabulation.  Otherwise it estimates only relative
+ proportions and should be normalised to some convenient total such as
+ 100 or 1.0 by specifying the \code{Ntotal} argument.  If the formula
+ has a left-hand side the mean or sum of this variable rather than the
+ frequency is tabulated.
+
+ The \code{Ntotal} argument can be either a single number or a data frame
 whose first column gives the (first-stage) sampling strata and second column the
 population size in each stratum.  In this second case the
 \code{svytable} command performs `post-stratification': tabulating
 and scaling to the population within strata and then adding up the
-strata.
+strata.  
 
 As with other \code{xtabs} objects, the output of \code{svytable} can be
 processed by \code{ftable} for more attractive display. The
@@ -73,7 +77,9 @@ degrees of freedom of the test. Rao and Thomas (1990) compare these
 tests and find the adjustment benefical.
 
 
-At the moment, \code{svychisq} works only for 2-dimensional tables.
+At the moment, \code{svychisq} works only for 2-dimensional tables, and
+does not work for designs with post-stratification, since I'm not sure
+how to account for it in the degrees of freedom.
 
 }
 \value{
@@ -115,7 +121,7 @@ for simple goodness-of-fit statistics under cluster sampling" JASA 82:630-636
   svytable(~sch.wide+stype, dclus1)
   svychisq(~sch.wide+stype, dclus1)
   svychisq(~sch.wide+stype, dclus1, statistic="Chisq")
- svychisq(~sch.wide+stype, dclus1, statistic="adjWald")
+  svychisq(~sch.wide+stype, dclus1, statistic="adjWald")
 
   rclus1 <- as.svrepdesign(dclus1)
   svytable(~sch.wide+stype, rclus1, round=TRUE)
