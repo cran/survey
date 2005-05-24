@@ -1,3 +1,21 @@
+3.0-1 Allow some strata to have an infinite population (zero sampling fraction)
+      (this doesn't happen in reality but is the recommended analysis for
+      handling certainty PSUs in some large NCHS studies). 
+
+      Let svyby() handle vectors that are not in the design object (even 
+      though they are discouraged)
+
+      calibrate() was working only under stratified/simple random sampling.
+
+      Allow user-supplied Hadamard matrix for brrweights
+
+      as.svrepdesign gave a spurious warning when converting post-2.9-1
+      objects without finite population corrections to BRR.
+
+      Allow multicolumn response variable in svymle() (for survival data)
+
+      Add nlm() as the default optimization method for svymle().
+
 3.0   Added simple GREG (G-calibration) estimators with calibrate() 
 
       Added deff="replace" option to compute design effects comparing to

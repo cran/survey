@@ -10,8 +10,8 @@ svychisq<-function(formula, design,
     stop("Only 2-way tables at the moment")
   statistic<-match.arg(statistic)
   
-  if(!is.null(design$postStrata))
-    warning("Post-stratification not implemented")
+  ##if(!is.null(design$postStrata))
+  ##  warning("Post-stratification not implemented")
   
   rows<-formula[[2]][[2]]
   cols<-formula[[2]][[3]]

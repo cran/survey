@@ -29,7 +29,7 @@ calibrate.survey.design2<-function(design, formula, population,
     g<-drop(1+mm%*%tT)
     design$prob<-design$prob/g
     
-    caldata<- list(qr=qr(mm), w=g*whalf, stage=0, index=NULL)
+    caldata<- list(qr=qr(mm), w=g*whalf*whalf, stage=0, index=NULL)
    
   } else {
     ## Calibration within clusters (Sarndal's Case C)
@@ -68,7 +68,7 @@ calibrate.survey.design2<-function(design, formula, population,
       g<-drop(1+mm[these,,drop=FALSE]%*%tT)
       design$prob[these]<-design$prob[these]/g
       caldata$qr[[i]]<-qr(mm[these,,drop=FALSE])
-      caldata$w[[i]]<-g*stageweights[these]*cwhalf[these]
+      caldata$w[[i]]<-g*stageweights[these]*cwhalf[these]^2
     }
   }  
   class(caldata)<-"greg_calibration"

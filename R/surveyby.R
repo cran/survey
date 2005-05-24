@@ -13,6 +13,19 @@ svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
   byfactor<-do.call("interaction", byfactors)
   uniques <- which(!duplicated(byfactors))
 
+  ## some people insist on using vectors rather than formulas
+  ## so I suppose we should be nice to them
+  if (!inherits(formula, "formula")){
+      if (NROW(formula)!=length(byfactor))
+          stop("'formula' is the wrong length")
+      if (!(is.data.frame(formula) ||
+            is.matrix(formula) ||
+            is.vector(formula))){
+          stop("invalid type for 'formula'")
+      }
+      
+  }
+  
   
   if (keep.var){
       unwrap <- function(x){
@@ -25,7 +38,15 @@ svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
       }
 
     rval<-t(sapply(uniques,
-                   function(i) unwrap(FUN(formula,design[byfactor %in% byfactor[i],],deff=deff,...))))
+                   function(i) {
+                       if (inherits(formula,"formula"))
+                           data<-formula
+                       else
+                           data<-subset(formula, byfactor %in% byfactor[i])
+                       unwrap(FUN(data,
+                                  design[byfactor %in% byfactor[i],],
+                                  deff=deff,...)) }
+                   ))
   } else {
       unwrap2 <- function(x){
           if(!is.null(attr(x, "deff")))
@@ -34,7 +55,15 @@ svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
           else c(statistic = unclass(x))
       }
       rval<-sapply(uniques,
-                   function(i) unwrap2(FUN(formula,design[byfactor %in% byfactor[i],],deff=deff,...)))
+                   function(i) {
+                       if (inherits(formula,"formula"))
+                           data<-formula
+                       else
+                           data<-subset(formula, byfactor %in% byfactor[i])
+                       unwrap2(FUN(data,
+                                   design[byfactor %in% byfactor[i],],
+                                   deff=deff,...))}
+                   )
       if (is.matrix(rval)) rval<-t(rval)
   }
 

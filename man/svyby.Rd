@@ -10,7 +10,8 @@ svyby(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE, keep.names = TR
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{formula}{A formula specifying the variables to pass to \code{FUN} }
+  \item{formula}{A formula specifying the variables to pass to
+    \code{FUN} (or a matrix, data frame, or vector)}
   \item{by}{A formula specifying factors that define subsets, or a list
     of factors.}
   \item{design}{A \code{svydesign} or \code{svrepdesign} object}

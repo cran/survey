@@ -1155,7 +1155,7 @@ svymle<-function(loglike, gradient=NULL, design, formulas,
                  start=NULL, control=list(maxit=1000),
                  na.action="na.fail", method=NULL,...){
   if(is.null(method))
-    method<-if(is.null(gradient)) "Nelder-Mead" else "BFGS"
+    method<-if(is.null(gradient)) "Nelder-Mead" else "nlm"
 
   if (!inherits(design,"survey.design")) 
 	stop("design is not a survey.design")
@@ -1262,11 +1262,24 @@ svymle<-function(loglike, gradient=NULL, design, formulas,
 	stop("starting values wrong length")
   }
 
-  
-  rval<-optim(theta0, objectivefn, grad,control=control,
+  if (method=="nlm"){
+      ff<-function(theta){
+          rval<- -objectivefn(theta)
+          if (is.na(rval)) rval<- -Inf
+          attr(rval,"grad")<- -grad(theta)
+          rval
+      }
+      rval<-nlm(ff, theta0,hessian=TRUE)
+      if (rval$code>3) warning("nlm did not converge")
+      rval$par<-rval$estimate
+  } else {
+      rval<-optim(theta0, objectivefn, grad,control=control,
               hessian=TRUE,method=method,...)
- 
-  if (rval$conv!=0) warning("optim did not converge")
+      if (rval$conv!=0) warning("optim did not converge")
+  }
+
+  
+
 
   names(rval$par)<-parnms
   dimnames(rval$hessian)<-list(parnms,parnms)

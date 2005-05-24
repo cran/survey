@@ -26,7 +26,7 @@ svymle(loglike, gradient = NULL, design, formulas, start = NULL, control
   \item{start}{Starting values for parameters}
   \item{control}{control options for \code{\link{optim}}}
   \item{na.action}{Handling of \code{NA}s}
-  \item{method}{passed to \code{\link{optim}}}
+  \item{method}{\code{"nlm"} to use \code{nlm}, otherwise passed to \code{\link{optim}}}
   \item{\dots}{Arguments to \code{loglike} and \code{gradient} that are
     not to be optimised over.}
   \item{object}{\code{svymle} object}
@@ -34,6 +34,10 @@ svymle(loglike, gradient = NULL, design, formulas, start = NULL, control
     standard sandwich estimator. See Details below.}
 }
 \details{
+Optimization is done by \code{\link{nlm}} by default or if
+\code{method=="nlm"}. Otherwise \code{\link{optim}} is used and \code{method}
+specifies the method and \code{control} specifies control parameters.
+
   The \code{design} object contains all the data and design information
 from the survey, so all the formulas refer to variables in this object.
 The \code{formulas} argument needs to specify the response variable and
@@ -88,14 +92,48 @@ model the \code{stderr="model"} should work fairly well.
 	 ds<-(x-mean)^2*(2*(2 * sd))/(2*sd^2)^2 - sqrt(2*pi)/(sd*sqrt(2*pi))
          cbind(dm,ds)
       }
- m2 <- svymle(loglike=dnorm,gradient=gr, design=dstrat,
- formulas=list(mean=api00~api99+ell, sd=~1), start=list(c(80,1,0),c(20)), log=TRUE)
+ m2 <- svymle(loglike=dnorm,gradient=gr, design=dstrat, formulas=list(mean=api00~api99+ell, sd=~1),
+               start=list(c(80,1,0),c(20)), log=TRUE, method="BFGS")
 
  summary(m0)
  summary(m1,stderr="model")
  summary(m2)
 
- 
+ ## More complicated censored data example
+ ## showing that the response variable can be multivariate
+
+ data(pbc, package="survival")
+ biasmodel<-glm(I(trt>0)~age*edema,data=pbc)
+ pbc$randprob<-fitted(biasmodel)
+ dpbc<-svydesign(id=~1, prob=~randprob, strata=~edema, data=subset(pbc,trt>0))
+
+ lcens<-function(x,mean,sd){
+    ifelse(x[,2]==1,
+           dnorm(log(x[,1]),mean,sd,log=TRUE),
+           pnorm(log(x[,1]),mean,sd,log=TRUE,lower.tail=FALSE)
+           )
+ }
+
+ gcens<- function(x,mean,sd){
+
+        dz<- -dnorm(log(x[,1]),mean,sd)/pnorm(log(x[,1]),mean,sd,lower.tail=FALSE)
+
+        dm<-ifelse(x[,2]==1,
+                   2*(log(x[,1]) - mean)/(2*sd^2),
+                   dz*-1/sd)
+        ds<-ifelse(x[,2]==1,
+                   (log(x[,1])-mean)^2*(2*(2 * sd))/(2*sd^2)^2 - sqrt(2*pi)/(sd*sqrt(2*pi)),
+                   ds<- dz*-(log(x[,1])-mean)/(sd*sd))
+        cbind(dm,ds)      
+ }
+
+
+svymle(loglike=lcens, gradient=gcens, design=dpbc,
+      formulas=list(mean=I(cbind(time,status))~bili+protime+alb,
+                    sd=~1),
+         start=list(c(10,0,0,0),c(1)))
+
+
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

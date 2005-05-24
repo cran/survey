@@ -14,7 +14,7 @@ brrweights(strata, psu, match = NULL,
               small = c("fail","split","merge"),
               large = c("split", "merge", "fail"),
               fay.rho=0, only.weights=FALSE,
-              compress=TRUE)
+              compress=TRUE, hadamard.matrix=NULL)
 jk1weights(psu,fpc=NULL,
               fpctype=c("population","fraction","correction"),
               compress=TRUE)
@@ -36,6 +36,7 @@ jknweights(strata,psu, fpc=NULL,
     replicate weights}
   \item{compress}{If \code{TRUE}, store the replicate weights in
     compressed form}
+  \item{hadamard.matrix}{Optional user-supplied Hadamard matrix for \code{brrweights}}
 }
 \details{
   JK1 and JKn are  jackknife schemes for unstratified and stratified
@@ -101,8 +102,20 @@ For \code{brrweights} with \code{only.weights=FALSE} a list with elements
   \code{\link{svrVar}}}
 
 \examples{
+data(scd)
+scdnofpc<-svydesign(data=scd, prob=~1, id=~ambulance, strata=~ESA,
+nest=TRUE)
 
- 
+## convert to BRR replicate weights
+scd2brr <- as.svrepdesign(scdnofpc, type="BRR")
+svymean(~alive, scd2brr)
+svyratio(~alive, ~arrests, scd2brr)
+
+## with user-supplied hadamard matrix
+scd2brr1 <- as.svrepdesign(scdnofpc, type="BRR", hadamard.matrix=paley(11))
+svymean(~alive, scd2brr1)
+svyratio(~alive, ~arrests, scd2brr1)
+
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

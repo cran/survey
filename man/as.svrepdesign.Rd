@@ -46,8 +46,12 @@ scd2jkn <- as.svrepdesign(scdnofpc, type="JKn")
 # convert to JKn weights with finite population correction
 scd2jknf <- as.svrepdesign(scddes, type="JKn")
 
-svrepratio(~alive, ~arrests, design=scd2brr)
-svrepratio(~alive, ~arrests, design=scd2fay)
+## with user-supplied hadamard matrix
+scd2brr1 <- as.svrepdesign(scdnofpc, type="BRR", hadamard.matrix=paley(11))
+
+svyratio(~alive, ~arrests, design=scd2brr)
+svyratio(~alive, ~arrests, design=scd2brr1)
+svyratio(~alive, ~arrests, design=scd2fay)
 svyratio(~alive, ~arrests, design=scd2jkn)
 svyratio(~alive, ~arrests, design=scd2jknf)
 

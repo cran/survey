@@ -124,7 +124,8 @@ jknweights<-function(strata,psu, fpc=NULL,
 
 brrweights<-function(strata,psu, match=NULL, small=c("fail","split","merge"),
                      large=c("split","merge","fail"),fay.rho=0,
-                     only.weights=FALSE,compress=TRUE){
+                     only.weights=FALSE,compress=TRUE,
+                     hadamard.matrix=NULL){
 
   small<-match.arg(small)
   large<-match.arg(large)
@@ -204,7 +205,23 @@ brrweights<-function(strata,psu, match=NULL, small=c("fail","split","merge"),
     upto<-upto+length(goodstrata)
   }
   
-  H<-hadamard(upto)
+
+  if (is.null(hadamard.matrix)){
+    H<-hadamard(upto)
+  } else {
+    ## the user supplied hadamard.matrix
+    ## Check that it is a binary matrix and satifies the
+    ## Hadamard determinant property
+    if (!is.matrix(hadamard.matrix) || nrow(hadamard.matrix)<upto+1)
+      stop("hadamard.matrix must be a matrix of dimension at least nstrata+1")
+    values<-unique(as.vector(hadamard.matrix))
+    if(length(values)!=2)
+      stop("hadamard.matrix has more than two different values")
+    H<-ifelse(hadamard.matrix==values[1],-1,1)
+    if (!(sum(H[-1,])==0) || !all.equal(t(H)%*%H, diag(nrow(H))*nrow(H)))
+      stop("hadamard.matrix is not a Hadamard matrix")
+    H<-(H+1)/2
+  }
   ii<-1:upto
   jj<-1:length(weightstrata)
   sampler<-function(i){
@@ -259,7 +276,8 @@ as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","Fa
     stop("Must use JK1 or bootstrap for an unstratified design")
   
   fpctype<-"population"
-  if (is.null(design$fpc)){
+  if (is.null(design$fpc) ||
+      (inherits(design, "survey.design2") && is.null(design$fpc$popsize))){
       fpc<-NULL
   } else if (type %in% c("Fay","BRR")){
       warning("Finite population correction dropped in conversion")

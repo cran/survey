@@ -77,10 +77,7 @@ degrees of freedom of the test. Rao and Thomas (1990) compare these
 tests and find the adjustment benefical.
 
 
-At the moment, \code{svychisq} works only for 2-dimensional tables, and
-does not work for designs with post-stratification, since I'm not sure
-how to account for it in the degrees of freedom.
-
+At the moment, \code{svychisq} works only for 2-dimensional tables.
 }
 \value{
   The table commands return an \code{xtabs} object, \code{svychisq}

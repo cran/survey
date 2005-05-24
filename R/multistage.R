@@ -168,7 +168,7 @@ onestrat<-function(x,cluster,nPSU,fpc, lonely.psu,stratum=NULL,stage=1,cal=cal){
   if (is.null(fpc))
       f<-1
   else{
-      f<-(fpc-nPSU)/fpc
+      f<-ifelse(fpc==Inf, 1, (fpc-nPSU)/fpc)
   }
   if (lonely.psu!="adjust" || nsubset>1 ||
       (nPSU>1 & !getOption("survey.adjust.domain.lonely")))
@@ -186,7 +186,7 @@ onestrat<-function(x,cluster,nPSU,fpc, lonely.psu,stratum=NULL,stage=1,cal=cal){
   
   if (nPSU>1){
       return(crossprod(x)*scale)
-  } else if (f<0.00001) ## certainty PSU
+  } else if (f<0.0000001) ## certainty PSU
       return(0*crossprod(x))
   else {
       rval<-switch(lonely.psu,
