@@ -96,7 +96,8 @@ design effect is the square of Kish's "deft".
 
 
 The \code{cv} function computes the coefficient of variation of a
-statistic such as ratio, mean or total. 
+statistic such as ratio, mean or total. The default method is for any
+object with methods for \code{\link{SE}} and \code{coef}.
 
 }
 \value{

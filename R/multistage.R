@@ -229,7 +229,7 @@ svyrecvar<-function(x, clusters,  stratas, fpcs, postStrata=NULL,
       if (inherits(psvar, "greg_calibration")) {
         if (psvar$stage==0){
           ## G-calibration at population level
-          x<-qr.resid(psvar$qr,x/(psvar$w))*psvar$w
+          x<-qr.resid(psvar$qr,x/psvar$w)*psvar$w
         } else {
           ## G-calibration within clusters
           cal<-c(cal, list(psvar))

@@ -11,9 +11,11 @@
 Compute quantiles for data from complex surveys.
 }
 \usage{
-\method{svyquantile}{survey.design}(x, design, quantiles, alpha=0.05, ci=FALSE, method = "linear", f = 1, interval.type=c("Wald","score"),...)
-\method{svyquantile}{svyrep.design}(x, design, quantiles, method =
-"linear", f = 1, return.replicates=FALSE,...)
+\method{svyquantile}{survey.design}(x, design, quantiles, alpha=0.05,
+ ci=FALSE, method = "linear", f = 1, interval.type=c("Wald","score"),...)
+\method{svyquantile}{svyrep.design}(x, design, quantiles,
+ method ="linear", interval.type=c("probability","quantile"), f = 1,
+ return.replicates=FALSE,...)
 \method{SE}{svyquantile}(object,...)
 }
 %- maybe also `usage' for other objects documented here.
@@ -54,9 +56,13 @@ Compute quantiles for data from complex surveys.
   dividing the confidence interval length by \code{2*qnorm(alpha/2)}.
   
   For replicate-weight designs, ordinary replication-based standard errors
-  are computed.  These are typically not valid for the JK1 and JKn jackknife
-  designs. They are valid for BRR and Fay's method, and for some
-  bootstrap-based designs. 
+  are valid for BRR and Fay's method, and for some bootstrap-based
+  designs, but not for jackknife-based designs.
+  \code{interval.type="quantile"} gives these replication-based
+  standard errors.  The default, \code{interval.type="probability"}
+  computes confidence on the probability scale and then transforms
+  back to quantiles, the equivalent of \code{interval.type="Wald"} for
+  \code{survey.design} objects (with \code{alpha=0.05}).
   
 }
 \value{
@@ -101,13 +107,18 @@ Compute quantiles for data from complex surveys.
   dstrat<-svydesign(id=~1, strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
   svyquantile(~api00, dstrat, c(.25,.5,.75),ci=TRUE)
 
+  #stratified sample, replicate weights
+  # interval="probability" is necessary for jackknife weights
+  rstrat<-as.svrepdesign(dstrat)
+  svyquantile(~api00, rstrat, c(.25,.5,.75), interval="probability")
+
 
   # BRR method
   data(scd)
   repweights<-2*cbind(c(1,0,1,0,1,0), c(1,0,0,1,0,1), c(0,1,1,0,0,1),
               c(0,1,0,1,1,0))
   scdrep<-svrepdesign(data=scd, type="BRR", repweights=repweights)
-  svyquantile(~arrests+alive, design=scdrep, quantile=0.5)
+  svyquantile(~arrests+alive, design=scdrep, quantile=0.5, interval="quantile")
 
  }
 }

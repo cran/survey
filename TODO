@@ -8,7 +8,7 @@
  - Calibration estimators
 	- Poststratifying to a logistic model as for two-phase case-control
 	  and marginal structural models
-	- GREG estimators
+	- Wu & De Sitter model-calibration 
 
  - Survival curve estimation (the standard errors are the only 
 	non-trivial part of this)
@@ -18,4 +18,4 @@
 
  - GEE. 
 
- - Parametric survival models.
+ - Parametric survival models (you can do these with svymle)

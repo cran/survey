@@ -3,9 +3,11 @@
 ##
 
 
-svychisq<-function(formula, design,
+svychisq<-function(formula, design,...) UseMethod("svychisq",design)
+
+svychisq.survey.design<-function(formula, design,
                    statistic=c("F","Chisq","Wald","adjWald"),
-                   na.rm=TRUE){
+                   na.rm=TRUE,...){
   if (ncol(attr(terms(formula),"factors"))>2)
     stop("Only 2-way tables at the moment")
   statistic<-match.arg(statistic)
@@ -32,10 +34,9 @@ svychisq<-function(formula, design,
   nu <- length(unique(design$cluster[,1]))-length(unique(design$strata[,1]))
 
 
-  warn<-options(warn=-1) ## turn off the small-cell count warning.
-  pearson<- chisq.test(svytable(formula,design,Ntotal=N),
-                       correct=FALSE)
-  options(warn)
+  pearson<- suppressWarnings(chisq.test(svytable(formula,design,Ntotal=N),
+                       correct=FALSE))
+
   
   mf1<-expand.grid(rows=1:nr,cols=1:nc)
   X1<-model.matrix(~factor(rows)+factor(cols),mf1)
@@ -127,6 +128,8 @@ svychisq<-function(formula, design,
   pearson
   
 }
+
+
 
 summary.svreptable<-function(object,...){
   object

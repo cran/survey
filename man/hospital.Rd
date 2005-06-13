@@ -30,7 +30,7 @@ fpc=~tothosp, data=hospital)
 hosprep<-as.svrepdesign(hospdes)
 
 svytotal(~births, design=hospdes)
-svreptotal(~births, design=hosprep)
+svytotal(~births, design=hosprep)
 
 }}
 \keyword{datasets}

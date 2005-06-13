@@ -218,7 +218,7 @@ brrweights<-function(strata,psu, match=NULL, small=c("fail","split","merge"),
     if(length(values)!=2)
       stop("hadamard.matrix has more than two different values")
     H<-ifelse(hadamard.matrix==values[1],-1,1)
-    if (!(sum(H[-1,])==0) || !all.equal(t(H)%*%H, diag(nrow(H))*nrow(H)))
+    if (!(sum(H[-1,])==0) || !isTRUE(all.equal(t(H)%*%H, diag(nrow(H))*nrow(H))))
       stop("hadamard.matrix is not a Hadamard matrix")
     H<-(H+1)/2
   }
@@ -525,7 +525,7 @@ subset.svyrep.design<-function(x,subset,...){
         r <- eval(e, x$variables, parent.frame())
         r <- r & !is.na(r) 
         x<-x[r,]
-	x$call<-sys.call()
+	x$call<-sys.call(-1)
 	x
 }
 
@@ -538,7 +538,7 @@ update.svyrep.design<-function(object,...){
     object$variables[,newnames[j]]<-eval(dots[[j]],object$variables, parent.frame())
   }
   
-  object$call<-sys.call()
+  object$call<-sys.call(-1)
   object 
 }
 
@@ -555,40 +555,75 @@ weights.survey.design<-function(object,...){
 }
 
 
-svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="linear",f=1, return.replicates=FALSE,...){
-    if (!inherits(design,"svyrep.design"))
-      stop("Not a survey replicates object")
-    if (design$type %in% c("JK1","JKn"))
-      warning("Jackknife replicate weights may not give valid standard errors for quantiles")
-    if (design$type %in% "other")
-      warning("Not all replicate weight designs give valid standard errors for quantiles.")
-    if (inherits(x,"formula"))
+svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="linear",
+                                                   interval.type=c("probability","quantile"),f=1,
+                                                   return.replicates=FALSE,...){
+
+  if (!exists(".Generic",inherits=FALSE))
+    .Deprecated("svyquantile")
+  
+  interval<-match.arg(interval.type)
+  if (design$type %in% c("JK1","JKn") && interval=="quantile")
+    warning("Jackknife replicate weights may not give valid standard errors for quantiles")
+  if (design$type %in% "other" && interval=="quantile")
+    warning("Not all replicate weight designs give valid standard errors for quantiles.")
+  if (inherits(x,"formula"))
 		x<-model.frame(x,design$variables)
     else if(typeof(x) %in% c("expression","symbol"))
         x<-eval(x, design$variables)
     
     
     w<-weights(design,"analysis")
-    computeQuantiles<-function(xx){
-      oo<-order(xx)
-      cum.w<-apply(w,2,function(wi) cumsum(wi[oo])/sum(wi))
-    
-      qq<-apply(cum.w, 2,function(cum.wi) approx(cum.wi,xx[oo],method=method,f=f,
-                                                 yleft=min(xx),yright=max(xx),
-                                                 xout=quantiles,ties=max)$y)
-      if (length(quantiles)>1)
-        qq<-t(qq)
-      else
-        qq<-as.matrix(qq)
-      rval<-colMeans(qq)
-            
-      rval<-list(quantiles=rval,
-                 variances=diag(as.matrix(svrVar(qq,design$scale,design$rscales))))
-      if (return.replicates)
-        rval<-c(rval, list(replicates=qq))
-      rval
-    }
 
+    if (interval=="quantile"){
+      ## interval on quantile scale
+      computeQuantiles<-function(xx){
+        oo<-order(xx)
+        cum.w<-apply(w,2,function(wi) cumsum(wi[oo])/sum(wi))
+        
+        qq<-apply(cum.w, 2,function(cum.wi) approx(cum.wi,xx[oo],method=method,f=f,
+                                                   yleft=min(xx),yright=max(xx),
+                                                   xout=quantiles,ties=max)$y)
+        if (length(quantiles)>1)
+          qq<-t(qq)
+        else
+          qq<-as.matrix(qq)
+        rval<-colMeans(qq)
+        
+        rval<-list(quantiles=rval,
+                   variances=diag(as.matrix(svrVar(qq,design$scale,design$rscales))))
+        if (return.replicates)
+          rval<-c(rval, list(replicates=qq))
+        rval
+      }
+    } else {
+      ## interval on probability scale, backtransformed.
+      computeQuantiles<-function(xx){
+        oo<-order(xx)
+        w<-weights(design,"sampling")
+        cum.w<- cumsum(w[oo])/sum(w)
+        Qf<-approxfun(cum.w,xx[oo],method=method,f=f,
+                      yleft=min(xx),yright=max(xx),
+                      ties=max)
+        
+        point.estimates<-Qf(quantiles)
+        if(length(quantiles)==1)
+          estfun<-as.numeric(xx>point.estimates)
+        else
+          estfun<-0+outer(xx,point.estimates,">")
+        est<-svymean(estfun,design, return.replicates=return.replicates)
+        if (return.replicates)
+          q.estimates<-matrix(Qf(est$replicates),nrow=NROW(est$replicates))
+        ci<-matrix(Qf(c(coef(est)+2*SE(est), coef(est)-2*SE(est))),ncol=2)
+        variances<-((ci[,1]-ci[,2])/4)^2
+        rval<-list(quantiles=point.estimates,
+                   variances=variances)
+        if (return.replicates)
+          rval<-c(rval, list(replicates=q.estimates))
+        rval
+      }
+    }
+    
     if (!is.null(dim(x)))
       results<-apply(x,2,computeQuantiles)
     else
@@ -633,8 +668,8 @@ svrVar<-function(thetas, scale, rscales,na.action=getOption("na.action")){
 svyvar.svyrep.design<-svrepvar<-function(x, design, na.rm=FALSE, rho=NULL,
                                          return.replicates=FALSE,...){
 
-  if (!inherits(design,"svyrep.design"))
-    stop("design is not a replicate survey design")
+  if (!exists(".Generic",inherits=FALSE))
+    .Deprecated("svyvar")
   
   if (inherits(x,"formula"))
     x<-model.frame(x,design$variables,na.action=na.pass)
@@ -685,6 +720,8 @@ svyvar.svyrep.design<-svrepvar<-function(x, design, na.rm=FALSE, rho=NULL,
 svymean.svyrep.design<-svrepmean<-function(x,design, na.rm=FALSE, rho=NULL,
                                            return.replicates=FALSE,deff=FALSE,...)
 {
+  if (!exists(".Generic",inherits=FALSE))
+    .Deprecated("svymean")
   if (!inherits(design,"svyrep.design")) stop("design is not a replicate survey design")
   
   if (inherits(x,"formula")){
@@ -745,7 +782,7 @@ svymean.svyrep.design<-svrepmean<-function(x,design, na.rm=FALSE, rho=NULL,
   if (is.character(deff) || deff){
       nobs<-length(design$pweights)
       npop<-sum(design$pweights)
-      vsrs<-unclass(svrepvar(x,design,na.rm=na.rm, return.replicates=FALSE))/length(design$pweights)
+      vsrs<-unclass(svyvar(x,design,na.rm=na.rm, return.replicates=FALSE))/length(design$pweights)
       if (deff!="replace")
         vsrs<-vsrs*(npop-nobs)/npop
       attr(rval,"deff") <- v/vsrs
@@ -759,6 +796,8 @@ svymean.svyrep.design<-svrepmean<-function(x,design, na.rm=FALSE, rho=NULL,
 svytotal.svyrep.design<-svreptotal<-function(x,design, na.rm=FALSE, rho=NULL,
                                              return.replicates=FALSE, deff=FALSE,...)
 {
+ if (!exists(".Generic",inherits=FALSE))
+    .Deprecated("svytotal")
   if (!inherits(design,"svyrep.design")) stop("design is not a replicate survey design")
   
   if (inherits(x,"formula")){
@@ -773,21 +812,22 @@ svytotal.svyrep.design<-svreptotal<-function(x,design, na.rm=FALSE, rho=NULL,
       x[,scols[i]+1:cols[i]]<-xx[[i]]
     }
     colnames(x)<-do.call("c",lapply(xx,colnames))
-  }   else if(typeof(x) %in% c("expression","symbol"))
+  }  else if(typeof(x) %in% c("expression","symbol"))
     x<-eval(x, design$variables)
 
-  wts<-design$repweights
-  scale<-design$scale
-  rscales<-design$rscales
-  if (!is.null(rho)) .NotYetUsed("rho")
   
   x<-as.matrix(x)
   
   if (na.rm){
     nas<-rowSums(is.na(x))
     design<-design[nas==0,]
-    x[is.na(x)]<-0
+    x<-x[nas==0,,drop=FALSE]
   }
+  
+  wts<-design$repweights
+  scale<-design$scale
+  rscales<-design$rscales
+  if (!is.null(rho)) .NotYetUsed("rho")
   
   if (!design$combined.weights)
     pw<-design$pweights
@@ -795,7 +835,8 @@ svytotal.svyrep.design<-svreptotal<-function(x,design, na.rm=FALSE, rho=NULL,
     pw<-1
   
   rval<-colSums(design$pweights*x)
-   if (inherits(wts, "repweights_compressed")){
+
+  if (inherits(wts, "repweights_compressed")){
     repmeans<-matrix(ncol=NCOL(x), nrow=ncol(wts$weights))
     for(i in 1:ncol(wts$weights)){
       wi<-wts$weights[wts$index,i]
@@ -808,22 +849,24 @@ svytotal.svyrep.design<-svreptotal<-function(x,design, na.rm=FALSE, rho=NULL,
     }
   }
   repmeans<-drop(repmeans)
-  #repmeans<-apply(wts,2, function(w)  colSums(as.vector(w)*pw*x))
 
-  attr(rval,"var")<-v<-svrVar(repmeans, scale, rscales)
-  attr(rval,"statistic")<-"total"
+  attr(rval,"var") <- v <- svrVar(repmeans, scale, rscales)
+  attr(rval, "statistic")<-"mean"
   if (return.replicates)
     rval<-list(mean=rval, replicates=repmeans)
   if (is.character(deff) || deff){
-    vsrs<-unclass(svrepvar(x,design, return.replicates=FALSE, na.rm=na.rm))*sum(design$pweights^2)
-    if (deff!="replace")
-      vsrs<-vsrs*(sum(design$pweights)-length(design$pweights))/sum(design$pweights)
-    attr(rval,"deff")<-v/vsrs
+      nobs<-length(design$pweights)
+      npop<-sum(design$pweights)
+      vsrs<-unclass(svyvar(x,design,na.rm=na.rm, return.replicates=FALSE))/length(design$pweights)
+      if (deff!="replace")
+        vsrs<-vsrs*(npop-nobs)/npop
+      attr(rval,"deff") <- v/vsrs
   }
   class(rval)<-"svrepstat"
   rval
-  
 }
+
+
 
 svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replicates=FALSE,na.action){
   require(survival)
@@ -902,6 +945,9 @@ svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replica
 svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL, ...,
                                          rho=NULL, return.replicates=FALSE, na.action){
 
+  if (!exists(".Generic",inherit=FALSE))
+    .Deprecated("svyglm")
+  
       subset<-substitute(subset)
       subset<-eval(subset, design$variables, parent.frame())
       if (!is.null(subset))
@@ -1037,6 +1083,9 @@ print.summary.svyglm<-function (x, digits = max(3, getOption("digits") - 3),
 
 svyratio.svyrep.design<-svrepratio<-function(numerator,denominator, design,...){
 
+  if (!exists(".Generic"))
+    .Deprecated("svyratio")
+  
   if (!inherits(design, "svyrep.design")) stop("design must be a svyrepdesign object")
   
   if (inherits(numerator,"formula"))
@@ -1052,7 +1101,7 @@ svyratio.svyrep.design<-svrepratio<-function(numerator,denominator, design,...){
   nd<-NCOL(denominator)
   
   all<-cbind(numerator,denominator)
-  allstats<-svrepmean(all,design, return.replicates=TRUE)
+  allstats<-svymean(all,design, return.replicates=TRUE)
   
   rval<-list(ratio=outer(allstats$mean[1:nn],allstats$mean[nn+1:nd],"/"))
   
@@ -1169,6 +1218,16 @@ SE.default<-function(object,...){
   sqrt(diag(vcov(object,...)))
 }
 
+SE.svrepstat<-function(object,...){
+  if (is.list(object)){
+    object<-object[[1]]
+  }
+  vv<-as.matrix(attr(object,"var"))
+  if (!is.null(dim(object)) && length(object)==length(vv))
+    sqrt(vv)
+  else
+    sqrt(diag(vv))
+}
 
 print.svrepstat<-function(x,...){
   if (is.list(x)){
@@ -1253,6 +1312,10 @@ summary.svrepglm<-function (object, correlation = FALSE, ...)
 svytable.svyrep.design<-svreptable<-function(formula, design,
                                              Ntotal=sum(weights(design, "sampling")),
                                              round=FALSE,...){
+
+  if (!exists(".Generic",inherits=FALSE))
+    .Deprecated("svytable")
+  
    weights<-design$pweights
    if (is.data.frame(weights)) weights<-weights[[1]]
    ## unstratified or unadjusted.
@@ -1362,7 +1425,7 @@ postStratify.svyrep.design<-function(design, strata, population,
 
   if (compress) design$repweights<-compressWeights(design$repweights)
   
-  design$call<-sys.call()
+  design$call<-sys.call(-1)
   
   design
 }
@@ -1404,9 +1467,8 @@ rake<-function(design, sample.margins, population.margins,
     
 
     allterms<-unlist(lapply(sample.margins,all.vars))
-    tabfn<-if (is.rep) svreptable else svytable
     ff<-formula(paste("~", paste(allterms,collapse="+"),sep=""))
-    oldtable<-tabfn(ff, design)
+    oldtable<-svytable(ff, design)
     if (control$verbose)
         print(oldtable)
 
@@ -1422,7 +1484,7 @@ rake<-function(design, sample.margins, population.margins,
                                  population.margins[[i]],
                                  compress=FALSE)
         }
-        newtable<-tabfn(ff, design)
+        newtable<-svytable(ff, design)
         if (control$verbose)
             print(newtable)
 

@@ -1,3 +1,20 @@
+3.1   Quantiles for replicate-weight designs now by default compute confidence
+      intervals on the probability scale and transform, so they are valid for
+      jackknife designs. (as Gillian Raab suggested long ago)
+
+      Analyses on replicate weights should use eg svymean, which has methods for
+      replicate weight designs; the old (eg svrepmean) variants are now deprecated.
+
+      calibrate() can now use regression models with variance proportional 
+      to linear combination of predictors (and so can duplicate ratio estimators 
+      of means and totals)
+
+      Prettier labelling of objects created by postStratify(), calibrate(), 
+      update(), subset()
+
+      svytotal on replicate weight designs was computing means, not totals
+      (probably since 3.0). 
+
 3.0-1 Allow some strata to have an infinite population (zero sampling fraction)
       (this doesn't happen in reality but is the recommended analysis for
       handling certainty PSUs in some large NCHS studies). 
@@ -7,7 +24,7 @@
 
       calibrate() was working only under stratified/simple random sampling.
 
-      Allow user-supplied Hadamard matrix for brrweights
+      Allow user-supplied Hadamard matrix for brrweights.
 
       as.svrepdesign gave a spurious warning when converting post-2.9-1
       objects without finite population corrections to BRR.
@@ -53,7 +70,6 @@
       Fixed svychisq denominator degrees of freedom for stratified designs 
       for bug introduced by multistage revision. (Takahiro Tsuchiya)
       
-
 
 2.9-1 Fixed typo in description of fpc in svydesign.Rd
   

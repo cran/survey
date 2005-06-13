@@ -1,6 +1,6 @@
 
 R : Copyright 2005, The R Foundation for Statistical Computing
-Version 2.1.0 beta (2005-04-12), ISBN 3-900051-07-0
+Version 2.1.0 Patched (2005-05-12), ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -86,8 +86,7 @@ I(x * (x > 4))         0.7555129
 > (dclus1g3 <- calibrate(dclus1, ~stype+api99, c(pop.totals, api99=3914069)))
 1 - level Cluster Sampling design
 With (15) clusters.
-calibrate.survey.design2(dclus1, ~stype + api99, c(pop.totals, 
-    api99 = 3914069))
+calibrate(dclus1, ~stype + api99, c(pop.totals, api99 = 3914069))
 > 
 > m1<-svymean(~api00, subset(dclus1g3, comp.imp=="Yes"))
 > m3<-svyratio(~I(api00*(comp.imp=="Yes")), ~as.numeric(comp.imp=="Yes"), dclus1g3)

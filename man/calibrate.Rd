@@ -14,8 +14,8 @@
 }
 \usage{
 calibrate(design,...)
-\method{calibrate}{survey.design2}(design, formula, population,stage=NULL,...)
-\method{calibrate}{svyrep.design}(design, formula, population, compress=NA,...)
+\method{calibrate}{survey.design2}(design, formula, population,stage=NULL,lambda=NULL,...)
+\method{calibrate}{svyrep.design}(design, formula, population, compress=NA,lambda=NULL,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,6 +26,8 @@ calibrate(design,...)
   \item{compress}{compress the resulting replicate weights if
     \code{TRUE} or if \code{NA} and weights were previously compressed}
   \item{stage}{See Details below}
+  \item{lambda}{Coefficients for variance in calibration model (see
+    Details below)}
   \item{...}{options for other methods}
 }
 \details{
@@ -39,13 +41,17 @@ calibrate(design,...)
   totals for PSUs, and so on.  The default, \code{stage=NULL} is
   interpreted as stage 0 when a single population vector is supplied
   and stage 1 when a list is supplied.
+  
+  If \code{lambda=NULL} the calibration model has constant
+  variance. The model must explicitly or implicitly contain an
+  intercept. If \code{lambda} is not \code{NULL} it specifies a linear
+  combination of the columns of the model matrix and the calibration
+  variance is proportional to that linear combination.
 }
 \value{
   A survey design object.
 }
-\note{
-  Only a constant variance calibration model is supported at the moment.
-}
+
 \references{
 Sarndal CA, Swensson B, Wretman J. "Model Assisted Survey
 Sampling". Springer. 1991.
@@ -97,18 +103,29 @@ svymean(~api00, rclus1g3)
 svytotal(~enroll, rclus1g3)
 svytotal(~stype, rclus1g3)
 
-## Similar to separate ratio estimator
+## Ratio estimators
 dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
+rstrat<-as.svrepdesign(dstrat)
+
 svytotal(~api.stu,dstrat)
 
+common<-svyratio(~api.stu, ~enroll, dstrat, separate=FALSE)
 sep<-svyratio(~api.stu,~enroll, dstrat,separate=TRUE)
 stratum.totals<-list(E=1877350, H=1013824, M=920298)
 predict(sep, total=stratum.totals)
+predict(common, total=do.call("sum",stratum.totals))
 
 pop<-colSums(model.matrix(~stype*enroll-1,model.frame(~stype*enroll,apipop)))
 pop
-dstratg<-calibrate(dstrat,~stype*enroll-1, pop)
-svytotal(~api.stu,dstratg)
+## common ratio
+dstratg1<-calibrate(dstrat,~enroll-1, pop[4], lambda=1)
+svytotal(~api.stu, dstratg1)
+rstratg1<-calibrate(rstrat,~enroll-1, pop[4], lambda=1)
+svytotal(~api.stu, rstratg1)
+
+## similar (but not identical) to separate ratio.
+dstratg2<-calibrate(dstrat,~stype*enroll-1, pop,lambda=c(0,0,0,1,0,0))
+svytotal(~api.stu,dstratg2)
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

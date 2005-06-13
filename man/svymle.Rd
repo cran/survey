@@ -67,7 +67,6 @@ conditional on variables in the model then standard errors based on just
 the information matrix will be approximately valid.  In particular, for
 independent sampling where weights and strata depend on variables in the
 model the \code{stderr="model"} should work fairly well.
-
 }
 \value{
   An object of class \code{svymle}

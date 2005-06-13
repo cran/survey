@@ -1,0 +1,221 @@
+
+R : Copyright 2005, The R Foundation for Statistical Computing
+Version 2.1.0 Patched (2005-05-12), ISBN 3-900051-07-0
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for a HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(survey)
+> example(api)
+
+api> library(survey)
+
+api> data(api)
+
+api> mean(apipop$api00)
+[1] 664.7126
+
+api> sum(apipop$enroll, na.rm = TRUE)
+[1] 3811472
+
+api> dstrat <- svydesign(id = ~1, strata = ~stype, weights = ~pw, 
+    data = apistrat, fpc = ~fpc)
+
+api> summary(dstrat)
+Stratified Independent Sampling design
+svydesign(id = ~1, strata = ~stype, weights = ~pw, data = apistrat, 
+    fpc = ~fpc)
+Probabilities:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.02262 0.02262 0.03587 0.04014 0.05339 0.06623 
+Stratum Sizes: 
+             E  H  M
+obs        100 50 50
+design.PSU 100 50 50
+actual.PSU 100 50 50
+Population stratum sizes (PSUs): 
+   E    M    H 
+4421 1018  755 
+Data variables:
+ [1] "cds"      "stype"    "name"     "sname"    "snum"     "dname"   
+ [7] "dnum"     "cname"    "cnum"     "flag"     "pcttest"  "api00"   
+[13] "api99"    "target"   "growth"   "sch.wide" "comp.imp" "both"    
+[19] "awards"   "meals"    "ell"      "yr.rnd"   "mobility" "acs.k3"  
+[25] "acs.46"   "acs.core" "pct.resp" "not.hsg"  "hsg"      "some.col"
+[31] "col.grad" "grad.sch" "avg.ed"   "full"     "emer"     "enroll"  
+[37] "api.stu"  "pw"       "fpc"     
+
+api> svymean(~api00, dstrat)
+        mean     SE
+api00 662.29 9.4089
+
+api> svytotal(~enroll, dstrat, na.rm = TRUE)
+         total     SE
+enroll 3687178 114642
+
+api> dclus1 <- svydesign(id = ~dnum, weights = ~pw, data = apiclus1, 
+    fpc = ~fpc)
+
+api> summary(dclus1)
+1 - level Cluster Sampling design
+With (15) clusters.
+svydesign(id = ~dnum, weights = ~pw, data = apiclus1, fpc = ~fpc)
+Probabilities:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.02954 0.02954 0.02954 0.02954 0.02954 0.02954 
+Population size (PSUs): 757 
+Data variables:
+ [1] "cds"      "stype"    "name"     "sname"    "snum"     "dname"   
+ [7] "dnum"     "cname"    "cnum"     "flag"     "pcttest"  "api00"   
+[13] "api99"    "target"   "growth"   "sch.wide" "comp.imp" "both"    
+[19] "awards"   "meals"    "ell"      "yr.rnd"   "mobility" "acs.k3"  
+[25] "acs.46"   "acs.core" "pct.resp" "not.hsg"  "hsg"      "some.col"
+[31] "col.grad" "grad.sch" "avg.ed"   "full"     "emer"     "enroll"  
+[37] "api.stu"  "fpc"      "pw"      
+
+api> svymean(~api00, dclus1)
+        mean     SE
+api00 644.17 23.542
+
+api> svytotal(~enroll, dclus1, na.rm = TRUE)
+         total     SE
+enroll 3404940 932235
+
+api> dclus2 <- svydesign(id = ~dnum + snum, fpc = ~fpc1 + 
+    fpc2, data = apiclus2)
+
+api> summary(dclus2)
+2 - level Cluster Sampling design
+With (40, 126) clusters.
+svydesign(id = ~dnum + snum, fpc = ~fpc1 + fpc2, data = apiclus2)
+Probabilities:
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+0.003669 0.037740 0.052840 0.042390 0.052840 0.052840 
+Population size (PSUs): 757 
+Data variables:
+ [1] "cds"      "stype"    "name"     "sname"    "snum"     "dname"   
+ [7] "dnum"     "cname"    "cnum"     "flag"     "pcttest"  "api00"   
+[13] "api99"    "target"   "growth"   "sch.wide" "comp.imp" "both"    
+[19] "awards"   "meals"    "ell"      "yr.rnd"   "mobility" "acs.k3"  
+[25] "acs.46"   "acs.core" "pct.resp" "not.hsg"  "hsg"      "some.col"
+[31] "col.grad" "grad.sch" "avg.ed"   "full"     "emer"     "enroll"  
+[37] "api.stu"  "pw"       "fpc1"     "fpc2"    
+
+api> svymean(~api00, dclus2)
+        mean     SE
+api00 670.81 30.099
+
+api> svytotal(~enroll, dclus2, na.rm = TRUE)
+         total     SE
+enroll 2639273 799638
+
+api> dclus2wr <- svydesign(id = ~dnum + snum, weights = ~pw, 
+    data = apiclus2)
+
+api> summary(dclus2wr)
+2 - level Cluster Sampling design
+With (40, 126) clusters.
+svydesign(id = ~dnum + snum, weights = ~pw, data = apiclus2)
+Probabilities:
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+0.003669 0.037740 0.052840 0.042390 0.052840 0.052840 
+Data variables:
+ [1] "cds"      "stype"    "name"     "sname"    "snum"     "dname"   
+ [7] "dnum"     "cname"    "cnum"     "flag"     "pcttest"  "api00"   
+[13] "api99"    "target"   "growth"   "sch.wide" "comp.imp" "both"    
+[19] "awards"   "meals"    "ell"      "yr.rnd"   "mobility" "acs.k3"  
+[25] "acs.46"   "acs.core" "pct.resp" "not.hsg"  "hsg"      "some.col"
+[31] "col.grad" "grad.sch" "avg.ed"   "full"     "emer"     "enroll"  
+[37] "api.stu"  "pw"       "fpc1"     "fpc2"    
+
+api> svymean(~api00, dclus2wr)
+        mean     SE
+api00 670.81 30.712
+
+api> svytotal(~enroll, dclus2wr, na.rm = TRUE)
+         total     SE
+enroll 2639273 820261
+
+api> rclus1 <- as.svrepdesign(dclus1)
+
+api> summary(rclus1)
+Call: as.svrepdesign(dclus1)
+Unstratified cluster jacknife (JK1) with 15 replicates.
+Variables: 
+ [1] "cds"      "stype"    "name"     "sname"    "snum"     "dname"   
+ [7] "dnum"     "cname"    "cnum"     "flag"     "pcttest"  "api00"   
+[13] "api99"    "target"   "growth"   "sch.wide" "comp.imp" "both"    
+[19] "awards"   "meals"    "ell"      "yr.rnd"   "mobility" "acs.k3"  
+[25] "acs.46"   "acs.core" "pct.resp" "not.hsg"  "hsg"      "some.col"
+[31] "col.grad" "grad.sch" "avg.ed"   "full"     "emer"     "enroll"  
+[37] "api.stu"  "fpc"      "pw"      
+
+api> svymean(~api00, rclus1)
+        mean     SE
+api00 644.17 26.329
+
+api> svytotal(~enroll, rclus1, na.rm = TRUE)
+          mean     SE
+enroll 3404940 932235
+
+api> pop.types <- xtabs(~stype, data = apipop)
+
+api> rclus1p <- postStratify(rclus1, ~stype, pop.types)
+
+api> dclus1p <- postStratify(dclus1, ~stype, pop.types)
+
+api> summary(dclus1p)
+1 - level Cluster Sampling design
+With (15) clusters.
+postStratify(dclus1, ~stype, pop.types)
+Probabilities:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.01854 0.03257 0.03257 0.03040 0.03257 0.03257 
+Population size (PSUs): 757 
+Data variables:
+ [1] "cds"      "stype"    "name"     "sname"    "snum"     "dname"   
+ [7] "dnum"     "cname"    "cnum"     "flag"     "pcttest"  "api00"   
+[13] "api99"    "target"   "growth"   "sch.wide" "comp.imp" "both"    
+[19] "awards"   "meals"    "ell"      "yr.rnd"   "mobility" "acs.k3"  
+[25] "acs.46"   "acs.core" "pct.resp" "not.hsg"  "hsg"      "some.col"
+[31] "col.grad" "grad.sch" "avg.ed"   "full"     "emer"     "enroll"  
+[37] "api.stu"  "fpc"      "pw"      
+
+api> summary(rclus1p)
+Call: postStratify(rclus1, ~stype, pop.types)
+Unstratified cluster jacknife (JK1) with 15 replicates.
+Variables: 
+ [1] "cds"      "stype"    "name"     "sname"    "snum"     "dname"   
+ [7] "dnum"     "cname"    "cnum"     "flag"     "pcttest"  "api00"   
+[13] "api99"    "target"   "growth"   "sch.wide" "comp.imp" "both"    
+[19] "awards"   "meals"    "ell"      "yr.rnd"   "mobility" "acs.k3"  
+[25] "acs.46"   "acs.core" "pct.resp" "not.hsg"  "hsg"      "some.col"
+[31] "col.grad" "grad.sch" "avg.ed"   "full"     "emer"     "enroll"  
+[37] "api.stu"  "fpc"      "pw"      
+
+api> svymean(~api00, dclus1p)
+        mean     SE
+api00 642.31 23.921
+
+api> svytotal(~enroll, dclus1p, na.rm = TRUE)
+         total     SE
+enroll 3680893 406293
+
+api> svymean(~api00, rclus1p)
+        mean    SE
+api00 642.31 26.45
+
+api> svytotal(~enroll, rclus1p, na.rm = TRUE)
+          mean     SE
+enroll 3680893 346014
+> 
+> 

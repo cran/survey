@@ -297,7 +297,7 @@ update.survey.design<-function(object,...){
     object$variables[,newnames[j]]<-eval(dots[[j]],object$variables, parent.frame())
   }
   
-  object$call<-sys.call()
+  object$call<-sys.call(-1)
   object 
 }
 
@@ -306,7 +306,7 @@ subset.survey.design<-function(x,subset,...){
         r <- eval(e, x$variables, parent.frame())
         r <- r & !is.na(r) 
         x<-x[r,]
-	x$call<-sys.call()
+	x$call<-sys.call(-1)
 	x
 }
 
@@ -376,7 +376,7 @@ postStratify.survey.design<-function(design, strata, population, partial=FALSE,.
   
   ## Do we need to iterate here a la raking to get design strata
   ## and post-strata both balanced?
-  design$call<-sys.call()
+  design$call<-sys.call(-1)
   
   design
 }

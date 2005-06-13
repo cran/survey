@@ -1,6 +1,6 @@
 
 R : Copyright 2005, The R Foundation for Statistical Computing
-Version 2.2.0 Under development (unstable) (2005-05-05), ISBN 3-900051-07-0
+Version 2.1.0 Patched (2005-05-12), ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -109,4 +109,25 @@ There were 29 warnings (use warnings() to see them)
 768  768        562.5000  0
 781  781        851.0000  0
 There were 29 warnings (use warnings() to see them)
+> 
+> ## Ratio estimators
+> dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
+> svytotal(~api.stu,dstrat)
+          total    SE
+api.stu 3086009 99477
+> common<-svyratio(~api.stu, ~enroll, dstrat, separate=FALSE)
+> total.enroll<-sum(apipop$enroll,na.rm=TRUE)
+> predict(common, total=total.enroll)
+$total
+         enroll
+api.stu 3190038
+
+$se
+          enroll
+api.stu 29565.98
+
+> dstratg<-calibrate(dstrat,~enroll-1, total.enroll, lambda=1)
+> svytotal(~api.stu, dstratg)
+          total    SE
+api.stu 3190038 29566
 > 

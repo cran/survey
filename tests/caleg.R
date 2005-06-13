@@ -27,3 +27,12 @@ svymean(~api99, dclus2g)
 round(svyby(~api99, ~dnum, design=dclus2, svymean),4)
 
 round(svyby(~api99, ~dnum, design=dclus2g, svymean),4)
+
+## Ratio estimators
+dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
+svytotal(~api.stu,dstrat)
+common<-svyratio(~api.stu, ~enroll, dstrat, separate=FALSE)
+total.enroll<-sum(apipop$enroll,na.rm=TRUE)
+predict(common, total=total.enroll)
+dstratg<-calibrate(dstrat,~enroll-1, total.enroll, lambda=1)
+svytotal(~api.stu, dstratg)

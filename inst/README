@@ -1,3 +1,7 @@
+NEWS                    Change log
+
+porting.to.S            Notes on porting to S-PLUS
+
 description.pdf         Reprint from Journal of Statistical Software. 
                         Describes version 2.3, which is now quite old.
 
@@ -9,3 +13,8 @@ survey-vanderbilt.pdf   Slides from a talk at the Department of Biostatistics,
 
 twostage.pdf            Analysis examples for two-stage sampling, 
 			showing agreement with SUDAAN
+
+More documentation is on the package homepage at
+    http://faculty.washington.edu/tlumley/survey/
+
+

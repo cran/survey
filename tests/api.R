@@ -1,0 +1,3 @@
+library(survey)
+example(api)
+

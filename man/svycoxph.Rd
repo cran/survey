@@ -10,7 +10,7 @@
 \alias{extractAIC.svycoxph}
 \alias{survfit.svycoxph}
 %- Also NEED an `\alias' for EACH other topic documented here.
-\title{Survey-weighted generalised linear models.}
+\title{Survey-weighted Cox models.}
 \description{
 Fit a proportional hazards model to data from a complex survey design, with inverse-probability weighting and with standard errors corrected for cluster sampling.
 }
@@ -26,7 +26,8 @@ svycoxph(formula, design,subset=NULL, ...)
   \item{\dots}{Other arguments passed to \code{coxph}. }
 }
 \details{
-The main difference between this function and \code{\link{coxph}} in the
+The main difference between this function and the \code{robust=TRUE}
+option to \code{\link{coxph}} in the
 survival package is that this function accounts for the reduction in
 variance from stratified sampling and the increase in variance from
 having only a small number of clusters.

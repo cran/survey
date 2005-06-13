@@ -4,6 +4,7 @@
 \alias{svytable.svyrep.design}
 \alias{svytable.survey.design}
 \alias{svychisq}
+\alias{svychisq.survey.design}
 \alias{summary.svytable}
 \alias{print.summary.svytable}
 \alias{summary.svreptable}
@@ -15,7 +16,7 @@
 \usage{
 \method{svytable}{survey.design}(formula, design, Ntotal = NULL, round = FALSE,...)
 \method{svytable}{svyrep.design}(formula, design, Ntotal = sum(weights(design, "sampling")), round = FALSE,...)
-svychisq(formula, design, statistic = c("F",  "Chisq","Wald","adjWald"),na.rm=TRUE)
+\method{svychisq}{survey.design}(formula, design, statistic = c("F",  "Chisq","Wald","adjWald"),na.rm=TRUE,...)
 \method{summary}{svytable}(object, statistic = c("F",  "Chisq","Wald","adjWald"),...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -29,7 +30,7 @@ svychisq(formula, design, statistic = c("F",  "Chisq","Wald","adjWald"),na.rm=TR
     integer?}
   \item{na.rm}{Remove missing values}
   \item{object}{Output from \code{svytable}}
-  \item{...}{Other arguments to \code{summary}, not used here}
+  \item{...}{Other arguments for future expansion}
  }
 \details{
  
