@@ -650,19 +650,20 @@ svyvar.survey.design<-function(x, design, na.rm=FALSE,...){
 	else if(typeof(x) %in% c("expression","symbol"))
             x<-eval(x, design$variables)
         
+	n<-NROW(x)
 	xbar<-svymean(x,design, na.rm=na.rm)
 	if(NCOL(x)==1) {
             x<-x-xbar
-            v<-svymean(x*x,design, na.rm=na.rm)
+            v<-svymean(x*x*n/(n-1),design, na.rm=na.rm)
             attr(v,"statistic")<-"variance"
             return(v)
 	}
 	x<-t(t(x)-xbar)
 	p<-NCOL(x)
-	n<-NROW(x)
 	a<-matrix(rep(x,p),ncol=p*p)
 	b<-x[,rep(1:p,each=p)]
-	v<-svymean(a*b,design, na.rm=na.rm)
+        ## Kish uses the n-1 divisor, so it affects design effects
+	v<-svymean(a*b*n/(n-1),design, na.rm=na.rm)
 	v<-matrix(v,ncol=p)
         attr(v,"statistic")<-"variance"
         v

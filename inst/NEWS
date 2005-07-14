@@ -1,3 +1,12 @@
+3.2   Add option to calibrate() to make weights constant within clusters.
+
+      Add bounded regression calibration to calibrate()
+
+3.1-1 Rescale svyvar output by n/(n-1) to match Kish, which makes a small
+      difference to design effect computations. (for Takahiro Tsuchiya)   
+
+      Test for presence of intercept in calibrate() was too fussy.
+
 3.1   Quantiles for replicate-weight designs now by default compute confidence
       intervals on the probability scale and transform, so they are valid for
       jackknife designs. (as Gillian Raab suggested long ago)

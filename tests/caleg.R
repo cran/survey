@@ -1,7 +1,9 @@
 ##
-## Example of calibration to first-stage clusters
+## Calibration examples
 ##
 
+
+## Example of calibration to first-stage clusters
 library(survey)
 data(api)
 
@@ -10,7 +12,6 @@ clusters<-clusters[clusters>1 & names(clusters)!="639"]
 apiclus2a<-subset(apiclus2, dnum %in% as.numeric(names(clusters)))
 
 dclus2<-svydesign(id=~dnum+snum, fpc=~fpc1+fpc2, data=apiclus2a)
-
 
 popclusters<-subset(apipop, dnum %in% as.numeric(names(clusters)))
 
@@ -27,6 +28,25 @@ svymean(~api99, dclus2g)
 round(svyby(~api99, ~dnum, design=dclus2, svymean),4)
 
 round(svyby(~api99, ~dnum, design=dclus2g, svymean),4)
+
+## Averaging to first stage
+
+dclus1<- svydesign(id = ~dnum, weights = ~pw, data = apiclus1, fpc = ~fpc)
+pop<-colSums(cbind(1,apipop$enroll),na.rm=TRUE)
+
+dclus1g<-calibrate(dclus1, ~enroll, pop, aggregate=1)
+
+svytotal(~enroll,dclus1g)
+svytotal(~api.stu,dclus1g)
+
+#variation within clusters should be zero
+all.equal(0, max(ave(weights(dclus1g),dclus1g$cluster,FUN=var),na.rm=TRUE))
+
+##bounded weights
+ dclus1g<-calibrate(dclus1, ~enroll, pop)
+ range(weights(dclus1g)/weights(dclus1))
+ dclus1gb<-calibrate(dclus1, ~enroll, pop, bounds=c(.6,1.5))
+ range(weights(dclus1gb)/weights(dclus1))
 
 ## Ratio estimators
 dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)

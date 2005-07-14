@@ -5,21 +5,32 @@ is.calibrated<-function(design){ !is.null(design$postStrata)}
 
 
 calibrate.survey.design2<-function(design, formula, population,
-                                   stage=NULL,  lambda=NULL,...){
+                                   stage=NULL,  lambda=NULL, aggregate.stage=NULL, bounds=c(-Inf,Inf),...){
   
   if (is.null(stage))
     stage<-if (is.list(population)) 1 else 0
+
+  if (!is.null(aggregate.stage)){
+    aggindex<-design$cluster[[aggregate.stage]]
+  }
   
   if(stage==0){
     ## calibration to population totals
     mm<-model.matrix(formula, model.frame(formula, design$variables))
-    whalf<-sqrt(weights(design))
-    sample.total<-colSums(mm*whalf*whalf)
-
+    ww<-weights(design)
     if (is.null(lambda))
       sigma2<-rep(1,nrow(mm))
     else
       sigma2<-drop(mm%*%lambda)
+
+    if (!is.null(aggregate.stage)){
+      mm<-apply(mm,2,function(mx) ave(mx,aggindex))
+      ww<-ave(ww,aggindex)
+      sigma2<-ave(sigma2,aggindex)
+    }
+    whalf<-sqrt(ww)
+    sample.total<-colSums(mm*ww)
+
     
     if (length(sample.total)!=length(population))
       stop("Population and sample totals are not the same length.")
@@ -28,14 +39,27 @@ calibrate.survey.design2<-function(design, formula, population,
       warning("Sample and population totals have different names.")
 
     tqr<-qr(mm*whalf/sqrt(sigma2))
-    if (is.null(lambda) && !all(abs(qr.resid(tqr,sigma2)) <1e-7))
-      stop("Calibration models with constant variance must have an intercept")
-    
-    Tmat<-crossprod(mm*whalf/sqrt(sigma2))
-    
-    tT<-solve(Tmat,population-sample.total)
-    
-    g<-drop(1+mm%*%tT/sigma2)
+    if (is.null(lambda) && !all(abs(qr.resid(tqr,sigma2)/sigma2) <1e-3))
+      warning("Calibration models with constant variance must have an intercept")
+
+    ok<-rep(TRUE,NROW(mm))
+    g<-rep(1,NROW(mm))
+    iter<-1
+    repeat({
+      Tmat<-crossprod(mm[ok,,drop=FALSE]*whalf[ok]/sqrt(sigma2[ok]))
+      
+      tT<-solve(Tmat,population-sample.total-colSums(mm[!ok,,drop=FALSE]*ww[!ok]))
+      
+      g[ok]<-drop(1+mm[ok,,drop=FALSE]%*%tT/sigma2[ok])
+      
+      ok<- g>=bounds[1] & g<=bounds[2]
+      g<-pmin(bounds[2],pmax(bounds[1],g))
+      
+      if (all(ok)) break
+      if (isTRUE(all.equal(population, colSums(mm*ww*g)))) break;
+      iter<-iter+1
+      if (iter>10) stop("Failed to achieve bounds in ",iter," iterations")
+    })
     design$prob<-design$prob/g
     
     caldata<- list(qr=tqr, w=g*whalf*sqrt(sigma2), stage=0, index=NULL)
@@ -44,6 +68,10 @@ calibrate.survey.design2<-function(design, formula, population,
     ## Calibration within clusters (Sarndal's Case C)
     if (stage>NCOL(design$cluster))
       stop("This design does not have stage",stage)
+
+    if (!is.null(aggregate.stage)){
+      stop("aggregate= not implemented for calibration within clusters")
+    }
 
     if (!all(length(population[[1]])==sapply(population,length)))
       stop("Population totals are not all the same length")
@@ -74,7 +102,7 @@ calibrate.survey.design2<-function(design, formula, population,
     cwhalf<-sqrt(weights(design)/stageweights)
     dwhalf<-sqrt(weights(design))
     tqr<-qr(mm)
-    if (is.null(lambda) && !all(abs(qr.resid(tqr,sigma2)) <1e-7))
+    if (is.null(lambda) && !all(abs(qr.resid(tqr,sigma2)) <1e-3))
       stop("Calibration models with constant variance must have an intercept")
  
     for (i in 1:length(clusters)){ 
@@ -99,11 +127,11 @@ calibrate.survey.design2<-function(design, formula, population,
 }
 
 
-calibrate.svyrep.design<-function(design, formula, population,compress=NA,lambda=NULL,...){
+calibrate.svyrep.design<-function(design, formula, population,compress=NA,lambda=NULL,
+                                  aggregate.index=NULL,...){
   mf<-model.frame(formula, design$variables)
   mm<-model.matrix(formula, mf)
-  whalf<-sqrt(design$pweights)
-
+  ww<-design$pweights
   if (is.null(lambda))
     sigma2<-rep(1,nrow(mm))
   else
@@ -112,6 +140,25 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,lambda
   repwt<-as.matrix(design$repweights)
   if (!design$combined.weights)
     repwt<-repwt*design$pweights
+
+  if (inherits(aggregate.index,"formula")){
+    if (length(aggregate.index)!=2)
+      stop("aggregate.index must be a one-sided formula")
+    aggregate.index<-model.frame(aggregate.index, design$variables)
+    if (NCOL(aggregate.index)>1)
+      stop("aggregate.index must specify a single variable")
+    aggregate.index<-aggregate.index[[1]]
+  }
+  
+  if (!is.null(aggregate.index)){
+    if (sqrt(max(ave(ww,aggregate.index,FUN=var),na.rm=TRUE))>1e-2*mean(ww))
+      warning("Sampling weights are not constant within clusters defined by aggregate.index")
+    mm<-apply(mm,2,function(mx) ave(mx,aggregate.index))
+    ww<-ave(ww,aggregate.index)
+    sigma2<-ave(sigma2,aggregate.index)
+    repwt<-apply(repwt,2,function(wx) ave(wx, aggregate.index))
+  }
+  whalf<-sqrt(ww)
   
   sample.total<-colSums(mm*whalf*whalf)
 
@@ -124,19 +171,19 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,lambda
   
   tT<-solve(Tmat,population-sample.total)
   
-  g<-drop(1+mm%*%tT/sigma2)
-  design$pweights<-design$pweights*g
+  gtotal<-drop(1+mm%*%tT/sigma2)
+  design$pweights<-design$pweights*gtotal
   
   for(i in 1:NCOL(repwt)){
     whalf<-sqrt(repwt[,i])
     Tmat<-crossprod(mm*whalf/sqrt(sigma2))
     sample.total<-colSums(mm*whalf*whalf)
     g<-drop(1+mm%*%solve(Tmat,population-sample.total)/sigma2)
-    repwt[,i]<-repwt[,i]*g
+    repwt[,i]<-as.vector(design$repweights[,i])*g
   }
 
   if (!design$combined.weights)
-    repwt<-repwt/design$pweights
+      repwt<-repwt/gtotal
 
   if (compress ||
       (is.na(compress && inherits(design$repweights,"repweights_compressed")))){

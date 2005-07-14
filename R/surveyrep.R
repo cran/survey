@@ -693,11 +693,12 @@ svyvar.svyrep.design<-svrepvar<-function(x, design, na.rm=FALSE, rho=NULL,
     pw<-1
   else
     pw<-design$pweights
-  
+
+  n<-NROW(x)
   v<-function(w){
     xbar<-colSums(as.vector(w)*pw*x)/sum(as.vector(w)*pw)
     xdev<-sweep(x,2,xbar,"-")
-    colSums(xdev*xdev*as.vector(w)*pw)/sum(as.vector(w)*pw)
+    (n/(n-1))*colSums(xdev*xdev*as.vector(w)*pw)/sum(as.vector(w)*pw)
   }
 
   if (design$combined.weights)

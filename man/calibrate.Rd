@@ -14,8 +14,10 @@
 }
 \usage{
 calibrate(design,...)
-\method{calibrate}{survey.design2}(design, formula, population,stage=NULL,lambda=NULL,...)
-\method{calibrate}{svyrep.design}(design, formula, population, compress=NA,lambda=NULL,...)
+\method{calibrate}{survey.design2}(design, formula, population,
+      stage=NULL, lambda=NULL, aggregate.stage=NULL,bounds=c(-Inf,Inf),...)
+\method{calibrate}{svyrep.design}(design, formula, population,
+      compress=NA,lambda=NULL,aggregate.index=NULL,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -28,6 +30,11 @@ calibrate(design,...)
   \item{stage}{See Details below}
   \item{lambda}{Coefficients for variance in calibration model (see
     Details below)}
+  \item{aggregate.stage}{An integer. If not \code{NULL}, make calibration weights
+    constant within sampling units at this stage.}
+  \item{aggregate.index}{A vector or one-sided formula. If not \code{NULL}, make calibration weights
+    constant within levels of this variable}
+  \item{bounds}{Bounds for the calibration weights}
   \item{...}{options for other methods}
 }
 \details{
@@ -47,6 +54,18 @@ calibrate(design,...)
   intercept. If \code{lambda} is not \code{NULL} it specifies a linear
   combination of the columns of the model matrix and the calibration
   variance is proportional to that linear combination.
+  
+  Calibration may result in observations within the last-stage sampling
+  units having unequal weight even though they necessarily are sampled
+  together.  Specifying \code{aggegrate.stage} ensures that the
+  calibration weight adjustments are constant within sampling units at
+  the specified stage; if the original sampling weights were equal the
+  final weights will also be equal.  The algorithm is as described by
+  Vanderhoeft (2001, section III.D). Specifying \code{aggregate.index}
+  does the same thing for replicate weight designs; a warning will be
+  given if the original weights are not constant within levels of
+  \code{aggregate.index}.
+  
 }
 \value{
   A survey design object.
@@ -56,10 +75,12 @@ calibrate(design,...)
 Sarndal CA, Swensson B, Wretman J. "Model Assisted Survey
 Sampling". Springer. 1991.
 
-
 Rao JNK, Yung W, Hidiroglou MA (2002)   Estimating equations for the
 analysis of survey data using poststratification information. Sankhya
 64 Series A Part 2, 364-378.
+
+Vanderhoeft C (2001) Generalized Calibration at Statistics
+Belgium. Statistics Belgium Working Paper No 3. \url{http://www.statbel.fgov.be/studies/paper03_en.asp}
 }
 
 \seealso{ \code{\link{postStratify}}, \code{\link{rake}}}
@@ -78,6 +99,12 @@ svymean(~api00, dclus1g)
 svytotal(~enroll, dclus1g)
 svytotal(~stype, dclus1g)
 
+## Make weights constant within school district
+(dclus1agg<-calibrate(dclus1, ~stype, pop.totals, aggregate=1))
+svymean(~api00, dclus1agg)
+svytotal(~enroll, dclus1agg)
+svytotal(~stype, dclus1agg)
+
 
 ## Now add sch.wide
 (dclus1g2 <- calibrate(dclus1, ~stype+sch.wide, c(pop.totals, sch.wideYes=5122)))
@@ -94,6 +121,7 @@ svymean(~api00, dclus1g3)
 svytotal(~enroll, dclus1g3)
 svytotal(~stype, dclus1g3)
 
+
 ## Same syntax with replicate weights
 rclus1<-as.svrepdesign(dclus1)
 
@@ -102,6 +130,23 @@ rclus1<-as.svrepdesign(dclus1)
 svymean(~api00, rclus1g3)
 svytotal(~enroll, rclus1g3)
 svytotal(~stype, rclus1g3)
+
+(rclus1agg3 <- calibrate(rclus1, ~stype+api99, c(pop.totals,api99=3914069), aggregate.index=~dnum))
+
+svymean(~api00, rclus1agg3)
+svytotal(~enroll, rclus1agg3)
+svytotal(~stype, rclus1agg3)
+
+
+## Bounded weights
+range(weights(dclus1g3)/weights(dclus1))
+(dclus1g3b <- calibrate(dclus1, ~stype+api99, c(pop.totals, api99=3914069),bounds=c(0,1.5)))
+range(weights(dclus1g3b)/weights(dclus1))
+
+svymean(~api00, dclus1g3b)
+svytotal(~enroll, dclus1g3b)
+svytotal(~stype, dclus1g3b)
+
 
 ## Ratio estimators
 dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)

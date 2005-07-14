@@ -15,9 +15,11 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > ##
-> ## Example of calibration to first-stage clusters
+> ## Calibration examples
 > ##
 > 
+> 
+> ## Example of calibration to first-stage clusters
 > library(survey)
 > data(api)
 > 
@@ -26,7 +28,6 @@ Type 'q()' to quit R.
 > apiclus2a<-subset(apiclus2, dnum %in% as.numeric(names(clusters)))
 > 
 > dclus2<-svydesign(id=~dnum+snum, fpc=~fpc1+fpc2, data=apiclus2a)
-> 
 > 
 > popclusters<-subset(apipop, dnum %in% as.numeric(names(clusters)))
 > 
@@ -109,6 +110,32 @@ There were 29 warnings (use warnings() to see them)
 768  768        562.5000  0
 781  781        851.0000  0
 There were 29 warnings (use warnings() to see them)
+> 
+> ## Averaging to first stage
+> 
+> dclus1<- svydesign(id = ~dnum, weights = ~pw, data = apiclus1, fpc = ~fpc)
+> pop<-colSums(cbind(1,apipop$enroll),na.rm=TRUE)
+> 
+> dclus1g<-calibrate(dclus1, ~enroll, pop, aggregate=1)
+> 
+> svytotal(~enroll,dclus1g)
+         total        SE
+enroll 3811472 6.013e-10
+> svytotal(~api.stu,dclus1g)
+          total    SE
+api.stu 3242857 38967
+> 
+> #variation within clusters should be zero
+> all.equal(0, max(ave(weights(dclus1g),dclus1g$cluster,FUN=var),na.rm=TRUE))
+[1] TRUE
+> 
+> ##bounded weights
+>  dclus1g<-calibrate(dclus1, ~enroll, pop)
+>  range(weights(dclus1g)/weights(dclus1))
+[1] 0.7906782 1.7891164
+>  dclus1gb<-calibrate(dclus1, ~enroll, pop, bounds=c(.6,1.5))
+>  range(weights(dclus1gb)/weights(dclus1))
+[1] 0.8897141 1.5000000
 > 
 > ## Ratio estimators
 > dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
