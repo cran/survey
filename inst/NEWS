@@ -1,3 +1,8 @@
+3.2-1 Fix ordering bug in ftable.svyby (Stefano Calza)
+
+      The "probability" option added to svyquantile for replicate designs
+      in 3.1 computed standard errors for the wrong tail. (Gillian Raab).
+
 3.2   Add option to calibrate() to make weights constant within clusters.
 
       Add bounded regression calibration to calibrate()
@@ -11,12 +16,13 @@
       intervals on the probability scale and transform, so they are valid for
       jackknife designs. (as Gillian Raab suggested long ago)
 
-      Analyses on replicate weights should use eg svymean, which has methods for
-      replicate weight designs; the old (eg svrepmean) variants are now deprecated.
+      Analyses on replicate weights should use eg svymean, which has
+      methods for replicate weight designs; the old (eg svrepmean) variants
+      are now deprecated.
 
       calibrate() can now use regression models with variance proportional 
-      to linear combination of predictors (and so can duplicate ratio estimators 
-      of means and totals)
+      to linear combination of predictors (and so can duplicate ratio 
+      estimators of means and totals)
 
       Prettier labelling of objects created by postStratify(), calibrate(), 
       update(), subset()

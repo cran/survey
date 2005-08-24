@@ -39,7 +39,8 @@ calibrate.survey.design2<-function(design, formula, population,
       warning("Sample and population totals have different names.")
 
     tqr<-qr(mm*whalf/sqrt(sigma2))
-    if (is.null(lambda) && !all(abs(qr.resid(tqr,sigma2)/sigma2) <1e-3))
+    ##FIXME: the check for intercept is still not quite right
+    if (is.null(lambda) && !all(abs(qr.resid(tqr,whalf*sigma2)/sigma2) <1e-5))
       warning("Calibration models with constant variance must have an intercept")
 
     ok<-rep(TRUE,NROW(mm))

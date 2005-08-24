@@ -608,9 +608,9 @@ svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="li
         
         point.estimates<-Qf(quantiles)
         if(length(quantiles)==1)
-          estfun<-as.numeric(xx>point.estimates)
+          estfun<-as.numeric(xx<point.estimates)
         else
-          estfun<-0+outer(xx,point.estimates,">")
+          estfun<-0+outer(xx,point.estimates,"<")
         est<-svymean(estfun,design, return.replicates=return.replicates)
         if (return.replicates)
           q.estimates<-matrix(Qf(est$replicates),nrow=NROW(est$replicates))

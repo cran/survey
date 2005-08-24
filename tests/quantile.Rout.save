@@ -1,0 +1,38 @@
+
+R : Copyright 2005, The R Foundation for Statistical Computing
+Version 2.1.1  (2005-06-20), ISBN 3-900051-07-0
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for a HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(survey)
+> set.seed(42)
+> 
+> df<-data.frame(x=exp(rnorm(1000)))
+> ddf<-svydesign(id=~1,data=df)
+Warning message:
+No weights or probabilities supplied, assuming equal probability in: svydesign(id = ~1, data = df) 
+> rdf<-as.svrepdesign(ddf)
+> 
+> SE(svyquantile(~x,ddf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE))
+      0.01        0.1        0.5        0.9       0.99 
+0.01545209 0.01265608 0.03388011 0.16145776 2.10061576 
+> 
+> SE(svyquantile(~x,rdf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE))
+               x
+q0.01 0.01534861
+q0.1  0.01514945
+q0.5  0.03394446
+q0.9  0.16409412
+q0.99 1.86410482
+> 
+> 
