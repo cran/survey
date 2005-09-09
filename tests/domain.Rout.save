@@ -1,6 +1,6 @@
 
 R : Copyright 2005, The R Foundation for Statistical Computing
-Version 2.1.0 Patched (2005-05-12), ISBN 3-900051-07-0
+Version 2.1.1  (2005-06-20), ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -42,7 +42,7 @@ Warning messages:
 > summary(m3)
 
 Call:
-svyglm.survey.design(formula = x ~ I(x > 4) + 0, design = dfpc)
+svyglm(x ~ I(x > 4) + 0, design = dfpc)
 
 Survey design:
 svydesign(id = ~psuid, strat = ~stratid, weight = ~weight, data = fpc, 

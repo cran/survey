@@ -1,6 +1,6 @@
 
 R : Copyright 2005, The R Foundation for Statistical Computing
-Version 2.1.0 Patched (2005-05-12), ISBN 3-900051-07-0
+Version 2.1.1  (2005-06-20), ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -134,8 +134,9 @@ api.stu 3242857 38967
 >  range(weights(dclus1g)/weights(dclus1))
 [1] 0.7906782 1.7891164
 >  dclus1gb<-calibrate(dclus1, ~enroll, pop, bounds=c(.6,1.5))
+Loading required package: MASS
 >  range(weights(dclus1gb)/weights(dclus1))
-[1] 0.8897141 1.5000000
+[1] 0.7198751 1.5000000
 > 
 > ## Ratio estimators
 > dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
@@ -153,7 +154,7 @@ $se
           enroll
 api.stu 29565.98
 
-> dstratg<-calibrate(dstrat,~enroll-1, total.enroll, lambda=1)
+> dstratg<-calibrate(dstrat,~enroll-1, total.enroll, variance=1)
 > svytotal(~api.stu, dstratg)
           total    SE
 api.stu 3190038 29566

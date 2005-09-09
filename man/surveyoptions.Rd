@@ -17,10 +17,13 @@
     When \code{options("survey.ultimate.cluster")} is \code{TRUE},
     standard error estimation is based on independence of PSUs at the
     first stage of sampling, without using any information about
-    subsequent stages (this is what Stata (before version 9) and many
-    other packages do). When \code{FALSE}, finite population corrections
+    subsequent stages. When \code{FALSE}, finite population corrections
     and variances are estimated recursively. See \code{\link{svyrecvar}}
-    for more information.
+    for more information. This option makes no difference unless
+    first-stage finite population corrections are specified, in which
+    case setting the option to \code{TRUE} gives the wrong answer for a
+    multistage study. The only reason to use \code{TRUE} is for
+    compatibility with other software that gives the wrong answer.
     
     Handling of strata with a single PSU that are not certainty PSUs is
     controlled by \code{options("survey.lonely.psu")}. The default
@@ -28,7 +31,7 @@
     to ignore that PSU for variance computation, \code{"adjust"} to
     center the stratum at the population mean rather than the stratum
     mean, and \code{"average"} to replace the variance contribution of
-    the stratum by the average variance contribution across strata.
+    the stratum by the average variance contribution across strata. 
     
     The variance formulas for domain estimation give well-defined,
     positive results when a stratum contains only one PSU with

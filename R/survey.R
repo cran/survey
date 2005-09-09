@@ -890,8 +890,10 @@ svytable.survey.design<-function(formula, design, Ntotal=NULL, round=FALSE,...){
            tbl<-tbl*sum(Ntotal)/sum(tbl)
        }
        if (round)
-           tbl<-round(tbl)
-       return(tbl)
+         tbl<-round(tbl)
+     attr(tbl,"call")<-match.call()
+     class(tbl)<-c("svytable",class(tbl))
+     return(tbl)
    }
    ## adjusted and stratified
   if (length(formula)==3)
@@ -1048,7 +1050,7 @@ svyglm.survey.design<-function(formula,design,subset=NULL,...){
       g$cov.unscaled<-svy.varcoef(g,design)
       
       class(g)<-c("svyglm",class(g))
-      g$call<-match.call()
+      g$call<-sys.call(-1)
       g$survey.design<-design 
       g
 }

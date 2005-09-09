@@ -5,9 +5,11 @@
 \alias{svytable.survey.design}
 \alias{svychisq}
 \alias{svychisq.survey.design}
+\alias{svychisq.svyrep.design}
 \alias{summary.svytable}
 \alias{print.summary.svytable}
 \alias{summary.svreptable}
+\alias{degf}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Contingency tables for survey data}
 \description{
@@ -17,7 +19,10 @@
 \method{svytable}{survey.design}(formula, design, Ntotal = NULL, round = FALSE,...)
 \method{svytable}{svyrep.design}(formula, design, Ntotal = sum(weights(design, "sampling")), round = FALSE,...)
 \method{svychisq}{survey.design}(formula, design, statistic = c("F",  "Chisq","Wald","adjWald"),na.rm=TRUE,...)
-\method{summary}{svytable}(object, statistic = c("F",  "Chisq","Wald","adjWald"),...)
+\method{svychisq}{svyrep.design}(formula, design, statistic = c("F",  "Chisq","Wald","adjWald"),na.rm=TRUE,...)
+\method{summary}{svytable}(object, statistic = c("F",
+"Chisq","Wald","adjWald"),...)
+degf(design, tol=1e-5)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -31,28 +36,26 @@
   \item{na.rm}{Remove missing values}
   \item{object}{Output from \code{svytable}}
   \item{...}{Other arguments for future expansion}
+  \item{tol}{Tolerance for \code{\link{qr}} in computing the matrix rank}
  }
 \details{
  
-The \code{svytable} and \code{svreptable} function compute a weighted
+The \code{svytable} function computes a weighted
 crosstabulation.  In many cases it is easier to use
 \code{\link{svytotal}} or \code{\link{svymean}}, which also produce
 standard errors, design effects, etc.
 
- If the sampling probabilities supplied to \code{svydesign} were actual
- probabilities (rather than relative probabilities) this estimates a
- full population crosstabulation.  Otherwise it estimates only relative
- proportions and should be normalised to some convenient total such as
- 100 or 1.0 by specifying the \code{Ntotal} argument.  If the formula
- has a left-hand side the mean or sum of this variable rather than the
- frequency is tabulated.
+The frequencies in the table can be normalised to some convenient total
+such as 100 or 1.0 by specifying the \code{Ntotal} argument.  If the
+formula has a left-hand side the mean or sum of this variable rather
+than the frequency is tabulated.
 
- The \code{Ntotal} argument can be either a single number or a data frame
-whose first column gives the (first-stage) sampling strata and second column the
-population size in each stratum.  In this second case the
-\code{svytable} command performs `post-stratification': tabulating
+The \code{Ntotal} argument can be either a single number or a data
+frame whose first column gives the (first-stage) sampling strata and
+second column the population size in each stratum.  In this second case
+the \code{svytable} command performs `post-stratification': tabulating
 and scaling to the population within strata and then adding up the
-strata.  
+strata.
 
 As with other \code{xtabs} objects, the output of \code{svytable} can be
 processed by \code{ftable} for more attractive display. The
@@ -62,12 +65,12 @@ for a test of independence.
 \code{svychisq} computes first and second-order Rao-Scott corrections to
 the Pearson chisquared test, and two Wald-type tests.
 
-The default (\code{statistic="F"}) is the Rao-Scott second-order correction.  The
-p-values are computed with a Satterthwaite approximation to the
-distribution.  The alternative \code{statistic="Chisq"} adjusts the
-Pearson chisquared statistic by a design effect estimate and then
-compares it to the chisquared distribution it would have under simple
-random sampling.  
+The default (\code{statistic="F"}) is the Rao-Scott second-order
+correction.  The p-values are computed with a Satterthwaite
+approximation to the distribution.  The alternative
+\code{statistic="Chisq"} adjusts the Pearson chisquared statistic by a
+design effect estimate and then compares it to the chisquared
+distribution it would have under simple random sampling.
 
 The \code{statistic="Wald"} test is that proposed by Koch et al (1975)
 and used by the SUDAAN software package. It is a Wald test based on the
@@ -76,6 +79,13 @@ independence. The adjustment given by \code{statistic="adjWald"} reduces
 the statistic when the number of PSUs is small compared to the number of
 degrees of freedom of the test. Rao and Thomas (1990) compare these
 tests and find the adjustment benefical.
+
+For designs using replicate weights the code is essentially the same as
+for designs with sampling structure, since the necessary variance
+computations are done by the appropriate methods of
+\code{\link{svytotal}} and \code{\link{svymean}}.  The exception is that
+the degrees of freedom is computed as one less than the rank of the
+matrix of replicate weights (by \code{degf}).
 
 
 At the moment, \code{svychisq} works only for 2-dimensional tables.
@@ -108,7 +118,12 @@ for simple goodness-of-fit statistics under cluster sampling" JASA 82:630-636
   simulations by Sribney (1998)}
 
 
-\seealso{\code{\link{svyby}} and \code{\link{ftable.svystat}} for tables of means,  medians, etc. }
+\seealso{\code{\link{svytotal}} and \code{\link{svymean}} report totals
+  and proportions by category for factor variables.
+  
+  See \code{\link{svyby}} and \code{\link{ftable.svystat}} to construct
+  more complex tables of summary statistics.
+}
 \examples{
   data(api)
   xtabs(~sch.wide+stype, data=apipop)
@@ -116,13 +131,14 @@ for simple goodness-of-fit statistics under cluster sampling" JASA 82:630-636
   dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
   summary(dclus1)
 
-  svytable(~sch.wide+stype, dclus1)
+  (tbl <- svytable(~sch.wide+stype, dclus1))
   svychisq(~sch.wide+stype, dclus1)
-  svychisq(~sch.wide+stype, dclus1, statistic="Chisq")
+  summary(tbl, statistic="Chisq")
   svychisq(~sch.wide+stype, dclus1, statistic="adjWald")
 
   rclus1 <- as.svrepdesign(dclus1)
-  svytable(~sch.wide+stype, rclus1, round=TRUE)
+  summary(svytable(~sch.wide+stype, rclus1))
+  svychisq(~sch.wide+stype, rclus1, statistic="adjWald")
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

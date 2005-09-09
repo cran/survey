@@ -1023,7 +1023,7 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL, ...,
       if (return.replicates) full$replicates<-betas
       
       class(full)<-c("svrepglm", "svyglm", class(full))
-      full$call<-match.call()
+      full$call<-sys.call(-1)
       full$survey.design<-design
       full
 }
@@ -1328,6 +1328,8 @@ svytable.svyrep.design<-svreptable<-function(formula, design,
        }
        if (round)
            tbl<-round(tbl)
+       class(tbl) <- c("svytable", class(tbl))
+       attr(tbl, "call")<-match.call()
        return(tbl)
    }
    ## adjusted and stratified
@@ -1446,7 +1448,7 @@ rake<-function(design, sample.margins, population.margins,
     is.rep<-inherits(design,"svyrep.design")
 
     if (is.rep && is.null(compress))
-      compress<-inherits(design$repweighs,"repweights_compressed")
+      compress<-inherits(design$repweights,"repweights_compressed")
      
     if (length(sample.margins)!=length(population.margins))
         stop("sample.margins and population.margins do not match.")
@@ -1454,7 +1456,7 @@ rake<-function(design, sample.margins, population.margins,
     nmar<-length(sample.margins)
     
     if (control$epsilon<1) 
-        epsilon<-control$epsilon*sum(design$pweights)
+        epsilon<-control$epsilon*sum(weights(design,"sampling"))
     else
         epsilon<-control$epsilon
 
@@ -1508,4 +1510,14 @@ rake<-function(design, sample.margins, population.margins,
 
     return(design)
         
+}
+
+
+
+
+## degrees of freedom for repweights design
+degf<-function(design,tol=1e-5){
+  if (!inherits(design,"svyrep.design"))
+    stop("Not a survey design with replicate weights")
+ qr(weights(design,"analysis"), tol=1e-5)$rank-1
 }

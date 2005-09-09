@@ -22,36 +22,46 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
         
     }
 
-
-    na.failsafe<-function(object,...){
-      if (NCOL(object)==0)
-        object
-      else na.fail(object)
+    na.failsafe<-function(message="missing values in object"){
+      function(object,...){
+        if (NCOL(object)==0)
+          object
+        else {
+          ok <- complete.cases(object)
+          if (all(ok)) 
+            object
+          else stop(message)
+        }
+      }
     }
-    
+
+     na.id<-na.failsafe("missing values in `id'")
      if(inherits(ids,"formula")) {
-	 mf<-substitute(model.frame(ids,data=data,na.action=na.failsafe))   
+	 mf<-substitute(model.frame(ids,data=data, na.action=na.id))
 	 ids<-eval.parent(mf)
          if (ncol(ids)==0) ## formula was ~1
            ids<-data.frame(id=1:nrow(ids))
-       } else if (is.null(ids))
-         stop("Must provide ids= argument")
-       else
-         ids<-na.fail(data.frame(ids))
-    
-     if(inherits(probs,"formula")){
-	mf<-substitute(model.frame(probs,data=data,na.action=na.failsafe))
-	probs<-eval.parent(mf)
-	}
-     
-     if(inherits(weights,"formula")){
-       mf<-substitute(model.frame(weights,data=data,na.action=na.failsafe))
-       weights<-eval.parent(mf)
+       } else{
+         if (is.null(ids))
+           stop("Must provide ids= argument")
+         else
+           ids<-na.id(data.frame(ids))
+       }
+
+    na.prob<-na.failsafe("missing values in `prob'")
+    if(inherits(probs,"formula")){
+      mf<-substitute(model.frame(probs,data=data,na.action=na.prob))
+      probs<-eval.parent(mf)
+    }
+
+    na.weight<-na.failsafe("missing values in `weights'")
+    if(inherits(weights,"formula")){
+      mf<-substitute(model.frame(weights,data=data,na.action=na.weight))
+      weights<-eval.parent(mf)
      } else if (!is.null(weights))
-         weights<-na.fail(data.frame(weights))
-     
-     if(!is.null(weights)){
-       if (!is.null(probs))
+         weights<-na.weight(data.frame(weights))
+    if(!is.null(weights)){
+      if (!is.null(probs))
          stop("Can't specify both sampling weights and probabilities")
        else
          probs<-as.data.frame(1/as.matrix(weights))
@@ -59,10 +69,10 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
 
       
 
-    
+    na.strata<-na.failsafe("missing values in `strata'")
     if (!is.null(strata)){
       if(inherits(strata,"formula")){
-        mf<-substitute(model.frame(strata,data=data, na.action=na.failsafe))
+        mf<-substitute(model.frame(strata,data=data, na.action=na.strata))
         strata<-eval.parent(mf)
       }
       if (!is.list(strata))
@@ -70,8 +80,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
       has.strata<-TRUE
     } else {
       has.strata <-FALSE
-      strata<-as.data.frame(matrix(1, nrow=NROW(ids), ncol=NCOL(ids)))
-      
+      strata<-na.strata(as.data.frame(matrix(1, nrow=NROW(ids), ncol=NCOL(ids))))
     }
 
     
@@ -83,11 +92,12 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
     } else
         variables<-do.call("data.frame",variables)
 
-    
-      if (inherits(fpc,"formula")){
-        mf<-substitute(model.frame(fpc,data=data,na.action=na.failsafe))
-        fpc<-eval.parent(mf)
-      }
+
+    na.fpc<-na.failsafe("missing values in `fpc'")
+    if (inherits(fpc,"formula")){
+      mf<-substitute(model.frame(fpc,data=data,na.action=na.fpc))
+      fpc<-eval.parent(mf)
+    }
       
       
       ## force subclusters nested in clusters

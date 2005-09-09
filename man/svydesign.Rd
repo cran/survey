@@ -41,16 +41,21 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL)
   \item{check.strata}{If \code{TRUE}, check that clusters are nested in strata}.
 }
 \details{
-   When analysing data from a complex survey, observations must be
-   weighted inversely to their sampling probabilities, and the effects
-   of stratification and of correlation induced by cluster sampling must
-   be incorporated in standard errors.
-
    The \code{svydesign} object combines a data frame and all the survey
    design information needed to analyse it.  These objects are used by
-   the survey modelling and summary functions.
-
-   The finite population correction is used to reduce the variance when
+   the survey modelling and summary functions.  The
+   \code{id} argument is always required, the \code{strata},
+   \code{fpc}, \code{weights} and \code{probs} arguments are
+   optional. If these variables are specified they must not have any
+   missing values.
+   
+   By default, \code{svydesign} assumes that all PSUs, even those in
+   different strata, have a unique value of the \code{id}
+   variable. This allows some data errors to be detected. If your PSUs
+   reuse the same identifiers across strata then set \code{nest=TRUE}.
+   
+   
+   The finite population correction (fpc) is used to reduce the variance when
    a substantial fraction of the total population of interest has been
    sampled. It may not be appropriate if the target of inference is the
    process generating the data rather than the statistics of a

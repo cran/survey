@@ -1,3 +1,5 @@
+Possible additional developments in no particular order
+
  - Score-based confidence intervals for glms
 
  - More general HT estimator for sampling without replacement
@@ -5,17 +7,19 @@
 	- using population first-order inclusion probabilities
 	- using Overton's approximation and sample inclusion probabilities
 
- - Calibration estimators
-	- Poststratifying to a logistic model as for two-phase case-control
-	  and marginal structural models
-	- Wu & De Sitter model-calibration 
-
  - Survival curve estimation (the standard errors are the only 
 	non-trivial part of this)
 
+ - Calibration to estimating functions to reproduce the semiparametric
+   estimators of Robins, Rotnitzky and Zhao.
+
  - Large data sets: design object with references to data stored in a 
-   database. Probably no regression models.
+   database. Linear regression, but probably no other regression models.
 
  - GEE. 
 
+ - imputation
+
  - Parametric survival models (you can do these with svymle)
+
+ - linear mixed models?

@@ -49,5 +49,11 @@ svyratio(~alive, ~arrests, design=scdrep)
 summary(svyglm(cbind(alive,arrests-alive)~1, family=quasibinomial, design=scdnofpc))
 summary(svyglm(cbind(alive,arrests-alive)~1, family=quasibinomial, design=scdrep))
 
+# Because no sampling weights are given, can't compute design effects
+# without replacement: use deff="replace"
+
+svymean(~alive+arrests, scddes, deff=TRUE)
+svymean(~alive+arrests, scddes, deff="replace")
+
 }
 \keyword{datasets}

@@ -1,11 +1,14 @@
 
-calibrate<-function(design, ...) UseMethod("calibrate")
+regcalibrate<-function(design, ...) UseMethod("regcalibrate")
 
 is.calibrated<-function(design){ !is.null(design$postStrata)}
 
-
-calibrate.survey.design2<-function(design, formula, population,
-                                   stage=NULL,  lambda=NULL, aggregate.stage=NULL, bounds=c(-Inf,Inf),...){
+##
+## unbounded linear calibration using qr decomposition: less sensitive to
+## collinearity than Deville & Sarndal's Newton algorithm.
+##
+regcalibrate.survey.design2<-function(design, formula, population,
+                                   stage=NULL,  lambda=NULL, aggregate.stage=NULL,...){
   
   if (is.null(stage))
     stage<-if (is.list(population)) 1 else 0
@@ -39,32 +42,22 @@ calibrate.survey.design2<-function(design, formula, population,
       warning("Sample and population totals have different names.")
 
     tqr<-qr(mm*whalf/sqrt(sigma2))
-    ##FIXME: the check for intercept is still not quite right
     if (is.null(lambda) && !all(abs(qr.resid(tqr,whalf*sigma2)/sigma2) <1e-5))
       warning("Calibration models with constant variance must have an intercept")
 
-    ok<-rep(TRUE,NROW(mm))
     g<-rep(1,NROW(mm))
-    iter<-1
-    repeat({
-      Tmat<-crossprod(mm[ok,,drop=FALSE]*whalf[ok]/sqrt(sigma2[ok]))
-      
-      tT<-solve(Tmat,population-sample.total-colSums(mm[!ok,,drop=FALSE]*ww[!ok]))
-      
-      g[ok]<-drop(1+mm[ok,,drop=FALSE]%*%tT/sigma2[ok])
-      
-      ok<- g>=bounds[1] & g<=bounds[2]
-      g<-pmin(bounds[2],pmax(bounds[1],g))
-      
-      if (all(ok)) break
-      if (isTRUE(all.equal(population, colSums(mm*ww*g)))) break;
-      iter<-iter+1
-      if (iter>10) stop("Failed to achieve bounds in ",iter," iterations")
-    })
+
+    Tmat<-crossprod(mm*whalf/sqrt(sigma2))
+    
+    tT<-solve(Tmat,population-sample.total)
+    
+    g<-drop(1+mm%*%tT/sigma2)
+    
+    
     design$prob<-design$prob/g
     
     caldata<- list(qr=tqr, w=g*whalf*sqrt(sigma2), stage=0, index=NULL)
-   
+    
   } else {
     ## Calibration within clusters (Sarndal's Case C)
     if (stage>NCOL(design$cluster))
@@ -128,7 +121,7 @@ calibrate.survey.design2<-function(design, formula, population,
 }
 
 
-calibrate.svyrep.design<-function(design, formula, population,compress=NA,lambda=NULL,
+regcalibrate.svyrep.design<-function(design, formula, population,compress=NA,lambda=NULL,
                                   aggregate.index=NULL,...){
   mf<-model.frame(formula, design$variables)
   mm<-model.matrix(formula, mf)
@@ -161,14 +154,14 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,lambda
   }
   whalf<-sqrt(ww)
   
-  sample.total<-colSums(mm*whalf*whalf)
+  sample.total<-colSums(mm*ww)
 
   if (length(sample.total)!=length(population))
     stop("Population and sample totals are not the same length.")
   if (any(names(sample.total)!=names(population)))
     warning("Sample and population totals have different names.")
   
-  Tmat<-crossprod(mm*whalf)
+  Tmat<-crossprod(mm*whalf/sqrt(sigma2))
   
   tT<-solve(Tmat,population-sample.total)
   

@@ -33,8 +33,11 @@ rake(design, sample.margins, population.margins, control = list(maxit =
   is a joint distribution with the given margins and the same pattern of
   zeros.  The `margins' need not be one-dimensional.
   
-  The algorithm works by repeated calls to \code{\link{postStratify}},
-  not the most efficient possible implementation.
+  The algorithm works by repeated calls to \code{\link{postStratify}}
+  (iterative proportional fitting), which is efficient for large
+  multiway tables. For small tables \code{\link{calibrate}} will be
+  faster, and also allows raking to population totals for continuous
+  variables, and raking with bounded weights. 
 }
 \value{
  A raked survey design. 

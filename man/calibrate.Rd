@@ -3,6 +3,10 @@
 \alias{calibrate.svyrep.design}
 \alias{is.calibrated}
 \alias{calibrate}
+\alias{regcalibrate.survey.design2}
+\alias{regcalibrate.svyrep.design}
+\alias{regcalibrate}
+\alias{grake}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{G-calibration (GREG) estimators}
 \description{
@@ -15,9 +19,12 @@
 \usage{
 calibrate(design,...)
 \method{calibrate}{survey.design2}(design, formula, population,
-      stage=NULL, lambda=NULL, aggregate.stage=NULL,bounds=c(-Inf,Inf),...)
-\method{calibrate}{svyrep.design}(design, formula, population,
-      compress=NA,lambda=NULL,aggregate.index=NULL,...)
+       aggregate.stage=NULL, stage=0, variance=NULL,
+       bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
+       maxit=30,epsilon=1e-7,verbose=FALSE,...)
+\method{calibrate}{svyrep.design}(design, formula, population,compress=NA,
+       aggregate.index=NULL, variance=NULL, bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
+        maxit=30, epsilon=1e-7, verbose=FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -28,32 +35,27 @@ calibrate(design,...)
   \item{compress}{compress the resulting replicate weights if
     \code{TRUE} or if \code{NA} and weights were previously compressed}
   \item{stage}{See Details below}
-  \item{lambda}{Coefficients for variance in calibration model (see
+  \item{variance}{Coefficients for variance in calibration model (see
     Details below)}
   \item{aggregate.stage}{An integer. If not \code{NULL}, make calibration weights
     constant within sampling units at this stage.}
   \item{aggregate.index}{A vector or one-sided formula. If not \code{NULL}, make calibration weights
     constant within levels of this variable}
-  \item{bounds}{Bounds for the calibration weights}
+  \item{bounds}{Bounds for the calibration weights, optional
+    except for \code{calfun="logit"}}
   \item{...}{options for other methods}
+  \item{calfun}{Calibration function}
+  \item{maxit}{Number of iterations}
+  \item{epsilon}{tolerance in matching population total}
+  \item{verbose}{print lots of uninteresting information}
 }
 \details{
-  In a model with two-stage sampling population totals may be available
-  for the PSUs actually sampled, but not for the whole population.  In
-  this situation, calibrating within each PSU reduces with second-stage
-  contribution to variance. This generalizes to multistage sampling.
   
-  The \code{stage} argument specifies which stage of sampling the
-  totals refer to.  Stage 0 is full population totals, stage 1 is
-  totals for PSUs, and so on.  The default, \code{stage=NULL} is
-  interpreted as stage 0 when a single population vector is supplied
-  and stage 1 when a list is supplied.
-  
-  If \code{lambda=NULL} the calibration model has constant
-  variance. The model must explicitly or implicitly contain an
-  intercept. If \code{lambda} is not \code{NULL} it specifies a linear
-  combination of the columns of the model matrix and the calibration
-  variance is proportional to that linear combination.
+  The \code{calibrate} function implements linear, bounded linear,
+  raking, bounded raking, and logit calibration functions. All except
+  unbounded linear calibration use the Newton-Raphson algorithm
+  described by Deville et al (1993).  Unbounded linear calibration uses
+  an algorithm that is less sensitive to collinearity.
   
   Calibration may result in observations within the last-stage sampling
   units having unequal weight even though they necessarily are sampled
@@ -66,13 +68,33 @@ calibrate(design,...)
   given if the original weights are not constant within levels of
   \code{aggregate.index}.
   
+  In a model with two-stage sampling population totals may be available
+  for the PSUs actually sampled, but not for the whole population.  In
+  this situation, calibrating within each PSU reduces with second-stage
+  contribution to variance. This generalizes to multistage sampling.
+    The \code{stage} argument specifies which stage of sampling the
+  totals refer to.  Stage 0 is full population totals, stage 1 is
+  totals for PSUs, and so on.  The default, \code{stage=NULL} is
+  interpreted as stage 0 when a single population vector is supplied
+  and stage 1 when a list is supplied.
+  
+  For unbounded linear calibration only, the variance in the calibration
+  model may depend on covariates.  If \code{variance=NULL} the
+  calibration model has constant variance. The model must explicitly or
+  implicitly contain an intercept. If \code{variance} is not \code{NULL}
+  it specifies a linear combination of the columns of the model matrix
+  and the calibration variance is proportional to that linear
+  combination.
 }
 \value{
   A survey design object.
 }
 
 \references{
-Sarndal CA, Swensson B, Wretman J. "Model Assisted Survey
+Deville J-C, Sarndal C-E, Sautory O (1993) Generalized Raking
+Procedures in Survey Sampling. JASA 88:1013-1020
+  
+Sarndal C-E, Swensson B, Wretman J. "Model Assisted Survey
 Sampling". Springer. 1991.
 
 Rao JNK, Yung W, Hidiroglou MA (2002)   Estimating equations for the
@@ -80,7 +102,8 @@ analysis of survey data using poststratification information. Sankhya
 64 Series A Part 2, 364-378.
 
 Vanderhoeft C (2001) Generalized Calibration at Statistics
-Belgium. Statistics Belgium Working Paper No 3. \url{http://www.statbel.fgov.be/studies/paper03_en.asp}
+Belgium. Statistics Belgium Working Paper No 3.
+\url{http://www.statbel.fgov.be/studies/paper03_en.asp}
 }
 
 \seealso{ \code{\link{postStratify}}, \code{\link{rake}}}
@@ -137,15 +160,27 @@ svymean(~api00, rclus1agg3)
 svytotal(~enroll, rclus1agg3)
 svytotal(~stype, rclus1agg3)
 
+image(rclus1agg3)
 
+###
 ## Bounded weights
 range(weights(dclus1g3)/weights(dclus1))
-(dclus1g3b <- calibrate(dclus1, ~stype+api99, c(pop.totals, api99=3914069),bounds=c(0,1.5)))
+(dclus1g3b <- calibrate(dclus1, ~stype+api99, c(pop.totals, api99=3914069),bounds=c(0.6,1.6)))
 range(weights(dclus1g3b)/weights(dclus1))
 
 svymean(~api00, dclus1g3b)
 svytotal(~enroll, dclus1g3b)
 svytotal(~stype, dclus1g3b)
+
+## generalised raking
+(dclus1g3c <- calibrate(dclus1, ~stype+api99, c(pop.totals,
+    api99=3914069), calfun="raking"))
+range(weights(dclus1g3c)/weights(dclus1))
+
+(dclus1g3d <- calibrate(dclus1, ~stype+api99, c(pop.totals,
+    api99=3914069), calfun="logit",bounds=c(0.5,2.5)))
+range(weights(dclus1g3d)/weights(dclus1))
+
 
 
 ## Ratio estimators
@@ -155,22 +190,15 @@ rstrat<-as.svrepdesign(dstrat)
 svytotal(~api.stu,dstrat)
 
 common<-svyratio(~api.stu, ~enroll, dstrat, separate=FALSE)
-sep<-svyratio(~api.stu,~enroll, dstrat,separate=TRUE)
-stratum.totals<-list(E=1877350, H=1013824, M=920298)
-predict(sep, total=stratum.totals)
-predict(common, total=do.call("sum",stratum.totals))
+predict(common, total=3811472)
 
-pop<-colSums(model.matrix(~stype*enroll-1,model.frame(~stype*enroll,apipop)))
-pop
-## common ratio
-dstratg1<-calibrate(dstrat,~enroll-1, pop[4], lambda=1)
+pop<-3811472
+## equivalent to (common) ratio estimator
+dstratg1<-calibrate(dstrat,~enroll-1, pop, variance=1)
 svytotal(~api.stu, dstratg1)
-rstratg1<-calibrate(rstrat,~enroll-1, pop[4], lambda=1)
+rstratg1<-calibrate(rstrat,~enroll-1, pop, variance=1)
 svytotal(~api.stu, rstratg1)
 
-## similar (but not identical) to separate ratio.
-dstratg2<-calibrate(dstrat,~stype*enroll-1, pop,lambda=c(0,0,0,1,0,0))
-svytotal(~api.stu,dstratg2)
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

@@ -1,0 +1,131 @@
+
+R : Copyright 2005, The R Foundation for Statistical Computing
+Version 2.1.1  (2005-06-20), ISBN 3-900051-07-0
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for a HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(survey)
+> 
+> data(api)
+> dclus1 <- svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
+> rclus1 <- as.svrepdesign(dclus1)
+> 
+> ## population marginal totals for each stratum
+> pop.types <- data.frame(stype=c("E","H","M"), Freq=c(4421,755,1018))
+> pop.schwide <- data.frame(sch.wide=c("No","Yes"), Freq=c(1072,5122))
+> 
+> rclus1r <- rake(rclus1, list(~stype,~sch.wide), list(pop.types, pop.schwide))
+> 
+> svymean(~api00, rclus1r)
+        mean     SE
+api00 641.23 26.871
+> svytotal(~enroll, rclus1r)
+          mean     SE
+enroll 3647300 463253
+> 
+> ff<-~stype+sch.wide
+> poptotals<-colSums(model.matrix(ff,model.frame(ff,apipop)))
+> rclus1g<-calibrate(rclus1, ~stype+sch.wide, poptotals,calfun="raking")
+Loading required package: MASS
+> 
+> svymean(~api00,rclus1g)
+        mean     SE
+api00 641.23 26.874
+> svytotal(~enroll,rclus1g)
+          mean     SE
+enroll 3647280 463582
+> 
+> summary(weights(rclus1g)/weights(rclus1r))
+       X1               X2               X3               X4        
+ Min.   :0.9978   Min.   :0.9978   Min.   :0.9984   Min.   :0.9985  
+ 1st Qu.:0.9987   1st Qu.:0.9988   1st Qu.:0.9990   1st Qu.:0.9991  
+ Median :0.9999   Median :0.9998   Median :0.9998   Median :0.9997  
+ Mean   :0.9996   Mean   :0.9996   Mean   :0.9997   Mean   :0.9997  
+ 3rd Qu.:1.0005   3rd Qu.:1.0005   3rd Qu.:1.0004   3rd Qu.:1.0003  
+ Max.   :1.0014   Max.   :1.0014   Max.   :1.0010   Max.   :1.0010  
+ NA's   :3.0000   NA's   :3.0000   NA's   :2.0000   NA's   :4.0000  
+       X5               X6               X7               X8        
+ Min.   :0.9980   Min.   :0.9983   Min.   :0.9984   Min.   :0.9973  
+ 1st Qu.:0.9988   1st Qu.:0.9990   1st Qu.:0.9990   1st Qu.:0.9984  
+ Median :0.9999   Median :1.0001   Median :0.9997   Median :1.0001  
+ Mean   :0.9996   Mean   :0.9997   Mean   :0.9997   Mean   :0.9995  
+ 3rd Qu.:1.0004   3rd Qu.:1.0003   3rd Qu.:1.0004   3rd Qu.:1.0005  
+ Max.   :1.0012   Max.   :1.0009   Max.   :1.0011   Max.   :1.0017  
+ NA's   :1.0000   NA's   :3.0000   NA's   :3.0000   NA's   :3.0000  
+       X9              X10              X11              X12        
+ Min.   :0.9975   Min.   :0.9979   Min.   :0.9980   Min.   :0.9953  
+ 1st Qu.:0.9986   1st Qu.:0.9988   1st Qu.:0.9988   1st Qu.:0.9971  
+ Median :1.0000   Median :0.9994   Median :1.0002   Median :0.9996  
+ Mean   :0.9995   Mean   :0.9995   Mean   :0.9996   Mean   :0.9991  
+ 3rd Qu.:1.0005   3rd Qu.:1.0004   3rd Qu.:1.0004   3rd Qu.:1.0010  
+ Max.   :1.0015   Max.   :1.0013   Max.   :1.0011   Max.   :1.0035  
+ NA's   :5.0000   NA's   :2.0000   NA's   :6.0000   NA's   :4.0000  
+      X13              X14              X15        
+ Min.   :0.9987   Min.   :0.9980   Min.   :0.9978  
+ 1st Qu.:0.9992   1st Qu.:0.9988   1st Qu.:0.9987  
+ Median :0.9998   Median :0.9999   Median :0.9999  
+ Mean   :0.9997   Mean   :0.9996   Mean   :0.9996  
+ 3rd Qu.:1.0003   3rd Qu.:1.0004   3rd Qu.:1.0005  
+ Max.   :1.0008   Max.   :1.0013   Max.   :1.0014  
+ NA's   :3.0000   NA's   :1.0000   NA's   :3.0000  
+Warning message:
+some row.names duplicated: 4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46 --> row.names NOT used in: data.row.names(row.names, rowsi, i) 
+> 
+> 
+> ## Do it for a design without replicate weights
+> dclus1r<-rake(dclus1, list(~stype,~sch.wide), list(pop.types, pop.schwide))
+> 
+> svymean(~api00, dclus1r)
+        mean     SE
+api00 641.23 23.739
+> svytotal(~enroll, dclus1r)
+         total     SE
+enroll 3647300 399094
+> 
+> dclus1g<-calibrate(dclus1, ~stype+sch.wide, poptotals,calfun="raking")
+> 
+> svymean(~api00,dclus1g)
+        mean     SE
+api00 641.23 23.704
+> svytotal(~api00,dclus1g)
+        total     SE
+api00 3971781 146820
+> 
+> summary(weights(dclus1g)/weights(dclus1r))
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+      1       1       1       1       1       1 
+> 
+> 
+> 
+> ## Example of raking with partial joint distributions
+> pop.table <- xtabs(~stype+sch.wide,apipop)
+> pop.imp<-data.frame(comp.imp=c("No","Yes"),Freq=c(1712,4482))
+> dclus1r2<-rake(dclus1, list(~stype+sch.wide, ~comp.imp),
++                list(pop.table, pop.imp))
+> svymean(~api00, dclus1r2)
+        mean     SE
+api00 642.62 22.776
+> 
+> ff1 <-~stype*sch.wide+comp.imp
+> 
+> poptotals1<-colSums(model.matrix(ff1,model.frame(ff1,apipop)))
+> dclus1g2<-calibrate(dclus1, ~stype*sch.wide+comp.imp, poptotals1, calfun="raking")
+> 
+> svymean(~api00, dclus1g2)
+        mean     SE
+api00 642.61 22.731
+> 
+> summary(weights(dclus1r2)/weights(dclus1g2))
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  0.999   1.000   1.000   1.000   1.000   1.002 
+> 

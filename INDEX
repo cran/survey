@@ -3,7 +3,7 @@ subset.survey.design    Subset of survey
 update.survey.design    Add variables to a survey design
 postStratify            Post-stratify a survey design
 rake                    Rake a survey design
-calibrate		G-calibration (GREG) for survey designs
+calibrate		Calibration and generalised raking
 svrepdesign             Replication-weight designs
 as.svrepdesign          Convert svydesign to svrepdesign
 subset.svyrep.design    Subset of svrepdesign
@@ -63,6 +63,9 @@ brrweights              create replication weights
 hadamard                Hadamard matrices
 paley                   Paley-type Hadamard matrices
 regTermTest             Test sets of terms in a regression model
+grake                   Computations for generalised raking
+regcalibrate            Computations for regression calibration
+degf                    Degrees of freedom for replication weights
 
                  -----
 Data:

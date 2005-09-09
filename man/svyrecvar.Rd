@@ -70,9 +70,11 @@ one.stage=getOption("survey.ultimate.cluster"))
   at least, sampling probabilities for units not included in the sample),
   information not generally available.
 
-  For a PPS survey the best option is probably to treat the survey as 
+  For a PPS survey one option is probably to treat the survey as 
   sampled with replacement by omitting the fpc argument.  This appears
-  to be the most widely used solution with other software.
+  to be the most widely used solution with other software. Another
+  option is to treat the survey as if it were stratified, grouping
+  together units with similar sampling probabilities.
 }
 
 

@@ -1,3 +1,15 @@
+3.3   Added more generalized raking estimators: raking ratio, bounded raking 
+      ratio, logit, (for Ana Quiterio)
+
+      svytable() could sometimes leave the class attribute off the result.
+      summary() now gives tests of association for svytable().
+
+      svychisq() works for replicate designs
+
+      degf() gives approximate degrees of freedom for replicate designs.
+
+      Clearer error messages when design information is missing.
+
 3.2-1 Fix ordering bug in ftable.svyby (Stefano Calza)
 
       The "probability" option added to svyquantile for replicate designs

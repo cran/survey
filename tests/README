@@ -1,0 +1,28 @@
+api.R: Run example(api) to check that results haven't changed
+
+caleg.R: Calibration examples
+	 - calibration to information on PSUs rather than population
+	 - check that bounded weights really are bounded
+	 - check that linear calibration with error proportional to 
+           x agrees with ratio estimators
+
+check.R:  Many combinations of options for svydesign
+
+domain.R: Check that domain estimators of means and their standard
+          errors agree with derivations as ratio and regression 
+          estimators.  Repeat for calibrated and raked designs
+
+fpc.R: Many ways to specify fpc
+
+lonely.psu.R: All the lonely PSU options
+
+multistage.R: Check that a two-stage cluster sample analysis agrees with
+              the hand-calcuated result in Sarndal et al.
+
+quantile.R: quantile estimation on a lognormal sample
+
+rakecheck.R: check that raking by iterative post-stratification agrees with
+ 	     raking using calibrate()
+
+scoping.R: check that svyglm and svycoxph work inside functions.
+
