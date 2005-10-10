@@ -110,9 +110,10 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
       ## force clusters nested in strata
       if (nest && has.strata && NCOL(ids)){
         N<-NCOL(ids)
+        NS<-NCOL(strata)
         for(i in 1:N)
           ids[,i]<-do.call("interaction",
-                           c(strata[,1:i,drop=FALSE], ids[,i,drop=FALSE]))
+                           c(strata[,1:min(i,NS),drop=FALSE], ids[,i,drop=FALSE]))
       }
       
     ## check if clusters nested in strata 
@@ -125,9 +126,10 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
 
       ## force substrata nested in clusters
       N<-ncol(ids)
+      NS<-ncol(strata)
       if (N>1){
         for(i in 2:N)
-          strata[,i]<-interaction(strata[,i], ids[,i-1])
+          strata[,i]<-interaction(strata[,min(i,NS)], ids[,i-1])
       }
         
       ## Finite population correction: specified per observation
@@ -137,7 +139,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
         stop("fpc must be a matrix or dataframe or NULL")
 
       fpc<-as.fpc(fpc,strata, ids)
-      
+
       ## if FPC specified, but no weights, use it for weights
     if (is.null(probs) && is.null(weights)){
       if (is.null(fpc$popsize)){
@@ -147,7 +149,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
         probs<-1/weights(fpc, final=FALSE)
       }
     }
-      
+
   
     if (is.numeric(probs) && length(probs)==1)
       probs<-rep(probs, NROW(variables))
@@ -155,7 +157,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
     if (length(probs)==0) probs<-rep(1,NROW(variables))
     
     if (NCOL(probs)==1) probs<-data.frame(probs)
-    
+
     rval<-list(cluster=ids)
     rval$strata<-strata
     rval$has.strata<-has.strata
@@ -269,8 +271,8 @@ multistage<-function(x, clusters,  stratas, nPSUs, fpcs,
   v <- onestage(x,stratas[,1], clusters[,1], nPSUs[,1],
                 fpcs[,1], lonely.psu=lonely.psu,stage=stage,cal=cal)
   
-  if (!one.stage && !is.null(fpcs) && NCOL(clusters)>1) {
-    v.sub<-by(1:n, list(clusters[,1]), function(index){
+  if (one.stage!=TRUE && !is.null(fpcs) && NCOL(clusters)>1) {
+    v.sub<-by(1:n, list(as.numeric(clusters[,1])), function(index){
       ## residuals for G-calibration using population information
       ## only on clusters at this stage.
       for(cali in cal){
@@ -349,14 +351,21 @@ print.survey.design2<-function(x,varnames=FALSE,design.summaries=FALSE,...){
   if (x$has.strata) cat("Stratified ")
   un<-length(unique(x$cluster[,1]))
   if(n==un){
-    cat("Independent Sampling design\n")
+    cat("Independent Sampling design")
     is.independent<-TRUE
+    if (is.null(x$fpc$popsize))
+      cat(" (with replacement)\n")
+    else cat("\n")
   } else {
-    cat(NCOL(x$cluster),"- level Cluster Sampling design\n")
+    cat(NCOL(x$cluster),"- level Cluster Sampling design")
+    if (is.null(x$fpc$popsize))
+      cat(" (with replacement)\n")
+    else cat("\n")
     nn<-lapply(x$cluster,function(i) length(unique(i)))
     cat(paste("With (",paste(unlist(nn),collapse=", "),") clusters.\n",sep=""))
     is.independent<-FALSE
   }
+
   print(x$call)
   if (design.summaries){
     cat("Probabilities:\n")

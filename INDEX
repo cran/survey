@@ -5,9 +5,7 @@ postStratify            Post-stratify a survey design
 rake                    Rake a survey design
 calibrate		Calibration and generalised raking
 svrepdesign             Replication-weight designs
-as.svrepdesign          Convert svydesign to svrepdesign
-subset.svyrep.design    Subset of svrepdesign
-update.svyrep.design    Add variables to svrepdesign
+as.svrepdesign          Compute replication weights for a design
 as.svydesign2           Convert a old svydesign object to
                         the new format.
 

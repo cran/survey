@@ -1,0 +1,161 @@
+
+R : Copyright 2005, The R Foundation for Statistical Computing
+Version 2.1.1  (2005-06-20), ISBN 3-900051-07-0
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for a HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ##
+> ## Calibration examples
+> ##
+> 
+> 
+> ## Example of calibration to first-stage clusters
+> library(survey)
+> data(api)
+> 
+> clusters<-table(apiclus2$dnum)
+> clusters<-clusters[clusters>1 & names(clusters)!="639"]
+> apiclus2a<-subset(apiclus2, dnum %in% as.numeric(names(clusters)))
+> 
+> dclus2<-svydesign(id=~dnum+snum, fpc=~fpc1+fpc2, data=apiclus2a)
+> 
+> popclusters<-subset(apipop, dnum %in% as.numeric(names(clusters)))
+> 
+> pop<-lapply(as.numeric(names(clusters)), function(cluster) {
++   colSums(model.matrix(~api99, model.frame(~api99, subset(popclusters, dnum %in% cluster))))})
+> 
+> names(pop)<-names(clusters)
+> 
+> dclus2g<-calibrate(dclus2, ~api99, pop,stage=1)
+> 
+> svymean(~api99, dclus2)
+        mean     SE
+api99 642.14 31.434
+> svymean(~api99, dclus2g)
+        mean     SE
+api99 654.49 29.820
+> 
+> round(svyby(~api99, ~dnum, design=dclus2, svymean),4)
+    dnum statistic.api99      SE
+83    83        694.3333  0.0000
+132  132        505.0000  0.0000
+152  152        574.0000  0.0000
+173  173        894.7500  0.0000
+198  198        533.7500  0.0000
+200  200        589.8000  6.8335
+228  228        477.0000  0.0000
+295  295        646.4000  0.0000
+302  302        903.5000  0.0000
+403  403        852.4000  0.0000
+452  452        533.0000  0.0000
+480  480        614.2000  0.0000
+523  523        580.5000  0.0000
+534  534        564.6000  0.0000
+549  549        896.2000  0.0000
+552  552        730.0000  0.0000
+570  570        518.4000  7.5478
+575  575        800.8000  4.2513
+596  596        785.6000  2.4155
+620  620        591.6000 10.5869
+638  638        560.2000  4.0954
+674  674        760.0000  0.0000
+679  679        610.2500  0.0000
+687  687        718.6667  0.0000
+701  701        651.5000  0.0000
+711  711        690.5000  0.0000
+731  731        702.0000  2.1744
+768  768        562.5000  0.0000
+781  781        854.4000  0.7456
+There were 29 warnings (use warnings() to see them)
+> 
+> round(svyby(~api99, ~dnum, design=dclus2g, svymean),4)
+    dnum statistic.api99 SE
+83    83        694.3333  0
+132  132        505.0000  0
+152  152        574.0000  0
+173  173        894.7500  0
+198  198        533.7500  0
+200  200        567.5455  0
+228  228        477.0000  0
+295  295        646.4000  0
+302  302        903.5000  0
+403  403        852.4000  0
+452  452        533.0000  0
+480  480        614.2000  0
+523  523        580.5000  0
+534  534        564.6000  0
+549  549        896.2000  0
+552  552        730.0000  0
+570  570        548.9444  0
+575  575        824.5357  0
+596  596        787.5714  0
+620  620        609.3750  0
+638  638        585.6429  0
+674  674        760.0000  0
+679  679        610.2500  0
+687  687        718.6667  0
+701  701        651.5000  0
+711  711        690.5000  0
+731  731        700.6667  0
+768  768        562.5000  0
+781  781        851.0000  0
+There were 29 warnings (use warnings() to see them)
+> 
+> ## Averaging to first stage
+> 
+> dclus1<- svydesign(id = ~dnum, weights = ~pw, data = apiclus1, fpc = ~fpc)
+> pop<-colSums(cbind(1,apipop$enroll),na.rm=TRUE)
+> 
+> dclus1g<-calibrate(dclus1, ~enroll, pop, aggregate=1)
+> 
+> svytotal(~enroll,dclus1g)
+         total        SE
+enroll 3811472 6.013e-10
+> svytotal(~api.stu,dclus1g)
+          total    SE
+api.stu 3242857 38967
+> 
+> #variation within clusters should be zero
+> all.equal(0, max(ave(weights(dclus1g),dclus1g$cluster,FUN=var),na.rm=TRUE))
+[1] TRUE
+> 
+> ##bounded weights
+>  dclus1g<-calibrate(dclus1, ~enroll, pop)
+>  range(weights(dclus1g)/weights(dclus1))
+[1] 0.7906782 1.7891164
+>  dclus1gb<-calibrate(dclus1, ~enroll, pop, bounds=c(.6,1.5))
+Loading required package: MASS
+>  range(weights(dclus1gb)/weights(dclus1))
+[1] 0.7198751 1.5000000
+> 
+> ## Ratio estimators
+> dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
+> svytotal(~api.stu,dstrat)
+          total    SE
+api.stu 3086009 99477
+> common<-svyratio(~api.stu, ~enroll, dstrat, separate=FALSE)
+> total.enroll<-sum(apipop$enroll,na.rm=TRUE)
+> predict(common, total=total.enroll)
+$total
+         enroll
+api.stu 3190038
+
+$se
+          enroll
+api.stu 29565.98
+
+> dstratg<-calibrate(dstrat,~enroll-1, total.enroll, variance=1)
+> svytotal(~api.stu, dstratg)
+          total    SE
+api.stu 3190038 29566
+> 

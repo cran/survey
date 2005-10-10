@@ -1,3 +1,11 @@
+3.3-1 Make nest=TRUE in multistage designs work when only some initial 
+      sampling stages are stratified
+      
+      Multistage recursive variances were only going to two stages.
+
+      Add "(with replacement)" to output of print.survey.design2 when
+      no fpc is specified.
+
 3.3   Added more generalized raking estimators: raking ratio, bounded raking 
       ratio, logit, (for Ana Quiterio)
 

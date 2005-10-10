@@ -97,9 +97,9 @@ enroll 3647300 399094
 > svymean(~api00,dclus1g)
         mean     SE
 api00 641.23 23.704
-> svytotal(~api00,dclus1g)
-        total     SE
-api00 3971781 146820
+> svytotal(~enroll,dclus1g)
+         total     SE
+enroll 3647280 400603
 > 
 > summary(weights(dclus1g)/weights(dclus1r))
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 

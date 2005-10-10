@@ -32,7 +32,7 @@ svytotal(~enroll, dclus1r)
 dclus1g<-calibrate(dclus1, ~stype+sch.wide, poptotals,calfun="raking")
 
 svymean(~api00,dclus1g)
-svytotal(~api00,dclus1g)
+svytotal(~enroll,dclus1g)
 
 summary(weights(dclus1g)/weights(dclus1r))
 
