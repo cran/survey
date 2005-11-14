@@ -1211,6 +1211,14 @@ vcov.svrepstat<-function(object,...){
 }
 
 
+as.data.frame.svrepstat<-function(x,...){
+  rval<-data.frame(statistic=coef(x),SE=SE(x))
+  names(rval)[1]<-attr(x,"statistic")
+  if (!is.null(attr(x,"deff")))
+    rval<-cbind(rval,deff=deff(x))
+  rval
+}
+
 SE<-function(object,...){
   UseMethod("SE")
 }
@@ -1516,8 +1524,14 @@ rake<-function(design, sample.margins, population.margins,
 
 
 ## degrees of freedom for repweights design
-degf<-function(design,tol=1e-5){
+degf<-function(design,...) UseMethod("degf")
+
+degf.svyrep.design<-function(design,tol=1e-5,...){
   if (!inherits(design,"svyrep.design"))
     stop("Not a survey design with replicate weights")
  qr(weights(design,"analysis"), tol=1e-5)$rank-1
+}
+
+degf.survey.design2<-function(design,...){
+  length(unique(design$cluster[, 1])) - length(unique(design$strata[, 1]))
 }

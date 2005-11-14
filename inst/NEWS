@@ -1,3 +1,11 @@
+3.3-2 Add cv, SE, coef, and deff methods for svyby (for Ana Quiterio)
+
+      as.data.frame methods for svystat, svrepstat
+
+      regTermTest can do F-tests now (Daryl Morris).
+
+      fix documentation of value for as.svrepdesign (Alan Zaslavsky)
+
 3.3-1 Make nest=TRUE in multistage designs work when only some initial 
       sampling stages are stratified
       

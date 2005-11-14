@@ -10,7 +10,7 @@
   \code{\link{anova}} when not fitting by maximum likelihood.
 }
 \usage{
-regTermTest(model, test.terms, null=NULL)
+regTermTest(model, test.terms, null=NULL,df=Inf)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -18,6 +18,8 @@ regTermTest(model, test.terms, null=NULL)
   \item{test.terms}{Character string or one-sided formula giving name of
     term or terms to test}
   \item{null}{Null hypothesis values for parameters. Default is zeros}
+  \item{df}{Denominator degrees of freedom for an F test. If
+    \code{NULL} these are estimated from the model}
 }
 \value{
   An object of class \code{regTermTest}.
@@ -33,6 +35,14 @@ regTermTest(model, test.terms, null=NULL)
  regTermTest(model1,"tobgp")
  regTermTest(model1,"tobgp:alcgp")
  regTermTest(model1, ~alcgp+tobgp:alcgp)
+
+
+ data(api)
+ dclus2<-svydesign(id=~dnum+snum, weights=~pw, data=apiclus2)
+ model2<-svyglm(api00~ell+meals+mobility, design=dclus2)
+ regTermTest(model2, ~ell)
+ regTermTest(model2, ~ell,df=NULL)
+
 }
 \keyword{regression}% at least one, from doc/KEYWORDS
 

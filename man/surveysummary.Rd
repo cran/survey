@@ -18,6 +18,8 @@
 \alias{vcov.svystat}
 \alias{coef.svrepstat}
 \alias{vcov.svrepstat}
+\alias{as.data.frame.svystat}
+\alias{as.data.frame.svrepstat}
 \alias{cv.svyratio}
 \alias{cv.svrepratio}
 \alias{cv.svrepstat}

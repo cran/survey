@@ -92,3 +92,20 @@ svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
   class(rval)<-c("svyby","data.frame")
   rval
 }
+
+SE.svyby <-function(object,...){
+    aa<-attr(object,"svyby")
+    if (!aa$vars) stop("Object does not contain variances")
+    object[,max(aa$margins)+aa$nstats+(1:aa$nstats)]
+}
+
+coef.svyby<-function(object,...){
+    aa<-attr(object,"svyby")
+    object[,max(aa$margins)+(1:aa$nstats)]
+}
+
+deff.svyby<-function(object,...){
+    aa<-attr(object,"svyby")
+    if (!aa$deffs) stop("object does not have design effect information")
+    object[,max(aa$margins)+aa$nstats*(1+aa$vars)+(1:aa$nstats)]
+}

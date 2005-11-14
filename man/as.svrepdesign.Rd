@@ -23,7 +23,7 @@ fay.rho = 0, ..., compress=TRUE)
 }
 
 \value{
-  Object of class \code{svrep.design}.
+  Object of class \code{svyrep.design}.
 }
 
 \seealso{\code{\link{brrweights}}, \code{\link{svydesign}},

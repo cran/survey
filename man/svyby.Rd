@@ -1,12 +1,19 @@
 \name{svyby}
 \alias{svyby}
+\alias{SE.svyby}
+\alias{deff.svyby}
+\alias{coef.svyby}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Survey statistics on subsets}
 \description{
 Compute survey statistics on subsets of a survey defined by factors. 
 }
 \usage{
-svyby(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE, keep.names = TRUE)
+svyby(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE,
+keep.names = TRUE)
+\method{SE}{svyby}(object,...)
+\method{deff}{svyby}(object,...)
+\method{coef}{svyby}(object,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -21,11 +28,12 @@ svyby(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE, keep.names = TR
   \item{deff}{Request a design effect from \code{FUN}}
   \item{keep.var}{If \code{FUN} returns a \code{svystat} object, extract
   standard errors from it}
-  \item{keep.names}{Define row names based on the subsets}
+\item{keep.names}{Define row names based on the subsets}
+\item{object}{An object of class \code{"svyby"}}
 }
 
 \value{
-  A data frame showing the factors and the results of \code{FUN}
+  An object of class \code{"svyby"}: a data frame showing the factors and the results of \code{FUN}
 }
 
 \note{ Asking for a design effect (\code{deff=TRUE}) from a function
@@ -54,6 +62,12 @@ svyby(~api99, ~stype, rclus1, svyquantile, quantiles=0.5)
 svyby(~api99, list(school.type=apiclus1$stype), rclus1, svymean)
 svyby(~enroll,~stype, rclus1,svytotal, deff=TRUE)
 svyby(~api99+api00, ~stype+sch.wide, rclus1, svymean, keep.var=FALSE)
+
+a<-svyby(~enroll, ~stype, rclus1, svytotal, deff=TRUE)
+deff(a)
+SE(a)
+cv(a)
+coef(a)
 
 
 }

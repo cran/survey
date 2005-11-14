@@ -561,6 +561,14 @@ print.svystat<-function(x,...){
   printCoefmat(m)
 }
 
+as.data.frame.svystat<-function(x,...){
+  rval<-data.frame(statistic=coef(x),SE=SE(x))
+  names(rval)[1]<-attr(x,"statistic")
+  if (!is.null(attr(x,"deff")))
+    rval<-cbind(rval,deff=deff(x))
+  rval
+}
+
 coef.svystat<-function(object,...){
   attr(object,"statistic")<-NULL
   attr(object,"deff")<-NULL
@@ -587,7 +595,7 @@ cv<-function(object,...) UseMethod("cv")
 
 cv.default<-function(object,...){
   rval<-SE(object)/coef(object)
-  if (rval<0) warning("CV may not be useful for negative statistics")
+  if (any(rval<0)) warning("CV may not be useful for negative statistics")
   rval
 }
 

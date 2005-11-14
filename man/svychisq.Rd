@@ -10,6 +10,8 @@
 \alias{print.summary.svytable}
 \alias{summary.svreptable}
 \alias{degf}
+\alias{degf.svyrep.design}
+\alias{degf.survey.design2}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Contingency tables for survey data}
 \description{
@@ -22,7 +24,9 @@
 \method{svychisq}{svyrep.design}(formula, design, statistic = c("F",  "Chisq","Wald","adjWald"),na.rm=TRUE,...)
 \method{summary}{svytable}(object, statistic = c("F",
 "Chisq","Wald","adjWald"),...)
-degf(design, tol=1e-5)
+degf(design, ...)
+\method{degf}{survey.design2}(design, ...)
+\method{degf}{svyrep.design}(design, tol=1e-5,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
