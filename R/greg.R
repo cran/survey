@@ -19,7 +19,7 @@ regcalibrate.survey.design2<-function(design, formula, population,
   
   if(stage==0){
     ## calibration to population totals
-    mm<-model.matrix(formula, model.frame(formula, design$variables))
+    mm<-model.matrix(formula, model.frame(formula, model.frame(design)))
     ww<-weights(design)
     if (is.null(lambda))
       sigma2<-rep(1,nrow(mm))
@@ -76,7 +76,7 @@ regcalibrate.survey.design2<-function(design, formula, population,
     caldata<-list(qr=vector("list",nc), w=vector("list",nc),
                   stage=stage,index=as.character(clusters))
 
-    mm<-model.matrix(formula, model.frame(formula, design$variables))
+    mm<-model.matrix(formula, model.frame(formula, model.frame(design)))
 
     if (is.null(lambda))
       sigma2<-rep(1,nrow(mm))

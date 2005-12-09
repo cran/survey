@@ -143,7 +143,8 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
       ## if FPC specified, but no weights, use it for weights
     if (is.null(probs) && is.null(weights)){
       if (is.null(fpc$popsize)){
-        warning("No weights or probabilities supplied, assuming equal probability")
+        if (missing(probs) && missing(weights))
+          warning("No weights or probabilities supplied, assuming equal probability")
         probs<-rep(1,nrow(ids))
       } else {
         probs<-1/weights(fpc, final=FALSE)
@@ -487,7 +488,8 @@ as.svydesign2<-function(object){
           }
       } else {
           ## subset everything.
-          x$variables<-"[.data.frame"(x$variables,i,...,drop=FALSE)
+          if (!is.null(x$variables)) ## phase 2 of twophase design
+              x$variables<-"[.data.frame"(x$variables,i,..1,drop=FALSE)
           x$cluster<-x$cluster[i,,drop=FALSE]
           x$prob<-x$prob[i]
           x$allprob<-x$allprob[i,,drop=FALSE]
@@ -497,7 +499,8 @@ as.svydesign2<-function(object){
       }
       
   } else {
-      x$variables<-x$variables[,...,drop=FALSE]
+      if(!is.null(x$variables))
+          x$variables<-x$variables[,..1,drop=FALSE]
   }
   
   x
@@ -520,20 +523,23 @@ svytotal.survey.design2<-function(x,design, na.rm=FALSE, deff=FALSE,...){
     colnames(x)<-do.call("c",lapply(xx,colnames))
   } else if(typeof(x) %in% c("expression","symbol"))
       x<-eval(x, design$variables)
-
+    
   x<-as.matrix(x)
   
-  if (na.rm){
-    nas<-rowSums(is.na(x))
-    design<-design[nas==0,]
-    x<-x[nas==0,,drop=FALSE]
-  }
+    if (na.rm){
+        nas<-rowSums(is.na(x))
+        design<-design[nas==0,]
+        if (length(nas)>length(design$prob))
+            x<-x[nas==0,,drop=FALSE]
+        else
+            x[nas>0,]<-0
+    }
 
-  N<-sum(1/design$prob)
-  m <- svymean(x, design, na.rm=na.rm)
-  total<-m*N
-  attr(total, "var")<-v<-svyrecvar(x/design$prob,design$cluster,
-                                   design$strata, design$fpc,
+    N<-sum(1/design$prob)
+    m <- svymean(x, design, na.rm=na.rm)
+    total<-m*N
+    attr(total, "var")<-v<-svyrecvar(x/design$prob,design$cluster,
+                                     design$strata, design$fpc,
                                    postStrata=design$postStrata)
     attr(total,"statistic")<-"total"
 
@@ -573,8 +579,11 @@ svymean.survey.design2<-function(x,design, na.rm=FALSE,deff=FALSE,...){
   
   if (na.rm){
     nas<-rowSums(is.na(x))
-            design<-design[nas==0,]
-    x<-x[nas==0,,drop=FALSE]
+    design<-design[nas==0,]
+    if (length(nas)>length(design$prob))
+        x<-x[nas==0,,drop=FALSE]
+    else
+        x[nas>0,]<-0
   }
   
   pweights<-1/design$prob
@@ -604,7 +613,7 @@ svymean.survey.design2<-function(x,design, na.rm=FALSE,deff=FALSE,...){
   return(average)
 }
 
-svyratio.survey.design2<-function(numerator, denominator, design, separate=FALSE,...){
+svyratio.survey.design2<-function(numerator, denominator, design, separate=FALSE,na.rm=FALSE,...){
 
     if (separate){
       strats<-sort(unique(design$strata[,1]))
@@ -626,11 +635,11 @@ svyratio.survey.design2<-function(numerator, denominator, design, separate=FALSE
     }
   
     if (inherits(numerator,"formula"))
-		numerator<-model.frame(numerator,design$variables)
+        numerator<-model.frame(numerator,design$variables,na.action=na.pass)
     else if(typeof(numerator) %in% c("expression","symbol"))
         numerator<-eval(numerator, design$variables)
     if (inherits(denominator,"formula"))
-		denominator<-model.frame(denominator,design$variables)
+        denominator<-model.frame(denominator,design$variables,na.action=na.pass)
     else if(typeof(denominator) %in% c("expression","symbol"))
         denominator<-eval(denominator, design$variables)
 
@@ -638,6 +647,13 @@ svyratio.survey.design2<-function(numerator, denominator, design, separate=FALSE
     nd<-NCOL(denominator)
 
     all<-cbind(numerator,denominator)
+    nas<-!complete.cases(all)
+    if (na.rm==TRUE){
+        design<-design[!nas,]
+        all<-all[!nas,,drop=FALSE]
+        numerator<-numerator[!nas,,drop=FALSE]
+        denominator<-denominator[!nas,,drop=FALSE]
+    }
     allstats<-svytotal(all,design) 
     rval<-list(ratio=outer(allstats[1:nn],allstats[nn+1:nd],"/"))
 

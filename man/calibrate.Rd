@@ -6,6 +6,7 @@
 \alias{regcalibrate.survey.design2}
 \alias{regcalibrate.svyrep.design}
 \alias{regcalibrate}
+\alias{calibrate.twophase}
 \alias{grake}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{G-calibration (GREG) estimators}
@@ -25,13 +26,15 @@ calibrate(design,...)
 \method{calibrate}{svyrep.design}(design, formula, population,compress=NA,
        aggregate.index=NULL, variance=NULL, bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
         maxit=30, epsilon=1e-7, verbose=FALSE, ...)
+\method{calibrate}{twophase}(design, phase=2,formula, population,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{design}{survey design object}
   \item{formula}{model formula for calibration model}
   \item{population}{Vectors of population column totals for the model matrix in the
-    calibration model, or list of such vectors for each cluster.}
+    calibration model, or list of such vectors for each
+    cluster. Required except for two-phase designs}
   \item{compress}{compress the resulting replicate weights if
     \code{TRUE} or if \code{NA} and weights were previously compressed}
   \item{stage}{See Details below}
@@ -48,6 +51,7 @@ calibrate(design,...)
   \item{maxit}{Number of iterations}
   \item{epsilon}{tolerance in matching population total}
   \item{verbose}{print lots of uninteresting information}
+  \item{phase}{Phase of a two-phase design to calibrate}
 }
 \details{
   
@@ -85,6 +89,9 @@ calibrate(design,...)
   it specifies a linear combination of the columns of the model matrix
   and the calibration variance is proportional to that linear
   combination.
+
+  In a two-phase design, \code{population} may be omitted when
+  \code{phase=2}, to specify calibration to the phase-one sample.
 }
 \value{
   A survey design object.
@@ -106,7 +113,7 @@ Belgium. Statistics Belgium Working Paper No 3.
 \url{http://www.statbel.fgov.be/studies/paper03_en.asp}
 }
 
-\seealso{ \code{\link{postStratify}}, \code{\link{rake}}}
+\seealso{ \code{\link{postStratify}}, \code{\link{rake}}, \code{\link{twophase}}}
 \examples{
 data(api)
 dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)

@@ -1,5 +1,6 @@
 \name{update.survey.design}
 \alias{update.survey.design}
+\alias{update.twophase}
 \alias{update.svyrep.design}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{ Add variables to a survey design}
@@ -8,20 +9,21 @@ Update the data variables in a survey design, either with a formula for a new se
 }
 \usage{
 \method{update}{survey.design}(object, ...)
+\method{update}{twophase}(object, ...)
 \method{update}{svyrep.design}(object, ...)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
-  \item{object}{a \code{survey.design} object}
+  \item{object}{a survey design object}
   \item{\dots}{Arguments \code{tag=expr} add a new variable \code{tag}
     computed by evaluating \code{expr} in the survey data.}
 }
 
 \value{
-A \code{survey.design} or \code{svyrep.design} object  
+A survey design object
 }
 
-\seealso{\code{\link{svydesign}}, \code{\link{svrepdesign}}}
+\seealso{\code{\link{svydesign}}, \code{\link{svrepdesign}}, \code{\link{twophase}}}
 
 \examples{
 data(api)

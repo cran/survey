@@ -1,3 +1,19 @@
+3.4   twophase() for specifying two-phase designs.
+
+      two vignettes: a simple example and a description of two-phase epi designs
+
+      svyratio handles missing data.
+
+      cv() gives NaN rather than an error when the statistic is zero (for 
+      ana.pmartins@ine.pt)
+
+      oldsvydesign() is officially deprecated
+
+      Jackknife variances for strata with a single population PSU were wrong
+      (non-zero) (ana.pmartins@ine.pt)
+
+      svyglm refused to work on subsets of calibrated designs
+
 3.3-2 Add cv, SE, coef, and deff methods for svyby (for Ana Quiterio)
 
       as.data.frame methods for svystat, svrepstat

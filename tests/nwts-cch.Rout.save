@@ -1,0 +1,93 @@
+
+R : Copyright 2005, The R Foundation for Statistical Computing
+Version 2.3.0 Under development (unstable) (2005-12-02 r36582)
+ISBN 3-900051-07-0
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for a HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(survey)
+> library(survival)
+Loading required package: splines
+> data(nwtco)
+> 
+> ntwco<-subset(nwtco, !is.na(edrel))
+> 
+> load("nwtco-subcohort.rda")
+> nwtco$subcohort<-subcohort
+> 
+> d_BorganII <- twophase(id=list(~seqno,~seqno),
++                        strata=list(NULL,~interaction(instit,rel)),
++                        data=nwtco, subset=~I(rel |subcohort))
+> 
+> ##Coefficient results same as Splus with code from
+> ## http://faculty.washington.edu/norm/software.html
+> ## SE slightly larger due to using sandwich variance.
+> 
+> svycoxph(Surv(edrel, rel)~factor(stage)+factor(histol)+I(age/12), design=d_BorganII)
+Two-phase design:twophase(id = list(~seqno, ~seqno), strata = list(NULL, ~interaction(instit, 
+    rel)), data = nwtco, subset = ~I(rel | subcohort))
+Phase 1:
+Independent Sampling design (with replacement)
+svydesign(id = ~seqno)
+Phase 2:
+Stratified Independent Sampling design
+svydesign(id = ~seqno, strata = ~interaction(instit, rel), fpc = `*phase1*`)
+Call:
+svycoxph(Surv(edrel, rel) ~ factor(stage) + factor(histol) + 
+    I(age/12), design = d_BorganII)
+
+
+                  coef exp(coef) se(coef)      z       p
+factor(stage)2  0.4629      1.59   0.1809  2.559 1.0e-02
+factor(stage)3  0.5831      1.79   0.1785  3.267 1.1e-03
+factor(stage)4  1.0597      2.89   0.2052  5.163 2.4e-07
+factor(histol)2 1.5974      4.94   0.1332 11.994 0.0e+00
+I(age/12)       0.0299      1.03   0.0334  0.897 3.7e-01
+
+Likelihood ratio test=NA  on 5 df, p=NA  n= 1062 
+> 
+> ##
+> ## This gives higher standard errors. calibrate() does not recompute the
+> ## finite population correction if a calibration variable happens to predict
+> ## sampling perfectly. It probably should.
+> ##
+> d_BorganIIps<-calibrate(twophase(id=list(~seqno,~seqno),
++                            strata=list(NULL,~rel),
++                            data=nwtco, subset=~I(rel |subcohort)), 
++                         phase=2, formula=~interaction(instit,rel),
++                         epsilon=1e-10)
+> 
+> svycoxph(Surv(edrel, rel)~factor(stage)+factor(histol)+I(age/12), design=d_BorganIIps)
+Two-phase design:calibrate(twophase(id = list(~seqno, ~seqno), strata = list(NULL, 
+    ~rel), data = nwtco, subset = ~I(rel | subcohort)), phase = 2, 
+    formula = ~interaction(instit, rel), epsilon = 1e-10)
+Phase 1:
+Independent Sampling design (with replacement)
+svydesign(id = ~seqno)
+Phase 2:
+Stratified Independent Sampling design
+calibrate(phase2, formula, population, ...)
+Call:
+svycoxph(Surv(edrel, rel) ~ factor(stage) + factor(histol) + 
+    I(age/12), design = d_BorganIIps)
+
+
+                  coef exp(coef) se(coef)      z       p
+factor(stage)2  0.4629      1.59   0.1802  2.569 1.0e-02
+factor(stage)3  0.5831      1.79   0.1788  3.261 1.1e-03
+factor(stage)4  1.0597      2.89   0.2051  5.167 2.4e-07
+factor(histol)2 1.5974      4.94   0.1335 11.968 0.0e+00
+I(age/12)       0.0299      1.03   0.0327  0.916 3.6e-01
+
+Likelihood ratio test=NA  on 5 df, p=NA  n= 1062 
+> 

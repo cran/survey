@@ -3,9 +3,10 @@
 \alias{svrepratio}
 \alias{print.svyratio}
 \alias{print.svyratio_separate}
+\alias{svyratio.svyrep.design}
 \alias{svyratio.survey.design}
 \alias{svyratio.survey.design2}
-\alias{svyratio.svyrep.design}
+\alias{svyratio.twophase}
 \alias{SE.svyratio}
 \alias{predict.svyratio}
 \alias{predict.svyratio_separate}
@@ -16,8 +17,9 @@ Ratio estimation and estimates of totals based on ratios for complex
 survey samples.
 }
 \usage{
-\method{svyratio}{survey.design2}(numerator, denominator, design,separate=FALSE,...)
-\method{svyratio}{svyrep.design}(numerator, denominator, design,...)
+\method{svyratio}{survey.design2}(numerator, denominator, design,separate=FALSE, na.rm=FALSE,...)
+\method{svyratio}{svyrep.design}(numerator, denominator, design, na.rm=FALSE,...)
+\method{svyratio}{twophase}(numerator, denominator, design,separate=FALSE, na.rm=FALSE,...)
 \method{predict}{svyratio}(object, total, se=TRUE,...)
 \method{predict}{svyratio_separate}(object, total, se=TRUE,...)
 }
@@ -26,14 +28,14 @@ survey samples.
   \item{numerator}{formula, expression, or data frame giving numerator variable(s)}
   \item{denominator}{formula, expression, or data frame giving
     denominator variable(s) }
-  \item{design}{from \code{svydesign} for \code{svyratio}, from
-    \code{svrepdesign} for \code{svrepratio}}
+  \item{design}{survey design object}
   \item{object}{result of \code{svyratio}}
   \item{total}{vector of population totals for the denominator variables in
     \code{object}, or list of vectors of 
     population stratum totals if \code{separate=TRUE}}
   \item{se}{Return standard errors?}
   \item{separate}{Estimate ratio separately for strata}
+  \item{na.rm}{Remove missing values?}
   \item{...}{Other unused arguments for other methods}
 }
 \details{
@@ -43,7 +45,10 @@ survey samples.
   names will be matched. If they do not have names it is important that
   the sample totals are supplied in the correct order, the same order
   as shown in the output of \code{summary(design)}.
-  }
+
+  When \code{design} is a two-phase design, stratification will be on
+  the second phase.
+}
 \value{
 \code{svyratio} returns an object of class \code{svyratio}. The
 \code{predict} method returns a matrix of population totals and

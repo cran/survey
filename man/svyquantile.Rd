@@ -71,7 +71,18 @@ Compute quantiles for data from complex surveys.
   returns an object of class \code{svyrepstat}.
 }
 
+\note{
+By default, \code{svyquantile} interpolates between the two nearest
+observed values to obtain a quantile. This is the almost universal practice outside
+survey statistics, but  software for survey analysis often does not
+interpolate. Interpolation is discussed in the help for
+\code{\link{quantile}}; \code{svyquantile} uses type 4 of the 9 methods
+described there. For type 1 quantiles, the inverse of the weighted right-continuous
+empirical cdf, specify \code{method="constant"} and \code{f=0}.
+  }
+
 \author{Thomas Lumley}
+
 
 \seealso{ \code{\link{svydesign}}, \code{\link{svymean}},
   \code{\link{as.svrepdesign}}, \code{\link{svrepdesign}}}

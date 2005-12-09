@@ -23,7 +23,7 @@ calibrate.survey.design2<-function(design, formula, population,
   expit<-function(x) 1-1/(1+exp(x))
   
   ## calibration to population totals
-  mm<-model.matrix(formula, model.frame(formula, design$variables))
+  mm<-model.matrix(formula, model.frame(formula, model.frame(design)))
   ww<-weights(design)
   
   if (!is.null(aggregate.stage)){

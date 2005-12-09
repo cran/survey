@@ -1,4 +1,5 @@
-svydesign               Survey sample analysis.
+svydesign               Specify a survey design
+twophase                Two-phase designs
 subset.survey.design    Subset of survey
 update.survey.design    Add variables to a survey design
 postStratify            Post-stratify a survey design
@@ -64,6 +65,7 @@ regTermTest             Test sets of terms in a regression model
 grake                   Computations for generalised raking
 regcalibrate            Computations for regression calibration
 degf                    Degrees of freedom for replication weights
+twophasevar		Variances in two-phase designs
 
                  -----
 Data:

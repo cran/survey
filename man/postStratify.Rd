@@ -1,5 +1,6 @@
 \name{postStratify}
 \alias{postStratify}
+\alias{postStratify.twophase}
 \alias{postStratify.svyrep.design}
 \alias{postStratify.survey.design}
 %- Also NEED an '\alias' for EACH other topic documented here.

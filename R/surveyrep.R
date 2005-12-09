@@ -284,7 +284,11 @@ as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","Fa
   } else {
     if (inherits(design,"survey.design2")){
       fpc<-design$fpc$popsize
-    } else{
+      if(NCOL(fpc)>1){
+          fpc<-fpc[,1]
+          warning("Finite population corrections after first stage have been dropped")
+      }
+  } else{
       fpc<-design$fpc[,2]
       names(fpc)<-design$fpc[,1]
     }
@@ -654,10 +658,10 @@ svrVar<-function(thetas, scale, rscales,na.action=getOption("na.action")){
       stop("All replicates contained NAs")
   }
   if (length(dim(thetas))==2){
-    meantheta<-colMeans(thetas)
+    meantheta<-colMeans(thetas[rscales>0,,drop=FALSE])
     v<-crossprod( sweep(thetas,2, meantheta,"-")*sqrt(rscales))*scale
   }  else {
-    meantheta<-mean(thetas)
+    meantheta<-mean(thetas[rscales>0])
     v<- sum( (thetas-meantheta)^2*rscales)*scale
   }
   attr(v,"na.replicates")<-naa
@@ -939,6 +943,7 @@ svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replica
   
   class(full)<-c("svrepcoxph","svycoxph",class(full))
   full$call<-match.call()
+  full$printcall<-sys.call(-1)
   full$survey.design<-design
   full
 }
@@ -1082,7 +1087,7 @@ print.summary.svyglm<-function (x, digits = max(3, getOption("digits") - 3),
 
     
 
-svyratio.svyrep.design<-svrepratio<-function(numerator,denominator, design,...){
+svyratio.svyrep.design<-svrepratio<-function(numerator,denominator, design,na.rm=FALSE,...){
 
   if (!exists(".Generic"))
     .Deprecated("svyratio")
@@ -1090,11 +1095,11 @@ svyratio.svyrep.design<-svrepratio<-function(numerator,denominator, design,...){
   if (!inherits(design, "svyrep.design")) stop("design must be a svyrepdesign object")
   
   if (inherits(numerator,"formula"))
-    numerator<-model.frame(numerator,design$variables)
+    numerator<-model.frame(numerator,design$variables, na.action=na.pass)
   else if(typeof(numerator) %in% c("expression","symbol"))
     numerator<-eval(numerator, design$variables)
   if (inherits(denominator,"formula"))
-    denominator<-model.frame(denominator,design$variables)
+    denominator<-model.frame(denominator,design$variables, na.action=na.pass)
   else if(typeof(denominator) %in% c("expression","symbol"))
     denominator<-eval(denominator, design$variables)
   
@@ -1102,6 +1107,13 @@ svyratio.svyrep.design<-svrepratio<-function(numerator,denominator, design,...){
   nd<-NCOL(denominator)
   
   all<-cbind(numerator,denominator)
+  nas<-!complete.cases(all)
+  if (na.rm==TRUE){
+      design<-design[!nas,]
+      all<-all[!nas,,drop=FALSE]
+      numerator<-numerator[!nas,,drop=FALSE]
+      denominator<-denominator[!nas,,drop=FALSE]
+  }
   allstats<-svymean(all,design, return.replicates=TRUE)
   
   rval<-list(ratio=outer(allstats$mean[1:nn],allstats$mean[nn+1:nd],"/"))

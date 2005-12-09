@@ -3,8 +3,10 @@
 \alias{svymean.survey.design}
 \alias{svymean.survey.design2}
 \alias{svymean.svyrep.design}
+\alias{svymean.twophase}
 \alias{svrepmean}
 \alias{svytotal}
+\alias{svytotal.twophase}
 \alias{svytotal.survey.design}
 \alias{svytotal.survey.design2}
 \alias{svytotal.svyrep.design}
@@ -36,12 +38,14 @@ Compute means, variances, ratios and totals for data from complex surveys.
 }
 \usage{
 \method{svymean}{survey.design}(x, design, na.rm=FALSE,deff=FALSE,...) 
+\method{svymean}{twophase}(x, design, na.rm=FALSE,deff=FALSE,...) 
 \method{svymean}{svyrep.design}(x, design, na.rm=FALSE, rho=NULL,
   return.replicates=FALSE, deff=FALSE,...) 
 \method{svyvar}{survey.design}(x, design, na.rm=FALSE,...) 
 \method{svyvar}{svyrep.design}(x, design, na.rm=FALSE, rho=NULL,
    return.replicates=FALSE,...) 
 \method{svytotal}{survey.design}(x, design, na.rm=FALSE,deff=FALSE,...) 
+\method{svytotal}{twophase}(x, design, na.rm=FALSE,deff=FALSE,...) 
 \method{svytotal}{svyrep.design}(x, design, na.rm=FALSE, rho=NULL,
    return.replicates=FALSE, deff=FALSE,...)
 \method{coef}{svystat}(object,...)

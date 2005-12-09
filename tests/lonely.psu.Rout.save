@@ -1,6 +1,7 @@
 
 R : Copyright 2005, The R Foundation for Statistical Computing
-Version 2.1.1  (2005-06-20), ISBN 3-900051-07-0
+Version 2.3.0 Under development (unstable) (2005-11-29 r36544)
+ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -108,6 +109,13 @@ api00 644.17 5.7344
 > svymean(~api00,ds)
         mean     SE
 api00 644.17 5.7344
+> 
+> rs<-as.svrepdesign(ds)
+> svytotal(~api00,rs)
+         mean    SE
+api00 3989986 35519
+> SE(svytotal(~api00,subset(rs, dnum==413)))==0
+[1] TRUE
 > 
 > ## lonely PSUs after subsetting
 > ds<-svydesign(id = ~1, weights = ~pw, strata = ~dnum, data = subset(apiclus1,dnum !=413))

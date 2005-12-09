@@ -1,6 +1,7 @@
 
 R : Copyright 2005, The R Foundation for Statistical Computing
-Version 2.1.1  (2005-06-20), ISBN 3-900051-07-0
+Version 2.3.0 Under development (unstable) (2005-11-29 r36544)
+ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -46,7 +47,7 @@ api00 641.23 26.874
 enroll 3647280 463582
 > 
 > summary(weights(rclus1g)/weights(rclus1r))
-       X1               X2               X3               X4        
+       V1               V2               V3               V4        
  Min.   :0.9978   Min.   :0.9978   Min.   :0.9984   Min.   :0.9985  
  1st Qu.:0.9987   1st Qu.:0.9988   1st Qu.:0.9990   1st Qu.:0.9991  
  Median :0.9999   Median :0.9998   Median :0.9998   Median :0.9997  
@@ -54,7 +55,7 @@ enroll 3647280 463582
  3rd Qu.:1.0005   3rd Qu.:1.0005   3rd Qu.:1.0004   3rd Qu.:1.0003  
  Max.   :1.0014   Max.   :1.0014   Max.   :1.0010   Max.   :1.0010  
  NA's   :3.0000   NA's   :3.0000   NA's   :2.0000   NA's   :4.0000  
-       X5               X6               X7               X8        
+       V5               V6               V7               V8        
  Min.   :0.9980   Min.   :0.9983   Min.   :0.9984   Min.   :0.9973  
  1st Qu.:0.9988   1st Qu.:0.9990   1st Qu.:0.9990   1st Qu.:0.9984  
  Median :0.9999   Median :1.0001   Median :0.9997   Median :1.0001  
@@ -62,7 +63,7 @@ enroll 3647280 463582
  3rd Qu.:1.0004   3rd Qu.:1.0003   3rd Qu.:1.0004   3rd Qu.:1.0005  
  Max.   :1.0012   Max.   :1.0009   Max.   :1.0011   Max.   :1.0017  
  NA's   :1.0000   NA's   :3.0000   NA's   :3.0000   NA's   :3.0000  
-       X9              X10              X11              X12        
+       V9              V10              V11              V12        
  Min.   :0.9975   Min.   :0.9979   Min.   :0.9980   Min.   :0.9953  
  1st Qu.:0.9986   1st Qu.:0.9988   1st Qu.:0.9988   1st Qu.:0.9971  
  Median :1.0000   Median :0.9994   Median :1.0002   Median :0.9996  
@@ -70,7 +71,7 @@ enroll 3647280 463582
  3rd Qu.:1.0005   3rd Qu.:1.0004   3rd Qu.:1.0004   3rd Qu.:1.0010  
  Max.   :1.0015   Max.   :1.0013   Max.   :1.0011   Max.   :1.0035  
  NA's   :5.0000   NA's   :2.0000   NA's   :6.0000   NA's   :4.0000  
-      X13              X14              X15        
+      V13              V14              V15        
  Min.   :0.9987   Min.   :0.9980   Min.   :0.9978  
  1st Qu.:0.9992   1st Qu.:0.9988   1st Qu.:0.9987  
  Median :0.9998   Median :0.9999   Median :0.9999  
@@ -78,8 +79,6 @@ enroll 3647280 463582
  3rd Qu.:1.0003   3rd Qu.:1.0004   3rd Qu.:1.0005  
  Max.   :1.0008   Max.   :1.0013   Max.   :1.0014  
  NA's   :3.0000   NA's   :1.0000   NA's   :3.0000  
-Warning message:
-some row.names duplicated: 4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46 --> row.names NOT used in: data.row.names(row.names, rowsi, i) 
 > 
 > 
 > ## Do it for a design without replicate weights

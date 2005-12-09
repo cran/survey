@@ -33,6 +33,10 @@ svymean(~api00,ds)
 options(survey.lonely.psu="average")
 svymean(~api00,ds)
 
+rs<-as.svrepdesign(ds)
+svytotal(~api00,rs)
+SE(svytotal(~api00,subset(rs, dnum==413)))==0
+
 ## lonely PSUs after subsetting
 ds<-svydesign(id = ~1, weights = ~pw, strata = ~dnum, data = subset(apiclus1,dnum !=413))
 ds1<-ds[-31,]

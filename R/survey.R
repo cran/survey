@@ -1,6 +1,8 @@
 oldsvydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
                     data=NULL, nest=FALSE, check.strata=!nest,weights=NULL){
 
+    .Deprecated("svydesign")
+  
     ## less memory-hungry version for sparse tables
     interaction<-function (..., drop = TRUE) {
         args <- list(...)
@@ -595,7 +597,7 @@ cv<-function(object,...) UseMethod("cv")
 
 cv.default<-function(object,...){
   rval<-SE(object)/coef(object)
-  if (any(rval<0)) warning("CV may not be useful for negative statistics")
+  if (any(coef(object)<0)) warning("CV may not be useful for negative statistics")
   rval
 }
 
@@ -683,9 +685,9 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
                                     ci=FALSE, method="linear",f=1,
                                     interval.type=c("Wald","score"),...){
     if (inherits(x,"formula"))
-		x<-model.frame(x,design$variables)
+		x<-model.frame(x,model.frame(design))
     else if(typeof(x) %in% c("expression","symbol"))
-        x<-eval(x, design$variables)
+        x<-eval(x, model.frame(design))
     
     w<-weights(design)
     
@@ -926,14 +928,15 @@ svycoxph<-function(formula,design,subset=NULL,...){
   .svycheck(design)
   UseMethod("svycoxph",design)
 }
+
 svycoxph.survey.design<-function(formula,design,subset=NULL,...){
     subset<-substitute(subset)
-    subset<-eval(subset,design$variables,parent.frame())
+    subset<-eval(subset, model.frame(design),parent.frame())
     if (!is.null(subset))
         design<-design[subset,]
     
     require(survival) || stop("Needs the survival package")
-    data<-design$variables 
+    data<-model.frame(design)
     
     g<-match.call()
     g$formula<-eval.parent(g$formula)
@@ -950,9 +953,10 @@ svycoxph.survey.design<-function(formula,design,subset=NULL,...){
     data$.survey.prob.weights<-(1/design$prob)/sum(1/design$prob)
     if (!all(all.vars(formula) %in% names(data))) 
         stop("all variables must be in design= argument")
-    g<-with(list(data=data),eval(g))
+    g<-with(list(data=data), eval(g))
     g$call<-match.call()
-    class(g)<-c("svycoxph",class(g))
+    g$printcall<-sys.call(-1)
+    class(g)<-c("svycoxph", class(g))
     g$survey.design<-design
     
     nas<-g$na.action
@@ -963,6 +967,8 @@ svycoxph.survey.design<-function(formula,design,subset=NULL,...){
       g$var<-svyrecvar(resid(g,"dfbeta",weighted=TRUE), design$cluster,
                     design$strata, design$fpc,
                     postStrata=design$postStrata)
+    else if (inherits(design, "twophase"))
+      g$var<-twophasevar(resid(g,"dfbeta",weighted=TRUE), design)
     else 
       g$var<-svyCprod(resid(g,"dfbeta",weighted=TRUE), design$strata,
                     design$cluster[[1]], design$fpc,design$nPSU,
@@ -993,7 +999,7 @@ model.frame.svycoxph<-function(formula,...){
   else 
     f$weights<-bquote(.survey.prob.weights*.(f$weights))
   design<-formula$survey.design
-  data<-design$variables
+  data<-model.frame(design)
   data$.survey.prob.weights<-(1/design$prob)/sum(1/design$prob)
 
   with(list(data=data), eval(f))
@@ -1001,11 +1007,13 @@ model.frame.svycoxph<-function(formula,...){
 
 print.svycoxph<-function(x,...){
     print(x$survey.design, varnames=FALSE, design.summaries=FALSE,...)
+    x$call<-x$printcall
     NextMethod()
 }
 
 summary.svycoxph<-function(object,...){
     print(object$survey.design,varnames=FALSE, design.summaries=FALSE,...)
+    object$call<-object$printcall
     NextMethod()
 }
 
@@ -1028,11 +1036,11 @@ svyglm<-function(formula, design, ...){
 svyglm.survey.design<-function(formula,design,subset=NULL,...){
 
       subset<-substitute(subset)
-      subset<-eval(subset, design$variables, parent.frame())
+      subset<-eval(subset, model.frame(design), parent.frame())
       if (!is.null(subset))
         design<-design[subset,]
       
-      data<-design$variables
+      data<-model.frame(design)
 
       g<-match.call()
       g$formula<-eval.parent(g$formula)
@@ -1077,10 +1085,11 @@ svy.varcoef<-function(glm.object,design){
     estfun<-model.matrix(glm.object)*resid(glm.object,"working")*glm.object$weights
     if (inherits(design,"survey.design2"))
       B<-svyrecvar(estfun,design$cluster,design$strata,design$fpc,postStrata=design$postStrata)
+    else if (inherits(design, "twophase"))
+      B <- twophasevar(estfun, design)
     else
       B<-svyCprod(estfun,design$strata,design$cluster[[1]],design$fpc, design$nPSU,
                   design$certainty,design$postStrata)
-
     Ainv%*%B%*%Ainv
   }
 
@@ -1108,7 +1117,7 @@ summary.svyglm<-function (object, correlation = FALSE, ...)
     Qr <- object$qr
     est.disp <- TRUE
     df.r <- object$df.residual
-    dispersion<-svyvar(na.omit(resid(object,"pearson")), object$survey.design)
+    dispersion<-svyvar(resid(object,"pearson"), object$survey.design, na.rm=TRUE)
     coef.p <- coef(object)
     covmat<-vcov(object)
     dimnames(covmat) <- list(names(coef.p), names(coef.p))
@@ -1175,7 +1184,10 @@ svymle<-function(loglike, gradient=NULL, design, formulas,
   wtotal<-sum(weights)
   if (is.null(control$fnscale))
       control$fnscale<- -wtotal
-  data<-design$variables
+  if (inherits(design, "twophase"))
+    data<-design$phase1$sample$variables
+  else 
+    data<-design$variables
 
 ## Get the response variable
   nms<-names(formulas)
@@ -1319,6 +1331,8 @@ svymle<-function(loglike, gradient=NULL, design, formulas,
        if (inherits(design,"survey.design2"))
          rval$sandwich<-svyrecvar(db,design$cluster,design$strata, design$fpc, 
                                postStrata=design$postStrata)
+       else if (inherits(design, "twophase"))
+         rval$sandwich<-twophasevar(db,design)
        else
          rval$sandwich<-svyCprod(db,design$strata,design$cluster[[1]],
                                  design$fpc, design$nPSU,
