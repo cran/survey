@@ -10,8 +10,8 @@
 "[.repweights_compressed"<-function(x,i,...,drop=FALSE){
   if (!missing(i)){
     x$index<-x$index[i]
-    if(!missing(...))
-      x$weights<-x$weights[,...,drop=FALSE]
+    if(!missing(..1))
+      x$weights<-x$weights[,..1,drop=FALSE]
   } else{
       ## this is faster than just subscripting x$weights (!)
       x<-list(index=x$index,

@@ -31,6 +31,7 @@
 \alias{deff}
 \alias{deff.default}
 \alias{svrepvar}
+\alias{make.formula}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Summary statistics for sample surveys}
 \description{
@@ -43,7 +44,7 @@ Compute means, variances, ratios and totals for data from complex surveys.
   return.replicates=FALSE, deff=FALSE,...) 
 \method{svyvar}{survey.design}(x, design, na.rm=FALSE,...) 
 \method{svyvar}{svyrep.design}(x, design, na.rm=FALSE, rho=NULL,
-   return.replicates=FALSE,...) 
+   return.replicates=FALSE,...,estimate.only=FALSE) 
 \method{svytotal}{survey.design}(x, design, na.rm=FALSE,deff=FALSE,...) 
 \method{svytotal}{twophase}(x, design, na.rm=FALSE,deff=FALSE,...) 
 \method{svytotal}{svyrep.design}(x, design, na.rm=FALSE, rho=NULL,
@@ -54,6 +55,7 @@ Compute means, variances, ratios and totals for data from complex surveys.
 \method{vcov}{svrepstat}(object,...)
 cv(object,...)
 deff(object, quietly=FALSE,...)
+make.formula(names)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -65,7 +67,11 @@ deff(object, quietly=FALSE,...)
   \item{deff}{Return the design effect (see below)}
   \item{object}{The result of one of the other survey summary functions}
   \item{quietly}{Don't warn when there is no design effect computed}
-  \item{...}{additional arguments to \code{cv} methods,not currently used}
+  \item{estimate.only}{Don't compute standard errors (useful when
+    \code{svyvar} is used to estimate the design effect)}
+  \item{...}{additional arguments to \code{cv} methods,not currently
+    used}
+  \item{names}{vector of character strings}
 }
 \details{
   
@@ -104,6 +110,10 @@ design effect is the square of Kish's "deft".
 The \code{cv} function computes the coefficient of variation of a
 statistic such as ratio, mean or total. The default method is for any
 object with methods for \code{\link{SE}} and \code{coef}.
+
+\code{make.formula} makes a formula from a vector of names.  This is
+useful because formulas as the best way to specify variables to the
+survey functions.
 
 }
 \value{

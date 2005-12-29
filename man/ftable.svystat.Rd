@@ -32,11 +32,9 @@ dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
 a<-svymean(~interaction(stype,comp.imp), design=dclus1)
 b<-ftable(a, rownames=list(stype=c("E","H","M"),comp.imp=c("No","Yes")))
 b
-round(100*b,1)
 
 a<-svymean(~interaction(stype,comp.imp), design=dclus1, deff=TRUE)
 b<-ftable(a, rownames=list(stype=c("E","H","M"),comp.imp=c("No","Yes")))
-b
 round(100*b,1)
 
 rclus1<-as.svrepdesign(dclus1)
@@ -50,8 +48,10 @@ ftable(a)
 print(ftable(a),digits=2)
 
 b<-svyby(~api99 + api00, ~stype + sch.wide, rclus1, svymean, keep.var=TRUE, deff=TRUE)
-ftable(b)
 print(ftable(b),digits=2)
+
+d<-svyby(~api99 + api00, ~stype + sch.wide, rclus1, svymean, keep.var=TRUE, vartype="cvpct")
+round(ftable(d),1)
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

@@ -1,7 +1,7 @@
 This is pdfTeXk, Version 3.14159-1.10b (Web2C 7.4.5) (format=pdflatex 2003.8.8)  29 DEC 2005 15:14
  file:line:error style messages enabled.
-**\nonstopmode \input /usr/local/tlumley/Rarchive/survey/inst/doc/survey.tex
-(/usr/local/tlumley/Rarchive/survey/inst/doc/survey.tex
+**\nonstopmode \input /usr/local/tlumley/Rarchive/survey/inst/doc/phase1.tex
+(/usr/local/tlumley/Rarchive/survey/inst/doc/phase1.tex
 (/usr/share/texmf/tex/latex/base/article.cls
 Document Class: article 2001/04/21 v1.4e Standard LaTeX document class
 (/usr/share/texmf/tex/latex/base/size10.clo
@@ -96,28 +96,28 @@ Package: textcomp 2001/06/05 v1.94 Standard LaTeX package
 
 (/usr/share/texmf/tex/latex/base/ts1enc.def
 File: ts1enc.def 2001/06/05 v3.0e (jk/car/fm) Standard LaTeX file
-)))) (./survey.aux)
-\openout1 = `survey.aux'.
+)))) (./phase1.aux)
+\openout1 = `phase1.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 8.
-LaTeX Font Info:    ... okay on input line 8.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 8.
-LaTeX Font Info:    ... okay on input line 8.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 8.
-LaTeX Font Info:    ... okay on input line 8.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 8.
-LaTeX Font Info:    ... okay on input line 8.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 8.
-LaTeX Font Info:    ... okay on input line 8.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 8.
-LaTeX Font Info:    ... okay on input line 8.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 8.
-LaTeX Font Info:    Try loading font information for TS1+cmr on input line 8.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 12.
+LaTeX Font Info:    Try loading font information for TS1+cmr on input line 12.
 
 (/usr/share/texmf/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 8.
+LaTeX Font Info:    ... okay on input line 12.
 
 (/usr/share/texmf/tex/context/base/supp-pdf.tex
 (/usr/share/texmf/tex/context/base/supp-mis.tex
@@ -148,50 +148,41 @@ loading : Context Support Macros / PDF
 \everyMPtoPDFconversion=\toks18
 )
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 9.
+(Font)              <12> on input line 13.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 9.
+(Font)              <8> on input line 13.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 9.
-LaTeX Font Info:    Try loading font information for T1+aett on input line 15.
+(Font)              <6> on input line 13.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 21.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 21.
+LaTeX Font Info:    Try loading font information for T1+aett on input line 56.
  (/usr/share/texmf/tex/latex/ae/t1aett.fd
 File: t1aett.fd 1997/11/16 Font definitions for T1/aett.
-)
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 15.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 15.
- [1
+) [1
 
-{/usr/share/texmf/dvips/config/pdftex.map}] [2] [3]
-LaTeX Font Info:    Try loading font information for TS1+aett on input line 217
-.
- (/usr/local/thomas/Rarchive/r-devel/R/share/texmf/ts1aett.fd
-File: ts1aett.fd 
-)
-LaTeX Font Info:    Try loading font information for TS1+cmtt on input line 217
-.
- (/usr/share/texmf/tex/latex/base/ts1cmtt.fd
-File: ts1cmtt.fd 1999/05/25 v2.5h Standard LaTeX font definitions
-)
-LaTeX Font Info:    Font shape `TS1/aett/m/n' in size <10> not available
-(Font)              Font shape `TS1/cmtt/m/n' tried instead on input line 217.
- [4] [5] [6] (./survey.aux) ) 
+{/usr/share/texmf/dvips/config/pdftex.map}] [2] (./phase1.aux) ) 
 Here is how much of TeX's memory you used:
- 2077 strings out of 95437
- 27903 string characters out of 1188126
- 69149 words of memory out of 1000001
- 5060 multiletter control sequences out of 10000+50000
- 16441 words of font info for 43 fonts, out of 500000 for 1000
+ 2051 strings out of 95437
+ 27209 string characters out of 1188126
+ 71159 words of memory out of 1000001
+ 5041 multiletter control sequences out of 10000+50000
+ 16144 words of font info for 42 fonts, out of 500000 for 1000
  14 hyphenation exceptions out of 1000
- 35i,6n,21p,324b,315s stack positions out of 1500i,500n,5000p,200000b,5000s
- 35 PDF objects out of 300000
+ 35i,6n,21p,324b,312s stack positions out of 1500i,500n,5000p,200000b,5000s
+ 40 PDF objects out of 300000
  0 named destinations out of 131072
  0 words of extra memory for PDF output out of 65536
- </var/lib/texmf/pk/ljfour/jknappen/tc/tctt1000.60
-0pk>{/usr/share/texmf/dvips/tetex/09fbbfac.enc}</usr/share/texmf/fonts/type1/bl
-uesky/cm/cmsltt10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmtt10.pfb>{/usr
-/share/texmf/dvips/tetex/f7b6d320.enc}</usr/share/texmf/fonts/type1/bluesky/cm/
-cmr10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr12.pfb></usr/share/texmf/
-fonts/type1/bluesky/cm/cmr17.pfb>
-Output written on survey.pdf (6 pages, 60368 bytes).
+{/usr/share/tex
+mf/dvips/tetex/09fbbfac.enc}</usr/share/texmf/fonts/type1/bluesky/cm/cmsltt10.p
+fb></usr/share/texmf/fonts/type1/bluesky/cm/cmtt10.pfb>{/usr/share/texmf/dvips/
+tetex/bbad153f.enc}</usr/share/texmf/fonts/type1/bluesky/cm/cmsy7.pfb>{/usr/sha
+re/texmf/dvips/tetex/aae443f0.enc}</usr/share/texmf/fonts/type1/bluesky/cm/cmmi
+7.pfb>{/usr/share/texmf/dvips/tetex/f7b6d320.enc}</usr/share/texmf/fonts/type1/
+bluesky/cm/cmr7.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmsy10.pfb></usr/s
+hare/texmf/fonts/type1/bluesky/cm/cmex10.pfb></usr/share/texmf/fonts/type1/blue
+sky/cm/cmmi10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr10.pfb></usr/shar
+e/texmf/fonts/type1/bluesky/cm/cmr12.pfb></usr/share/texmf/fonts/type1/bluesky/
+cm/cmr17.pfb>
+Output written on phase1.pdf (2 pages, 68499 bytes).

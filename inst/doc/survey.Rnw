@@ -59,6 +59,12 @@ The warnings referred to in the output occured because several
 school districts have only one high school sampled, making the second
 stage standard error estimation unreliable.
 
+Specifying a large number of variables is made easier by the \texttt{make.formula} function
+<<>>=
+vars<-names(apiclus1)[c(12:13,16:23,27:37)]
+svymean(make.formula(vars),dclus1,na.rm=TRUE)
+@ 
+
 Summary statistics for subsets can also be computed with
 \texttt{svyby}. Here we compute the average proportion of ``English
 language learners'' and of students eligible for subsidized school
@@ -88,5 +94,6 @@ svytotal(~stype, gclus1)
 svytotal(~enroll, gclus1)
 svyratio(~api.stu,~enroll, gclus1)
 @
+
 
 \end{document}

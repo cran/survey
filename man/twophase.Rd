@@ -11,14 +11,19 @@
 \alias{na.fail.twophase}
 \alias{na.omit.twophase}
 \alias{na.exclude.twophase}
+\alias{svyrecvar.phase1}
+\alias{multistage.phase1}
+\alias{onestage.phase1}
+\alias{onestrat.phase1}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Two-phase designs}
 \description{
 In a two-phase design a sample is taken from a population and a
 subsample taken from the sample, typically stratified by variables not
-known for the whole population.  The two phases can each use any design
-supported for single-phase sampling (but see Note below).  The internal
-structure of \code{twophase} objects may change in the future.
+known for the whole population.  The second phase can use any design 
+supported for single-phase sampling. The first phase must currently
+be one-stage element  or cluster sampling
+The internal structure of \code{twophase} objects may change in the future.
 }
 \usage{
 twophase(id, strata = NULL, probs = NULL, weights = NULL, fpc = NULL,
@@ -54,13 +59,15 @@ twophasevar(x,design)
   first-stage variance would be used (cf Therneau & Li, 1999)
   
   Variance computations are based on the conditioning argument in
-  Section 9.3 of Sarndal et al, but do not use their formulas.
-}
+  Section 9.3 of Sarndal et al, but do not use their formulas. In particular,
+  the phase-1 variance uses a formula that has bias O(1/phase 2 sample size) but
+  is easier to extend to multistage sampling designs. See the \code{tests} 
+  directory for a worked example.
+  }
 \note{
   The variance computations were derived under the assumption that the
   PSUs in the second stage are nested in the ultimate sampling units at
-  the first stage.  I don't know if they are correct otherwise, and
-  unless someone can present an example I don't intend to find out.
+  the first stage. 
 }
 \value{
 

@@ -51,7 +51,8 @@ calibrate(design,...)
   \item{maxit}{Number of iterations}
   \item{epsilon}{tolerance in matching population total}
   \item{verbose}{print lots of uninteresting information}
-  \item{phase}{Phase of a two-phase design to calibrate}
+  \item{phase}{Phase of a two-phase design to calibrate (only
+    \code{phase=2} currently implemented.}
 }
 \details{
   

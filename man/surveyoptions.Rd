@@ -4,6 +4,7 @@
 \alias{survey.ultimate.cluster}
 \alias{survey.adjust.domain.lonely}
 \alias{survey.want.obsolete}
+\alias{survey.drop.replicates}
 \title{Options for the survey package}
 \description{
   This help page documents the options that control the behaviour of
@@ -45,8 +46,14 @@
     
     The fourth option is \code{options("survey.want.obsolete")}. This
     controls the warnings about using the deprecated pre-2.9.0 survey
-    design objects. 
-    
+    design objects.
+
+    The behaviour of replicate-weight designs for self-representing
+    strata is controlled by \code{options("survey.drop.replicates")}.
+    When \code{TRUE}, various optimizations are used that take advantage
+    of the fact that these strata do not contribute to the variance.
+    The only reason ever to use \code{FALSE} is if there is a bug in
+    the code for these optimizations.
   }
   
   \keyword{survey}

@@ -1,3 +1,31 @@
+3.4-1 Speed optimizations for JKn weights with self-representing strata
+	- jackknife replicates are not created for these strata
+	- svytotal does not use these strata in variance calculation.
+	- svytotal, svymean, svyratio,svyquantile,svyglm recognize 
+            designs (eg subsets) where all strata are self-representing.
+
+      [.repweights_compressed does less copying and is a lot faster 
+      for large designs
+
+      Added verbose= option to svyby() to monitor slow computations.
+
+      Added vartype="cv","cvpct" options for svyby().
+
+      Two-phase designs gave incorrect variances in some cases [they
+      were correct if the first stage was infinite superpopulation
+      sampling or if all phase 1 ultimate sampling units were
+      represented in phase 2].  These are fixed but twophase() now
+      limits the first phase to single-stage cluster or element
+      sampling. [detailed bug report from Takahiro Tsuchiya]
+
+      added vignette describing estimator of phase-one variance in
+      two-phase designs
+
+      minor speedup in svyrecvar() for self-representing strata
+
+      added make.formula() for convenience with many variables.
+
+
 3.4   twophase() for specifying two-phase designs.
 
       two vignettes: a simple example and a description of two-phase epi designs

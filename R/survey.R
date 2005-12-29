@@ -1,3 +1,7 @@
+
+make.formula<-function(names) formula(paste("~",paste(names,collapse="+")))
+
+
 oldsvydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
                     data=NULL, nest=FALSE, check.strata=!nest,weights=NULL){
 
@@ -688,7 +692,7 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
 		x<-model.frame(x,model.frame(design))
     else if(typeof(x) %in% c("expression","symbol"))
         x<-eval(x, model.frame(design))
-    
+
     w<-weights(design)
     
     computeQuantiles<-function(xx,p=quantiles){
@@ -1396,6 +1400,8 @@ model.frame.svyrep.design<-function(formula,...){
     options(survey.want.obsolete=FALSE)
   if (is.null(getOption("survey.adjust.domain.lonely")))
     options(survey.adjust.domain.lonely=FALSE)
+  if (is.null(getOption("survey.drop.replicates")))
+      options(survey.drop.replicates=TRUE)
 }
 
 

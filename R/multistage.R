@@ -174,22 +174,25 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
 
 onestrat<-function(x,cluster,nPSU,fpc, lonely.psu,stratum=NULL,stage=1,cal=cal){
   
-  x<-rowsum(x,cluster)
-  nsubset<-nrow(x)
-  if (nsubset<nPSU)
-      x<-rbind(x,matrix(0,ncol=ncol(x),nrow=nPSU-nrow(x)))
   if (is.null(fpc))
       f<-1
   else{
       f<-ifelse(fpc==Inf, 1, (fpc-nPSU)/fpc)
   }
-  if (lonely.psu!="adjust" || nsubset>1 ||
-      (nPSU>1 & !getOption("survey.adjust.domain.lonely")))
-      x<-sweep(x, 2, colMeans(x), "-")
   if (nPSU>1)
       scale<-f*nPSU/(nPSU-1)
   else
       scale<-f
+  if (f<0.0000001)## self-representing stratum
+      return(matrix(0,NCOL(x),NCOL(x)))
+
+  x<-rowsum(x,cluster)
+  nsubset<-nrow(x)
+  if (nsubset<nPSU)
+      x<-rbind(x,matrix(0,ncol=ncol(x),nrow=nPSU-nrow(x)))
+  if (lonely.psu!="adjust" || nsubset>1 ||
+      (nPSU>1 & !getOption("survey.adjust.domain.lonely")))
+      x<-sweep(x, 2, colMeans(x), "-")
 
   if (nsubset==1 && nPSU>1){ 
       warning("Stratum (",stratum,") has only one PSU at stage ",stage)
@@ -199,9 +202,7 @@ onestrat<-function(x,cluster,nPSU,fpc, lonely.psu,stratum=NULL,stage=1,cal=cal){
   
   if (nPSU>1){
       return(crossprod(x)*scale)
-  } else if (f<0.0000001) ## certainty PSU
-      return(0*crossprod(x))
-  else {
+  } else {
       rval<-switch(lonely.psu,
                    certainty=scale*crossprod(x),
                    remove=scale*crossprod(x),
@@ -510,22 +511,38 @@ svytotal.survey.design2<-function(x,design, na.rm=FALSE, deff=FALSE,...){
 
   
     if (inherits(x,"formula")){
-    ## do the right thing with factors
-    mf<-model.frame(x,design$variables,na.action=na.pass)
-    xx<-lapply(attr(terms(x),"variables")[-1],
-               function(tt) model.matrix(eval(bquote(~0+.(tt))),mf))
-    cols<-sapply(xx,NCOL)
-    x<-matrix(nrow=NROW(xx[[1]]),ncol=sum(cols))
-    scols<-c(0,cumsum(cols))
-    for(i in 1:length(xx)){
-      x[,scols[i]+1:cols[i]]<-xx[[i]]
+        ## do the right thing with factors
+        mf<-model.frame(x,design$variables,na.action=na.pass)
+        xx<-lapply(attr(terms(x),"variables")[-1],
+                   function(tt) model.matrix(eval(bquote(~0+.(tt))),mf))
+        cols<-sapply(xx,NCOL)
+        x<-matrix(nrow=NROW(xx[[1]]),ncol=sum(cols))
+        scols<-c(0,cumsum(cols))
+        for(i in 1:length(xx)){
+            x[,scols[i]+1:cols[i]]<-xx[[i]]
+        }
+        colnames(x)<-do.call("c",lapply(xx,colnames))
+    } else{
+        if(typeof(x) %in% c("expression","symbol"))
+            x<-eval(x, design$variables)
+        else {
+            if(is.data.frame(x) && any(sapply(x,is.factor))){
+                xx<-lapply(x, function(xi) {if (is.factor(xi)) 0+(outer(xi,levels(xi),"==")) else xi})
+                cols<-sapply(xx,NCOL)
+                scols<-c(0,cumsum(cols))
+                cn<-character(sum(cols))
+                for(i in 1:length(xx))
+                    cn[scols[i]+1:cols[i]]<-paste(names(x)[i],levels(x[[i]]),sep="")
+                x<-matrix(nrow=NROW(xx[[1]]),ncol=sum(cols))
+                for(i in 1:length(xx)){
+                    x[,scols[i]+1:cols[i]]<-xx[[i]]
+                }
+                colnames(x)<-cn
+            }
+        }
     }
-    colnames(x)<-do.call("c",lapply(xx,colnames))
-  } else if(typeof(x) %in% c("expression","symbol"))
-      x<-eval(x, design$variables)
+    x<-as.matrix(x)
     
-  x<-as.matrix(x)
-  
     if (na.rm){
         nas<-rowSums(is.na(x))
         design<-design[nas==0,]
@@ -536,8 +553,8 @@ svytotal.survey.design2<-function(x,design, na.rm=FALSE, deff=FALSE,...){
     }
 
     N<-sum(1/design$prob)
-    m <- svymean(x, design, na.rm=na.rm)
-    total<-m*N
+    total <- colSums(x/as.vector(design$prob),na.rm=na.rm)
+    class(total)<-"svystat"
     attr(total, "var")<-v<-svyrecvar(x/design$prob,design$cluster,
                                      design$strata, design$fpc,
                                    postStrata=design$postStrata)
@@ -546,9 +563,9 @@ svytotal.survey.design2<-function(x,design, na.rm=FALSE, deff=FALSE,...){
     if (is.character(deff) || deff){
       nobs<-NROW(design$cluster)
       if (deff=="replace")
-        vsrs<-svyvar(x,design,na.rm=na.rm)*sum(weights(design)^2)*(N-nobs)/N
-      else
         vsrs<-svyvar(x,design,na.rm=na.rm)*sum(weights(design)^2)
+      else
+        vsrs<-svyvar(x,design,na.rm=na.rm)*sum(weights(design)^2)*(N-nobs)/N
       attr(total, "deff")<-v/vsrs
     }
     
@@ -572,9 +589,23 @@ svymean.survey.design2<-function(x,design, na.rm=FALSE,deff=FALSE,...){
     }
     colnames(x)<-do.call("c",lapply(xx,colnames))
   }
-  else if(typeof(x) %in% c("expression","symbol"))
-    x<-eval(x, design$variables)
-  
+  else {
+      if(typeof(x) %in% c("expression","symbol"))
+          x<-eval(x, design$variables)
+      else if(is.data.frame(x) && any(sapply(x,is.factor))){
+          xx<-lapply(x, function(xi) {if (is.factor(xi)) 0+(outer(xi,levels(xi),"==")) else xi})
+          cols<-sapply(xx,NCOL)
+          scols<-c(0,cumsum(cols))
+          cn<-character(sum(cols))
+          for(i in 1:length(xx))
+              cn[scols[i]+1:cols[i]]<-paste(names(x)[i],levels(x[[i]]),sep="")
+          x<-matrix(nrow=NROW(xx[[1]]),ncol=sum(cols))
+          for(i in 1:length(xx)){
+              x[,scols[i]+1:cols[i]]<-xx[[i]]
+          }
+          colnames(x)<-cn
+      }
+    }
   x<-as.matrix(x)
   
   if (na.rm){

@@ -1,6 +1,6 @@
 
 R : Copyright 2005, The R Foundation for Statistical Computing
-Version 2.3.0 Under development (unstable) (2005-12-02 r36582)
+Version 2.3.0 Under development (unstable) (2005-12-19 r36803)
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -12,7 +12,7 @@ Type 'contributors()' for more information and
 'citation()' on how to cite R or R packages in publications.
 
 Type 'demo()' for some demos, 'help()' for on-line help, or
-'help.start()' for a HTML browser interface to help.
+'help.start()' for an HTML browser interface to help.
 Type 'q()' to quit R.
 
 > library(survey)
@@ -50,8 +50,8 @@ svycoxph(Surv(edrel, rel) ~ factor(stage) + factor(histol) +
                   coef exp(coef) se(coef)      z       p
 factor(stage)2  0.4629      1.59   0.1809  2.559 1.0e-02
 factor(stage)3  0.5831      1.79   0.1785  3.267 1.1e-03
-factor(stage)4  1.0597      2.89   0.2052  5.163 2.4e-07
-factor(histol)2 1.5974      4.94   0.1332 11.994 0.0e+00
+factor(stage)4  1.0597      2.89   0.2053  5.163 2.4e-07
+factor(histol)2 1.5974      4.94   0.1334 11.972 0.0e+00
 I(age/12)       0.0299      1.03   0.0334  0.897 3.7e-01
 
 Likelihood ratio test=NA  on 5 df, p=NA  n= 1062 
@@ -84,9 +84,9 @@ svycoxph(Surv(edrel, rel) ~ factor(stage) + factor(histol) +
 
                   coef exp(coef) se(coef)      z       p
 factor(stage)2  0.4629      1.59   0.1802  2.569 1.0e-02
-factor(stage)3  0.5831      1.79   0.1788  3.261 1.1e-03
-factor(stage)4  1.0597      2.89   0.2051  5.167 2.4e-07
-factor(histol)2 1.5974      4.94   0.1335 11.968 0.0e+00
+factor(stage)3  0.5831      1.79   0.1788  3.260 1.1e-03
+factor(stage)4  1.0597      2.89   0.2051  5.166 2.4e-07
+factor(histol)2 1.5974      4.94   0.1337 11.947 0.0e+00
 I(age/12)       0.0299      1.03   0.0327  0.916 3.6e-01
 
 Likelihood ratio test=NA  on 5 df, p=NA  n= 1062 

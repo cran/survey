@@ -139,6 +139,43 @@ The warnings referred to in the output occured because several
 school districts have only one high school sampled, making the second
 stage standard error estimation unreliable.
 
+Specifying a large number of variables is made easier by the \texttt{make.formula} function
+\begin{Schunk}
+\begin{Sinput}
+> vars <- names(apiclus1)[c(12:13, 16:23, 27:37)]
+> svymean(make.formula(vars), dclus1, na.rm = TRUE)
+\end{Sinput}
+\begin{Soutput}
+                  mean      SE
+api00       643.203822 25.4936
+api99       605.490446 25.4987
+sch.wideNo    0.127389  0.0247
+sch.wideYes   0.872611  0.0247
+comp.impNo    0.273885  0.0365
+comp.impYes   0.726115  0.0365
+bothNo        0.273885  0.0365
+bothYes       0.726115  0.0365
+awardsNo      0.292994  0.0397
+awardsYes     0.707006  0.0397
+meals        50.636943  6.6588
+ell          26.891720  2.1567
+yr.rndNo      0.942675  0.0358
+yr.rndYes     0.057325  0.0358
+mobility     17.719745  1.4555
+pct.resp     67.171975  9.6553
+not.hsg      23.082803  3.1976
+hsg          24.847134  1.1167
+some.col     25.210191  1.4709
+col.grad     20.611465  1.7305
+grad.sch      6.229299  1.5361
+avg.ed        2.621529  0.1054
+full         87.127389  2.1624
+emer         10.968153  1.7612
+enroll      573.713376 46.5959
+api.stu     487.318471 41.4182
+\end{Soutput}
+\end{Schunk}
+
 Summary statistics for subsets can also be computed with
 \texttt{svyby}. Here we compute the average proportion of ``English
 language learners'' and of students eligible for subsidized school
@@ -267,5 +304,6 @@ SEs=
 api.stu 0.008674888
 \end{Soutput}
 \end{Schunk}
+
 
 \end{document}
