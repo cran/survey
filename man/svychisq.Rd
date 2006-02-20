@@ -12,6 +12,7 @@
 \alias{degf}
 \alias{degf.svyrep.design}
 \alias{degf.survey.design2}
+\alias{degf.twophase}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Contingency tables for survey data}
 \description{

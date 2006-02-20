@@ -32,7 +32,8 @@
     to ignore that PSU for variance computation, \code{"adjust"} to
     center the stratum at the population mean rather than the stratum
     mean, and \code{"average"} to replace the variance contribution of
-    the stratum by the average variance contribution across strata. 
+    the stratum by the average variance contribution across strata. As
+    of version 3.4-2 \code{as.svrepdesign} also uses this option.
     
     The variance formulas for domain estimation give well-defined,
     positive results when a stratum contains only one PSU with

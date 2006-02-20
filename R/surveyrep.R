@@ -43,6 +43,7 @@ jk1weights<-function(psu, fpc=NULL,
     if (fpctype=="population" && fpc<n) stop("Population size smaller than sample size. No can do.")
     fpc <-switch(fpctype, population=(fpc-n)/fpc, fraction=1-fpc, correction=fpc)
  }
+
   if (compress){
       if(fpc==0 && getOption("survey.drop.replicates")) ## exhaustively sampled strata do not need replicates.
          repweights<-matrix(ncol=0,nrow=length(psu))
@@ -69,13 +70,15 @@ jk1weights<-function(psu, fpc=NULL,
 
 jknweights<-function(strata,psu, fpc=NULL,
                      fpctype=c("population","fraction","correction"),
-                     compress=TRUE){
+                     compress=TRUE, lonely.psu=getOption("survey.lonely.psu")){
 
   sunq<-unique(strata)
   unq<-unique(psu)
   nstrat<-length(sunq)
   n<-length(strata)
 
+  lonely.psu<-match.arg(lonely.psu, c("fail","certainty","remove","adjust","average"))
+  
   fpctype<-match.arg(fpctype)
   
   if (is.null(fpc)){
@@ -111,23 +114,49 @@ jknweights<-function(strata,psu, fpc=NULL,
       theseweights<-jk1weights(psu[strata %in% ss], fpc=thisfpc,
                                fpctype=fpctype,compress=compress)
       nc<-if (compress) NCOL(theseweights$repweights$weights) else NCOL(theseweights$repweights)
+      if (nc==1 && thisfpc!=0){
+        ## lonely PSUs
+        if (lonely.psu=="fail")
+          stop("Stratum",ss,"has only one PSU")
+        if (lonely.psu=="remove")
+          next
+        if (lonely.psu=="certainty")
+          next
+        if (lonely.psu=="average")
+          next
+        if (lonely.psu=="adjust"){
+          nc<-1
+          if (compress)
+            repweights[, counter+nc]<-ifelse(strata[!duplicated(psu)] %in% ss, 0, nstrat/(nstrat-1))
+          else
+            repweights[ counter+nc]<-ifelse(strata %in% ss, 0, nstrat/(nstrat-1))
+          rscales[counter+nc]<-(nstrat-1)/nstrat
+          counter<-counter+nc
+          next
+        }
+      }
+      
       if (compress)
-          repweights[strata[!duplicated(psu)] %in% ss,counter+seq(length=nc)]<-theseweights$repweights$weights
+        repweights[strata[!duplicated(psu)] %in% ss,counter+seq(length=nc)]<-theseweights$repweights$weights
       else
-          repweights[strata %in% ss, counter+seq(length=nc)]<-theseweights$repweights
+        repweights[strata %in% ss, counter+seq(length=nc)]<-theseweights$repweights
+      
       rscales[counter+seq(length=nc)]<-theseweights$scale
       counter<-counter+nc
   }
   if (counter==0) stop("All strata were exhaustively sampled: you have the whole population")
+  scale<-1
   if (counter<length(unq)){
       repweights<-repweights[,1:counter]
       rscales<-rscales[1:counter]
+      if (lonely.psu=="average")
+        scale<-scale*length(unq)/counter
   }
   if (compress){
     repweights<-list(weights=repweights,index=match(psu,unq))
     class(repweights)<- "repweights_compressed"
   } else class(repweights)<-"repweights"
-  list(type="jkn", repweights=repweights, rscales=rscales, scale=1)
+  list(type="jkn", repweights=repweights, rscales=rscales, scale=scale)
 }
 
 
@@ -350,7 +379,7 @@ as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","Fa
                     fpctype=fpctype, compress=compress)
     pweights<-1/design$prob
     repweights<-r$repweights
-    scale<-1
+    scale<-r$scale
     rscales<-r$rscales
   } else if (type=="bootstrap"){
     ##bootstrap
@@ -1029,11 +1058,13 @@ svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replica
   full$loglik<-c(NA,NA)
   full$rscore<-NULL
   full$score<-NA
+  full$degf.residual<-degf(design)+1-length(coef(full)[!is.na(coef(full))])
   
   class(full)<-c("svrepcoxph","svycoxph",class(full))
   full$call<-match.call()
   full$printcall<-sys.call(-1)
   full$survey.design<-design
+  
   full
 }
 
@@ -1116,6 +1147,7 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL, ...,
 
   full$model<-NULL
   full$x<-NULL
+  full$df.residual<-degf(design)+1-length(coef(full)[!is.na(coef(full))])
   
   if (length(nas))
       design<-design[-nas,]
@@ -1382,11 +1414,14 @@ print.svrepstat<-function(x,...){
     cat("Note: NA results discarded for",length(naa),"replicates (",naa,")\n")
 }
 
-summary.svrepglm<-function (object, correlation = FALSE, ...) 
+summary.svrepglm<-function (object, correlation = FALSE, df.resid=NULL,...) 
 {
     Qr <- object$qr
     est.disp <- TRUE
-    df.r <- object$df.residual
+    if (is.null(df.resid))
+      df.r <- object$df.residual
+    else
+      df.r<-df.resid
     presid<-resid(object,"pearson")
     dispersion<- sum(  object$survey.design$pweights*presid^2,na.rm=TRUE)/sum(object$survey.design$pweights)
     coef.p <- coef(object)
@@ -1647,4 +1682,8 @@ degf.svyrep.design<-function(design,tol=1e-5,...){
 
 degf.survey.design2<-function(design,...){
   length(unique(design$cluster[, 1])) - length(unique(design$strata[, 1]))
+}
+
+degf.twophase<-function(design,...){
+  degf(design$phase2)
 }

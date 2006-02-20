@@ -1,0 +1,136 @@
+
+R : Copyright 2005, The R Foundation for Statistical Computing
+Version 2.2.0  (2005-10-06 r35749)
+ISBN 3-900051-07-0
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for a HTML browser interface to help.
+Type 'q()' to quit R.
+
+>  library(survey)
+> 
+>  ## two-phase simple random sampling.
+>  data(pbc, package="survival")
+>  pbc$id<-1:nrow(pbc)
+>  (d2pbc<-twophase(id=list(~id,~id), data=pbc, subset=~I(trt==-9)))
+Two-phase design:twophase(id = list(~id, ~id), data = pbc, subset = ~I(trt == 
+    -9))
+Phase 1:
+Independent Sampling design (with replacement)
+svydesign(id = ~id)
+Phase 2:
+Independent Sampling design
+svydesign(id = ~id, fpc = `*phase1*`)
+>  m<-svymean(~bili, d2pbc)
+>  all.equal(coef(m),with(pbc, mean(bili[trt==-9])))
+[1] TRUE
+>  all.equal(SE(m), with(pbc, sd(bili[trt==-9])/sqrt(sum(trt==-9))),tolerance=0.001)
+[1] TRUE
+> 
+>  ## two-stage sampling as two-phase
+>  data(mu284)
+>  ii<-with(mu284, c(1:15, rep(1:5,n2[1:5]-3)))
+>  mu284.1<-mu284[ii,]
+>  mu284.1$id<-1:nrow(mu284.1)
+>  mu284.1$sub<-rep(c(TRUE,FALSE),c(15,34-15))
+>  dmu284<-svydesign(id=~id1+id2,fpc=~n1+n2, data=mu284)
+>  ## first phase cluster sample, second phase stratified within cluster
+>  (d2mu284<-twophase(id=list(~id1,~id),strata=list(NULL,~id1),fpc=list(~n1,NULL),data=mu284.1,subset=~sub))
+Two-phase design:twophase(id = list(~id1, ~id), strata = list(NULL, ~id1), fpc = list(~n1, 
+    NULL), data = mu284.1, subset = ~sub)
+Phase 1:
+1 - level Cluster Sampling design
+With (5) clusters.
+svydesign(id = ~id1, fpc = ~n1)
+Phase 2:
+Stratified Independent Sampling design
+svydesign(id = ~id, strata = ~id1, fpc = `*phase1*`)
+> summary(d2mu284)
+Two-phase design:twophase(id = list(~id1, ~id), strata = list(NULL, ~id1), fpc = list(~n1, 
+    NULL), data = mu284.1, subset = ~sub)
+Phase 1:
+1 - level Cluster Sampling design
+With (5) clusters.
+svydesign(id = ~id1, fpc = ~n1)
+Probabilities:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    0.1     0.1     0.1     0.1     0.1     0.1 
+Population size (PSUs): 50 
+Phase 2:
+Stratified Independent Sampling design
+svydesign(id = ~id, strata = ~id1, fpc = `*phase1*`)
+Probabilities:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.3333  0.3750  0.4286  0.4674  0.6000  0.6000 
+Stratum Sizes: 
+           19 31 45 47 50
+obs         3  3  3  3  3
+design.PSU  3  3  3  3  3
+actual.PSU  3  3  3  3  3
+Population stratum sizes (PSUs): 
+19 45 47 50 31 
+ 5  8  5  9  7 
+Data variables:
+[1] "id1" "n1"  "id2" "y1"  "n2"  "id"  "sub"
+>  t1<-svytotal(~y1, dmu284)
+>  t2<-svytotal(~y1, d2mu284)
+>  m1<-svymean(~y1, dmu284)
+>  m2<-svymean(~y1, d2mu284)
+>  all.equal(coef(t1),coef(t2))
+[1] TRUE
+>  all.equal(coef(m1),coef(m2))
+[1] TRUE
+>  all.equal(SE(t1),SE(t2))
+[1] TRUE
+>  all.equal(SE(t1),SE(t2))
+[1] TRUE
+> 
+>  ## case-cohort design
+>  ##this example requires R 2.2.0 or later for cch and data.
+>  library("survival")
+Loading required package: splines
+
+Attaching package: 'survival'
+
+
+	The following object(s) are masked _by_ .GlobalEnv :
+
+	 pbc 
+
+>  data(nwtco, package="survival")
+>  ## unstratified, equivalent to Lin & Ying (1993)
+>  nwtco$pp<-with(nwtco, ifelse(rel, 1, sum(in.subcohort & !rel )/sum(!rel) ))
+>  (dcchu<-twophase(id=list(~seqno,~seqno), prob=list(NULL,~pp),
++          subset=~I(in.subcohort | rel), data=nwtco))
+Two-phase design:twophase(id = list(~seqno, ~seqno), prob = list(NULL, ~pp), subset = ~I(in.subcohort | 
+    rel), data = nwtco)
+Phase 1:
+Independent Sampling design (with replacement)
+svydesign(id = ~seqno)
+Phase 2:
+Independent Sampling design
+svydesign(id = ~seqno, probs = ~pp, fpc = `*phase1*`)
+>  cch1<-svycoxph(Surv(edrel,rel)~factor(stage)+factor(histol)+I(age/12), design=dcchu)
+>  ## Using survival::cch 
+>  subcoh <- nwtco$in.subcohort
+>  selccoh <- with(nwtco, rel==1|subcoh==1)
+>  ccoh.data <- nwtco[selccoh,]
+>  ccoh.data$subcohort <- subcoh[selccoh]
+>  cch2<-cch(Surv(edrel, rel) ~ factor(stage) + factor(histol) + I(age/12), data =ccoh.data,
++         subcoh = ~subcohort, id=~seqno, cohort.size=4028, method="LinYing")
+>  
+>  all.equal(coef(cch1),coef(cch2))
+[1] TRUE
+>  ## variances equal only to just over 3 digits,
+>  ##  probably because of model-based variance in survival::cch
+>  all.equal(as.vector(vcov(cch1)),as.vector(vcov(cch2)),tolerance=0.001)
+[1] TRUE
+> 

@@ -25,7 +25,7 @@ with inverse-probability weighting and design-based standard errors.
 \method{svyglm}{survey.design}(formula, design, subset=NULL, ...)
 \method{svyglm}{svyrep.design}(formula, design, subset=NULL, ..., rho=NULL,
 return.replicates=FALSE, na.action)
-\method{summary}{svyglm}(object, correlation = FALSE,  ...) 
+\method{summary}{svyglm}(object, correlation = FALSE, df.resid=NULL, ...) 
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -41,15 +41,21 @@ return.replicates=FALSE, na.action)
   \item{object}{A \code{svyglm} object}
   \item{correlation}{Include the correlation matrix of parameters?}
   \item{na.action}{Handling of NAs}
+  \item{df.resid}{Optional denominator degrees of freedom for Wald tests}
 }
 \details{
 There is no \code{anova} method for \code{svyglm} as the models are not
 fitted by maximum likelihood. The function \code{\link{regTermTest}} may
 be useful for testing sets of regression terms.
+
+If \code{df.resid} is not specified the df for the null model is
+computed by \code{\link{degf}} and the residual df computed by
+subtraction.  It's not that these are particularly good approximations
+in a regression model but they are relatively standard. To get tests
+based on a Normal distribution use \code{df.resid=Inf}.
 }
-\value{
-  An object of class \code{svyglm}.
-}
+
+ \value{ An object of class \code{svyglm}.  }
 
 \author{Thomas Lumley}
 

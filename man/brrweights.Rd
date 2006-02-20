@@ -20,7 +20,8 @@ jk1weights(psu,fpc=NULL,
               compress=TRUE)
 jknweights(strata,psu, fpc=NULL,
               fpctype=c("population","fraction","correction"),
-              compress=TRUE)
+              compress=TRUE,
+              lonely.psu=getOption("survey.lonely.psu"))
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -36,7 +37,9 @@ jknweights(strata,psu, fpc=NULL,
     replicate weights}
   \item{compress}{If \code{TRUE}, store the replicate weights in
     compressed form}
-  \item{hadamard.matrix}{Optional user-supplied Hadamard matrix for \code{brrweights}}
+  \item{hadamard.matrix}{Optional user-supplied Hadamard matrix for
+    \code{brrweights}}
+  \item{lonely.psu}{Handling of non-certainty single-PSU strata}
 }
 \details{
   JK1 and JKn are  jackknife schemes for unstratified and stratified
@@ -99,7 +102,7 @@ For \code{brrweights} with \code{only.weights=FALSE} a list with elements
 }
 
 \seealso{\code{\link{hadamard}}, \code{\link{as.svrepdesign}},
-  \code{\link{svrVar}}}
+  \code{\link{svrVar}}, \code{\link{surveyoptions}}}
 
 \examples{
 data(scd)

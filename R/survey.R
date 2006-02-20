@@ -983,6 +983,7 @@ svycoxph.survey.design<-function(formula,design,subset=NULL,...){
     g$loglik<-c(NA,NA)
     g$rscore<-NULL
     g$score<-NA
+    g$degf.resid<-degf(design)-length(coef(g)[!is.na(coef(g))])+1
     
     g
 }
@@ -1068,6 +1069,7 @@ svyglm.survey.design<-function(formula,design,subset=NULL,...){
 	design<-design[-nas,]
 
       g$cov.unscaled<-svy.varcoef(g,design)
+      g$df.residual <- degf(design)+1-length(coef(g)[!is.na(coef(g))])
       
       class(g)<-c("svyglm",class(g))
       g$call<-sys.call(-1)
@@ -1116,12 +1118,18 @@ residuals.svyglm<-function(object,type = c("deviance", "pearson", "working",
 
 }
 
-summary.svyglm<-function (object, correlation = FALSE, ...) 
+summary.svyglm<-function (object, correlation = FALSE, df.resid=NULL,...) 
 {
     Qr <- object$qr
     est.disp <- TRUE
-    df.r <- object$df.residual
-    dispersion<-svyvar(resid(object,"pearson"), object$survey.design, na.rm=TRUE)
+    if (is.null(df.resid))
+      df.r <- object$df.residual
+    else
+      df.r<-df.resid
+    
+    dispersion<-svyvar(resid(object,"pearson"), object$survey.design,
+                       na.rm=TRUE)
+    
     coef.p <- coef(object)
     covmat<-vcov(object)
     dimnames(covmat) <- list(names(coef.p), names(coef.p))

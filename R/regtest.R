@@ -10,8 +10,10 @@ regTermTest<-function(model,test.terms, null=NULL,df=Inf){
     test.terms<-attr(terms(test.terms),"term.labels")
 
   if (is.null(df)){
-    if (inherits(model,"svyglm") || inherits(model, "svycoxph"))
-      df<-degf(model$survey.design)
+    if (inherits(model,"svyglm"))
+      df<-model$df.residual
+    else if (inherits(model, "svycoxph"))
+      df<-model$degf.residual
     else if (inherits(model,"lm"))
       df<-model$df.residual
     else if (inherits(model,"coxph"))

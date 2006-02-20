@@ -1,6 +1,7 @@
 
 R : Copyright 2005, The R Foundation for Statistical Computing
-Version 2.1.1  (2005-06-20), ISBN 3-900051-07-0
+Version 2.2.1  (2005-12-20 r36812)
+ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -11,7 +12,7 @@ Type 'contributors()' for more information and
 'citation()' on how to cite R or R packages in publications.
 
 Type 'demo()' for some demos, 'help()' for on-line help, or
-'help.start()' for a HTML browser interface to help.
+'help.start()' for an HTML browser interface to help.
 Type 'q()' to quit R.
 
 > ##
@@ -50,10 +51,10 @@ svydesign(id = ~psuid, strat = ~stratid, weight = ~weight, data = fpc,
 
 Coefficients:
               Estimate Std. Error t value Pr(>|t|)    
-I(x > 4)FALSE   3.3143     0.3117   10.63 4.08e-05 ***
-I(x > 4)TRUE    6.1950     0.7555    8.20 0.000177 ***
+I(x > 4)FALSE   3.3143     0.3117   10.63 0.000127 ***
+I(x > 4)TRUE    6.1950     0.7555    8.20 0.000439 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 
 (Dispersion parameter for gaussian family taken to be 2.557379)
 
@@ -68,7 +69,7 @@ I(x * (x > 4))             6.195
 SEs=
                as.numeric(x > 4)
 I(x * (x > 4))         0.7555129
-> stopifnot(identical(TRUE,all.equal(m2$SE, SE(m3))))
+> stopifnot(identical(TRUE,all.equal(m2$SE, as.vector(SE(m3)))))
 > stopifnot(identical(TRUE,all.equal(m2$SE[2], drop(SE(m4)))))
 > 
 > ## with strata
@@ -77,7 +78,7 @@ I(x * (x > 4))         0.7555129
 > m1<-svymean(~enroll, subset(dstrat, comp.imp=="Yes"))
 > m2<-svyglm(enroll~comp.imp-1, dstrat)
 > m3<- svyratio(~I(enroll*(comp.imp=="Yes")), ~as.numeric(comp.imp=="Yes"), dstrat)
-> stopifnot(identical(TRUE, all.equal(SE(m2)["comp.impYes"], SE(m1))))
+> stopifnot(identical(TRUE, all.equal(as.vector(SE(m2)["comp.impYes"]), SE(m1))))
 > stopifnot(identical(TRUE, all.equal(SE(m1), drop(SE(m3)))))
 > 
 > ## with calibration
@@ -91,7 +92,7 @@ calibrate(dclus1, ~stype + api99, c(pop.totals, api99 = 3914069))
 > m1<-svymean(~api00, subset(dclus1g3, comp.imp=="Yes"))
 > m3<-svyratio(~I(api00*(comp.imp=="Yes")), ~as.numeric(comp.imp=="Yes"), dclus1g3)
 > m2<-svyglm(api00~comp.imp-1, dclus1g3)
-> stopifnot(identical(TRUE, all.equal(SE(m2)["comp.impYes"], SE(m1))))
+> stopifnot(identical(TRUE, all.equal(as.vector(SE(m2)["comp.impYes"]), SE(m1))))
 > stopifnot(identical(TRUE, all.equal(SE(m1), drop(SE(m3)))))
 > 
 > ## with raking
@@ -101,6 +102,6 @@ calibrate(dclus1, ~stype + api99, c(pop.totals, api99 = 3914069))
 > m1<-svymean(~api00, subset(dclus1r, comp.imp=="Yes"))
 > m2<-svyglm(api00~comp.imp-1, dclus1r)
 > m3<-svyratio(~I(api00*(comp.imp=="Yes")), ~as.numeric(comp.imp=="Yes"), dclus1r)
-> stopifnot(identical(TRUE, all.equal(SE(m2)["comp.impYes"], SE(m1))))
+> stopifnot(identical(TRUE, all.equal(as.vector(SE(m2)["comp.impYes"]), SE(m1))))
 > stopifnot(identical(TRUE, all.equal(SE(m1), drop(SE(m3)))))
 > 

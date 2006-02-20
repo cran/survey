@@ -1,6 +1,6 @@
 
 R : Copyright 2005, The R Foundation for Statistical Computing
-Version 2.3.0 Under development (unstable) (2005-11-29 r36544)
+Version 2.2.0  (2005-10-06 r35749)
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -45,22 +45,37 @@ Data variables:
 > try(svymean(~api00,ds))
 Error in switch(lonely.psu, certainty = scale * crossprod(x), remove = scale *  : 
 	Stratum (413) has only one PSU at stage 1
+> try(svymean(~api00, as.svrepdesign(ds)))
+Error in jknweights(design$strata[, 1], design$cluster[, 1], fpc = fpc,  : 
+	Stratum413has only one PSU
 > options(survey.lonely.psu="remove")
 > svymean(~api00,ds)
+        mean     SE
+api00 644.17 5.8058
+> svymean(~api00, as.svrepdesign(ds))
         mean     SE
 api00 644.17 5.8058
 > options(survey.lonely.psu="certainty")
 > svymean(~api00,ds)
         mean     SE
 api00 644.17 5.8058
+> svymean(~api00, as.svrepdesign(ds))
+        mean     SE
+api00 644.17 5.8058
 > options(survey.lonely.psu="adjust")
 > svymean(~api00,ds)
         mean     SE
 api00 644.17 5.8281
+> svymean(~api00, as.svrepdesign(ds))
+        mean     SE
+api00 644.17 5.8267
 > options(survey.lonely.psu="average")
 > svymean(~api00,ds)
         mean     SE
 api00 644.17 6.0096
+> svymean(~api00, as.svrepdesign(ds))
+        mean     SE
+api00 644.17 5.8217
 > 
 > ## fpc specified
 > fpc<-ifelse(apiclus1$dnum==413, 1,1000)
@@ -93,27 +108,42 @@ Data variables:
 > try(svymean(~api00,ds))
         mean     SE
 api00 644.17 5.7344
+> svymean(~api00, as.svrepdesign(ds))
+        mean     SE
+api00 644.17 5.7344
 > options(survey.lonely.psu="remove")
 > svymean(~api00,ds)
+        mean     SE
+api00 644.17 5.7344
+> svymean(~api00, as.svrepdesign(ds))
         mean     SE
 api00 644.17 5.7344
 > options(survey.lonely.psu="certainty")
 > svymean(~api00,ds)
         mean     SE
 api00 644.17 5.7344
+> svymean(~api00, as.svrepdesign(ds))
+        mean     SE
+api00 644.17 5.7344
 > options(survey.lonely.psu="adjust")
 > svymean(~api00,ds)
+        mean     SE
+api00 644.17 5.7344
+> svymean(~api00, as.svrepdesign(ds))
         mean     SE
 api00 644.17 5.7344
 > options(survey.lonely.psu="average")
 > svymean(~api00,ds)
         mean     SE
 api00 644.17 5.7344
+> svymean(~api00, as.svrepdesign(ds))
+        mean     SE
+api00 644.17 5.7501
 > 
 > rs<-as.svrepdesign(ds)
 > svytotal(~api00,rs)
          mean    SE
-api00 3989986 35519
+api00 3989986 35616
 > SE(svytotal(~api00,subset(rs, dnum==413)))==0
 [1] TRUE
 > 

@@ -35,13 +35,14 @@ sample.size = 500, subset = NULL, legend = 1, inches = 0.05, ...)
   Bubble plots are suited to small surveys, hexagonal binning and
   subsampling to large surveys where plotting all the points would
   result in too much overlap.
-  
 }
 \value{
   None
 }
 
-\seealso{ }
+\seealso{
+  \code{\link{symbols}} for other options (such as colour) for bubble plots.
+}
 \examples{
 data(api)
 dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)

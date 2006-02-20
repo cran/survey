@@ -1,3 +1,10 @@
+3.4-2 Options for residual df for summary.svyglm, default based on degf
+      Default denominator df for svyglm, svycoxph in regTermTest.
+
+      survey.lonely.psu now applies to as.svrepdesign.
+
+      keep up with changes in all.equal() for R 2.3.0
+
 3.4-1 Speed optimizations for JKn weights with self-representing strata
 	- jackknife replicates are not created for these strata
 	- svytotal does not use these strata in variance calculation.

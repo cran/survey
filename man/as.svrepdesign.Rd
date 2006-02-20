@@ -16,8 +16,8 @@ fay.rho = 0, ..., compress=TRUE)
   \item{type}{Type of replicate weights. \code{"auto"} uses JKn for
     stratified, JK1 for unstratified designs}
   \item{fay.rho}{Tuning parameter for Fay's variance method }
-  \item{\dots}{Other arguments to \code{\link{brrweights}}, controlling
-    the handling of strata that do not have exactly 2 clusters.}
+  \item{\dots}{Other arguments to \code{jk1weights}, \code{jknweights},
+    \code{brrweights}, or \code{bootweights} .}
   \item{compress}{Use a compressed representation of the replicate
     weights matrix.}
 }

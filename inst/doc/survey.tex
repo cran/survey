@@ -210,11 +210,11 @@ svydesign(id = ~dnum, weights = ~pw, data = apiclus1, fpc = ~fpc)
 
 Coefficients:
             Estimate Std. Error t value Pr(>|t|)    
-(Intercept) 817.1823    18.6709  43.768   <2e-16 ***
-ell          -0.5088     0.3259  -1.561    0.120    
-meals        -3.1456     0.3018 -10.423   <2e-16 ***
+(Intercept) 817.1823    18.6709  43.768 1.32e-14 ***
+ell          -0.5088     0.3259  -1.561    0.144    
+meals        -3.1456     0.3018 -10.423 2.29e-07 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 
 (Dispersion parameter for gaussian family taken to be 3161.207)
 
@@ -231,12 +231,12 @@ Survey design:
 svydesign(id = ~dnum, weights = ~pw, data = apiclus1, fpc = ~fpc)
 
 Coefficients:
-             Estimate Std. Error t value Pr(>|t|)    
-(Intercept)  1.899557   0.509900   3.725 0.000261 ***
-ell          0.039925   0.012442   3.209 0.001578 ** 
-meals       -0.019115   0.008825  -2.166 0.031630 *  
+             Estimate Std. Error t value Pr(>|t|)   
+(Intercept)  1.899557   0.509900   3.725  0.00290 **
+ell          0.039925   0.012442   3.209  0.00751 **
+meals       -0.019115   0.008825  -2.166  0.05116 . 
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 
 (Dispersion parameter for quasibinomial family taken to be 0.9627734)
 

@@ -17,7 +17,7 @@ dsub<-subset(dfpc,x>4)
 m3<-svyglm(x~I(x>4)+0,design=dfpc)
 summary(m3)
 (m4<-svyratio(~I(x*(x>4)),~as.numeric(x>4), dfpc))
-stopifnot(identical(TRUE,all.equal(m2$SE, SE(m3))))
+stopifnot(identical(TRUE,all.equal(m2$SE, as.vector(SE(m3)))))
 stopifnot(identical(TRUE,all.equal(m2$SE[2], drop(SE(m4)))))
 
 ## with strata
@@ -26,7 +26,7 @@ dstrat<-svydesign(id=~1, strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
 m1<-svymean(~enroll, subset(dstrat, comp.imp=="Yes"))
 m2<-svyglm(enroll~comp.imp-1, dstrat)
 m3<- svyratio(~I(enroll*(comp.imp=="Yes")), ~as.numeric(comp.imp=="Yes"), dstrat)
-stopifnot(identical(TRUE, all.equal(SE(m2)["comp.impYes"], SE(m1))))
+stopifnot(identical(TRUE, all.equal(as.vector(SE(m2)["comp.impYes"]), SE(m1))))
 stopifnot(identical(TRUE, all.equal(SE(m1), drop(SE(m3)))))
 
 ## with calibration
@@ -37,7 +37,7 @@ pop.totals<-c(`(Intercept)`=6194, stypeH=755, stypeM=1018)
 m1<-svymean(~api00, subset(dclus1g3, comp.imp=="Yes"))
 m3<-svyratio(~I(api00*(comp.imp=="Yes")), ~as.numeric(comp.imp=="Yes"), dclus1g3)
 m2<-svyglm(api00~comp.imp-1, dclus1g3)
-stopifnot(identical(TRUE, all.equal(SE(m2)["comp.impYes"], SE(m1))))
+stopifnot(identical(TRUE, all.equal(as.vector(SE(m2)["comp.impYes"]), SE(m1))))
 stopifnot(identical(TRUE, all.equal(SE(m1), drop(SE(m3)))))
 
 ## with raking
@@ -47,5 +47,5 @@ dclus1r<-rake(dclus1, list(~stype,~sch.wide), list(pop.types, pop.schwide))
 m1<-svymean(~api00, subset(dclus1r, comp.imp=="Yes"))
 m2<-svyglm(api00~comp.imp-1, dclus1r)
 m3<-svyratio(~I(api00*(comp.imp=="Yes")), ~as.numeric(comp.imp=="Yes"), dclus1r)
-stopifnot(identical(TRUE, all.equal(SE(m2)["comp.impYes"], SE(m1))))
+stopifnot(identical(TRUE, all.equal(as.vector(SE(m2)["comp.impYes"]), SE(m1))))
 stopifnot(identical(TRUE, all.equal(SE(m1), drop(SE(m3)))))
