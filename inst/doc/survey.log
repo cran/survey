@@ -1,4 +1,4 @@
-This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=pdflatex 2006.1.13)  20 FEB 2006 12:17
+This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=pdflatex 2006.1.13)  16 MAR 2006 17:24
 entering extended mode
 **\nonstopmode \input /var/local/tlumley/Rarchive/survey/inst/doc/survey.tex
 (/var/local/tlumley/Rarchive/survey/inst/doc/survey.tex
@@ -22,19 +22,13 @@ File: size10.clo 2004/02/16 v1.4f Standard LaTeX file (size option)
 (/usr/share/texmf/tex/latex/url/url.sty
 \Urlmuskip=\muskip10
 Package: url 2004/03/15  ver 3.1  Verb mode for urls, etc.
-) (/usr/lib/R/share/texmf/Sweave.sty
+)
+(/usr/local/tlumley/Rarchive/r-devel/R/share/texmf/Sweave.sty
 Package: Sweave 
 
 (/usr/share/texmf/tex/latex/base/ifthen.sty
 Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
 )
-(/usr/share/texmf/tex/latex/base/fontenc.sty
-Package: fontenc 2004/02/22 v1.99f Standard LaTeX package
-
-(/usr/share/texmf/tex/latex/base/t1enc.def
-File: t1enc.def 2004/02/22 v1.99f Standard LaTeX file
-LaTeX Font Info:    Redeclaring font encoding T1 on input line 43.
-))
 (/usr/share/texmf/tex/latex/graphics/graphicx.sty
 Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
 
@@ -60,21 +54,6 @@ File: pdftex.def 2002/06/19 v0.03k graphics/color for pdftex
 \Gin@req@height=\dimen103
 \Gin@req@width=\dimen104
 )
-(/usr/share/texmf/tex/latex/ae/ae.sty
-Package: ae 2001/02/12 1.3 Almost European Computer Modern
-
-(/usr/share/texmf/tex/latex/base/fontenc.sty
-Package: fontenc 2004/02/22 v1.99f Standard LaTeX package
-
-(/usr/share/texmf/tex/latex/base/t1enc.def
-File: t1enc.def 2004/02/22 v1.99f Standard LaTeX file
-LaTeX Font Info:    Redeclaring font encoding T1 on input line 43.
-)
-LaTeX Font Info:    Try loading font information for T1+aer on input line 100.
-
-(/usr/share/texmf/tex/latex/ae/t1aer.fd
-File: t1aer.fd 1997/11/16 Font definitions for T1/aer.
-)))
 (/usr/share/texmf/tex/latex/fancyvrb/fancyvrb.sty
 Package: fancyvrb 1998/07/17
 
@@ -87,7 +66,7 @@ Style option: `fancyvrb' v2.6, with DG/SPQR fixes <1998/07/17> (tvz)
 \FV@OutFile=\write3
 
 No file fancyvrb.cfg.
-) (/usr/lib/R/share/texmf/upquote.sty
+) (/usr/local/tlumley/Rarchive/r-devel/R/share/texmf/upquote.sty
 Package: upquote 2003/08/11 v1.1 Covington's upright-quote modification to verb
 atim and verb
 
@@ -157,7 +136,29 @@ Package textcomp Info: Setting pplx sub-encoding to TS1/3 on input line 323.
 Package textcomp Info: Setting pplj sub-encoding to TS1/3 on input line 324.
 Package textcomp Info: Setting ptmx sub-encoding to TS1/4 on input line 325.
 Package textcomp Info: Setting ptmj sub-encoding to TS1/4 on input line 326.
-))) (./survey.aux)
+))
+(/usr/share/texmf/tex/latex/base/fontenc.sty
+Package: fontenc 2004/02/22 v1.99f Standard LaTeX package
+
+(/usr/share/texmf/tex/latex/base/t1enc.def
+File: t1enc.def 2004/02/22 v1.99f Standard LaTeX file
+LaTeX Font Info:    Redeclaring font encoding T1 on input line 43.
+))
+(/usr/share/texmf/tex/latex/ae/ae.sty
+Package: ae 2001/02/12 1.3 Almost European Computer Modern
+
+(/usr/share/texmf/tex/latex/base/fontenc.sty
+Package: fontenc 2004/02/22 v1.99f Standard LaTeX package
+
+(/usr/share/texmf/tex/latex/base/t1enc.def
+File: t1enc.def 2004/02/22 v1.99f Standard LaTeX file
+LaTeX Font Info:    Redeclaring font encoding T1 on input line 43.
+)
+LaTeX Font Info:    Try loading font information for T1+aer on input line 100.
+
+(/usr/share/texmf/tex/latex/ae/t1aer.fd
+File: t1aer.fd 1997/11/16 Font definitions for T1/aer.
+)))) (./survey.aux)
 \openout1 = `survey.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 8.
@@ -233,10 +234,10 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 {/usr/share/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2] [3] [4] [5] [6] 
 (./survey.aux) ) 
 Here is how much of TeX's memory you used:
- 2154 strings out of 94500
- 28101 string characters out of 1176766
- 70724 words of memory out of 1000000
- 5309 multiletter control sequences out of 10000+50000
+ 2158 strings out of 94500
+ 28281 string characters out of 1176766
+ 71030 words of memory out of 1000000
+ 5313 multiletter control sequences out of 10000+50000
  16144 words of font info for 42 fonts, out of 500000 for 2000
  580 hyphenation exceptions out of 1000
  35i,6n,21p,324b,280s stack positions out of 1500i,500n,5000p,200000b,5000s
@@ -248,4 +249,4 @@ PDF statistics:
 re/texmf/fonts/type1/bluesky/cm/cmtt10.pfb></usr/share/texmf/fonts/type1/bluesk
 y/cm/cmr10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr12.pfb></usr/share/t
 exmf/fonts/type1/bluesky/cm/cmr17.pfb>
-Output written on survey.pdf (6 pages, 60364 bytes).
+Output written on survey.pdf (6 pages, 60504 bytes).

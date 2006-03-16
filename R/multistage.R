@@ -644,7 +644,7 @@ svymean.survey.design2<-function(x,design, na.rm=FALSE,deff=FALSE,...){
   return(average)
 }
 
-svyratio.survey.design2<-function(numerator, denominator, design, separate=FALSE,na.rm=FALSE,...){
+svyratio.survey.design2<-function(numerator=formula, denominator, design, separate=FALSE,na.rm=FALSE,formula,...){
 
     if (separate){
       strats<-sort(unique(design$strata[,1]))
@@ -655,7 +655,7 @@ svyratio.survey.design2<-function(numerator, denominator, design, separate=FALSE
                      tmp<-svyratio(numerator, denominator,
                                    subset(design, design$strata[,1] %in% s),
                                    separate=FALSE,...)
-                     tmp$call<-bquote(Stratum==.(s))
+                     attr(tmp,"call")<-bquote(Stratum==.(s))
                      tmp}))
       names(rval$ratios)<-strats
    
@@ -700,7 +700,7 @@ svyratio.survey.design2<-function(numerator, denominator, design, separate=FALSE
     colnames(vars)<-names(denominator)
     rownames(vars)<-names(numerator)
     rval$var<-vars
-    rval$call<-sys.call()
+    attr(rval,"call")<-sys.call()
     class(rval)<-"svyratio"
     rval
     

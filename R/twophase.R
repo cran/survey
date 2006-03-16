@@ -457,7 +457,7 @@ model.frame.twophase<-function(formula,phase=2,...){
     formula$phase1$sample$variables
 }
 
-svyratio.twophase<-function(numerator, denominator, design, separate=FALSE,na.rm=FALSE,...){
+svyratio.twophase<-function(numerator=formula, denominator, design, separate=FALSE,na.rm=FALSE,formula,...){
 
     if (separate){
       strats<-sort(unique(design$phase2$strata[,1]))
@@ -468,7 +468,7 @@ svyratio.twophase<-function(numerator, denominator, design, separate=FALSE,na.rm
                      tmp<-svyratio(numerator, denominator,
                                    subset(design, design$phase2$strata[,1] %in% s),
                                    separate=FALSE,...)
-                     tmp$call<-bquote(Stratum==.(s))
+                     attr(tmp,"call")<-bquote(Stratum==.(s))
                      tmp}))
       names(rval$ratios)<-strats
    
@@ -512,7 +512,7 @@ svyratio.twophase<-function(numerator, denominator, design, separate=FALSE,na.rm
     colnames(vars)<-names(denominator)
     rownames(vars)<-names(numerator)
     rval$var<-vars
-    rval$call<-sys.call()
+    attr(rval,"call")<-sys.call()
     class(rval)<-"svyratio"
     rval
     

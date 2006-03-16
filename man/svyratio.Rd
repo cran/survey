@@ -14,18 +14,18 @@
 \title{Ratio estimation}
 \description{
 Ratio estimation and estimates of totals based on ratios for complex
-survey samples.
+survey samples. Estimating domain means can be done more easily with \code{\lin{svymean}}.
 }
 \usage{
-\method{svyratio}{survey.design2}(numerator, denominator, design,separate=FALSE, na.rm=FALSE,...)
-\method{svyratio}{svyrep.design}(numerator, denominator, design, na.rm=FALSE,...)
-\method{svyratio}{twophase}(numerator, denominator, design,separate=FALSE, na.rm=FALSE,...)
+\method{svyratio}{survey.design2}(numerator=formula, denominator, design,separate=FALSE, na.rm=FALSE,formula,...)
+\method{svyratio}{svyrep.design}(numerator=formula, denominator, design, na.rm=FALSE,formula,...)
+\method{svyratio}{twophase}(numerator=formula, denominator, design,separate=FALSE, na.rm=FALSE,formula,...)
 \method{predict}{svyratio}(object, total, se=TRUE,...)
 \method{predict}{svyratio_separate}(object, total, se=TRUE,...)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
-  \item{numerator}{formula, expression, or data frame giving numerator variable(s)}
+  \item{numerator,formula}{formula, expression, or data frame giving numerator variable(s)}
   \item{denominator}{formula, expression, or data frame giving
     denominator variable(s) }
   \item{design}{survey design object}

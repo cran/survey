@@ -22,10 +22,11 @@ calibrate(design,...)
 \method{calibrate}{survey.design2}(design, formula, population,
        aggregate.stage=NULL, stage=0, variance=NULL,
        bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
-       maxit=30,epsilon=1e-7,verbose=FALSE,...)
+       maxit=50,epsilon=1e-7,verbose=FALSE,...)
 \method{calibrate}{svyrep.design}(design, formula, population,compress=NA,
-       aggregate.index=NULL, variance=NULL, bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
-        maxit=30, epsilon=1e-7, verbose=FALSE, ...)
+       aggregate.index=NULL, variance=NULL, bounds=c(-Inf,Inf),
+       calfun=c("linear","raking","logit"),
+       maxit=50, epsilon=1e-7, verbose=FALSE, ...)
 \method{calibrate}{twophase}(design, phase=2,formula, population,...)
 }
 %- maybe also 'usage' for other objects documented here.

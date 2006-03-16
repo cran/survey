@@ -322,7 +322,7 @@ Likelihood ratio test=NA  on 5 df, p=NA  n= 1154
 +     method = "LinYing")
 \end{Sinput}
 \begin{Soutput}
-Case-cohort analysis,  LinYing  method,
+Case-cohort analysis,x$method, LinYing 
  with subcohort of 668 from cohort of 4028 
 
 Call: cch(formula = Surv(edrel, rel) ~ factor(stage) + factor(histol) + 
@@ -331,11 +331,11 @@ Call: cch(formula = Surv(edrel, rel) ~ factor(stage) + factor(histol) +
 
 Coefficients:
                      Value         SE         Z            p
-factor(stage)2  0.69265646 0.16274542  4.256073 2.080485e-05
-factor(stage)3  0.62685179 0.16816124  3.727683 1.932483e-04
-factor(stage)4  1.29951229 0.18896863  6.876868 6.118217e-12
-factor(histol)2 1.45829267 0.14553560 10.020178 0.000000e+00
-I(age/12)       0.04608972 0.02300671  2.003317 4.514329e-02
+factor(stage)2  0.69265646 0.16287906  4.252581 2.113204e-05
+factor(stage)3  0.62685179 0.16746144  3.743260 1.816478e-04
+factor(stage)4  1.29951229 0.18973707  6.849016 7.436052e-12
+factor(histol)2 1.45829267 0.14429553 10.106291 0.000000e+00
+I(age/12)       0.04608972 0.02230861  2.066006 3.882790e-02
 \end{Soutput}
 \end{Schunk}
 
@@ -428,11 +428,11 @@ svycoxph(Surv(start, stop, event) ~ factor(stage) + factor(histol) +
 
 
                   coef exp(coef) se(coef)    z       p
-factor(stage)2  0.7359      2.09   0.1846 3.99 6.7e-05
-factor(stage)3  0.5976      1.82   0.1838 3.25 1.1e-03
-factor(stage)4  1.3907      4.02   0.2146 6.48 9.1e-11
-factor(histol)2 1.5045      4.50   0.1693 8.89 0.0e+00
-I(age/12)       0.0432      1.04   0.0248 1.74 8.2e-02
+factor(stage)2  0.7359      2.09   0.1726 4.26 2.0e-05
+factor(stage)3  0.5976      1.82   0.1789 3.34 8.4e-04
+factor(stage)4  1.3907      4.02   0.1999 6.96 3.5e-12
+factor(histol)2 1.5045      4.50   0.1751 8.59 0.0e+00
+I(age/12)       0.0432      1.04   0.0254 1.70 9.0e-02
 
 Likelihood ratio test=NA  on 5 df, p=NA  n= 1239 
 \end{Soutput}

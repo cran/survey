@@ -73,6 +73,8 @@ SE(a)
 cv(a)
 coef(a)
 
+## ratio estimates
+svyby(~api.stu, by=~stype, denominator=~enroll, design=dclus1, svyratio)
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

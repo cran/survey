@@ -4,7 +4,7 @@ calibrate<-function(design, ...) UseMethod("calibrate")
 calibrate.survey.design2<-function(design, formula, population,
                                     aggregate.stage=NULL, stage=0, variance=NULL,
                                     bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
-                                    maxit=30, epsilon=1e-7, verbose=FALSE,
+                                    maxit=50, epsilon=1e-7, verbose=FALSE,
                                     ...){
 
   if (calfun=="linear" && (bounds==c(-Inf,Inf))){
@@ -63,7 +63,7 @@ calibrate.survey.design2<-function(design, formula, population,
 calibrate.svyrep.design<-function(design, formula, population,compress=NA,
                                    aggregate.index=NULL, variance=NULL,
                                    bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
-                                   maxit=30, epsilon=1e-7, verbose=FALSE,
+                                   maxit=50, epsilon=1e-7, verbose=FALSE,
                                    ...){
   if (calfun=="linear" && (bounds==c(-Inf,Inf))){
     ## old code is better for ill-conditioned linear calibration

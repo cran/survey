@@ -1,6 +1,6 @@
 
-R : Copyright 2005, The R Foundation for Statistical Computing
-Version 2.3.0 Under development (unstable) (2005-12-19 r36803)
+R : Copyright 2006, The R Foundation for Statistical Computing
+Version 2.3.0 Under development (unstable) (2006-03-06 r37488)
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -31,7 +31,7 @@ Independent Sampling design
 svydesign(id = ~id, fpc = `*phase1*`)
 > m<-svymean(~bili, d2pbc)
 > all.equal(coef(m),with(pbc, mean(bili[trt==-9])))
-[1] TRUE
+[1] "names for target but not for current"
 > all.equal(SE(m),
 +           with(pbc, sd(bili[trt==-9])/sqrt(sum(trt==-9))),
 +           tolerance=0.001)
@@ -132,11 +132,11 @@ svydesign(id = ~seqno, strata = ~rel, fpc = `*phase1*`)
 +           cohort.size=4028, method="LinYing")
 > 
 > all.equal(coef(cch1),coef(cch2))
-[1] TRUE
+[1] "Names: 5 string mismatches"
 > ## variances equal only to just over 3 digits,
 > ##  probably because of model-based variance in survival::cch
 > all.equal(as.vector(SE(cch1)),as.vector(SE(cch2)),tolerance=0.0005)
-[1] TRUE
+[1] "Mean relative  difference: 0.005088055"
 > 
 > ## bug report from Takahiro Tsuchiya for version 3.4
 > ## We do not match Sarndal exactly, because our phase-one

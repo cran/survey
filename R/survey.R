@@ -822,7 +822,10 @@ svyratio.survey.design<-function(numerator, denominator, design,...){
 
 print.svyratio_separate<-function(x,...){
   cat("Stratified ratio estimate: ")
-  print(x$call)
+  if (!is.null(x$call))
+    print(x$call)
+  else if (!is.null(attr(x,"call")))
+    print(attr(x$call))
   for(r in x$ratios) {
     print(r)
   }
@@ -831,7 +834,10 @@ print.svyratio_separate<-function(x,...){
 
 print.svyratio<-function(x,...){
   cat("Ratio estimator: ")
-  print(x$call)
+  if (!is.null(x$call))
+    print(x$call)
+  else if(!is.null(attr(x,"call")))
+    print(attr(x,"call"))
   cat("Ratios=\n")
   print(x$ratio)
   cat("SEs=\n")

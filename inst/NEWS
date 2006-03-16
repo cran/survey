@@ -1,3 +1,7 @@
+3.4-3 make svyratio work with svyby (for Phil Smith)
+
+      increase default number of iterations in calibrate()
+
 3.4-2 Options for residual df for summary.svyglm, default based on degf
       Default denominator df for svyglm, svycoxph in regTermTest.
 

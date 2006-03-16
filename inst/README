@@ -17,6 +17,13 @@ twostage.pdf            Analysis examples for two-stage sampling,
                         Stata are with version 8; version 9 can do multistage
                         without-replacement analyses.
 
+inst/epi.{Rnw,pdf}      Vignette on two-phase epidemiologic designs
+
+inst/phase1.{Rnw,pdf}   Vignette on two-phase variance computations
+
+inst/survey.{Rnw,pdf}   Vignette: how to analyse a survey.
+
+
 More documentation is on the package homepage at
     http://faculty.washington.edu/tlumley/survey/
 

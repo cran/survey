@@ -1215,7 +1215,7 @@ print.summary.svyglm<-function (x, digits = max(3, getOption("digits") - 3),
 
     
 
-svyratio.svyrep.design<-svrepratio<-function(numerator,denominator, design,na.rm=FALSE,...){
+svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, design,na.rm=FALSE,formula,...){
 
   if (!exists(".Generic"))
     .Deprecated("svyratio")
@@ -1260,7 +1260,7 @@ svyratio.svyrep.design<-svrepratio<-function(numerator,denominator, design,na.rm
   
 
   rval$var<-vars
-  rval$call<-sys.call()
+  attr(rval,"call")<-sys.call()
   class(rval)<-"svyratio"
   rval
     
