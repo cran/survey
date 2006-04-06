@@ -41,13 +41,13 @@ ftable.svyby <- function (x, ...)
     dimnames <- lapply(x[, margins, drop = FALSE], levels)
     dims <- sapply(dimnames, length)
     dims <- c(dims, variable = info$nstats)
-    sename<-switch(info$vartype,se="SE",cv="cv",cvpct="cv%")
+    senames<-c(se="SE",cv="cv",cvpct="cv%",var="Var")[info$vartype]
     if (info$vars || info$deffs) {
         dims <- c(dims, 1 + info$vars + info$deffs)
         dimnames <- c(dimnames,
                       list(sub("^statistic\\.(.*)$", "\\1", info$variables)),
                       list(c(info$statistic,
-                             if (info$vars) sename,
+                             if (info$vars) senames,
                              if (info$deffs) "DEff")))
       }
     else if (info$nstats == 1) {

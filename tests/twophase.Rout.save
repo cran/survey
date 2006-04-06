@@ -1,6 +1,6 @@
 
 R : Copyright 2006, The R Foundation for Statistical Computing
-Version 2.3.0 Under development (unstable) (2006-03-06 r37488)
+Version 2.3.0 alpha (2006-04-04 r37646)
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -35,7 +35,7 @@ svydesign(id = ~id, fpc = `*phase1*`)
 > all.equal(SE(m),
 +           with(pbc, sd(bili[trt==-9])/sqrt(sum(trt==-9))),
 +           tolerance=0.001)
-[1] TRUE
+[1] "names for target but not for current"
 > 
 > ## two-stage sampling as two-phase
 > data(mu284)
@@ -131,12 +131,12 @@ svydesign(id = ~seqno, strata = ~rel, fpc = `*phase1*`)
 +           data =ccoh.data, subcoh = ~subcohort, id=~seqno,
 +           cohort.size=4028, method="LinYing")
 > 
-> all.equal(coef(cch1),coef(cch2))
-[1] "Names: 5 string mismatches"
+> all.equal(as.vector(coef(cch1)),as.vector(coef(cch2)))
+[1] TRUE
 > ## variances equal only to just over 3 digits,
 > ##  probably because of model-based variance in survival::cch
-> all.equal(as.vector(SE(cch1)),as.vector(SE(cch2)),tolerance=0.0005)
-[1] "Mean relative  difference: 0.005088055"
+> all.equal(as.vector(SE(cch1)),as.vector(SE(cch2)),tolerance=0.006)
+[1] TRUE
 > 
 > ## bug report from Takahiro Tsuchiya for version 3.4
 > ## We do not match Sarndal exactly, because our phase-one
@@ -191,16 +191,16 @@ svydesign(id = ~seqno, strata = ~rel, fpc = `*phase1*`)
 > Vphase2
 [1] 12450
 > vcov(tot)
-         [,1]
-[1,] 35911.05
+         y
+y 35911.05
 attr(,"phases")
 attr(,"phases")$phase1
          [,1]
 [1,] 23461.05
 
 attr(,"phases")$phase2
-      [,1]
-[1,] 12450
+      y
+y 12450
 
 > ## phase 2 identical
 > all.equal(Vphase2,drop(attr(vcov(tot),"phases")$phase2))

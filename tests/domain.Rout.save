@@ -1,6 +1,6 @@
 
-R : Copyright 2005, The R Foundation for Statistical Computing
-Version 2.2.1  (2005-12-20 r36812)
+R : Copyright 2006, The R Foundation for Statistical Computing
+Version 2.3.0 alpha (2006-04-04 r37646)
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -33,9 +33,9 @@ x 6.195 0.7555
 > 
 > ## These should give the same domain estimates and standard errors
 > (m2<-svyby(~x,~I(x>4),design=dfpc, svymean,keep.var=TRUE))
-      I(x > 4) statistic.x        SE
-FALSE    FALSE    3.314286 0.3117042
-TRUE      TRUE    6.195000 0.7555129
+      I(x > 4) statistics.x      se.x
+FALSE    FALSE     3.314286 0.3117042
+TRUE      TRUE     6.195000 0.7555129
 Warning messages:
 1: Stratum (1) has only one PSU at stage 1 in: onestrat(x[index, , drop = FALSE], clusters[index], nPSU[index][1],  
 2: Stratum (2) has only one PSU at stage 1 in: onestrat(x[index, , drop = FALSE], clusters[index], nPSU[index][1],  
@@ -69,8 +69,8 @@ I(x * (x > 4))             6.195
 SEs=
                as.numeric(x > 4)
 I(x * (x > 4))         0.7555129
-> stopifnot(identical(TRUE,all.equal(m2$SE, as.vector(SE(m3)))))
-> stopifnot(identical(TRUE,all.equal(m2$SE[2], drop(SE(m4)))))
+> stopifnot(isTRUE(all.equal(SE(m2), as.vector(SE(m3)))))
+> stopifnot(isTRUE(all.equal(SE(m2)[2], drop(SE(m4)))))
 > 
 > ## with strata
 > data(api)
@@ -78,8 +78,8 @@ I(x * (x > 4))         0.7555129
 > m1<-svymean(~enroll, subset(dstrat, comp.imp=="Yes"))
 > m2<-svyglm(enroll~comp.imp-1, dstrat)
 > m3<- svyratio(~I(enroll*(comp.imp=="Yes")), ~as.numeric(comp.imp=="Yes"), dstrat)
-> stopifnot(identical(TRUE, all.equal(as.vector(SE(m2)["comp.impYes"]), SE(m1))))
-> stopifnot(identical(TRUE, all.equal(SE(m1), drop(SE(m3)))))
+> stopifnot(isTRUE(all.equal(as.vector(SE(m2)["comp.impYes"]), as.vector(SE(m1)))))
+> stopifnot(isTRUE( all.equal(as.vector(SE(m1)), as.vector(drop(SE(m3))))))
 > 
 > ## with calibration
 > dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
@@ -92,8 +92,8 @@ calibrate(dclus1, ~stype + api99, c(pop.totals, api99 = 3914069))
 > m1<-svymean(~api00, subset(dclus1g3, comp.imp=="Yes"))
 > m3<-svyratio(~I(api00*(comp.imp=="Yes")), ~as.numeric(comp.imp=="Yes"), dclus1g3)
 > m2<-svyglm(api00~comp.imp-1, dclus1g3)
-> stopifnot(identical(TRUE, all.equal(as.vector(SE(m2)["comp.impYes"]), SE(m1))))
-> stopifnot(identical(TRUE, all.equal(SE(m1), drop(SE(m3)))))
+> stopifnot(isTRUE( all.equal(as.vector(SE(m2)["comp.impYes"]), as.vector(SE(m1)))))
+> stopifnot(isTRUE( all.equal(as.vector(SE(m1)), as.vector(drop(SE(m3))))))
 > 
 > ## with raking
 > pop.types <- data.frame(stype=c("E","H","M"), Freq=c(4421,755,1018))
@@ -102,6 +102,6 @@ calibrate(dclus1, ~stype + api99, c(pop.totals, api99 = 3914069))
 > m1<-svymean(~api00, subset(dclus1r, comp.imp=="Yes"))
 > m2<-svyglm(api00~comp.imp-1, dclus1r)
 > m3<-svyratio(~I(api00*(comp.imp=="Yes")), ~as.numeric(comp.imp=="Yes"), dclus1r)
-> stopifnot(identical(TRUE, all.equal(as.vector(SE(m2)["comp.impYes"]), SE(m1))))
-> stopifnot(identical(TRUE, all.equal(SE(m1), drop(SE(m3)))))
+> stopifnot(isTRUE( all.equal(as.vector(SE(m2)["comp.impYes"]), as.vector(SE(m1)))))
+> stopifnot(isTRUE( all.equal(as.vector(SE(m1)), as.vector(drop(SE(m3))))))
 > 

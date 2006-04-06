@@ -126,7 +126,6 @@ Lin, DY and Ying, Z (1993). Cox regression with incomplete covariate measurement
  svymean(~y1, dmu284)
  svymean(~y1, d2mu284)
 
- \dontrun{
  ## case-cohort design: this example requires R 2.2.0 or later
  library("survival")
  data(nwtco)
@@ -162,7 +161,7 @@ Lin, DY and Ying, Z (1993). Cox regression with incomplete covariate measurement
  gccs8<-calibrate(dccs2, phase=2, formula=~interaction(rel,stage,instit))
  summary(svyglm(rel~factor(stage)*factor(histol),design=gccs8,family=quasibinomial()))
 
-}
+
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
 

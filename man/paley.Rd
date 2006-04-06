@@ -5,15 +5,19 @@
 \description{
   Computes a Hadamard matrix of dimension p+1, where p is a prime,
   and p+1 is a multiple of 4, using the Paley construction. Works
-  for \code{n} up to 1367.
+  for \code{n} up to 7919, and beyond that if the user can specify
+  a suitable prime.
 }
 \usage{
-paley(n, nmax = 2 * n)
+paley(n, nmax = 2 * n, prime=NULL, check=!is.null(prime))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{n}{Minimum size for matrix}
-  \item{nmax}{Maximum size for matrix}
+  \item{nmax}{Maximum size for matrix. Ignored if \code{prime} is specified.}
+  \item{prime}{Optional if \code{n<7920}. A prime at least as large as
+    \code{n},  such that \code{prime+1} is divisible by 4.}
+  \item{check}{Check that the resulting matrix is of Hadamard type}
 }
 
 \value{

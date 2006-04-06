@@ -1419,3 +1419,25 @@ model.frame.svyrep.design<-function(formula,...){
 }
 
 
+predict.svyglm <- function(object, newdata, total=NULL,
+                           type = c("link", "response"),...){
+
+    tt<-delete.response(terms(formula(object)))
+    mf<-model.frame(tt,data=newdata)
+    mm<-model.matrix(tt,mf)
+    if (!is.null(total) && attr(tt,"intercept")){
+        mm[,attr(tt,"intercept")]<-mm[,attr(tt,"intercept")]*total
+    }
+    eta<-drop(mm %*% coef(object))
+    type<-match.arg(type)
+    d<-drop(object$family$mu.eta(eta))
+    eta<-switch(type, link=eta, response=object$family$linkinv(eta))
+    vv<-mm %*% vcov(object) %*% t(mm)
+    attr(eta,"var")<-switch(type,
+                            link=vv,
+                            response=d*(t(vv*d)))
+    attr(eta,"statistic")<-type
+    class(eta)<-"svystat"
+    eta
+    }
+    

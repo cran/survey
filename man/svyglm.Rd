@@ -10,6 +10,7 @@
 \alias{vcov.svyglm}
 \alias{residuals.svyglm}
 \alias{residuals.svrepglm}
+\alias{predict.svyglm}
 \alias{coef.svyglm}
 \alias{extractAIC.svyglm}
 \alias{extractAIC.svrepglm}
@@ -25,7 +26,10 @@ with inverse-probability weighting and design-based standard errors.
 \method{svyglm}{survey.design}(formula, design, subset=NULL, ...)
 \method{svyglm}{svyrep.design}(formula, design, subset=NULL, ..., rho=NULL,
 return.replicates=FALSE, na.action)
-\method{summary}{svyglm}(object, correlation = FALSE, df.resid=NULL, ...) 
+\method{summary}{svyglm}(object, correlation = FALSE, df.resid=NULL,
+...)
+\method{predict}{svyglm}(object,newdata,total=NULL,
+                         type=c("link","response"),...)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -41,7 +45,11 @@ return.replicates=FALSE, na.action)
   \item{object}{A \code{svyglm} object}
   \item{correlation}{Include the correlation matrix of parameters?}
   \item{na.action}{Handling of NAs}
-  \item{df.resid}{Optional denominator degrees of freedom for Wald tests}
+  \item{df.resid}{Optional denominator degrees of freedom for Wald
+    tests}
+  \item{newdata}{new data frame for prediction}
+  \item{total}{population size when predicting population total}
+  \item{type}{linear predictor (\code{link}) or response}
 }
 \details{
 There is no \code{anova} method for \code{svyglm} as the models are not
@@ -53,16 +61,27 @@ computed by \code{\link{degf}} and the residual df computed by
 subtraction.  It's not that these are particularly good approximations
 in a regression model but they are relatively standard. To get tests
 based on a Normal distribution use \code{df.resid=Inf}.
+
+\code{predict} gives fitted values and sampling variability for specific new
+values of covariates.  When \code{newdata} are the population mean it
+gives the regression estimator of the mean, and when \code{newdata} are
+the population totals and \code{total} is specified it gives the
+regression estimator of the population total.  Regression estimators of
+mean and total can also be obtained with \code{\link{calibrate}}.
 }
 
- \value{ An object of class \code{svyglm}.  }
+ \value{ \code{svyglm} returns an object of class \code{svyglm}.  The
+ \code{predict} method returns an object of class \code{svystat}}
 
 \author{Thomas Lumley}
 
 
 \seealso{ \code{\link{svydesign}},
-  \code{\link{svrepdesign}},\code{\link{as.svrepdesign}}, \code{\link{glm}},
-  \code{\link{regTermTest}}}
+  \code{\link{glm}},
+  \code{\link{regTermTest},}
+
+  \code{\link{calibrate}}
+}
 
 \examples{
 
@@ -81,7 +100,33 @@ based on a Normal distribution use \code{df.resid=Inf}.
   summary(svyglm(api00~ell+meals+mobility, design=rclus2))
 
   ## use quasibinomial, quasipoisson to avoid warning messages
-  summary(svyglm(sch.wide~ell+meals+mobility, design=dstrat, family=quasibinomial()))
+  summary(svyglm(sch.wide~ell+meals+mobility, design=dstrat,
+        family=quasibinomial()))
+
+
+  ## Compare regression and ratio estimation of totals
+  api.ratio <- svyratio(~api.stu,~enroll, design=dstrat)
+  pop<-data.frame(enroll=sum(apipop$enroll, na.rm=TRUE))
+  npop <- nrow(apipop)
+  predict(api.ratio, pop$enroll)
+
+  ## regression estimator is less efficient
+  api.reg <- svyglm(api.stu~enroll, design=dstrat)
+  predict(api.reg, newdata=pop, total=npop)
+  ## same as calibration estimator
+  svytotal(~api.stu, calibrate(dstrat, ~enroll, pop=c(npop, pop$enroll)))
+
+  ## svyglm can also reproduce the ratio estimator
+  api.reg2 <- svyglm(api.stu~enroll-1, design=dstrat,
+                    family=quasi(link="identity",var="mu"))
+  predict(api.reg2, newdata=pop, total=npop)
+
+  ## higher efficiency by modelling variance better
+  api.reg3 <- svyglm(api.stu~enroll-1, design=dstrat,
+                    family=quasi(link="identity",var="mu^3"))
+  predict(api.reg3, newdata=pop, total=npop)
+  ## true value
+  sum(apipop$api.stu)
 
  }
 \keyword{regression}% at least one, from doc/KEYWORDS

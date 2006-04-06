@@ -1,3 +1,18 @@
+3.4-4 Paley construction of Hadamard matrices now knows primes 
+      up to 7919, works for larger sizes if the user supplies
+      a suitable prime.
+
+      calibrate() now reorders elements of 'population' to match
+      column names of model matrix if necessary.
+
+      predict() method for svyglm (for Phil Smith, Andrew Robinson)
+
+      svyratio() for two-phase designs.
+
+      Added vignette on domain estimation.
+
+      svyby() can report multiple vartypes.
+
 3.4-3 make svyratio work with svyby (for Phil Smith)
 
       increase default number of iterations in calibrate()

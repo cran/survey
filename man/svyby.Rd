@@ -10,7 +10,7 @@ Compute survey statistics on subsets of a survey defined by factors.
 }
 \usage{
 svyby(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE,
-keep.names = TRUE,verbose=FALSE, vartype=c("se","cv","cvpct"))
+keep.names = TRUE,verbose=FALSE, vartype=c("se","cv","cvpct","var"))
 \method{SE}{svyby}(object,...)
 \method{deff}{svyby}(object,...)
 \method{coef}{svyby}(object,...)
@@ -31,8 +31,9 @@ keep.names = TRUE,verbose=FALSE, vartype=c("se","cv","cvpct"))
 \item{keep.names}{Define row names based on the subsets}
 \item{verbose}{If \code{TRUE}, print a label for each subset as it is
   processed.}
-\item{vartype}{Report variability as standard error, coefficient of
-  variation, or percent coefficient of variation}
+\item{vartype}{Report variability as one or more of
+  standard error, coefficient of
+  variation,  percent coefficient of variation, or variance}
 \item{object}{An object of class \code{"svyby"}}
 }
 
@@ -67,7 +68,7 @@ svyby(~api99, list(school.type=apiclus1$stype), rclus1, svymean, vartype="cv")
 svyby(~enroll,~stype, rclus1,svytotal, deff=TRUE)
 svyby(~api99+api00, ~stype+sch.wide, rclus1, svymean, keep.var=FALSE)
 
-a<-svyby(~enroll, ~stype, rclus1, svytotal, deff=TRUE, verbose=TRUE)
+(a<-svyby(~enroll, ~stype, rclus1, svytotal, deff=TRUE, verbose=TRUE, vartype=c("se","cv","cvpct","var")))
 deff(a)
 SE(a)
 cv(a)

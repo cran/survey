@@ -297,6 +297,7 @@ multistage<-function(x, clusters,  stratas, nPSUs, fpcs,
     for(i in 1:length(v.sub))
       v<-v+v.sub[[i]]
   }
+  dimnames(v)<-list(colnames(x),colnames(x))
   v
 }
 

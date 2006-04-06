@@ -3,7 +3,7 @@
 ##
 
 svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
-                keep.names=TRUE,verbose=FALSE,vartype=c("se","cv","cvpct")){
+                keep.names=TRUE,verbose=FALSE,vartype=c("se","cv","cvpct","var")){
 
   if (inherits(by, "formula"))
     byfactors<-model.frame(by, design$variables, na.action=na.pass)
@@ -25,36 +25,26 @@ svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
       }
       
   }
-
-  vartype<-match.arg(vartype)
+  if(missing(vartype)) vartype<-"se"
+  vartype<-match.arg(vartype,several.ok=TRUE)
+  nvartype<-pmatch(vartype,eval(formals(sys.function())$vartype))
+  if(any(is.na(nvartype))) stop("invalid vartype")
   
   if (keep.var){
-      unwrap <- switch(vartype,
-                       se=function(x){
-                         if(!is.null(attr(x, "deff")))
-                           c(statistic = unclass(x),
-                             SE = SE(x),
-                             DEff = deff(x))
-                         else c(statistic = unclass(x),
-                                SE = SE(x))
-                       },
-                       cv=function(x){
-                         if(!is.null(attr(x, "deff")))
-                           c(statistic = unclass(x),
-                             cv = cv(x),
-                             DEff = deff(x))
-                         else c(statistic = unclass(x),
-                                cv = cv(x))
-                       },
-                       cvpct=function(x){
-                         if(!is.null(attr(x, "deff")))
-                           c(statistic = unclass(x),
-                             `cv%` = cv(x)*100,
-                             DEff = deff(x))
-                         else c(statistic = unclass(x),
-                                `cv%` = cv(x)*100)
-                       })
+      unwrap <-function(x){
+          rval<-c(statistics=unclass(x))
+          nvar<-length(rval)
+          rval<-c(rval,c(se=SE(x),
+                         cv=cv(x),
+                         `cv%`=cv(x)*100,
+                         var=SE(x)^2)[rep((nvartype-1)*(nvar),each=nvar)+(1:nvar)])
+          if(!is.null(attr(x,"deff")))
+              rval<-c(rval,DEff=deff(x))
+          rval
+      }
 
+                       
+  
     rval<-t(sapply(uniques,
                    function(i) {
                        if(verbose) print(as.character(byfactor[i]))
@@ -87,7 +77,7 @@ svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
       if (is.matrix(rval)) rval<-t(rval)
   }
 
-  nstats<-NCOL(rval)/(1+keep.var+deff)
+  nstats<-NCOL(rval)/(1+ keep.var*length(vartype) +deff)
   
   if (NCOL(rval)>1)
     rval<-cbind(byfactors[uniques,,drop=FALSE], rval)
@@ -100,7 +90,7 @@ svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
   rval<-rval[do.call("order",rval),]
 
   attr(rval,"svyby")<-list(margins=1:NCOL(byfactors),nstats=nstats,
-                           vars=keep.var,
+                           vars=if(keep.var) length(vartype) else 0,
                            deffs=deff,
                            statistic=deparse(substitute(FUN)),
                            variables= names(rval)[-(1:NCOL(byfactors))][1:nstats],
@@ -117,11 +107,17 @@ svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
 SE.svyby <-function(object,...){
     aa<-attr(object,"svyby")
     if (!aa$vars) stop("Object does not contain variances")
-    switch(attr(object,"svyby")$vartype,
-           se=object[,max(aa$margins)+aa$nstats+(1:aa$nstats)],
-           cv=object[,max(aa$margins)+aa$nstats+(1:aa$nstats)]*coef(object),
-           cvpct=object[,max(aa$margins)+aa$nstats+(1:aa$nstats)]*coef(object)/100
-           )
+    vartype<-attr(object,"svyby")$vartype
+    if (pos<-match("se",vartype,0))
+        object[,max(aa$margins)+aa$nstats*pos+(1:aa$nstats)]
+    else if (pos<-match("var",vartype,0))
+        sqrt(object[,max(aa$margins)+aa$nstats*pos+(1:aa$nstats)])
+    else if (pos<-match("cv",vartype,0))
+        object[,max(aa$margins)+aa$nstats*pos+(1:aa$nstats)]*coef(object)
+    else if (pos<-match("cvpct",vartype,0))
+         object[,max(aa$margins)+aa$nstats*pos+(1:aa$nstats)]*coef(object)/100
+    else stop("This can't happen")
+           
 }
 
 coef.svyby<-function(object,...){

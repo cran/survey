@@ -506,7 +506,7 @@ svyratio.twophase<-function(numerator=formula, denominator, design, separate=FAL
     for(i in 1:nn){
       for(j in 1:nd){
         r<-(numerator[,i]-rval$ratio[i,j]*denominator[,j])/sum(denominator[,j]/design$prob)
-        vars[i,j]<-twophase(r*1/design$prob, design)
+        vars[i,j]<-twophasevar(r*1/design$prob, design)
       }
     }
     colnames(vars)<-names(denominator)

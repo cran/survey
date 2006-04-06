@@ -56,13 +56,18 @@ calibrate(design,...)
     \code{phase=2} currently implemented.}
 }
 \details{
+
+  If the \code{population} argument has a names attribute it will be
+  checked against the names produced by \code{model.matrix(formula)} and
+  reordered if necessary.  This protects against situations where the
+  (locale-dependent) ordering of factor levels is not what you expected.
   
   The \code{calibrate} function implements linear, bounded linear,
   raking, bounded raking, and logit calibration functions. All except
   unbounded linear calibration use the Newton-Raphson algorithm
   described by Deville et al (1993).  Unbounded linear calibration uses
   an algorithm that is less sensitive to collinearity.
-  
+
   Calibration may result in observations within the last-stage sampling
   units having unequal weight even though they necessarily are sampled
   together.  Specifying \code{aggegrate.stage} ensures that the

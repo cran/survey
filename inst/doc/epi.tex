@@ -228,11 +228,6 @@ set used for case--control analyses above.
 \begin{Sinput}
 > library(survey)
 > library(survival)
-\end{Sinput}
-\begin{Soutput}
-Loading required package: splines
-\end{Soutput}
-\begin{Sinput}
 > data(nwtco)
 > ntwco <- subset(nwtco, !is.na(edrel))
 \end{Sinput}
@@ -428,11 +423,11 @@ svycoxph(Surv(start, stop, event) ~ factor(stage) + factor(histol) +
 
 
                   coef exp(coef) se(coef)    z       p
-factor(stage)2  0.7359      2.09   0.1726 4.26 2.0e-05
-factor(stage)3  0.5976      1.82   0.1789 3.34 8.4e-04
-factor(stage)4  1.3907      4.02   0.1999 6.96 3.5e-12
-factor(histol)2 1.5045      4.50   0.1751 8.59 0.0e+00
-I(age/12)       0.0432      1.04   0.0254 1.70 9.0e-02
+factor(stage)2  0.7359      2.09   0.1655 4.45 8.7e-06
+factor(stage)3  0.5976      1.82   0.1761 3.39 6.9e-04
+factor(stage)4  1.3907      4.02   0.2276 6.11 9.9e-10
+factor(histol)2 1.5045      4.50   0.1729 8.70 0.0e+00
+I(age/12)       0.0432      1.04   0.0259 1.67 9.6e-02
 
 Likelihood ratio test=NA  on 5 df, p=NA  n= 1239 
 \end{Soutput}

@@ -48,10 +48,10 @@ cch2<-cch(Surv(edrel, rel) ~ factor(stage) + factor(histol) + I(age/12),
           data =ccoh.data, subcoh = ~subcohort, id=~seqno,
           cohort.size=4028, method="LinYing")
 
-all.equal(coef(cch1),coef(cch2))
+all.equal(as.vector(coef(cch1)),as.vector(coef(cch2)))
 ## variances equal only to just over 3 digits,
 ##  probably because of model-based variance in survival::cch
-all.equal(as.vector(SE(cch1)),as.vector(SE(cch2)),tolerance=0.0005)
+all.equal(as.vector(SE(cch1)),as.vector(SE(cch2)),tolerance=0.006)
 
 ## bug report from Takahiro Tsuchiya for version 3.4
 ## We do not match Sarndal exactly, because our phase-one

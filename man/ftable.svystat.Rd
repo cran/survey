@@ -50,7 +50,7 @@ print(ftable(a),digits=2)
 b<-svyby(~api99 + api00, ~stype + sch.wide, rclus1, svymean, keep.var=TRUE, deff=TRUE)
 print(ftable(b),digits=2)
 
-d<-svyby(~api99 + api00, ~stype + sch.wide, rclus1, svymean, keep.var=TRUE, vartype="cvpct")
+d<-svyby(~api99 + api00, ~stype + sch.wide, rclus1, svymean, keep.var=TRUE, vartype=c("se","cvpct"))
 round(ftable(d),1)
 
 }

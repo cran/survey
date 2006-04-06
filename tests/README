@@ -27,6 +27,8 @@ quantile.R: quantile estimation on a lognormal sample
 rakecheck.R: check that raking by iterative post-stratification agrees with
  	     raking using calibrate()
 
+regpredict.R: ratio and regression estimation of a total.
+
 scoping.R: check that svyglm and svycoxph work inside functions.
 
 twophase.R: separately verifiable examples of twophase studies
