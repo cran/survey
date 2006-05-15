@@ -1,3 +1,33 @@
+3.5   Add estWeights for Robins et al way of using auxiliary
+      information (ie AIPW).
+
+      Remove JSS article and survey-vanderbilt.pdf from inst/
+      since they are now seriously out of date.
+
+      paley() now gives matrices of order 2^k(p+1), which are
+      usually of minimal or near-minimal size.
+
+      Drop 72x72 and 256x256 Hadamard matrices, which are easy
+      to recreate, from precomputed set and replace 36x36 with the
+      one from Plackett & Burman, which has full orthogonal balance
+
+      Note that changes to svyby now require R 2.2.0 or later.
+
+      predict.svyglm has option to return just variances (rather
+      than entire variance-covariance matrix)
+
+      drop.empty.groups now works when the grouping variables 
+      are not factors.
+
+      Add a namespace
+
+      Move precomputed Hadamard matrices from inst/hadamard.rda to
+      R/sysdata.rda
+
+3.4-5 Add svyboxplot (for Luke Peterson)
+
+      Add drop.empty.groups option to svyby
+
 3.4-4 Paley construction of Hadamard matrices now knows primes 
       up to 7919, works for larger sizes if the user supplies
       a suitable prime.

@@ -56,20 +56,35 @@ paley<-function(n, nmax=2*n, prime=NULL, check=!is.null(prime)){
   
   
   if (is.null(prime)){
-    if (n>max(small.primes)) return(NULL)
-    p<-min(small.primes[small.primes>=n])
-    if (p>nmax) return(NULL)
+      nceil<-nn <-  n + 4 - (n %% 4)
+      if ( (n %% 4) +4 ==  (n %% 8)) {
+          while (!(nn %% 8)){ nn <- nn /2}
+          if ((nn-1) %in% small.primes){
+              m<-paley(prime=nn-1,check=check)
+              while(nn<nceil){
+                  m<-rbind(cbind(m,m),cbind(m,1-m))
+                  nn<-nn*2
+              }
+              return(m)
+          } 
+      }
+      
+      if (n>max(small.primes)) return(NULL)
+      p<-min(small.primes[small.primes>=n])
+      if ((p+1 > nceil+4) && (nceil+4 < nmax)) return(paley(nceil+3))
+      if (p>nmax) return(NULL)
   } else{ 
-    p<-prime
-     if ((p+1) %% 4 !=0) {
-       warning("'prime'+1 is not divisible by 4")
-       return(NULL)
-     }
-    if (p<n) {
-      warning("'prime' is too small")
+      p<-prime
+      if ((p+1) %% 4 !=0) {
+          warning("'prime'+1 is not divisible by 4")
+          return(NULL)
+      }
+      if (p<n) {
+          warning("'prime' is too small")
       return(NULL)
-    }
+      }
   }
+
   m<-outer(0:(p-1) ,0:(p-1),"+") %% p
   
   res<-integer(1+floor((p-1)/2))
@@ -83,8 +98,21 @@ paley<-function(n, nmax=2*n, prime=NULL, check=!is.null(prime)){
   
   rval<-cbind(1,rbind(1,m))
   if(check) { 
-    if(!isTRUE(all.equal( (rval*2-1)%*%t(rval*2-1), diag(p+1)*(p+1) )))
-      warning("matrix is not Hadamard: check 'prime'")
+    if(!is.hadamard(rval))
+      warning("matrix is not Hadamard: is 'prime' really prime?")
   }
   rval
+}
+
+
+is.hadamard<-function(H, style=c("0/1","+-"), full.orthogonal.balance=TRUE){
+    if (is.matrix(H) && is.numeric(H) && (ncol(H)==nrow(H))){
+        H<-switch(match.arg(style),
+                  "0/1"= 2*H-1, 
+                  "+-"=H)        
+        isTRUE(all.equal(crossprod(H), diag(ncol(H))*ncol(H))) &&
+        all.equal(max(abs(H)),1) &&
+        (!full.orthogonal.balance || sum(H[-1,])==0)
+          
+    } else FALSE
 }

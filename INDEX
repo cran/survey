@@ -5,6 +5,7 @@ update.survey.design    Add variables to a survey design
 postStratify            Post-stratify a survey design
 rake                    Rake a survey design
 calibrate		Calibration and generalised raking
+estWeight               Estimated weights for two-phase designs
 svrepdesign             Replication-weight designs
 as.svrepdesign          Compute replication weights for a design
 as.svydesign2           Convert a old svydesign object to
@@ -13,7 +14,8 @@ as.svydesign2           Convert a old svydesign object to
                  -----
 
 svyplot                 Survey-weighted graphics
-svyhist                 Survey-weight histogram
+svyhist                 Survey-weighted histogram
+svyboxplot              Survey-weighted boxplots
 svyby                   Tables of statistics 
 ftable.svystat          Formatted tables of statistics
 ftable.svrepstat
@@ -41,32 +43,27 @@ svymle                  Maximum pseudolikelihood estimation in complex
 withReplicates          Replicate variances for arbitrary statistics
 
                  ----
-
-nonresponse		create non-response object
-sparseCells		look for sparse cells
-neighbours		find neighbours of a cell
-joinCells		collapse a set of cells together
-weights.nonresponse	extract non-response weights
-
+hadamard                Hadamard matrices
+is.hadamard
+paley                   Paley-type Hadamard matrices
                  -----
 
 Utility functions:
-svy.varcoef             Sandwich variance estimator for glms
-svyCprod                Computations for survey variances
-svyrecvar               Computations for multistage samples
-svrVar                  Computations for replication variances
+*svy.varcoef             Sandwich variance estimator for glms
+*svyCprod                Computations for survey variances
+*svyrecvar               Computations for multistage samples
+*svrVar                  Computations for replication variances
 jk1weights              create replication weights
 jknweights              create replication weights
 bootweights             create replication weights
 brrweights              create replication weights
-hadamard                Hadamard matrices
-paley                   Paley-type Hadamard matrices
 regTermTest             Test sets of terms in a regression model
-grake                   Computations for generalised raking
-regcalibrate            Computations for regression calibration
+*grake                   Computations for generalised raking
+*regcalibrate            Computations for regression calibration
 degf                    Degrees of freedom for replication weights
-twophasevar		Variances in two-phase designs
+*twophasevar		Variances in two-phase designs
 
+* not exported from NAMESPACE
                  -----
 Data:
 fpc                     Small artificial example
@@ -74,3 +71,11 @@ scd                     Cardiac arrests example
 api                     California Academic Performance Index
 crowd                   Small example from VPLX manual
 mu284                   Two-stage sample from MU284 population
+
+            ----Experimental----
+                 
+nonresponse		create non-response object
+sparseCells		look for sparse cells
+neighbours		find neighbours of a cell
+joinCells		collapse a set of cells together
+weights.nonresponse	extract non-response weights

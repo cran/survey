@@ -94,13 +94,14 @@ Therneau TM and Li H., Computing the Cox model for case-cohort designs. "Lifetim
 
 Lin, DY and Ying, Z (1993). Cox regression with incomplete covariate measurements.
 "Journal of the American Statistical Association" 88: 1341-1349.
-
 }
 
 \seealso{\code{\link{svydesign}}, \code{\link{svyrecvar}} for multi*stage*
   sampling
 
   \code{\link{calibrate}} for calibration (GREG) estimators.
+
+\code{\link{estWeights}} for two-phase designs for missing data.
 }
 \examples{
  ## two-phase simple random sampling.
@@ -160,6 +161,10 @@ Lin, DY and Ying, Z (1993). Cox regression with incomplete covariate measurement
  ## Stratification on stage is really post-stratification, so we should use calibrate()
  gccs8<-calibrate(dccs2, phase=2, formula=~interaction(rel,stage,instit))
  summary(svyglm(rel~factor(stage)*factor(histol),design=gccs8,family=quasibinomial()))
+
+ ## For this saturated model calibration is equivalent to estimating weights.
+ pccs8<-calibrate(dccs2, phase=2,formula=~interaction(rel,stage,instit), calfun="rrz")
+ summary(svyglm(rel~factor(stage)*factor(histol),design=pccs8,family=quasibinomial()))
 
 
 }

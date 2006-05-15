@@ -556,15 +556,19 @@ svymean.survey.design<-function(x,design, na.rm=FALSE,deff=FALSE,...){
 
 
 print.svystat<-function(x,...){
-  m<-cbind(x,sqrt(diag(attr(x,"var"))))
-  hasdeff<-!is.null(attr(x,"deff"))
-  if (hasdeff) {
-      m<-cbind(m,deff(x))
-      colnames(m)<-c(attr(x,"statistic"),"SE","DEff")
-  } else {
-      colnames(m)<-c(attr(x,"statistic"),"SE")
-  }
-  printCoefmat(m)
+    vv<-attr(x,"var")
+    if (is.matrix(vv))
+        m<-cbind(x,sqrt(diag(vv)))
+    else
+        m<-cbind(x,sqrt(vv))
+    hasdeff<-!is.null(attr(x,"deff"))
+    if (hasdeff) {
+        m<-cbind(m,deff(x))
+        colnames(m)<-c(attr(x,"statistic"),"SE","DEff")
+    } else {
+        colnames(m)<-c(attr(x,"statistic"),"SE")
+    }
+    printCoefmat(m)
 }
 
 as.data.frame.svystat<-function(x,...){
@@ -996,35 +1000,35 @@ svycoxph.survey.design<-function(formula,design,subset=NULL,...){
 
 
 model.frame.svycoxph<-function(formula,...){
-  f<-formula$call
-  env <- environment(formula(formula))
-  if (is.null(env)) 
-    env <- parent.frame()
-
-  f[[1]]<-as.name("model.frame")
-  f$data<-quote(data)
-  f$design<-NULL
-  f$formula<-formula(formula)
-  if (is.null(f$weights))
-    f$weights<-quote(.survey.prob.weights)
-  else 
-    f$weights<-bquote(.survey.prob.weights*.(f$weights))
-  design<-formula$survey.design
-  data<-model.frame(design)
-  data$.survey.prob.weights<-(1/design$prob)/sum(1/design$prob)
-
-  with(list(data=data), eval(f))
+    f<-formula$call
+    env <- environment(formula(formula))
+    if (is.null(env)) 
+        env <- parent.frame()
+    f[[1]]<-as.name("model.frame")
+    f$data<-quote(data)
+    f$design<-NULL
+    f$formula<-formula(formula)
+    if (is.null(f$weights))
+        f$weights<-quote(.survey.prob.weights)
+    else 
+        f$weights<-bquote(.survey.prob.weights*.(f$weights))
+    design<-formula$survey.design
+    data<-model.frame(design)
+    data$.survey.prob.weights<-(1/design$prob)/sum(1/design$prob)
+    with(list(data=data), eval(f))
 }
+
+
 
 print.svycoxph<-function(x,...){
     print(x$survey.design, varnames=FALSE, design.summaries=FALSE,...)
-    x$call<-x$printcall
+##    x$call<-x$printcall
     NextMethod()
 }
 
 summary.svycoxph<-function(object,...){
     print(object$survey.design,varnames=FALSE, design.summaries=FALSE,...)
-    object$call<-object$printcall
+##    object$call<-object$printcall
     NextMethod()
 }
 
@@ -1405,7 +1409,7 @@ model.frame.svyrep.design<-function(formula,...){
   formula$variables
 }
 
-.First.lib<-function(...){
+.onLoad<-function(...){
   if (is.null(getOption("survey.lonely.psu")))
     options(survey.lonely.psu="fail")
   if (is.null(getOption("survey.ultimate.cluster")))
@@ -1420,7 +1424,8 @@ model.frame.svyrep.design<-function(formula,...){
 
 
 predict.svyglm <- function(object, newdata, total=NULL,
-                           type = c("link", "response"),...){
+                           type = c("link", "response"),se=TRUE,
+                           vcov=TRUE,...){
 
     tt<-delete.response(terms(formula(object)))
     mf<-model.frame(tt,data=newdata)
@@ -1432,10 +1437,20 @@ predict.svyglm <- function(object, newdata, total=NULL,
     type<-match.arg(type)
     d<-drop(object$family$mu.eta(eta))
     eta<-switch(type, link=eta, response=object$family$linkinv(eta))
-    vv<-mm %*% vcov(object) %*% t(mm)
-    attr(eta,"var")<-switch(type,
-                            link=vv,
-                            response=d*(t(vv*d)))
+    if(se){
+        if(vcov){
+            vv<-mm %*% vcov(object) %*% t(mm)
+            attr(eta,"var")<-switch(type,
+                                    link=vv,
+                                    response=d*(t(vv*d)))
+        } else {
+            ## FIXME make this more efficient
+            vv<-drop(rowSums((mm %*% vcov(object)) * mm))
+            attr(eta,"var")<-switch(type,
+                                    link=vv,
+                                    response=d*(t(vv*d)))
+        }
+    }
     attr(eta,"statistic")<-type
     class(eta)<-"svystat"
     eta

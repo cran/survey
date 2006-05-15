@@ -103,7 +103,7 @@ twophase<-function(id,strata=NULL, probs=NULL, weights=NULL, fpc=NULL,
 }
 
 print.twophase<-function(x,...){
-  cat("Two-phase design:")
+  cat("Two-phase design: ")
   print(x$call)
   cat("Phase 1:\n")
   print(x$phase1$full)
@@ -118,7 +118,7 @@ summary.twophase<-function(object,...){
 }
 
 print.summary.twophase<-function(x,...,varnames=TRUE){
-  cat("Two-phase design:")
+  cat("Two-phase design: ")
   print(x$call)
    cat("Phase 1:\n")
   print(x$phase1$full,design.summaries=TRUE,varnames=FALSE)
@@ -600,8 +600,8 @@ update.twophase<-function(object,...){
   newnames<-names(dots)
   
   for(j in seq(along=dots)){
-    object$phase1$sample$variables[,newnames[j]]<-eval(dots[[j]],object$phase1$sample$variables, parent.frame())
-    object$phase1$full$variables[,newnames[j]]<-eval(dots[[j]],object$phase1$full$variables, parent.frame())
+    object$phase1$sample$variables[,newnames[j]]<-eval(dots[[j]], object$phase1$sample$variables, parent.frame())
+    object$phase1$full$variables[,newnames[j]]<-eval(dots[[j]], object$phase1$full$variables, parent.frame())
   }
   
   object$call<-sys.call(-1)
@@ -618,7 +618,8 @@ subset.twophase<-function(x,subset,...){
 }
 
 
-calibrate.twophase<-function(design, phase=2, formula, population,...){
+calibrate.twophase<-function(design, phase=2, formula, population,
+                             calfun=c("linear","raking","logit","rrz"),...){
 
     if (phase==1){
         stop("phase 1 calibration not yet implemented")
@@ -628,6 +629,12 @@ calibrate.twophase<-function(design, phase=2, formula, population,...){
         
     } else if(phase==2){
 
+        if (match.arg(calfun)=="rrz"){
+            design<-estWeights(design, formula,...)
+            design$call<-sys.call(-1)
+            return(design)
+        }
+            
         if (missing(population) || is.null(population)){
             ## calibrate to phase 1 totals
             population<-colSums(model.matrix(formula,
@@ -636,7 +643,7 @@ calibrate.twophase<-function(design, phase=2, formula, population,...){
         
         phase2<-design$phase2
         phase2$variables<-design$phase1$sample$variables
-        phase2<-calibrate(phase2,formula,population,...)
+        phase2<-calibrate(phase2,formula,population,calfun=calfun,...)
         g<-design$phase2$prob/phase2$prob
         phase2$variables<-NULL
         design$phase2<-phase2
@@ -663,3 +670,68 @@ postStratify.twophase<-function(design, ...) {
 	stop("postStratify not yet implemented for two-phase designs. Use calibrate()")
 }
 
+estWeights<-function(data, formula, ...) UseMethod("estWeights")
+                             
+estWeights.twophase<-function(data, formula,...){
+
+    ff<-data$subset~rhs
+    ff[[3]]<-formula[[2]]
+    if(!attr(terms(ff),"intercept")) stop("formula must have an intercept")
+
+    certainty<-rep(FALSE,nrow(data$phase1$full$variables))
+    certainty[data$subset]<-data$phase2$fpc$popsize==data$phase2$fpc$sampsize
+
+    model<-glm(ff, data=data$phase1$full$variables, family=binomial(),
+               subset=!certainty, na.action=na.fail)
+    fitp<-as.numeric(certainty[data$subset])
+    fitp[!certainty[data$subset]]<-fitted(model)[data$subset[!certainty]]
+    
+    g<- (1/fitp)/(1/data$phase2$prob)
+
+    mm<-model.matrix(model)[data$subset[!certainty],,drop=FALSE]
+    if (any(certainty)){
+        mm1<-matrix(0,ncol=ncol(mm)+1,nrow=sum(data$subset))
+        mm1[,1]<-as.numeric(certainty[data$subset])
+        mm1[!certainty[data$subset],-1]<-mm
+        mm<-mm1
+    }
+
+    whalf<-sqrt(1/data$phase2$prob)
+
+    caldata<-list(qr=qr(mm*whalf), w=g*whalf, stage=0, index=NULL)
+    class(caldata) <- c("greg_calibration","gen_raking")
+
+    data$phase2$prob<-fitp
+    data$usu<-data$usu/g
+    data$phase2$postStrata <- c(data$phase2$postStrata, list(caldata))
+    
+    if (length(data$phase1$sample$prob)==length(data$phase2$prob))
+        data$prob<-data$phase1$sample$prob*data$phase2$prob
+    else{
+        data$prob<-rep(Inf,length(data$phase1$sample$prob))
+        data$prob[subset]<-data$prob[subset]*data$phase2$prob
+    }
+
+    data$call <- sys.call(-1)
+    
+    data
+    
+}
+
+estWeights.data.frame<-function(data,formula,subset=NULL, strata=NULL,...){
+
+    if (is.null(subset))
+        subset<-complete.cases(data)
+    
+    if(is.null(strata)){
+        des<-twophase(id=list(~1,~1), subset=subset, data=data)
+    } else{
+        des<-twophase(id=list(~1,~1), subset=subset, data=data,
+                      strata=list(NULL,strata))
+    }
+
+    rval<-estWeights(des,formula=formula)
+    rval$call<-sys.call(-1)
+    rval
+    
+}

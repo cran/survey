@@ -1,6 +1,6 @@
 
-R : Copyright 2005, The R Foundation for Statistical Computing
-Version 2.3.0 Under development (unstable) (2005-12-19 r36803)
+R version 2.4.0 Under development (unstable) (2006-05-15 r38063)
+Copyright (C) 2006 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -34,17 +34,9 @@ Loading required package: splines
 > ## SE slightly larger due to using sandwich variance.
 > 
 > svycoxph(Surv(edrel, rel)~factor(stage)+factor(histol)+I(age/12), design=d_BorganII)
-Two-phase design:twophase(id = list(~seqno, ~seqno), strata = list(NULL, ~interaction(instit, 
-    rel)), data = nwtco, subset = ~I(rel | subcohort))
-Phase 1:
-Independent Sampling design (with replacement)
-svydesign(id = ~seqno)
-Phase 2:
-Stratified Independent Sampling design
-svydesign(id = ~seqno, strata = ~interaction(instit, rel), fpc = `*phase1*`)
 Call:
-svycoxph(Surv(edrel, rel) ~ factor(stage) + factor(histol) + 
-    I(age/12), design = d_BorganII)
+svycoxph.survey.design(formula = Surv(edrel, rel) ~ factor(stage) + 
+    factor(histol) + I(age/12), design = d_BorganII)
 
 
                   coef exp(coef) se(coef)      z       p
@@ -68,18 +60,9 @@ Likelihood ratio test=NA  on 5 df, p=NA  n= 1062
 +                         epsilon=1e-10)
 > 
 > svycoxph(Surv(edrel, rel)~factor(stage)+factor(histol)+I(age/12), design=d_BorganIIps)
-Two-phase design:calibrate(twophase(id = list(~seqno, ~seqno), strata = list(NULL, 
-    ~rel), data = nwtco, subset = ~I(rel | subcohort)), phase = 2, 
-    formula = ~interaction(instit, rel), epsilon = 1e-10)
-Phase 1:
-Independent Sampling design (with replacement)
-svydesign(id = ~seqno)
-Phase 2:
-Stratified Independent Sampling design
-calibrate(phase2, formula, population, ...)
 Call:
-svycoxph(Surv(edrel, rel) ~ factor(stage) + factor(histol) + 
-    I(age/12), design = d_BorganIIps)
+svycoxph.survey.design(formula = Surv(edrel, rel) ~ factor(stage) + 
+    factor(histol) + I(age/12), design = d_BorganIIps)
 
 
                   coef exp(coef) se(coef)      z       p

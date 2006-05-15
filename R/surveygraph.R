@@ -72,8 +72,47 @@ svyplot<-function(formula,
            else
              ys<-Y[index]
            plot(xs,ys,...)
-         }) 
-  
+         })
 
-  
 }
+
+svyboxplot<-function(formula, design, ...){
+    
+    formula<-as.formula(formula)
+    if(length(formula)!=3) stop("need a two-sided formula")
+    if(length(formula[[3]])!=1) stop("only one rhs variable allowed")
+    outcome<-eval(bquote(~.(formula[[2]])))
+    
+    if (length(attr(terms(formula),"term.labels"))){
+        groups<-eval(bquote(~.(formula[[3]])))
+        qs <- svyby(outcome,groups,design,svyquantile,ci=FALSE,
+                    keep.var=FALSE,
+                    quantiles=c(0,0.25,0.5,0.75,1))
+        n<-NCOL(qs)
+        iqr<- qs[,n-1]-qs[,n-3]
+        low<-pmax(qs[,n-4],qs[n-2]-1.5*iqr)
+        hi<-pmin(qs[,n],qs[n-1]+1.5*iqr)
+        stats<-t(as.matrix(cbind(low,qs[,n-(3:1)],hi)))
+        z<-list(stats=stats,n=coef(svytotal(groups,design)))
+        for(i in 1:ncol(stats)){
+            out<-c(if(qs[i,n]!=hi[i]) qs[i,n],
+                   if(qs[i,n-4]!=low[i])qs[i,n-4])
+            z$out<-c(z$out,out)
+            z$group<-c(z$group,rep(i,length(out)))
+            z$names<-as.character(qs[,1])
+        }
+    } else {
+        qs<-svyquantile(outcome,design,ci=FALSE,
+                        quantiles=c(0,0.25,0.5,0.75,1))
+        iqr<-qs[4]-qs[2]
+        z<-list(stats=matrix(c(max(qs[1],qs[2]-1.5*iqr),
+                qs[2:4],min(qs[5],qs[4]+1.5*iqr))),
+                n=sum(weights(design,"sampling")))
+        z$out<-c(if(qs[5]!=z$stats[5]) qs[5],
+                 if(qs[1]!=z$stats[1]) qs[1])
+    }
+    bxp(z,...)
+}
+
+
+

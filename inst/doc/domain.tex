@@ -236,8 +236,8 @@ Loading required package: splines
 > svymean(~rel, subset(dccs8, age > 36))
 \end{Sinput}
 \begin{Soutput}
-       mean     SE
-rel 0.18028 0.0114
+       mean   SE
+rel 0.16287 0.01
 \end{Soutput}
 \begin{Sinput}
 > svyratio(~I(rel * as.numeric(age > 36)), ~as.numeric(age > 36), 
@@ -248,10 +248,10 @@ Ratio estimator: svyratio.twophase(~I(rel * as.numeric(age > 36)), ~as.numeric(a
     36), dccs8)
 Ratios=
                               as.numeric(age > 36)
-I(rel * as.numeric(age > 36))            0.1802804
+I(rel * as.numeric(age > 36))            0.1628708
 SEs=
                               as.numeric(age > 36)
-I(rel * as.numeric(age > 36))           0.01136712
+I(rel * as.numeric(age > 36))          0.009994368
 \end{Soutput}
 \begin{Sinput}
 > summary(svyglm(rel ~ I(age > 36) + 0, dccs8))
@@ -266,12 +266,12 @@ twophase(id = list(~seqno, ~seqno), strata = list(NULL, ~interaction(rel,
 
 Coefficients:
                  Estimate Std. Error t value Pr(>|t|)    
-I(age > 36)FALSE 0.104913   0.007899   13.28   <2e-16 ***
-I(age > 36)TRUE  0.180280   0.011367   15.86   <2e-16 ***
+I(age > 36)FALSE 0.116861   0.009087   12.86   <2e-16 ***
+I(age > 36)TRUE  0.162871   0.009994   16.30   <2e-16 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 
-(Dispersion parameter for gaussian family taken to be 0.1203473)
+(Dispersion parameter for gaussian family taken to be 0.1212451)
 
 Number of Fisher Scoring iterations: 2
 \end{Soutput}

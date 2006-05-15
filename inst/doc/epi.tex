@@ -271,7 +271,7 @@ We compare the result to that given by \texttt{survival::cch} for Lin
 +     ~rel), subset = ~I(in.subcohort | rel), data = nwtco))
 \end{Sinput}
 \begin{Soutput}
-Two-phase design:twophase(id = list(~seqno, ~seqno), strata = list(NULL, ~rel), 
+Two-phase design: twophase(id = list(~seqno, ~seqno), strata = list(NULL, ~rel), 
     subset = ~I(in.subcohort | rel), data = nwtco)
 Phase 1:
 Independent Sampling design (with replacement)
@@ -285,17 +285,9 @@ svydesign(id = ~seqno, strata = ~rel, fpc = `*phase1*`)
 +     I(age/12), design = dcch)
 \end{Sinput}
 \begin{Soutput}
-Two-phase design:twophase(id = list(~seqno, ~seqno), strata = list(NULL, ~rel), 
-    subset = ~I(in.subcohort | rel), data = nwtco)
-Phase 1:
-Independent Sampling design (with replacement)
-svydesign(id = ~seqno)
-Phase 2:
-Stratified Independent Sampling design
-svydesign(id = ~seqno, strata = ~rel, fpc = `*phase1*`)
 Call:
-svycoxph(Surv(edrel, rel) ~ factor(stage) + factor(histol) + 
-    I(age/12), design = dcch)
+svycoxph.survey.design(formula = Surv(edrel, rel) ~ factor(stage) + 
+    factor(histol) + I(age/12), design = dcch)
 
 
                   coef exp(coef) se(coef)     z       p
@@ -380,13 +372,9 @@ svydesign(id = ~seqno + eventrec, strata = ~in.subcohort + rel,
 +     I(age/12), design = dBarlow)
 \end{Sinput}
 \begin{Soutput}
-Stratified 2 - level Cluster Sampling design (with replacement)
-With (1154, 1239) clusters.
-svydesign(id = ~seqno + eventrec, strata = ~in.subcohort + rel, 
-    data = nwtco.expd, weight = ~pwts)
 Call:
-svycoxph(Surv(start, stop, event) ~ factor(stage) + factor(histol) + 
-    I(age/12), design = dBarlow)
+svycoxph.survey.design(formula = Surv(start, stop, event) ~ factor(stage) + 
+    factor(histol) + I(age/12), design = dBarlow)
 
 
                   coef exp(coef) se(coef)    z       p
@@ -415,19 +403,17 @@ Survey bootstrap with 500 replicates.
 +     I(age/12), design = dWacholder)
 \end{Sinput}
 \begin{Soutput}
-Call: as.svrepdesign(dBarlow, type = "bootstrap", replicates = 500)
-Survey bootstrap with 500 replicates.
 Call:
-svycoxph(Surv(start, stop, event) ~ factor(stage) + factor(histol) + 
-    I(age/12), design = dWacholder)
+svycoxph.svyrep.design(formula = Surv(start, stop, event) ~ factor(stage) + 
+    factor(histol) + I(age/12), design = dWacholder)
 
 
                   coef exp(coef) se(coef)    z       p
-factor(stage)2  0.7359      2.09   0.1655 4.45 8.7e-06
-factor(stage)3  0.5976      1.82   0.1761 3.39 6.9e-04
-factor(stage)4  1.3907      4.02   0.2276 6.11 9.9e-10
-factor(histol)2 1.5045      4.50   0.1729 8.70 0.0e+00
-I(age/12)       0.0432      1.04   0.0259 1.67 9.6e-02
+factor(stage)2  0.7359      2.09   0.1751 4.20 2.6e-05
+factor(stage)3  0.5976      1.82   0.1834 3.26 1.1e-03
+factor(stage)4  1.3907      4.02   0.2154 6.46 1.1e-10
+factor(histol)2 1.5045      4.50   0.1716 8.77 0.0e+00
+I(age/12)       0.0432      1.04   0.0256 1.68 9.2e-02
 
 Likelihood ratio test=NA  on 5 df, p=NA  n= 1239 
 \end{Soutput}
@@ -453,17 +439,9 @@ subcohort sample for this stratified design, so we load the new
 +     I(age/12), design = d_BorganII))
 \end{Sinput}
 \begin{Soutput}
-Two-phase design:twophase(id = list(~seqno, ~seqno), strata = list(NULL, ~interaction(instit, 
-    rel)), data = nwtco, subset = ~I(rel | subcohort))
-Phase 1:
-Independent Sampling design (with replacement)
-svydesign(id = ~seqno)
-Phase 2:
-Stratified Independent Sampling design
-svydesign(id = ~seqno, strata = ~interaction(instit, rel), fpc = `*phase1*`)
 Call:
-svycoxph(Surv(edrel, rel) ~ factor(stage) + factor(histol) + 
-    I(age/12), design = d_BorganII)
+svycoxph.survey.design(formula = Surv(edrel, rel) ~ factor(stage) + 
+    factor(histol) + I(age/12), design = d_BorganII)
 
 
                   coef exp(coef) se(coef)      z       p
@@ -487,17 +465,9 @@ We can further post-stratify the design on disease stage and age with \texttt{ca
 +     I(age/12), design = d_BorganIIps)
 \end{Sinput}
 \begin{Soutput}
-Two-phase design:calibrate(d_BorganII, phase = 2, formula = ~age + interaction(instit, 
-    rel, stage))
-Phase 1:
-Independent Sampling design (with replacement)
-svydesign(id = ~seqno)
-Phase 2:
-Stratified Independent Sampling design
-calibrate(phase2, formula, population, ...)
 Call:
-svycoxph(Surv(edrel, rel) ~ factor(stage) + factor(histol) + 
-    I(age/12), design = d_BorganIIps)
+svycoxph.survey.design(formula = Surv(edrel, rel) ~ factor(stage) + 
+    factor(histol) + I(age/12), design = d_BorganIIps)
 
 
                   coef exp(coef) se(coef)     z       p

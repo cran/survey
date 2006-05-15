@@ -1,13 +1,13 @@
 \name{calibrate}
 \alias{calibrate.survey.design2}
 \alias{calibrate.svyrep.design}
-\alias{is.calibrated}
+%\alias{is.calibrated}
 \alias{calibrate}
-\alias{regcalibrate.survey.design2}
-\alias{regcalibrate.svyrep.design}
-\alias{regcalibrate}
+%\alias{regcalibrate.survey.design2}
+%\alias{regcalibrate.svyrep.design}
+%\alias{regcalibrate}
 \alias{calibrate.twophase}
-\alias{grake}
+%\alias{grake}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{G-calibration (GREG) estimators}
 \description{
@@ -27,7 +27,8 @@ calibrate(design,...)
        aggregate.index=NULL, variance=NULL, bounds=c(-Inf,Inf),
        calfun=c("linear","raking","logit"),
        maxit=50, epsilon=1e-7, verbose=FALSE, ...)
-\method{calibrate}{twophase}(design, phase=2,formula, population,...)
+\method{calibrate}{twophase}(design, phase=2,formula, population,
+       calfun=c("linear","raking","logit","rrz"),...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -48,12 +49,12 @@ calibrate(design,...)
   \item{bounds}{Bounds for the calibration weights, optional
     except for \code{calfun="logit"}}
   \item{...}{options for other methods}
-  \item{calfun}{Calibration function}
+  \item{calfun}{Calibration function: see below}
   \item{maxit}{Number of iterations}
   \item{epsilon}{tolerance in matching population total}
   \item{verbose}{print lots of uninteresting information}
   \item{phase}{Phase of a two-phase design to calibrate (only
-    \code{phase=2} currently implemented.}
+    \code{phase=2} currently implemented.)}
 }
 \details{
 
@@ -67,6 +68,10 @@ calibrate(design,...)
   unbounded linear calibration use the Newton-Raphson algorithm
   described by Deville et al (1993).  Unbounded linear calibration uses
   an algorithm that is less sensitive to collinearity.
+
+  For two-phase designs \code{calfun="rrz"} estimates the sampling
+  probabilities using logistic regression as described by Robins et al
+  (1994). \code{\link{estWeights}} will do the same thing.
 
   Calibration may result in observations within the last-stage sampling
   units having unequal weight even though they necessarily are sampled
@@ -114,6 +119,10 @@ Sampling". Springer. 1991.
 Rao JNK, Yung W, Hidiroglou MA (2002)   Estimating equations for the
 analysis of survey data using poststratification information. Sankhya
 64 Series A Part 2, 364-378.
+
+Robins JM, Rotnitzky A, Zhao LP. (1994) Estimation of regression
+coefficients when some regressors are not always observed. Journal of
+the American Statistical Association, 89, 846-866.
 
 Vanderhoeft C (2001) Generalized Calibration at Statistics
 Belgium. Statistics Belgium Working Paper No 3.

@@ -3,7 +3,8 @@
 ##
 
 svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
-                keep.names=TRUE,verbose=FALSE,vartype=c("se","cv","cvpct","var")){
+                keep.names=TRUE,verbose=FALSE,vartype=c("se","cv","cvpct","var"),
+                drop.empty.groups=TRUE){
 
   if (inherits(by, "formula"))
     byfactors<-model.frame(by, design$variables, na.action=na.pass)
@@ -12,7 +13,7 @@ svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
   
   byfactor<-do.call("interaction", byfactors)
   uniques <- which(!duplicated(byfactors))
-
+  
   ## some people insist on using vectors rather than formulas
   ## so I suppose we should be nice to them
   if (!inherits(formula, "formula")){
@@ -23,8 +24,8 @@ svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
             is.vector(formula))){
           stop("invalid type for 'formula'")
       }
-      
   }
+  
   if(missing(vartype)) vartype<-"se"
   vartype<-match.arg(vartype,several.ok=TRUE)
   nvartype<-pmatch(vartype,eval(formals(sys.function())$vartype))
@@ -77,18 +78,32 @@ svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
       if (is.matrix(rval)) rval<-t(rval)
   }
 
-  nstats<-NCOL(rval)/(1+ keep.var*length(vartype) +deff)
-  
-  if (NCOL(rval)>1)
+  nr<-NCOL(rval)
+  nstats<-nr/(1+ keep.var*length(vartype) +deff)
+
+              
+  if (nr>1)
     rval<-cbind(byfactors[uniques,,drop=FALSE], rval)
   else
     rval <-cbind(byfactors[uniques,,drop=FALSE], statistic=rval)
 
-  if (keep.names)
-    rownames(rval)<-paste(byfactor[uniques])
 
-  rval<-rval[do.call("order",rval),]
+  if(drop.empty.groups){
+      if (keep.names)
+          rownames(rval)<-paste(byfactor[uniques])
+      rval<-rval[order(byfactor[uniques]),]
+  } else {
+      a<-do.call("expand.grid", lapply(byfactors,function(f) levels(as.factor(f))))
+      a<-cbind(a,matrix(NA, ncol=nr, nrow=nrow(a)))
+      names(a)<-names(rval)
+      a[match(byfactor[uniques], levels(byfactor)),]<-rval
+      rval<-a
+      if (keep.names)
+          rownames(rval)<-levels(byfactor)
+  }
+                  
 
+  
   attr(rval,"svyby")<-list(margins=1:NCOL(byfactors),nstats=nstats,
                            vars=if(keep.var) length(vartype) else 0,
                            deffs=deff,

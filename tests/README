@@ -22,6 +22,9 @@ multistage.R: Check that a two-stage cluster sample analysis agrees with
 nwts.R:	Compare results from twophase() to published two-phase 
         case-control example
 
+nwts-cch.R: Compare results from twophase() to case-cohort analyses in
+        survival package.
+
 quantile.R: quantile estimation on a lognormal sample
 
 rakecheck.R: check that raking by iterative post-stratification agrees with

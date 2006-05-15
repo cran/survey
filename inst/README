@@ -2,9 +2,6 @@ NEWS                    Change log
 
 porting.to.S            Notes on porting to S-PLUS
 
-description.pdf         Reprint from Journal of Statistical Software. 
-                        Describes version 2.3, which is now quite old.
-
 ucla-examples.pdf       R versions of examples from the UCLA Academic 
                         Technology Services web site on survey analysis
 

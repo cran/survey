@@ -1,13 +1,12 @@
 
-hadamard<-local({
-  load(system.file("hadamard.rda",package="survey"))
   
-  hadamard.doubler<-function(H){
+hadamard.doubler<-function(H){
     rbind(cbind(H,H),cbind(H,1-H))
   }
   
-  function(n){
+hadamard<- function(n){
     m<-n-(n %% 4)
+    ## hadamard.list, hadamard.sizes in sysdata.rda
     precooked<- which(m < hadamard.sizes & m+4 >=hadamard.sizes)
     if (length(precooked))
       return(hadamard.list[[min(precooked)]])
@@ -16,16 +15,18 @@ hadamard<-local({
     
     sizes<-hadamard.sizes*2^pmax(0,ceiling(log((n+1)/hadamard.sizes,2)) )
     bestfit<- which.min(sizes-n)
-    H<-paley(n,sizes[bestfit])
+    H<-NULL
+    if (sizes[bestfit]-n >4)
+        H<-paley(n,sizes[bestfit])
     if (is.null(H)){
       ndoubles<-ceiling(log(sizes/hadamard.sizes, 2))[bestfit]
       H<-hadamard.list[[bestfit]]
-      for(i in 1:ndoubles)
+      for(i in seq(length=ndoubles))
         H<-hadamard.doubler(H)
     }
     H
   }
-})
+
 
 
 jk1weights<-function(psu, fpc=NULL,
@@ -256,10 +257,9 @@ brrweights<-function(strata,psu, match=NULL, small=c("fail","split","merge"),
     values<-unique(as.vector(hadamard.matrix))
     if(length(values)!=2)
       stop("hadamard.matrix has more than two different values")
-    H<-ifelse(hadamard.matrix==values[1],-1,1)
-    if (!(sum(H[-1,])==0) || !isTRUE(all.equal(t(H)%*%H, diag(nrow(H))*nrow(H))))
-      stop("hadamard.matrix is not a Hadamard matrix")
-    H<-(H+1)/2
+    H<-ifelse(hadamard.matrix==values[1],0,1)
+    if(!is.hadamard(H,full.orthogonal.balance=FALSE))
+        stop("hadamard.matrix is not a Hadamard matrix")
   }
   ii<-1:upto
   jj<-1:length(weightstrata)

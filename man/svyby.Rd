@@ -10,7 +10,8 @@ Compute survey statistics on subsets of a survey defined by factors.
 }
 \usage{
 svyby(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE,
-keep.names = TRUE,verbose=FALSE, vartype=c("se","cv","cvpct","var"))
+keep.names = TRUE,verbose=FALSE, vartype=c("se","cv","cvpct","var"),
+ drop.empty.groups=TRUE)
 \method{SE}{svyby}(object,...)
 \method{deff}{svyby}(object,...)
 \method{coef}{svyby}(object,...)
@@ -34,6 +35,8 @@ keep.names = TRUE,verbose=FALSE, vartype=c("se","cv","cvpct","var"))
 \item{vartype}{Report variability as one or more of
   standard error, coefficient of
   variation,  percent coefficient of variation, or variance}
+\item{drop.empty.groups}{If \code{FALSE}, report \code{NA} for empty
+  groups, if \code{TRUE} drop them from the output}
 \item{object}{An object of class \code{"svyby"}}
 }
 
@@ -76,6 +79,10 @@ coef(a)
 
 ## ratio estimates
 svyby(~api.stu, by=~stype, denominator=~enroll, design=dclus1, svyratio)
+
+## empty groups
+svyby(~api00,~comp.imp+sch.wide,design=dclus1,svymean)
+svyby(~api00,~comp.imp+sch.wide,design=dclus1,svymean,drop.empty.groups=FALSE)
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

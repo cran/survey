@@ -1,5 +1,6 @@
-This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=pdflatex 2006.1.13)  6 APR 2006 13:52
+This is pdfeTeXk, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=pdflatex 2006.1.13)  15 MAY 2006 16:13
 entering extended mode
+ file:line:error style messages enabled.
 **\nonstopmode \input /var/local/tlumley/Rarchive/survey/inst/doc/epi.tex
 (/var/local/tlumley/Rarchive/survey/inst/doc/epi.tex
 (/usr/share/texmf/tex/latex/base/article.cls
@@ -252,7 +253,7 @@ File: ts1cmtt.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `TS1/aett/m/n' in size <10> not available
 (Font)              Font shape `TS1/cmtt/m/n' tried instead on input line 281.
- [5] [6] [7] [8] [9] (./epi.aux) ) 
+ [5] [6] [7] [8] (./epi.aux) ) 
 Here is how much of TeX's memory you used:
  2202 strings out of 94500
  29102 string characters out of 1176766
@@ -260,16 +261,16 @@ Here is how much of TeX's memory you used:
  5336 multiletter control sequences out of 10000+50000
  26714 words of font info for 59 fonts, out of 500000 for 2000
  580 hyphenation exceptions out of 1000
- 35i,6n,21p,358b,292s stack positions out of 1500i,500n,5000p,200000b,5000s
+ 35i,6n,21p,358b,282s stack positions out of 1500i,500n,5000p,200000b,5000s
 PDF statistics:
- 54 PDF objects out of 300000
+ 51 PDF objects out of 300000
  0 named destinations out of 131072
  1 words of extra memory for PDF output out of 65536
- </var/lib/texmf/pk/ljfour/jknappen/tc/tctt10
-00.600pk></usr/share/texmf/fonts/type1/bluesky/cm/cmti10.pfb></usr/share/texmf/
-fonts/type1/bluesky/cm/cmmi10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmsl
-tt10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmbx12.pfb></usr/share/texmf/
-fonts/type1/bluesky/cm/cmtt10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr1
-0.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr12.pfb></usr/share/texmf/font
-s/type1/bluesky/cm/cmr17.pfb>
-Output written on epi.pdf (9 pages, 94332 bytes).
+ </var/lib/texmf/pk/ljfour/jknappen/tc/tctt1000.6
+00pk></usr/share/texmf/fonts/type1/bluesky/cm/cmti10.pfb></usr/share/texmf/font
+s/type1/bluesky/cm/cmmi10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmsltt10
+.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmbx12.pfb></usr/share/texmf/font
+s/type1/bluesky/cm/cmtt10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr10.pf
+b></usr/share/texmf/fonts/type1/bluesky/cm/cmr12.pfb></usr/share/texmf/fonts/ty
+pe1/bluesky/cm/cmr17.pfb>
+Output written on epi.pdf (8 pages, 93423 bytes).

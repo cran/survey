@@ -29,7 +29,7 @@ return.replicates=FALSE, na.action)
 \method{summary}{svyglm}(object, correlation = FALSE, df.resid=NULL,
 ...)
 \method{predict}{svyglm}(object,newdata,total=NULL,
-                         type=c("link","response"),...)
+                         type=c("link","response"),se=TRUE,vcov=TRUE,...)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -50,6 +50,9 @@ return.replicates=FALSE, na.action)
   \item{newdata}{new data frame for prediction}
   \item{total}{population size when predicting population total}
   \item{type}{linear predictor (\code{link}) or response}
+  \item{se}{if \code{TRUE}, return variances of predictions}
+  \item{vcov}{if \code{TRUE} and \code{se=TRUE} return
+    variance-covariance matrix of predictions}
 }
 \details{
 There is no \code{anova} method for \code{svyglm} as the models are not
@@ -68,6 +71,10 @@ gives the regression estimator of the mean, and when \code{newdata} are
 the population totals and \code{total} is specified it gives the
 regression estimator of the population total.  Regression estimators of
 mean and total can also be obtained with \code{\link{calibrate}}.
+
+By default the variance-covariance matrix of the predictions is
+returned. If \code{newdata} has many rows this may be very large.
+
 }
 
  \value{ \code{svyglm} returns an object of class \code{svyglm}.  The
