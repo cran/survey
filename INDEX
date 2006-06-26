@@ -15,6 +15,7 @@ as.svydesign2           Convert a old svydesign object to
 
 svyplot                 Survey-weighted graphics
 svyhist                 Survey-weighted histogram
+svysmooth               Smoothers and density estimates
 svyboxplot              Survey-weighted boxplots
 svyby                   Tables of statistics 
 ftable.svystat          Formatted tables of statistics
@@ -23,6 +24,7 @@ ftable.svyby
 cv			extract coefficient of variation
 SE			extract standard error
 deff			extract design effect
+svycontrast             linear combinations of estimates
 
                  -----
 

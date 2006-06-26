@@ -17,8 +17,8 @@ twophase<-function(id,strata=NULL, probs=NULL, weights=NULL, fpc=NULL,
   d1s$prob<-d1$prob[subset]
   d1s$allprob<-d1$allprob[subset,,drop=FALSE]
 
-  if (NCOL(d1s$allprob)>1)
-    stop("Can't handle multistage sampling at phase 1 (yet)")
+  ##if (NCOL(d1s$allprob)>1)
+  ##  stop("Can't handle multistage sampling at phase 1 (yet)")
   
   ## work out phase-two fpc
   if (is.null(fpc[[2]])){
@@ -88,8 +88,8 @@ twophase<-function(id,strata=NULL, probs=NULL, weights=NULL, fpc=NULL,
       rval$usu<-drop(with(rval$phase1$sample,ave(cluster[,m], strata[,m], FUN=nunique))/rval$phase1$full$fpc$sampsize[rval$subset])
   }
 
-  if (any(rval$usu<1) && any(duplicated(d1$cluster[,1])))
-      stop("Phase 1 design must either be element sampling or have all phase 1 sampling units in phase 2")
+##  if (any(rval$usu<1) && any(duplicated(d1$cluster[,1])))
+##      stop("Phase 1 design must either be element sampling or have all phase 1 sampling units in phase 2")
   
   if (length(rval$phase1$sample$prob)==length(d2$prob))
     rval$prob<-rval$phase1$sample$prob*d2$prob

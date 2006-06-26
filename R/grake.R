@@ -33,6 +33,15 @@ calibrate.survey.design2<-function(design, formula, population,
   whalf<-sqrt(ww)
   sample.total<-colSums(mm*ww)
   
+  if(any(sample.total==0)){
+    ## drop columsn where all sample and population are zero
+    zz<-(population==0) & (apply(mm,2,function(x) all(x==0)))
+    mm<-mm[,!zz]
+    population<-population[!zz]
+    sample.total<-sample.total[!zz]
+  }
+
+    
   if (length(sample.total)!=length(population))
     stop("Population and sample totals are not the same length.")
 
@@ -105,7 +114,16 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
   whalf<-sqrt(ww)
   
   sample.total<-colSums(mm*ww)
-
+  
+  if(any(sample.total==0)){
+    ## drop columsn where all sample and population are zero
+    zz<-(population==0) & (apply(mm,2,function(x) all(x==0)))
+    mm<-mm[,!zz]
+    population<-population[!zz]
+    sample.total<-sample.total[!zz]
+  }
+  
+    
   if (length(sample.total)!=length(population))
     stop("Population and sample totals are not the same length.")
 

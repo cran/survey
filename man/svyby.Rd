@@ -11,7 +11,7 @@ Compute survey statistics on subsets of a survey defined by factors.
 \usage{
 svyby(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE,
 keep.names = TRUE,verbose=FALSE, vartype=c("se","cv","cvpct","var"),
- drop.empty.groups=TRUE)
+ drop.empty.groups=TRUE, covmat=FALSE)
 \method{SE}{svyby}(object,...)
 \method{deff}{svyby}(object,...)
 \method{coef}{svyby}(object,...)
@@ -37,6 +37,9 @@ keep.names = TRUE,verbose=FALSE, vartype=c("se","cv","cvpct","var"),
   variation,  percent coefficient of variation, or variance}
 \item{drop.empty.groups}{If \code{FALSE}, report \code{NA} for empty
   groups, if \code{TRUE} drop them from the output}
+\item{covmat}{If \code{TRUE}, compute covariances between estimates for
+  different subsets (currently only for replicate-weight
+  designs). Allows \code{\link{svycontrast}} to be used on output.}
 \item{object}{An object of class \code{"svyby"}}
 }
 
@@ -71,6 +74,13 @@ svyby(~api99, list(school.type=apiclus1$stype), rclus1, svymean, vartype="cv")
 svyby(~enroll,~stype, rclus1,svytotal, deff=TRUE)
 svyby(~api99+api00, ~stype+sch.wide, rclus1, svymean, keep.var=FALSE)
 
+## comparing subgroups using covmat=TRUE
+mns<-svyby(~api99, ~stype, rclus1, svymean,covmat=TRUE)
+vcov(mns)
+svycontrast(mns, c(-1,1,0))
+
+
+## extractor functions
 (a<-svyby(~enroll, ~stype, rclus1, svytotal, deff=TRUE, verbose=TRUE, vartype=c("se","cv","cvpct","var")))
 deff(a)
 SE(a)

@@ -1,6 +1,6 @@
 
-R : Copyright 2005, The R Foundation for Statistical Computing
-Version 2.2.1  (2005-12-20 r36812)
+R : Copyright 2006, The R Foundation for Statistical Computing
+Version 2.3.0 (2006-04-24)
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -65,7 +65,7 @@ factor(stage)2:factor(histol)2   0.1152     0.4410   0.261 0.793887
 factor(stage)3:factor(histol)2   0.5066     0.4241   1.194 0.232572    
 factor(stage)4:factor(histol)2   0.9785     0.6214   1.575 0.115629    
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 (Dispersion parameter for binomial family taken to be 1.000876)
 
@@ -92,7 +92,7 @@ factor(stage)2:factor(histol)2 -0.04743    0.43497  -0.109    0.913
 factor(stage)3:factor(histol)2  0.28064    0.41299   0.680    0.497    
 factor(stage)4:factor(histol)2  0.90983    0.63776   1.427    0.154    
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 (Dispersion parameter for binomial family taken to be 1.000876)
 
@@ -119,7 +119,7 @@ factor(stage)2:factor(histol)2 -0.04743    0.43419  -0.109    0.913
 factor(stage)3:factor(histol)2  0.28064    0.41257   0.680    0.497    
 factor(stage)4:factor(histol)2  0.90983    0.62991   1.444    0.149    
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 (Dispersion parameter for binomial family taken to be 1.000876)
 
@@ -144,7 +144,7 @@ factor(stage)2   0.7814     0.1472   5.307 1.48e-07 ***
 factor(stage)3   0.8009     0.1525   5.252 1.97e-07 ***
 factor(stage)4   1.0729     0.1782   6.022 2.72e-09 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 (Dispersion parameter for binomial family taken to be 1.001333)
 
@@ -167,7 +167,7 @@ factor(stage)2   0.7814     0.1472   5.307 1.34e-07 ***
 factor(stage)3   0.8009     0.1525   5.252 1.79e-07 ***
 factor(stage)4   1.0729     0.1780   6.027 2.26e-09 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 (Dispersion parameter for binomial family taken to be 1.000876)
 

@@ -1,3 +1,22 @@
+3.6   Allow empty factor levels in calibration (for Diego Zardetto). 
+
+      Work around for strange S4 class/NAMESPACE issue with hexbin
+      plots; actual fix requires more understanding.
+
+      regTermTest handles MIresult objects.
+
+      Add dimnames, colnames, rownames methods (for ine.pt)
+
+      svysmooth for scatterplot smoothers and density estimation 
+      (needs KernSmooth)
+
+      Give a warning when fpc varies within strata. 
+
+      svycontrast() for linear combinations of survey statistics
+
+      covmat=TRUE option to svyby() for replicate-weight designs, so
+      the output can be used in svycontrast().
+
 3.5   Add estWeights for Robins et al way of using auxiliary
       information (ie AIPW).
 

@@ -102,6 +102,12 @@ calibrate(design,...)
   and the calibration variance is proportional to that linear
   combination.
 
+  The design matrix specified by formula (after any aggregation) must be
+  of full rank, with one exception. If the population total for a column
+  is zero and all the observations are zero the column will be
+  ignored. This allows the use of factors where the population happens
+  to have no observations at some level.
+
   In a two-phase design, \code{population} may be omitted when
   \code{phase=2}, to specify calibration to the phase-one sample.
 }
@@ -129,7 +135,11 @@ Belgium. Statistics Belgium Working Paper No 3.
 \url{http://www.statbel.fgov.be/studies/paper03_en.asp}
 }
 
-\seealso{ \code{\link{postStratify}}, \code{\link{rake}}, \code{\link{twophase}}}
+\seealso{ \code{\link{postStratify}}, \code{\link{rake}} for other ways
+  to use auxiliary information
+  
+  \code{vignette("epi")} for an example of calibration in two-phase designs
+}
 \examples{
 data(api)
 dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)

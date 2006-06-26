@@ -1,6 +1,9 @@
 
 make.formula<-function(names) formula(paste("~",paste(names,collapse="+")))
 
+dimnames.survey.design<-function(object) dimnames(object$variables)
+dimnames.svyrep.design<-function(object) dimnames(object$variables)
+dimnames.twophase<-function(object) dimnames(object$phase1$sample$variables)
 
 oldsvydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
                     data=NULL, nest=FALSE, check.strata=!nest,weights=NULL){
@@ -1198,7 +1201,7 @@ svymle<-function(loglike, gradient=NULL, design, formulas,
                  na.action="na.fail", method=NULL,...){
   if(is.null(method))
     method<-if(is.null(gradient)) "Nelder-Mead" else "nlm"
-
+  
   if (!inherits(design,"survey.design")) 
 	stop("design is not a survey.design")
 

@@ -1,5 +1,8 @@
 api.R: Run example(api) to check that results haven't changed
 
+bycovmat.R: Check that svyby(,covmat=TRUE) is getting the ordering 
+   of estimates correct.
+
 caleg.R: Calibration examples
 	 - calibration to information on PSUs rather than population
 	 - check that bounded weights really are bounded

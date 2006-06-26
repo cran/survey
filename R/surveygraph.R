@@ -34,6 +34,7 @@ svyplot<-function(formula,
                           function(ii) weighted.mean(X[ii],W[ii]))
            rval$ycm<-tapply(1:length(Y), cell,
                            function(ii) weighted.mean(Y[ii],W[ii]))
+             plot(rval,legend=legend,style="centroids",...)
            } else {
              ## new version
              rval<-hexbin(X,Y,ID=TRUE)
@@ -43,9 +44,9 @@ svyplot<-function(formula,
                               function(ii) weighted.mean(X[ii],W[ii])))
              rval@ycm<-as.vector(tapply(1:length(Y), cell,
                               function(ii) weighted.mean(Y[ii],W[ii])))
+             gplot.hexbin(rval, legend=legend, style="centroids",...)
            }
            
-           plot(rval,legend=legend,style="centroids",...)
          },
          grayhex={
            if (exists("hcell")) {
@@ -53,13 +54,15 @@ svyplot<-function(formula,
              rval<-hexbin(X,Y)
              cell<-hcell(X,Y)$cell
              rval$cnt<-tapply(W,cell,sum)
-         } else {
+             plot(rval, legend=legend,...)
+           } else {
              ## new version
              rval<-hexbin(X,Y,ID=TRUE)
              cell<-rval@cID
              rval@count<-as.vector(tapply(W,cell,sum))
+             gplot.hexbin(rval, legend=legend,...)
            }
-           plot(rval, legend=legend,...)
+
          },
          subsample={
            index<-sample(length(X),sample.size,replace=TRUE, prob=W)

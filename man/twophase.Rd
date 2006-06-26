@@ -101,7 +101,9 @@ Lin, DY and Ying, Z (1993). Cox regression with incomplete covariate measurement
 
   \code{\link{calibrate}} for calibration (GREG) estimators.
 
-\code{\link{estWeights}} for two-phase designs for missing data.
+  \code{\link{estWeights}} for two-phase designs for missing data.
+
+  The "epi" and "phase1" vignettes for examples and technical details.
 }
 \examples{
  ## two-phase simple random sampling.

@@ -34,6 +34,14 @@ regcalibrate.survey.design2<-function(design, formula, population,
     whalf<-sqrt(ww)
     sample.total<-colSums(mm*ww)
 
+    if(any(sample.total==0)){
+      ## drop columsn where all sample and population are zero
+      zz<-(population==0) & (apply(mm,2,function(x) all(x==0)))
+      mm<-mm[,!zz]
+      population<-population[!zz]
+      sample.total<-sample.total[!zz]
+    }
+
     
     if (length(sample.total)!=length(population))
       stop("Population and sample totals are not the same length.")
@@ -102,11 +110,21 @@ regcalibrate.survey.design2<-function(design, formula, population,
     for (i in 1:length(clusters)){ 
       cluster<-clusters[[i]]
       these<-which(cluster ==  as.character(design$cluster[,stage]))
-      sample.total<-colSums(mm[these,,drop=FALSE]*cwhalf[these]*cwhalf[these])
-      tqr<-qr(mm[these,,drop=FALSE]*cwhalf[these]/sqrt(sigma2[these]))
-      Tmat<-crossprod(mm[these,,drop=FALSE]*cwhalf[these]/sqrt(sigma2[these]))
+      mmi<-mm[these,,drop=FALSE]
+      sample.total<-colSums(mmi*cwhalf[these]*cwhalf[these])
+      
+      if(any(sample.total==0)){
+        ## drop columsn where all sample and population are zero
+        zz<-(population[[i]]==0) & (apply(mmi,2,function(x) all(x==0)))
+        mmi<-mmi[,!zz,drop=FALSE]
+        population[[i]]<-population[[i]][!zz]
+        sample.total<-sample.total[!zz]
+      }
+
+      tqr<-qr(mmi*cwhalf[these]/sqrt(sigma2[these]))
+      Tmat<-crossprod(mmi*cwhalf[these]/sqrt(sigma2[these]))
       tT<-solve(Tmat,population[[i]]-sample.total)
-      g<-drop(1+mm[these,,drop=FALSE]%*%tT/sigma2[these])
+      g<-drop(1+mmi%*%tT/sigma2[these])
       design$prob[these]<-design$prob[these]/g
       caldata$qr[[i]]<-tqr
       caldata$w[[i]]<-g*stageweights[these]*sqrt(sigma2[these])*cwhalf[these]^2
@@ -155,7 +173,15 @@ regcalibrate.svyrep.design<-function(design, formula, population,compress=NA,lam
   whalf<-sqrt(ww)
   
   sample.total<-colSums(mm*ww)
-
+  
+  if(any(sample.total==0)){
+    ## drop columsn where all sample and population are zero
+    zz<-(population==0) & (apply(mm,2,function(x) all(x==0)))
+    mm<-mm[,!zz]
+    population<-population[!zz]
+    sample.total<-sample.total[!zz]
+  }
+  
   if (length(sample.total)!=length(population))
     stop("Population and sample totals are not the same length.")
   if (any(names(sample.total)!=names(population)))

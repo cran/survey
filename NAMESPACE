@@ -2,10 +2,11 @@ import(stats, graphics)
 export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        rake, calibrate, estWeights, as.svydesign2, svyplot,svyhist,
        svyboxplot, svyby, cv, SE, deff, svycoxph, svyglm, svyquantile,
-       svymean,svytotal,svyvar,svyratio,svytable,svychisq,svymle,
+       svymean,svytotal,svyvar,svyratio,svytable,svychisq,svymle, svysmooth,
        withReplicates, hadamard, paley, is.hadamard, bootweights,
        jk1weights,jknweights, brrweights, regTermTest, degf, nonresponse, 
-       sparseCells, neighbours, joinCells, compressWeights, make.formula)
+       sparseCells, neighbours, joinCells, compressWeights, make.formula,
+       svycontrast)
 
 S3method(svymean,survey.design)
 S3method(svymean,svyrep.design)
@@ -63,6 +64,7 @@ S3method(vcov, svrepstat)
 S3method(vcov, svyglm)
 S3method(vcov, svymle)
 S3method(vcov, svystat)
+S3method(vcov, svyby)
 
 S3method(logLik,svyglm)
 S3method(logLik,svrepglm)
@@ -73,7 +75,16 @@ S3method(extractAIC,svyglm)
 
 S3method(anova,svycoxph)
 
+S3method(svycontrast,svrepstat)
+S3method(svycontrast,svystat)
+S3method(svycontrast,svyby)
+S3method(svycontrast,svyglm)
+S3method(svycontrast,svycoxph)
+
 S3method(image,svyrep.design)
+S3method(plot,svysmooth)
+S3method(print,svysmooth)
+S3method(lines,svysmooth)
 
 S3method(ftable,svrepstat)
 S3method(ftable,svystat)
@@ -121,6 +132,10 @@ S3method(print, twophase)
 S3method(dim,repweights_compressed)
 S3method(dim,survey.design)
 S3method(dim,twophase)
+
+S3method(dimnames,survey.design)
+S3method(dimnames,svyrep.design)
+S3method(dimnames,twophase)
 
 S3method(dimnames, repweights_compressed)
 

@@ -1,6 +1,6 @@
 
 R : Copyright 2006, The R Foundation for Statistical Computing
-Version 2.3.0 alpha (2006-04-04 r37646)
+Version 2.3.1 (2006-06-01)
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -21,7 +21,7 @@ Type 'q()' to quit R.
 > data(pbc, package="survival")
 > pbc$id<-1:nrow(pbc)
 > (d2pbc<-twophase(id=list(~id,~id), data=pbc, subset=~I(trt==-9)))
-Two-phase design:twophase(id = list(~id, ~id), data = pbc, subset = ~I(trt == 
+Two-phase design: twophase(id = list(~id, ~id), data = pbc, subset = ~I(trt == 
     -9))
 Phase 1:
 Independent Sampling design (with replacement)
@@ -47,7 +47,7 @@ svydesign(id = ~id, fpc = `*phase1*`)
 > ## first phase cluster sample, second phase stratified within cluster
 > (d2mu284<-twophase(id=list(~id1,~id),strata=list(NULL,~id1),
 +                    fpc=list(~n1,NULL),data=mu284.1,subset=~sub))
-Two-phase design:twophase(id = list(~id1, ~id), strata = list(NULL, ~id1), fpc = list(~n1, 
+Two-phase design: twophase(id = list(~id1, ~id), strata = list(NULL, ~id1), fpc = list(~n1, 
     NULL), data = mu284.1, subset = ~sub)
 Phase 1:
 1 - level Cluster Sampling design
@@ -57,7 +57,7 @@ Phase 2:
 Stratified Independent Sampling design
 svydesign(id = ~id, strata = ~id1, fpc = `*phase1*`)
 > summary(d2mu284)
-Two-phase design:twophase(id = list(~id1, ~id), strata = list(NULL, ~id1), fpc = list(~n1, 
+Two-phase design: twophase(id = list(~id1, ~id), strata = list(NULL, ~id1), fpc = list(~n1, 
     NULL), data = mu284.1, subset = ~sub)
 Phase 1:
 1 - level Cluster Sampling design
@@ -96,9 +96,30 @@ Data variables:
 > all.equal(SE(t1),SE(t2))
 [1] TRUE
 > 
-> ## case-cohort design
-> ##this example requires R 2.2.0 or later for cch and data.
-> library("survival")
+> if (getRversion() > '2.3.0'){
++ ## case-cohort design
++ ##this example requires R 2.3.1 or later for cch and data.
++ library("survival")
++ data(nwtco, package="survival")
++ ## unstratified, equivalent to Lin & Ying (1993)
++ print(dcchs<-twophase(id=list(~seqno,~seqno), strata=list(NULL,~rel),
++                  subset=~I(in.subcohort | rel), data=nwtco))
++ cch1<-svycoxph(Surv(edrel,rel)~factor(stage)+factor(histol)+I(age/12),
++                design=dcchs)
++ ## Using survival::cch 
++ subcoh <- nwtco$in.subcohort
++ selccoh <- with(nwtco, rel==1|subcoh==1)
++ ccoh.data <- nwtco[selccoh,]
++ ccoh.data$subcohort <- subcoh[selccoh]
++ cch2<-cch(Surv(edrel, rel) ~ factor(stage) + factor(histol) + I(age/12),
++           data =ccoh.data, subcoh = ~subcohort, id=~seqno,
++           cohort.size=4028, method="LinYing", robust=TRUE)
++ 
++ print(all.equal(as.vector(coef(cch1)),as.vector(coef(cch2))))
++ ## cch has smaller variances by a factor of 1.0005 because
++ ## there is a (n/(n-1)) in the survey phase1 varianace
++ print(all.equal(as.vector(SE(cch1)), as.vector(SE(cch2)),tolerance=0.0006))
++ }
 Loading required package: splines
 
 Attaching package: 'survival'
@@ -108,11 +129,7 @@ Attaching package: 'survival'
 
 	 pbc 
 
-> data(nwtco, package="survival")
-> ## unstratified, equivalent to Lin & Ying (1993)
-> (dcchs<-twophase(id=list(~seqno,~seqno), strata=list(NULL,~rel),
-+                  subset=~I(in.subcohort | rel), data=nwtco))
-Two-phase design:twophase(id = list(~seqno, ~seqno), strata = list(NULL, ~rel), 
+Two-phase design: twophase(id = list(~seqno, ~seqno), strata = list(NULL, ~rel), 
     subset = ~I(in.subcohort | rel), data = nwtco)
 Phase 1:
 Independent Sampling design (with replacement)
@@ -120,24 +137,8 @@ svydesign(id = ~seqno)
 Phase 2:
 Stratified Independent Sampling design
 svydesign(id = ~seqno, strata = ~rel, fpc = `*phase1*`)
-> cch1<-svycoxph(Surv(edrel,rel)~factor(stage)+factor(histol)+I(age/12),
-+                design=dcchs)
-> ## Using survival::cch 
-> subcoh <- nwtco$in.subcohort
-> selccoh <- with(nwtco, rel==1|subcoh==1)
-> ccoh.data <- nwtco[selccoh,]
-> ccoh.data$subcohort <- subcoh[selccoh]
-> cch2<-cch(Surv(edrel, rel) ~ factor(stage) + factor(histol) + I(age/12),
-+           data =ccoh.data, subcoh = ~subcohort, id=~seqno,
-+           cohort.size=4028, method="LinYing")
-> 
-> all.equal(as.vector(coef(cch1)),as.vector(coef(cch2)))
 [1] TRUE
-> ## variances equal only to just over 3 digits,
-> ##  probably because of model-based variance in survival::cch
-> all.equal(as.vector(SE(cch1)),as.vector(SE(cch2)),tolerance=0.006)
 [1] TRUE
-> 
 > ## bug report from Takahiro Tsuchiya for version 3.4
 > ## We do not match Sarndal exactly, because our phase-one
 > ## estimator has O(1/n.phase.2) bias.

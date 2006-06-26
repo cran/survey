@@ -30,12 +30,13 @@ all.equal(coef(m1),coef(m2))
 all.equal(SE(t1),SE(t2))
 all.equal(SE(t1),SE(t2))
 
+if (getRversion() > '2.3.0'){
 ## case-cohort design
-##this example requires R 2.2.0 or later for cch and data.
+##this example requires R 2.3.1 or later for cch and data.
 library("survival")
 data(nwtco, package="survival")
 ## unstratified, equivalent to Lin & Ying (1993)
-(dcchs<-twophase(id=list(~seqno,~seqno), strata=list(NULL,~rel),
+print(dcchs<-twophase(id=list(~seqno,~seqno), strata=list(NULL,~rel),
                  subset=~I(in.subcohort | rel), data=nwtco))
 cch1<-svycoxph(Surv(edrel,rel)~factor(stage)+factor(histol)+I(age/12),
                design=dcchs)
@@ -46,13 +47,13 @@ ccoh.data <- nwtco[selccoh,]
 ccoh.data$subcohort <- subcoh[selccoh]
 cch2<-cch(Surv(edrel, rel) ~ factor(stage) + factor(histol) + I(age/12),
           data =ccoh.data, subcoh = ~subcohort, id=~seqno,
-          cohort.size=4028, method="LinYing")
+          cohort.size=4028, method="LinYing", robust=TRUE)
 
-all.equal(as.vector(coef(cch1)),as.vector(coef(cch2)))
-## variances equal only to just over 3 digits,
-##  probably because of model-based variance in survival::cch
-all.equal(as.vector(SE(cch1)),as.vector(SE(cch2)),tolerance=0.006)
-
+print(all.equal(as.vector(coef(cch1)),as.vector(coef(cch2))))
+## cch has smaller variances by a factor of 1.0005 because
+## there is a (n/(n-1)) in the survey phase1 varianace
+print(all.equal(as.vector(SE(cch1)), as.vector(SE(cch2)),tolerance=0.0006))
+}
 ## bug report from Takahiro Tsuchiya for version 3.4
 ## We do not match Sarndal exactly, because our phase-one
 ## estimator has O(1/n.phase.2) bias.

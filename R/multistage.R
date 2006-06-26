@@ -312,6 +312,7 @@ as.fpc<-function(df,strata,ids){
     split(sampsize[,i],strata[,i])<-lapply(split(ids[,i],strata[,i]),count)
   
   if (is.null(df)){
+    ## No fpc
     rval<-list(popsize=NULL, sampsize=sampsize)
     class(rval)="survey_fpc"
     return(rval)
@@ -329,6 +330,14 @@ as.fpc<-function(df,strata,ids){
     stop("FPC implies >100% sampling in some strata.")
   if (!ispopsize && any(popsize>1e10) )
     warning("FPC implies population larger than ten billion.")
+
+  ## check that fpc is constant within strata.
+  for(i in 1:ncol(popsize)){
+    diff<-by(popsize[,i], list(strata[,i]), count)
+    if (any(as.vector(diff)>1))
+      warning("`fpc' varies within strata at stage",i)
+  }
+  
   rval<-list(popsize=popsize, sampsize=sampsize)
   class(rval)<-"survey_fpc"
   rval
