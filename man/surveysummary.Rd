@@ -4,15 +4,11 @@
 \alias{svymean.survey.design2}
 \alias{svymean.svyrep.design}
 \alias{svymean.twophase}
-\alias{svrepmean}
 \alias{svytotal}
 \alias{svytotal.twophase}
 \alias{svytotal.survey.design}
 \alias{svytotal.survey.design2}
 \alias{svytotal.svyrep.design}
-\alias{print.svystat}
-\alias{print.svrepstat}
-\alias{svreptotal}
 \alias{svyvar}
 \alias{svyvar.survey.design}
 \alias{svyvar.svyrep.design}
@@ -20,8 +16,6 @@
 \alias{vcov.svystat}
 \alias{coef.svrepstat}
 \alias{vcov.svrepstat}
-\alias{as.data.frame.svystat}
-\alias{as.data.frame.svrepstat}
 \alias{cv.svyratio}
 \alias{cv.svrepratio}
 \alias{cv.svrepstat}
@@ -30,7 +24,6 @@
 \alias{cv}
 \alias{deff}
 \alias{deff.default}
-\alias{svrepvar}
 \alias{make.formula}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Summary statistics for sample surveys}
@@ -93,9 +86,8 @@ produce missing results.  When using replicate weights and
 missing results will be discarded.
 
 The \code{svytotal} and \code{svreptotal} functions estimate a
-population total.  Use \code{predict} on \code{\link{svyratio}},
-\code{\link{svrepratio}}, \code{\link{svyglm}}, \code{\link{svrepglm}}
-to get ratio or regression estimates of totals.
+population total.  Use \code{predict} on \code{\link{svyratio}} and
+\code{\link{svyglm}}, to get ratio or regression estimates of totals.
 
 The design effect compares the variance of a mean or total to the
 variance from a study of the same size using simple random sampling
@@ -126,7 +118,8 @@ survey functions.
 \author{Thomas Lumley}
 
 \seealso{ \code{\link{svydesign}}, \code{\link{as.svrepdesign}},
-  \code{\link{svrepdesign}},  \code{\link{svyquantile}} ,  \code{\link{ftable.svystat}}}
+  \code{\link{svrepdesign}},  \code{\link{svyquantile}} , 
+ \code{\link{ftable.svystat}}}
 
 \examples{
 

@@ -67,11 +67,30 @@ print.regTermTest<-function(x,...){
 
 svycontrast<-function(stat, contrasts,...) UseMethod("svycontrast")
 
+match.names <- function(nms,contrasts){
+  l<-length(nms)
+  ll<-sapply(contrasts,length)
+  if (all(ll==l)) return(contrasts)
+
+  if (l==0) stop("No names to match")
+  if( !all( unlist(sapply(contrasts,names)) %in% nms))
+    stop("names not matched")
+  
+  lapply(contrasts,
+         function(con) {
+           r<-numeric(l)
+           names(r)<-nms
+           r[names(con)]<-con
+           r
+         })
+  
+}
+
 contrast<-function(coef,var,contrasts){
   nas<-is.na(var[,1])
   drop<-nas & apply(contrasts,2,function(v) all(v==0))
   if(any(drop)){
-    contrasts<-contrasts[!drop,,drop=FALSE]
+    contrasts<-contrasts[,!drop,drop=FALSE]
     coef<-coef[!drop]
     var<-var[!drop,!drop,drop=FALSE]
   }
@@ -83,6 +102,13 @@ contrast<-function(coef,var,contrasts){
 svycontrast.svystat<-function(stat, contrasts,...){
   if (!is.list(contrasts))
     contrasts<-list(contrast=contrasts)
+  if (is.call(contrasts[[1]])){
+    rval<-nlcon(contrasts,as.list(coef(stat)), vcov(stat))
+    class(rval)<-"svrepstat"
+    attr(rval,"statistic")<-"nlcon"
+    return(rval)
+  }
+  contrasts<-match.names(names(coef(stat)),contrasts)
   contrasts<-do.call(rbind,contrasts)
   coef<-contrast(coef(stat),vcov(stat),contrasts)
   class(coef)<-"svystat"
@@ -93,6 +119,13 @@ svycontrast.svystat<-function(stat, contrasts,...){
 svycontrast.svyby<-function(stat, contrasts,...){
   if (!is.list(contrasts))
     contrasts<-list(contrast=contrasts)
+  if (is.call(contrasts[[1]])){
+    rval<-nlcon(contrasts,as.list(coef(stat)), vcov(stat))
+    class(rval)<-"svystat"
+    attr(rval,"statistic")<-"nlcon"
+    return(rval)
+  }
+  contrasts<-match.names(row.names(stat),contrasts)
   contrasts<-do.call(rbind,contrasts)
   coef<-contrast(as.vector(as.matrix(coef(stat))),
                  vcov(stat),contrasts)
@@ -108,6 +141,22 @@ svycontrast.svycoxph<-svycontrast.svystat
 svycontrast.svrepstat<-function(stat, contrasts,...){
   if (!is.list(contrasts))
     contrasts<-list(contrast=contrasts)
+  if (is.call(contrasts[[1]])){
+    if (is.list(stat)){ ##replicates
+      rval<-list(nlcon=nlcon(contrasts,as.list(coef(stat)),vcov(stat)))
+      colnames(stat$replicates)<-names(coef(stat))
+      rval$replicates<-apply(stat$replicates,1,
+                             function(repi) nlcon(datalist=as.list(repi),
+                                                  exprlist=contrasts, varmat=NULL))
+      attr(rval$nlcon,"statistic")<-"nlcon"
+    } else {
+      rval<-nlcon(contrasts,as.list(coef(stat)), vcov(stat))
+      attr(rval,"statistic")<-"nlcon"
+    }
+    class(rval)<-"svrepstat"
+    return(rval)
+  }
+  contrasts<-match.names(names(coef(stat)), contrasts)
   contrasts<-do.call(rbind,contrasts)
   
   coef<-contrast(coef(stat),vcov(stat),contrasts)
@@ -120,3 +169,20 @@ svycontrast.svrepstat<-function(stat, contrasts,...){
   coef
 }
 
+
+
+nlcon<-function(exprlist, datalist, varmat){
+  if (!is.list(exprlist)) exprlist<-list(contrast=exprlist)
+  dexprlist<-lapply(exprlist,
+                    function(expr) deriv(expr, names(datalist))[[1]])
+  values<-lapply(dexprlist,
+                 function(dexpr) eval(do.call(substitute, list(dexpr,datalist))))
+  if (is.null(varmat))
+    return(do.call(c,values))
+  jac<-do.call(rbind,lapply(values,
+                            function(value) attr(value,"gradient")))
+  var<-jac%*%varmat%*%t(jac)
+  values<-do.call(c, values)
+  attr(values, "var")<-var
+  values
+}

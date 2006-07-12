@@ -163,8 +163,8 @@ jknweights<-function(strata,psu, fpc=NULL,
 
 
 brrweights<-function(strata,psu, match=NULL, small=c("fail","split","merge"),
-                     large=c("split","merge","fail"),fay.rho=0,
-                     only.weights=FALSE,compress=TRUE,
+                     large=c("split","merge","fail"), fay.rho=0,
+                     only.weights=FALSE, compress=TRUE,
                      hadamard.matrix=NULL){
 
   small<-match.arg(small)
@@ -408,7 +408,7 @@ as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","Fa
 
 svrepdesign<-function(variables=NULL,repweights=NULL, weights=NULL,
                       data=NULL,type=c("BRR","Fay","JK1", "JKn","bootstrap","other"),
-                      combined.weights=FALSE, rho=NULL,
+                      combined.weights=FALSE, rho=NULL, bootstrap.average=NULL,
                       scale=NULL,rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"))
 {
   
@@ -460,8 +460,10 @@ svrepdesign<-function(variables=NULL,repweights=NULL, weights=NULL,
     scale <-1/(ncol(repweights)*(1-rho)^2)
 
   if (type=="bootstrap"){
+    if(is.null(bootstrap.average))
+      bootstrap.average<-1
     if (is.null(scale))
-      scale<-1/(ncol(repweights)-1)
+      scale<-bootstrap.average/(ncol(repweights)-1)
     if (is.null(rscales))
       rscales<-rep(1,ncol(repweights))
     }

@@ -1,3 +1,13 @@
+3.6-1 Allow averaged bootstrap weights (as StatCanada sometimes produces) 
+      in svrepdesign()
+
+      Fix derivative to get faster convergence in logit calibration 
+      (Diego Zardetto)
+
+      svycontrast() can take named vectors of just the non-zero coefficients.
+
+      Nonlinear combinations of statistics with svycontrast()
+
 3.6   Allow empty factor levels in calibration (for Diego Zardetto). 
 
       Work around for strange S4 class/NAMESPACE issue with hexbin

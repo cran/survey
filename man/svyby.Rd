@@ -77,7 +77,7 @@ svyby(~api99+api00, ~stype+sch.wide, rclus1, svymean, keep.var=FALSE)
 ## comparing subgroups using covmat=TRUE
 mns<-svyby(~api99, ~stype, rclus1, svymean,covmat=TRUE)
 vcov(mns)
-svycontrast(mns, c(-1,1,0))
+svycontrast(mns, c(E = 1, M = -1))
 
 
 ## extractor functions

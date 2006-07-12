@@ -16,7 +16,7 @@ data structure for such a survey.
 \usage{
 svrepdesign(variables = NULL, repweights = NULL, weights = NULL, data =
 NULL, type = c("BRR", "Fay", "JK1","JKn","bootstrap","other"),
-combined.weights=FALSE, rho = NULL, 
+combined.weights=FALSE, rho = NULL, bootstrap.average=NULL,
 scale=NULL, rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"))
 \method{image}{svyrep.design}(x, ..., col=grey(seq(.5,1,length=30)), type.=c("rep","total"))
 }
@@ -30,6 +30,8 @@ scale=NULL, rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"))
   \item{combined.weights}{\code{TRUE} if the \code{repweights} already
     include the sampling weights}
   \item{rho}{Shrinkage factor for weights in Fay's method}
+  \item{bootstrap.average}{For \code{type="bootstrap"}, if the bootstrap
+    weights have averaged, gives the number of iterations averaged over}
   \item{scale, rscales}{Scaling constant for variance, see Details
 below}
 \item{fpc,fpctype}{Finite population correction information}
@@ -68,7 +70,8 @@ below}
 
   To generate your own replicate weights either use
   \code{\link{as.svrepdesign}} on a \code{survey.design} object, or see
-  \code{\link{brrweights}}, \code{\link{jk1weights}} and \code{\link{jknweights}}
+  \code{\link{brrweights}}, \code{\link{bootweights}},
+  \code{\link{jk1weights}} and \code{\link{jknweights}}
   
   The \code{model.frame} method extracts the observed data.
 

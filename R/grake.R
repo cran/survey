@@ -189,7 +189,7 @@ grake<-function(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verb
                U <- bounds[2]
                A <- (U-L)/((U-1)*(1-L))
                eAu <- exp(A*u)
-               U*(1-L)*eAu*A/(U-1+(1-L)*eAu)-(L*(U-1)+U*(1-L)*eAu)/(U-1+(1-L)*eAu)^2
+               U*(1-L)*eAu*A/(U-1+(1-L)*eAu)-(L*(U-1)+U*(1-L)*eAu)*((1-L)*eAu*A)/(U-1+(1-L)*eAu)^2
              }
              )
 

@@ -104,7 +104,6 @@ svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
     rval <-cbind(byfactors[uniques,,drop=FALSE], statistic=rval)
 
   expand.index<-function(index,reps,x=FALSE){
-    print(index)
     ns<-max(index)
     if (x){
       i<-matrix(1:(ns*reps),ncol=reps)
@@ -114,7 +113,6 @@ svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
       i<-matrix(1:(ns*reps), ncol=reps, nrow=ns, byrow=TRUE)
       rval<- i[index,]
     }
-    print(rval)
     as.vector(rval)
   }
 
@@ -177,7 +175,9 @@ SE.svyby <-function(object,...){
 
 coef.svyby<-function(object,...){
     aa<-attr(object,"svyby")
-    object[,max(aa$margins)+(1:aa$nstats)]
+    rval<-object[,max(aa$margins)+(1:aa$nstats)]
+    names(rval)<-row.names(object)
+    rval
 }
 
 deff.svyby<-function(object,...){

@@ -2,20 +2,13 @@
 \alias{svyglm}
 \alias{svyglm.survey.design}
 \alias{svyglm.svyrep.design}
-\alias{svrepglm}
-\alias{print.svyglm}
 \alias{summary.svyglm}
 \alias{summary.svrepglm}
-\alias{print.summary.svyglm}
 \alias{vcov.svyglm}
 \alias{residuals.svyglm}
 \alias{residuals.svrepglm}
 \alias{predict.svyglm}
 \alias{coef.svyglm}
-\alias{extractAIC.svyglm}
-\alias{extractAIC.svrepglm}
-\alias{logLik.svyglm}
-\alias{logLik.svrepglm}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Survey-weighted generalised linear models.}
 \description{
