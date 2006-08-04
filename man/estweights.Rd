@@ -10,13 +10,15 @@ regression model for second-phase sampling probability.  This function
 should be particularly useful in reweighting to account for missing data.  }
 \usage{
 estWeights(data,formula,...)
-\method{estWeights}{twophase}(data,formula,...)
-\method{estWeights}{data.frame}(data,formula, subset=NULL, strata=NULL,...)
+\method{estWeights}{twophase}(data,formula=NULL, working.model=NULL,...)
+\method{estWeights}{data.frame}(data,formula=NULL, working.model=NULL,
+      subset=NULL, strata=NULL,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{data}{twophase design object or data frame}
   \item{formula}{Predictors for estimating weights}
+  \item{working.model}{Model fitted to complete (ie phase 1) data}
   \item{subset}{Subset of data frame with complete data (ie phase 1).
     If \code{NULL} use all complete cases}
   \item{strata}{Stratification (if any) of phase 2 sampling}
@@ -32,6 +34,12 @@ estWeights(data,formula,...)
   probabilities using logistic regression as described by Robins et al
   (1994) and adds information to the object to enable correct sandwich
   standard errors to be computed.
+
+  An alternative to specifying \code{formula} is to specify
+  \code{working.model}. The estimating functions from this model will be
+  used as predictors of the sampling probabilities, which will increase
+  efficiency to the extent that the working model and the model of
+  interest estimate the same parameters (Kulich \& Lin 2004).
   
   The effect on a two-phase design object is very similar to
   \code{\link{calibrate}}, and is identical when \code{formula}
@@ -42,11 +50,12 @@ estWeights(data,formula,...)
 }
 
 \references{
-
 Robins JM, Rotnitzky A, Zhao LP. (1994) Estimation of regression
 coefficients when some regressors are not always observed. Journal of
 the American Statistical Association, 89, 846-866.
 
+Kulich M, Lin DY (2004). Improving the Efficiency of Relative-Risk
+Estimation in Case-Cohort Studies. Journal of the American Statistical Association, Vol. 99,  pp.832-844 
 }
 
 \seealso{ \code{\link{postStratify}},

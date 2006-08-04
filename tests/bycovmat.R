@@ -15,3 +15,26 @@ stopifnot(all(na.omit(
 stopifnot(all(
               as.vector(as.matrix(SE(b)))==sqrt(diag(vcov(b)))
               ))
+
+rat <- svyratio(~ell+mobility, ~mobility+meals, dclus1,covmat=TRUE)
+all <- svytotal(~ell+mobility+meals, dclus1)
+
+stopifnot(all(abs(vcov(svycontrast(all,
+                                   list(quote(ell/mobility),
+                                        quote(mobility/mobility),
+                                        quote(ell/meals),quote(mobility/meals))))
+                  -vcov(rat))<1e-10))
+
+stopifnot(all(abs(SE(rat)-sqrt(diag(vcov(rat))))<1e-10))
+
+rat <- svyratio(~ell+mobility, ~mobility+meals, rclus1,covmat=TRUE)
+all <- svytotal(~ell+mobility+meals, rclus1, return.replicates=TRUE)
+
+con<-svycontrast(all,
+                 list(quote(ell/mobility),
+                      quote(mobility/mobility),
+                      quote(ell/meals),quote(mobility/meals)))
+
+stopifnot(all(abs(survey:::svrVar(con$replicates, rclus1$scale,rclus1$rscales)-vcov(rat))<1e-10))
+
+

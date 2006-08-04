@@ -94,8 +94,18 @@ contrast<-function(coef,var,contrasts){
     coef<-coef[!drop]
     var<-var[!drop,!drop,drop=FALSE]
   }
-  rval<-contrasts%*%coef
-  attr(rval,"var")<-contrasts%*%var%*%t(contrasts)
+  if (any(is.na(coef))){
+    badin<-is.na(coef)
+    bad<-((contrasts!=0)%*%is.na(coef))>0
+    rval<-rep(NA,NROW(contrasts))
+    rval[!bad]<-contrasts[!bad,!badin,drop=FALSE]%*%coef[!badin]
+    v<-matrix(NA,length(rval),length(rval))
+    v[!bad,!bad]<-contrasts[!bad,!badin,drop=FALSE]%*%var[!badin,!badin,drop=FALSE]%*%t(contrasts[!bad,!badin,drop=FALSE])
+    attr(rval, "var")<-v
+  } else{
+    rval<-contrasts%*%coef
+    attr(rval,"var")<-contrasts%*%var%*%t(contrasts)
+  }
   rval
 }
 
@@ -145,9 +155,9 @@ svycontrast.svrepstat<-function(stat, contrasts,...){
     if (is.list(stat)){ ##replicates
       rval<-list(nlcon=nlcon(contrasts,as.list(coef(stat)),vcov(stat)))
       colnames(stat$replicates)<-names(coef(stat))
-      rval$replicates<-apply(stat$replicates,1,
+      rval$replicates<-t(apply(stat$replicates,1,
                              function(repi) nlcon(datalist=as.list(repi),
-                                                  exprlist=contrasts, varmat=NULL))
+                                                  exprlist=contrasts, varmat=NULL)))
       attr(rval$nlcon,"statistic")<-"nlcon"
     } else {
       rval<-nlcon(contrasts,as.list(coef(stat)), vcov(stat))
@@ -159,7 +169,7 @@ svycontrast.svrepstat<-function(stat, contrasts,...){
   contrasts<-match.names(names(coef(stat)), contrasts)
   contrasts<-do.call(rbind,contrasts)
   
-  coef<-contrast(coef(stat),vcov(stat),contrasts)
+  coef<-contrast(coef(stat), vcov(stat), contrasts)
   if (is.list(stat)){
     coef<-list(contrast=coef,
                replicates=crossprod(stat$replicates, contrasts))

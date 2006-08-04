@@ -1217,7 +1217,7 @@ print.summary.svyglm<-function (x, digits = max(3, getOption("digits") - 3),
 
     
 
-svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, design,na.rm=FALSE,formula,...){
+svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, design,na.rm=FALSE,formula,covmat=FALSE,...){
 
   if (!exists(".Generic"))
     .Deprecated("svyratio")
@@ -1244,9 +1244,9 @@ svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, desi
       numerator<-numerator[!nas,,drop=FALSE]
       denominator<-denominator[!nas,,drop=FALSE]
   }
-  allstats<-svymean(all,design, return.replicates=TRUE)
+  allstats<-svymean(all, design, return.replicates=TRUE)
   
-  rval<-list(ratio=outer(allstats$mean[1:nn],allstats$mean[nn+1:nd],"/"))
+  rval<-list(ratio=outer(allstats$mean[1:nn], allstats$mean[nn+1:nd], "/"))
   
   if (is.null(allstats$replicates)){
     ##only self-representing strata.
@@ -1255,11 +1255,21 @@ svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, desi
     vars<-matrix(nrow=nn,ncol=nd)
     for(i in 1:nn){
       for(j in 1:nd){
-        vars[i,j]<-svrVar(allstats$replicates[,i]/allstats$replicates[,nn+j], design$scale, design$rscales)
+        vars[i,j]<-svrVar(allstats$replicates[,i]/allstats$replicates[,nn+j],
+                          design$scale, design$rscales)
       }
     }
   }
-  
+  if (covmat){
+      if (is.null(allstats$replicates))
+          vcovmat<-matrix(0,nn*nd,nn*nd)
+      else
+          vcovmat<-svrVar(allstats$replicates[,rep(1:nn,nd)]/allstats$replicates[,nn+rep(1:nd,each=nn)],
+                          design$scale, design$rscales)
+      rownames(vcovmat)<-names(numerator)[rep(1:nn,nd)]
+      colnames(vcovmat)<-names(denominator)[rep(1:nd,each=nn)]
+      rval$vcov<-vcovmat
+  }
 
   rval$var<-vars
   attr(rval,"call")<-sys.call()
@@ -1268,7 +1278,14 @@ svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, desi
     
 }
 
-
+vcov.svyratio <- function(object, ...){
+    covmat<-object$vcov
+    if (is.null(covmat)){
+        covmat<-matrix(NaN,length(object$var),length(object$var))
+        diag(covmat)<-as.vector(object$var)
+    }
+    covmat
+}
 
 residuals.svrepglm<-function(object,type = c("deviance", "pearson", "working", 
     "response", "partial"),...){

@@ -17,9 +17,12 @@ Ratio estimation and estimates of totals based on ratios for complex
 survey samples. Estimating domain means can be done more easily with \code{\lin{svymean}}.
 }
 \usage{
-\method{svyratio}{survey.design2}(numerator=formula, denominator, design,separate=FALSE, na.rm=FALSE,formula,...)
-\method{svyratio}{svyrep.design}(numerator=formula, denominator, design, na.rm=FALSE,formula,...)
-\method{svyratio}{twophase}(numerator=formula, denominator, design,separate=FALSE, na.rm=FALSE,formula,...)
+\method{svyratio}{survey.design2}(numerator=formula, denominator,
+   design,separate=FALSE, na.rm=FALSE,formula, covmat=FALSE,...)
+\method{svyratio}{svyrep.design}(numerator=formula, denominator, design,
+   na.rm=FALSE,formula, covmat=FALSE,...)
+\method{svyratio}{twophase}(numerator=formula, denominator, design,
+    separate=FALSE, na.rm=FALSE,formula,...)
 \method{predict}{svyratio}(object, total, se=TRUE,...)
 \method{predict}{svyratio_separate}(object, total, se=TRUE,...)
 }
@@ -36,6 +39,7 @@ survey samples. Estimating domain means can be done more easily with \code{\lin{
   \item{se}{Return standard errors?}
   \item{separate}{Estimate ratio separately for strata}
   \item{na.rm}{Remove missing values?}
+  \item{covmat}{Compute the full variance-covariance matrix of the ratios}
   \item{...}{Other unused arguments for other methods}
 }
 \details{

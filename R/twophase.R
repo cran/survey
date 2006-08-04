@@ -672,53 +672,76 @@ postStratify.twophase<-function(design, ...) {
 
 estWeights<-function(data, formula, ...) UseMethod("estWeights")
                              
-estWeights.twophase<-function(data, formula,...){
+estWeights.twophase<-function(data, formula=NULL, working.model=NULL,...){
 
+  if (!xor(is.null(formula), is.null(working.model)))
+    stop("Must specify one of formula, working.model")
+
+  certainty<-rep(FALSE,nrow(data$phase1$full$variables))
+  certainty[data$subset]<-data$phase2$fpc$popsize==data$phase2$fpc$sampsize
+  
+  if (!is.null(formula)){
     ff<-data$subset~rhs
     ff[[3]]<-formula[[2]]
     if(!attr(terms(ff),"intercept")) stop("formula must have an intercept")
-
-    certainty<-rep(FALSE,nrow(data$phase1$full$variables))
-    certainty[data$subset]<-data$phase2$fpc$popsize==data$phase2$fpc$sampsize
-
+    
     model<-glm(ff, data=data$phase1$full$variables, family=binomial(),
                subset=!certainty, na.action=na.fail)
-    fitp<-as.numeric(certainty[data$subset])
-    fitp[!certainty[data$subset]]<-fitted(model)[data$subset[!certainty]]
-    
-    g<- (1/fitp)/(1/data$phase2$prob)
+  } else {
+    xx<-estfun(working.model)
+    model<-glm(data$subset~xx,family=binomial(), subset=!certainty, na.action=na.fail)
+  }
+  fitp<-as.numeric(certainty[data$subset])
+  fitp[!certainty[data$subset]]<-fitted(model)[data$subset[!certainty]]
+  
+  g<- (1/fitp)/(1/data$phase2$prob)
+  
+  mm<-model.matrix(model)[data$subset[!certainty],,drop=FALSE]
 
-    mm<-model.matrix(model)[data$subset[!certainty],,drop=FALSE]
-    if (any(certainty)){
-        mm1<-matrix(0,ncol=ncol(mm)+1,nrow=sum(data$subset))
-        mm1[,1]<-as.numeric(certainty[data$subset])
-        mm1[!certainty[data$subset],-1]<-mm
+  if (any(certainty)){
+    mm1<-matrix(0,ncol=ncol(mm)+1,nrow=sum(data$subset))
+    mm1[,1]<-as.numeric(certainty[data$subset])
+    mm1[!certainty[data$subset],-1]<-mm
         mm<-mm1
-    }
-
-    whalf<-sqrt(1/data$phase2$prob)
-
-    caldata<-list(qr=qr(mm*whalf), w=g*whalf, stage=0, index=NULL)
-    class(caldata) <- c("greg_calibration","gen_raking")
-
-    data$phase2$prob<-fitp
-    data$usu<-data$usu/g
-    data$phase2$postStrata <- c(data$phase2$postStrata, list(caldata))
+  }
+  
+  whalf<-sqrt(1/data$phase2$prob)
+  
+  caldata<-list(qr=qr(mm*whalf), w=g*whalf, stage=0, index=NULL)
+  class(caldata) <- c("greg_calibration","gen_raking")
+  
+  data$phase2$prob<-fitp
+  data$usu<-data$usu/g
+  data$phase2$postStrata <- c(data$phase2$postStrata, list(caldata))
     
-    if (length(data$phase1$sample$prob)==length(data$phase2$prob))
-        data$prob<-data$phase1$sample$prob*data$phase2$prob
-    else{
-        data$prob<-rep(Inf,length(data$phase1$sample$prob))
-        data$prob[subset]<-data$prob[subset]*data$phase2$prob
-    }
-
-    data$call <- sys.call(-1)
-    
-    data
-    
+  if (length(data$phase1$sample$prob)==length(data$phase2$prob))
+    data$prob<-data$phase1$sample$prob*data$phase2$prob
+  else{
+    data$prob<-rep(Inf,length(data$phase1$sample$prob))
+    data$prob[subset]<-data$prob[subset]*data$phase2$prob
+  }
+  
+  data$call <- sys.call(-1)
+  
+  data
+  
 }
 
-estWeights.data.frame<-function(data,formula,subset=NULL, strata=NULL,...){
+
+estfun<-function(model,...) UseMethod("estfun")
+estfun.coxph<-function(model, ...) resid(model,"score")
+estfun.glm<-function(model){
+  xmat<-model.matrix(model)
+  residuals(model,"working")*model$weights*xmat
+}
+estfun.lm<-function(model,...){
+  model.matrix(model)*resid(model)
+}
+
+
+
+
+estWeights.data.frame<-function(data,formula=NULL, working.model=NULL,subset=NULL, strata=NULL,...){
 
     if (is.null(subset))
         subset<-complete.cases(data)
@@ -730,7 +753,7 @@ estWeights.data.frame<-function(data,formula,subset=NULL, strata=NULL,...){
                       strata=list(NULL,strata))
     }
 
-    rval<-estWeights(des,formula=formula)
+    rval<-estWeights(des,formula=formula,working.model=working.model)
     rval$call<-sys.call(-1)
     rval
     

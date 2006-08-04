@@ -100,8 +100,8 @@ Ratios=
                as.numeric(x > 4)
 I(x * (x > 4))             6.195
 SEs=
-               as.numeric(x > 4)
-I(x * (x > 4))         0.7555129
+          [,1]
+[1,] 0.7555129
 \end{Soutput}
 \end{Schunk}
 
@@ -144,8 +144,8 @@ Ratios=
                                as.numeric(comp.imp == "Yes")
 I(api00 * (comp.imp == "Yes"))                       672.049
 SEs=
-                               as.numeric(comp.imp == "Yes")
-I(api00 * (comp.imp == "Yes"))                      6.518153
+         [,1]
+[1,] 6.518153
 \end{Soutput}
 \begin{Sinput}
 > summary(svyglm(api00 ~ comp.imp - 1, gclus1))
@@ -191,8 +191,8 @@ Ratios=
                   as.numeric(y1 > 40)
 I(y1 * (y1 > 40))            48.69014
 SEs=
-                  as.numeric(y1 > 40)
-I(y1 * (y1 > 40))            1.108825
+         [,1]
+[1,] 1.108825
 \end{Soutput}
 \begin{Sinput}
 > summary(svyglm(y1 ~ I(y1 > 40) + 0, dmu284))
@@ -237,7 +237,7 @@ Loading required package: splines
 \end{Sinput}
 \begin{Soutput}
        mean     SE
-rel 0.16795 0.0104
+rel 0.18671 0.0122
 \end{Soutput}
 \begin{Sinput}
 > svyratio(~I(rel * as.numeric(age > 36)), ~as.numeric(age > 36), 
@@ -248,10 +248,10 @@ Ratio estimator: svyratio.twophase(~I(rel * as.numeric(age > 36)), ~as.numeric(a
     36), dccs8)
 Ratios=
                               as.numeric(age > 36)
-I(rel * as.numeric(age > 36))             0.167946
+I(rel * as.numeric(age > 36))            0.1867095
 SEs=
                               as.numeric(age > 36)
-I(rel * as.numeric(age > 36))           0.01044728
+I(rel * as.numeric(age > 36))           0.01224983
 \end{Soutput}
 \begin{Sinput}
 > summary(svyglm(rel ~ I(age > 36) + 0, dccs8))
@@ -266,12 +266,12 @@ twophase(id = list(~seqno, ~seqno), strata = list(NULL, ~interaction(rel,
 
 Coefficients:
                  Estimate Std. Error t value Pr(>|t|)    
-I(age > 36)FALSE 0.112839   0.008717   12.94   <2e-16 ***
-I(age > 36)TRUE  0.167946   0.010447   16.08   <2e-16 ***
+I(age > 36)FALSE 0.101568   0.007715   13.16   <2e-16 ***
+I(age > 36)TRUE  0.186709   0.012250   15.24   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
-(Dispersion parameter for gaussian family taken to be 0.121011)
+(Dispersion parameter for gaussian family taken to be 0.1199626)
 
 Number of Fisher Scoring iterations: 2
 \end{Soutput}

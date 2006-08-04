@@ -426,8 +426,7 @@ print.summary.survey.design2<-function(x,...){
 
 .svycheck<-function(object){
   if (inherits(object,"survey.design") &&
-      !is.null(object$nPSU) && 
-      !getOption("survey.want.obsolete"))
+      !is.null(object$nPSU))
     warning("This is an old-style design object. Please use as.svydesign2 to update it.")
 }
 
@@ -654,7 +653,7 @@ svymean.survey.design2<-function(x,design, na.rm=FALSE,deff=FALSE,...){
   return(average)
 }
 
-svyratio.survey.design2<-function(numerator=formula, denominator, design, separate=FALSE,na.rm=FALSE,formula,...){
+svyratio.survey.design2<-function(numerator=formula, denominator, design, separate=FALSE,na.rm=FALSE,formula,covmat=FALSE,...){
 
     if (separate){
       strats<-sort(unique(design$strata[,1]))
@@ -684,6 +683,8 @@ svyratio.survey.design2<-function(numerator=formula, denominator, design, separa
     else if(typeof(denominator) %in% c("expression","symbol"))
         denominator<-eval(denominator, design$variables)
 
+    numerator<-as.matrix(numerator)
+    denominator<-as.matrix(denominator)
     nn<-NCOL(numerator)
     nd<-NCOL(denominator)
 
@@ -706,6 +707,16 @@ svyratio.survey.design2<-function(numerator=formula, denominator, design, separa
         vars[i,j]<-svyrecvar(r*1/design$prob, design$cluster, design$strata, design$fpc,
                             postStrata=design$postStrata)
       }
+    }
+    if (covmat){
+        ii<-rep(1:nn,nd)
+        jj<-rep(1:nd,each=nn)
+        allr<-sweep(numerator[,ii]-t(as.vector(rval$ratio)*t(denominator[,jj,drop=FALSE])),
+                    2, colSums(denominator[,jj,drop=FALSE]/design$prob),"/")
+        vcovmat<-svyrecvar(allr*1/design$prob, design$cluster, design$strata, design$fpc,
+                           postStrata=design$postStrata)
+        colnames(vcovmat)<-colnames(denominator)[ii]
+        rval$vcov<-vcovmat
     }
     colnames(vars)<-names(denominator)
     rownames(vars)<-names(numerator)

@@ -1,3 +1,7 @@
+3.6-2 covmat=TRUE option for svyratio.
+
+      svycontrast() fix for svyby() with empty groups (ine.pt)
+
 3.6-1 Allow averaged bootstrap weights (as StatCanada sometimes produces) 
       in svrepdesign()
 

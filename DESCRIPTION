@@ -1,11 +1,11 @@
 Package: survey
 Title: analysis of complex survey samples
 Description: Summary statistics, generalised linear models, and general maximum pseudolikelihood estimation for multistage stratified, cluster-sampled, unequally weighted survey samples. Variances by Taylor series linearisation or replicate weights. Post-stratification, GREG estimation, and raking. Two-phase designs. Graphics. 
-Version: 3.6-1
+Version: 3.6-2
 Author: Thomas Lumley
 Maintainer: Thomas Lumley <tlumley@u.washington.edu>
 License: LGPL 
 Depends: R (>= 2.2.0)
 Suggests: survival, MASS, KernSmooth
 URL: http://faculty.washington.edu/tlumley/survey/
-Packaged: Wed Jul 12 14:06:27 2006; thomas
+Packaged: Fri Aug  4 14:56:52 2006; thomas

@@ -65,6 +65,7 @@ S3method(vcov, svyglm)
 S3method(vcov, svymle)
 S3method(vcov, svystat)
 S3method(vcov, svyby)
+S3method(vcov, svyratio)
 
 S3method(logLik,svyglm)
 S3method(logLik,svrepglm)
