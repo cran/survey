@@ -1639,7 +1639,7 @@ rake<-function(design, sample.margins, population.margins,
     
     strata<-lapply(sample.margins, function(margin)
                    if(inherits(margin,"formula")){
-                       mf<-model.frame(margin, data=design$variables)
+                     mf<-model.frame(margin, data=design$variables)
                    }
                    )
     
@@ -1655,7 +1655,7 @@ rake<-function(design, sample.margins, population.margins,
     converged<-FALSE
     while(iter < control$maxit){
         ## we don't want to accumulate more poststrata with each iteration
-        design$postStrata<-oldpoststrata
+        design$postStrata<-NULL
         
         for(i in 1:nmar){
             design<-postStratify(design, strata[[i]],
@@ -1673,6 +1673,14 @@ rake<-function(design, sample.margins, population.margins,
         }
         oldtable<-newtable
         iter<-iter+1
+    }
+
+    ## changed in 3.6-3 to allow the projections to be iterated
+    ## in svyrecvar
+    rakestrata<-design$postStrata
+    if(!is.null(rakestrata)){
+      class(rakestrata)<-"raking"
+      design$postStrata<-c(oldpoststrata, list(rakestrata))
     }
     
     design$call<-sys.call()

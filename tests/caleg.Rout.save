@@ -1,6 +1,6 @@
 
-R : Copyright 2006, The R Foundation for Statistical Computing
-Version 2.3.0 alpha (2006-04-04 r37646)
+R version 2.5.0 Under development (unstable) (2006-09-25 r39513)
+Copyright (C) 2006 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -136,8 +136,6 @@ api.stu 3242857 38967
 [1] 0.7906782 1.7891164
 >  dclus1gb<-calibrate(dclus1, ~enroll, pop, bounds=c(.6,1.5))
 Loading required package: MASS
-Warning message:
-Sampling and population totals have different names. in: calibrate.survey.design2(dclus1, ~enroll, pop, bounds = c(0.6,  
 >  range(weights(dclus1gb)/weights(dclus1))
 [1] 0.7198751 1.5000000
 > 

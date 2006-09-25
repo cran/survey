@@ -81,6 +81,11 @@ dclus1r<-rake(dclus1, list(~stype,~sch.wide), list(pop.types, pop.schwide))
 svymean(~api00, dclus1r)
 svytotal(~enroll, dclus1r)
 
+## compare to raking with calibrate()
+dclus1gr<-calibrate(dclus1, ~stype+sch.wide, pop=c(6194, 755,1018,5122),
+           calfun="raking")
+svymean(~stype+api00, dclus1r)
+svymean(~stype+api00, dclus1gr)
 
 ## compare to joint post-stratification
 ## (only possible if joint population table is known)

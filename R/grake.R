@@ -45,11 +45,13 @@ calibrate.survey.design2<-function(design, formula, population,
   if (length(sample.total)!=length(population))
     stop("Population and sample totals are not the same length.")
 
-  if (!all(names(sample.total) %in% names(population)))
-    warning("Sampling and population totals have different names.")
-  else if (!all(names(sample.total) == names(population))){
+  if(!is.null(names(population))){
+    if (!all(names(sample.total) %in% names(population)))
+      warning("Sampling and population totals have different names.")
+    else if (!all(names(sample.total) == names(population))){
       warning("Sample and population totals reordered to make names agree: check results.")
       population <- population[match(names(sample.total), names(population))]
+    }
   }
   
   tqr<-qr(mm*whalf)
@@ -127,13 +129,14 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
   if (length(sample.total)!=length(population))
     stop("Population and sample totals are not the same length.")
 
-  if (!all(names(sample.total) %in% names(population)))
-      warning("Sampling and population totals have different names.")
-  else if (!all(names(sample.total) == names(population))){
+  if (!is.null(names(population))){
+    if (!all(names(sample.total) %in% names(population)))
+      warning("Sample and population totals have different names.")
+    else if (!all(names(sample.total) == names(population))){
       warning("Sample and population totals reordered to make names agree: check results.")
       population <- population[match(names(sample.total), names(population))]
+    }
   }
-
 
   calfun <- match.arg(calfun)
   gtotal <- grake(mm,ww,calfun,bounds=bounds,population=population,

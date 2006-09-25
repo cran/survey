@@ -400,8 +400,9 @@ svyCprod<-function(x, strata, psu, fpc, nPSU, certainty=NULL, postStrata=NULL,
   ## Remove post-stratum means, which may cut across PSUs
   if(!is.null(postStrata)){
     for (psvar in postStrata){
+      if (inherits(psvar, "greg_calibration") || inherits(psvar, "raking"))
+        stop("rake() and calibrate() not supported for old-style design objects")
       psw<-attr(psvar,"weights")
-      postStrata<-as.factor(psvar)
       psmeans<-rowsum(x/psw,psvar,reorder=TRUE)/as.vector(table(factor(psvar)))
       x<- x-psmeans[match(psvar,sort(unique(psvar))),]*psw
     }

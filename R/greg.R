@@ -46,7 +46,7 @@ regcalibrate.survey.design2<-function(design, formula, population,
     if (length(sample.total)!=length(population))
       stop("Population and sample totals are not the same length.")
     
-    if (any(names(sample.total)!=names(population)))
+    if (!is.null(names(population)) && any(names(sample.total)!=names(population)))
       warning("Sample and population totals have different names.")
 
     tqr<-qr(mm*whalf/sqrt(sigma2))
@@ -184,7 +184,7 @@ regcalibrate.svyrep.design<-function(design, formula, population,compress=NA,lam
   
   if (length(sample.total)!=length(population))
     stop("Population and sample totals are not the same length.")
-  if (any(names(sample.total)!=names(population)))
+  if (!is.null(names(population)) && any(names(sample.total)!=names(population)))
     warning("Sample and population totals have different names.")
   
   Tmat<-crossprod(mm*whalf/sqrt(sigma2))

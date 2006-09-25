@@ -1,3 +1,12 @@
+3.6-3 raking by rake() now has slightly more accurate (smaller)
+      standard errors. As a result, it can't be used on pre-2.9 
+      svydesign objects.
+
+      calibrate() does not warn about name mismatches when population 
+      argument has no names.
+
+      svyCprod, svyrecvar, grake now exported.
+
 3.6-2 covmat=TRUE option for svyratio.
 
       svycontrast() fix for svyby() with empty groups (ine.pt)

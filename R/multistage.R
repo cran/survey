@@ -248,10 +248,18 @@ svyrecvar<-function(x, clusters,  stratas, fpcs, postStrata=NULL,
           ## G-calibration within clusters
           cal<-c(cal, list(psvar))
         }
+      } else if (inherits(psvar, "raking")){
+        ## raking by iterative proportional fitting
+        for(iterations in 1:10){
+          for(margin in psvar){
+            psw<-attr(margin, "weights")
+            x<- x - psw*apply(x/psw, 2, ave, margin)
+          }
+        }
       } else {
         ## ordinary post-stratification
         psw<-attr(psvar, "weights")
-        postStrata<-as.factor(psvar)
+        psvar<-as.factor(psvar)
         psmeans<-rowsum(x/psw,psvar,reorder=TRUE)/as.vector(table(factor(psvar)))
         x<- x-psmeans[match(psvar,sort(unique(psvar))),]*psw
       }
@@ -718,8 +726,8 @@ svyratio.survey.design2<-function(numerator=formula, denominator, design, separa
         colnames(vcovmat)<-colnames(denominator)[ii]
         rval$vcov<-vcovmat
     }
-    colnames(vars)<-names(denominator)
-    rownames(vars)<-names(numerator)
+    colnames(vars)<-colnames(denominator)
+    rownames(vars)<-colnames(numerator)
     rval$var<-vars
     attr(rval,"call")<-sys.call()
     class(rval)<-"svyratio"

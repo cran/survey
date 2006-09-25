@@ -12,15 +12,15 @@ Possible additional developments in no particular order
  - Survival curve estimation (the standard errors are the only 
 	non-trivial part of this)
 
- - Calibration to estimating functions to reproduce the semiparametric
-   estimators of Robins, Rotnitzky and Zhao.
-
  - Large data sets: design object with references to data stored in a 
    database. Linear regression, but probably no other regression models.
+  [SQLite data frames may solve this]
 
  - GEE. 
 
  - imputation
+
+ - methods for multiple-response categorical data
 
  - Parametric survival models (you can do these with svymle)
 

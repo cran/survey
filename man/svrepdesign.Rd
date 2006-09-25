@@ -31,7 +31,7 @@ scale=NULL, rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"))
     include the sampling weights}
   \item{rho}{Shrinkage factor for weights in Fay's method}
   \item{bootstrap.average}{For \code{type="bootstrap"}, if the bootstrap
-    weights have averaged, gives the number of iterations averaged over}
+    weights have been averaged, gives the number of iterations averaged over}
   \item{scale, rscales}{Scaling constant for variance, see Details
 below}
 \item{fpc,fpctype}{Finite population correction information}

@@ -679,7 +679,7 @@ estWeights.twophase<-function(data, formula=NULL, working.model=NULL,...){
 
   certainty<-rep(FALSE,nrow(data$phase1$full$variables))
   certainty[data$subset]<-data$phase2$fpc$popsize==data$phase2$fpc$sampsize
-  
+
   if (!is.null(formula)){
     ff<-data$subset~rhs
     ff[[3]]<-formula[[2]]
@@ -741,10 +741,14 @@ estfun.lm<-function(model,...){
 
 
 
-estWeights.data.frame<-function(data,formula=NULL, working.model=NULL,subset=NULL, strata=NULL,...){
+estWeights.data.frame<-function(data,formula=NULL, working.model=NULL,
+                                subset=NULL, strata=NULL,...){
 
-    if (is.null(subset))
+    if (is.null(subset)){
         subset<-complete.cases(data)
+        if (all(subset))
+          stop("No missing data.")
+        }
     
     if(is.null(strata)){
         des<-twophase(id=list(~1,~1), subset=subset, data=data)

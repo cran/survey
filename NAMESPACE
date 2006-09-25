@@ -6,7 +6,7 @@ export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        withReplicates, hadamard, paley, is.hadamard, bootweights,
        jk1weights,jknweights, brrweights, regTermTest, degf, nonresponse, 
        sparseCells, neighbours, joinCells, compressWeights, make.formula,
-       svycontrast)
+       svycontrast,svyCprod, svyrecvar, rake)
 
 S3method(svymean,survey.design)
 S3method(svymean,svyrep.design)

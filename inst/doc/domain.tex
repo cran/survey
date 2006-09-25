@@ -77,7 +77,7 @@ Coefficients:
 I(x > 4)FALSE   3.3143     0.3117   10.63 0.000127 ***
 I(x > 4)TRUE    6.1950     0.7555    8.20 0.000439 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 
 (Dispersion parameter for gaussian family taken to be 2.557379)
 
@@ -100,8 +100,8 @@ Ratios=
                as.numeric(x > 4)
 I(x * (x > 4))             6.195
 SEs=
-          [,1]
-[1,] 0.7555129
+               as.numeric(x > 4)
+I(x * (x > 4))         0.7555129
 \end{Soutput}
 \end{Schunk}
 
@@ -144,8 +144,8 @@ Ratios=
                                as.numeric(comp.imp == "Yes")
 I(api00 * (comp.imp == "Yes"))                       672.049
 SEs=
-         [,1]
-[1,] 6.518153
+                               as.numeric(comp.imp == "Yes")
+I(api00 * (comp.imp == "Yes"))                      6.518153
 \end{Soutput}
 \begin{Sinput}
 > summary(svyglm(api00 ~ comp.imp - 1, gclus1))
@@ -162,7 +162,7 @@ Coefficients:
 comp.impNo   649.706     12.563   51.72   <2e-16 ***
 comp.impYes  672.049      6.518  103.10   <2e-16 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 
 (Dispersion parameter for gaussian family taken to be 10519.86)
 
@@ -191,8 +191,8 @@ Ratios=
                   as.numeric(y1 > 40)
 I(y1 * (y1 > 40))            48.69014
 SEs=
-         [,1]
-[1,] 1.108825
+                  as.numeric(y1 > 40)
+I(y1 * (y1 > 40))            1.108825
 \end{Soutput}
 \begin{Sinput}
 > summary(svyglm(y1 ~ I(y1 > 40) + 0, dmu284))
@@ -209,7 +209,7 @@ Coefficients:
 I(y1 > 40)FALSE   34.419      1.842   18.69 0.000334 ***
 I(y1 > 40)TRUE    48.690      1.109   43.91  2.6e-05 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 
 (Dispersion parameter for gaussian family taken to be 27.96987)
 
@@ -223,11 +223,6 @@ months) at diagnosis
 \begin{Schunk}
 \begin{Sinput}
 > library("survival")
-\end{Sinput}
-\begin{Soutput}
-Loading required package: splines
-\end{Soutput}
-\begin{Sinput}
 > data(nwtco)
 > nwtco$incc2 <- as.logical(with(nwtco, ifelse(rel | instit == 
 +     2, 1, rbinom(nrow(nwtco), 1, 0.1))))
@@ -237,7 +232,7 @@ Loading required package: splines
 \end{Sinput}
 \begin{Soutput}
        mean     SE
-rel 0.18671 0.0122
+rel 0.16618 0.0101
 \end{Soutput}
 \begin{Sinput}
 > svyratio(~I(rel * as.numeric(age > 36)), ~as.numeric(age > 36), 
@@ -248,10 +243,10 @@ Ratio estimator: svyratio.twophase(~I(rel * as.numeric(age > 36)), ~as.numeric(a
     36), dccs8)
 Ratios=
                               as.numeric(age > 36)
-I(rel * as.numeric(age > 36))            0.1867095
+I(rel * as.numeric(age > 36))            0.1661800
 SEs=
                               as.numeric(age > 36)
-I(rel * as.numeric(age > 36))           0.01224983
+I(rel * as.numeric(age > 36))           0.01007223
 \end{Soutput}
 \begin{Sinput}
 > summary(svyglm(rel ~ I(age > 36) + 0, dccs8))
@@ -266,12 +261,12 @@ twophase(id = list(~seqno, ~seqno), strata = list(NULL, ~interaction(rel,
 
 Coefficients:
                  Estimate Std. Error t value Pr(>|t|)    
-I(age > 36)FALSE 0.101568   0.007715   13.16   <2e-16 ***
-I(age > 36)TRUE  0.186709   0.012250   15.24   <2e-16 ***
+I(age > 36)FALSE 0.114179   0.008689   13.14   <2e-16 ***
+I(age > 36)TRUE  0.166180   0.010072   16.50   <2e-16 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 
-(Dispersion parameter for gaussian family taken to be 0.1199626)
+(Dispersion parameter for gaussian family taken to be 0.1210938)
 
 Number of Fisher Scoring iterations: 2
 \end{Soutput}

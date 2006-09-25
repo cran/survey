@@ -7,7 +7,7 @@
 %\alias{regcalibrate.svyrep.design}
 %\alias{regcalibrate}
 \alias{calibrate.twophase}
-%\alias{grake}
+\alias{grake}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{G-calibration (GREG) estimators}
 \description{
@@ -29,6 +29,7 @@ calibrate(design,...)
        maxit=50, epsilon=1e-7, verbose=FALSE, ...)
 \method{calibrate}{twophase}(design, phase=2,formula, population,
        calfun=c("linear","raking","logit","rrz"),...)
+grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -55,6 +56,9 @@ calibrate(design,...)
   \item{verbose}{print lots of uninteresting information}
   \item{phase}{Phase of a two-phase design to calibrate (only
     \code{phase=2} currently implemented.)}
+  \item{mm}{model matrix}
+  \item{ww}{vector of weights}
+  \item{eta}{starting values for iteration}
 }
 \details{
 
@@ -66,7 +70,8 @@ calibrate(design,...)
   The \code{calibrate} function implements linear, bounded linear,
   raking, bounded raking, and logit calibration functions. All except
   unbounded linear calibration use the Newton-Raphson algorithm
-  described by Deville et al (1993).  Unbounded linear calibration uses
+  described by Deville et al (1993). This algorithm is exposed for other
+  uses in the \code{grake} function.  Unbounded linear calibration uses
   an algorithm that is less sensitive to collinearity.
 
   For two-phase designs \code{calfun="rrz"} estimates the sampling
@@ -110,6 +115,7 @@ calibrate(design,...)
 
   In a two-phase design, \code{population} may be omitted when
   \code{phase=2}, to specify calibration to the phase-one sample.
+
 }
 \value{
   A survey design object.

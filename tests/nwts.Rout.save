@@ -1,6 +1,6 @@
 
-R : Copyright 2006, The R Foundation for Statistical Computing
-Version 2.3.0 (2006-04-24)
+R version 2.5.0 Under development (unstable) (2006-09-25 r39513)
+Copyright (C) 2006 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -56,16 +56,16 @@ twophase(id = list(~id, ~id), subset = ~in.ccs, strata = list(NULL,
 
 Coefficients:
                                Estimate Std. Error t value Pr(>|t|)    
-(Intercept)                     -2.5701     0.1288 -19.956  < 2e-16 ***
-factor(stage)2                   0.5482     0.1979   2.769 0.005708 ** 
-factor(stage)3                   0.4791     0.2032   2.359 0.018515 *  
+(Intercept)                     -2.5701     0.1288 -19.953  < 2e-16 ***
+factor(stage)2                   0.5482     0.1979   2.769 0.005711 ** 
+factor(stage)3                   0.4791     0.2032   2.358 0.018523 *  
 factor(stage)4                   1.0037     0.2592   3.872 0.000114 ***
 factor(histol)2                  1.3505     0.3108   4.346 1.51e-05 ***
-factor(stage)2:factor(histol)2   0.1152     0.4410   0.261 0.793887    
-factor(stage)3:factor(histol)2   0.5066     0.4241   1.194 0.232572    
-factor(stage)4:factor(histol)2   0.9785     0.6214   1.575 0.115629    
+factor(stage)2:factor(histol)2   0.1152     0.4410   0.261 0.793890    
+factor(stage)3:factor(histol)2   0.5066     0.4242   1.194 0.232579    
+factor(stage)4:factor(histol)2   0.9785     0.6214   1.575 0.115632    
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 
 (Dispersion parameter for binomial family taken to be 1.000876)
 
@@ -83,16 +83,16 @@ twophase(id = list(~id, ~id), subset = ~in.ccs, strata = list(NULL,
 
 Coefficients:
                                Estimate Std. Error t value Pr(>|t|)    
-(Intercept)                    -2.71604    0.10824 -25.092  < 2e-16 ***
-factor(stage)2                  0.78141    0.14725   5.307 1.34e-07 ***
-factor(stage)3                  0.80093    0.15249   5.252 1.80e-07 ***
-factor(stage)4                  1.07293    0.17817   6.022 2.33e-09 ***
-factor(histol)2                 1.45836    0.31781   4.589 4.96e-06 ***
-factor(stage)2:factor(histol)2 -0.04743    0.43497  -0.109    0.913    
-factor(stage)3:factor(histol)2  0.28064    0.41299   0.680    0.497    
-factor(stage)4:factor(histol)2  0.90983    0.63776   1.427    0.154    
+(Intercept)                    -2.71604    0.10829 -25.082  < 2e-16 ***
+factor(stage)2                  0.78141    0.14728   5.306 1.35e-07 ***
+factor(stage)3                  0.80093    0.15252   5.251 1.81e-07 ***
+factor(stage)4                  1.07293    0.17819   6.021 2.34e-09 ***
+factor(histol)2                 1.45836    0.31783   4.589 4.97e-06 ***
+factor(stage)2:factor(histol)2 -0.04743    0.43498  -0.109    0.913    
+factor(stage)3:factor(histol)2  0.28064    0.41301   0.680    0.497    
+factor(stage)4:factor(histol)2  0.90983    0.63777   1.427    0.154    
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 
 (Dispersion parameter for binomial family taken to be 1.000876)
 
@@ -110,16 +110,16 @@ calibrate(dccs2, phase = 2, formula = ~interaction(instit, stage,
 
 Coefficients:
                                Estimate Std. Error t value Pr(>|t|)    
-(Intercept)                    -2.71604    0.10823 -25.095  < 2e-16 ***
-factor(stage)2                  0.78141    0.14724   5.307 1.34e-07 ***
-factor(stage)3                  0.80093    0.15249   5.252 1.79e-07 ***
-factor(stage)4                  1.07293    0.17804   6.027 2.26e-09 ***
-factor(histol)2                 1.45836    0.31662   4.606 4.57e-06 ***
-factor(stage)2:factor(histol)2 -0.04743    0.43419  -0.109    0.913    
-factor(stage)3:factor(histol)2  0.28064    0.41257   0.680    0.497    
+(Intercept)                    -2.71604    0.10827 -25.085  < 2e-16 ***
+factor(stage)2                  0.78141    0.14727   5.306 1.35e-07 ***
+factor(stage)3                  0.80093    0.15252   5.251 1.80e-07 ***
+factor(stage)4                  1.07293    0.17806   6.026 2.28e-09 ***
+factor(histol)2                 1.45836    0.31664   4.606 4.58e-06 ***
+factor(stage)2:factor(histol)2 -0.04743    0.43421  -0.109    0.913    
+factor(stage)3:factor(histol)2  0.28064    0.41259   0.680    0.497    
 factor(stage)4:factor(histol)2  0.90983    0.62991   1.444    0.149    
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 
 (Dispersion parameter for binomial family taken to be 1.000876)
 
@@ -139,12 +139,12 @@ subset(dccs8, histol == 1)
 
 Coefficients:
                Estimate Std. Error t value Pr(>|t|)    
-(Intercept)     -2.7160     0.1082 -25.092  < 2e-16 ***
-factor(stage)2   0.7814     0.1472   5.307 1.48e-07 ***
-factor(stage)3   0.8009     0.1525   5.252 1.97e-07 ***
-factor(stage)4   1.0729     0.1782   6.022 2.72e-09 ***
+(Intercept)     -2.7160     0.1083 -25.082  < 2e-16 ***
+factor(stage)2   0.7814     0.1473   5.306 1.49e-07 ***
+factor(stage)3   0.8009     0.1525   5.251 1.98e-07 ***
+factor(stage)4   1.0729     0.1782   6.021 2.74e-09 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 
 (Dispersion parameter for binomial family taken to be 1.001333)
 
@@ -162,12 +162,12 @@ subset(gccs8, histol == 1)
 
 Coefficients:
                Estimate Std. Error t value Pr(>|t|)    
-(Intercept)     -2.7160     0.1082 -25.095  < 2e-16 ***
-factor(stage)2   0.7814     0.1472   5.307 1.34e-07 ***
-factor(stage)3   0.8009     0.1525   5.252 1.79e-07 ***
-factor(stage)4   1.0729     0.1780   6.027 2.26e-09 ***
+(Intercept)     -2.7160     0.1083 -25.085  < 2e-16 ***
+factor(stage)2   0.7814     0.1473   5.306 1.35e-07 ***
+factor(stage)3   0.8009     0.1525   5.251 1.80e-07 ***
+factor(stage)4   1.0729     0.1781   6.026 2.27e-09 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 
 (Dispersion parameter for binomial family taken to be 1.000876)
 
