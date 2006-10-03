@@ -1264,8 +1264,8 @@ svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, desi
       if (is.null(allstats$replicates))
           vcovmat<-matrix(0,nn*nd,nn*nd)
       else
-          vcovmat<-svrVar(allstats$replicates[,rep(1:nn,nd)]/allstats$replicates[,nn+rep(1:nd,each=nn)],
-                          design$scale, design$rscales)
+          vcovmat<-as.matrix(svrVar(allstats$replicates[,rep(1:nn,nd)]/allstats$replicates[,nn+rep(1:nd,each=nn)],
+                          design$scale, design$rscales))
       rownames(vcovmat)<-names(numerator)[rep(1:nn,nd)]
       colnames(vcovmat)<-names(denominator)[rep(1:nd,each=nn)]
       rval$vcov<-vcovmat
@@ -1275,7 +1275,6 @@ svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, desi
   attr(rval,"call")<-sys.call()
   class(rval)<-"svyratio"
   rval
-    
 }
 
 vcov.svyratio <- function(object, ...){

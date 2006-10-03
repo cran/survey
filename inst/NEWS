@@ -1,3 +1,5 @@
+3.6-4 rownames fix for svyratio with a single statistic.
+
 3.6-3 raking by rake() now has slightly more accurate (smaller)
       standard errors. As a result, it can't be used on pre-2.9 
       svydesign objects.
