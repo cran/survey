@@ -11,6 +11,8 @@ caleg.R: Calibration examples
 
 check.R:  Many combinations of options for svydesign
 
+deff.R:  Regression test on design effects, especially for totals
+
 domain.R: Check that domain estimators of means and their standard
           errors agree with derivations as ratio and regression 
           estimators.  Repeat for calibrated and raked designs

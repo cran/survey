@@ -1217,7 +1217,9 @@ print.summary.svyglm<-function (x, digits = max(3, getOption("digits") - 3),
 
     
 
-svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, design,na.rm=FALSE,formula,covmat=FALSE,...){
+svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, design,
+                                             na.rm=FALSE,formula,covmat=FALSE,
+                                             return.replicates=FALSE,...){
 
   if (!exists(".Generic"))
     .Deprecated("svyratio")
@@ -1270,6 +1272,8 @@ svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, desi
       colnames(vcovmat)<-names(denominator)[rep(1:nd,each=nn)]
       rval$vcov<-vcovmat
   }
+  if (return.replicates) 
+    rval$replicates<- allstats$replicates[, rep(1:nn, nd)]/allstats$replicates[, nn + rep(1:nd, each = nn)]
 
   rval$var<-vars
   attr(rval,"call")<-sys.call()

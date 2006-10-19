@@ -124,12 +124,6 @@ survey functions.
 \examples{
 
   data(api)
-  ## population
-  mean(apipop$api00)
-  quantile(apipop$api00,c(.25,.5,.75))
-  var(apipop$api00)
-  sum(apipop$enroll)
-  sum(apipop$api.stu)/sum(apipop$enroll)
 
   ## one-stage cluster sample
   dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
@@ -177,12 +171,6 @@ survey functions.
  (a<-svytotal(~enroll, dclus1, deff=TRUE))
   deff(a)
 
-  # BRR method
-  data(scd)
-  repweights<-2*cbind(c(1,0,1,0,1,0), c(1,0,0,1,0,1), c(0,1,1,0,0,1),
-              c(0,1,0,1,1,0))
-  scdrep<-svrepdesign(data=scd, type="BRR", repweights=repweights)
-  svymean(~arrests+alive, design=scdrep)
 
  }
 }

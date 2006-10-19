@@ -130,12 +130,12 @@ svycontrast.svyby<-function(stat, contrasts,...){
   if (!is.list(contrasts))
     contrasts<-list(contrast=contrasts)
   if (is.call(contrasts[[1]])){
-    rval<-nlcon(contrasts,as.list(coef(stat)), vcov(stat))
-    class(rval)<-"svystat"
-    attr(rval,"statistic")<-"nlcon"
-    return(rval)
+      rval<-nlcon(contrasts,as.list(coef(stat)), vcov(stat))
+      class(rval)<-"svystat"
+      attr(rval,"statistic")<-"nlcon"
+      return(rval)
   }
-  contrasts<-match.names(row.names(stat),contrasts)
+  contrasts <- match.names(names(coef(stat)), contrasts)
   contrasts<-do.call(rbind,contrasts)
   coef<-contrast(as.vector(as.matrix(coef(stat))),
                  vcov(stat),contrasts)

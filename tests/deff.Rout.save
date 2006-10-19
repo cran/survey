@@ -1,0 +1,63 @@
+
+R version 2.5.0 Under development (unstable) (2006-10-16 r39648)
+Copyright (C) 2006 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ## from Takahiro Tsuchiya
+> library(survey)
+> kigyo<-read.table(textConnection("  obs uriage srs.w pps.w
++ 1    1     15   100    20
++ 2    2    143   100   200
++ 3    3     21   100    11
++ 4    4     51   100    25
++ 5    5    337   100   550
++ 6    6     50   100    30
++ 7    7    274   100   250
++ 8    8    145   100   100
++ 9    9     15   100    10
++ 10  10     86   100    55
++ ",open="r"),header=TRUE)
+> des.srs <- svydesign(ids=~1, weights=~srs.w, data=kigyo)
+> (res.srs <- svymean(~uriage, des.srs, deff=TRUE))
+          mean      SE   DEff
+uriage 113.700  35.626 1.0101
+> (SE(res.srs)^2) / ((1-10/1000) * coef(svyvar(~uriage, des.srs)) / 10)
+  uriage 
+1.010101 
+> 
+> (tres.srs <- svytotal(~uriage, des.srs, deff=TRUE))
+        total     SE   DEff
+uriage 113700  35626 1.0101
+> (SE(tres.srs)^2) / (1000^2 * (1-10/1000) * coef(svyvar(~uriage, des.srs)) / 10)
+  uriage 
+1.010101 
+> 
+> 
+> des.pps <- svydesign(ids=~1, weights=~pps.w, data=kigyo)
+> (res.pps <- svymean(~uriage, des.pps, deff='replace'))
+          mean      SE   DEff
+uriage 243.914  48.752 1.9741
+> (SE(res.pps)^2) / (coef(svyvar(~uriage, des.pps)) / 10)
+  uriage 
+1.974067 
+> (tres.pps <- svytotal(~uriage, des.pps, deff='replace'))
+        total     SE   DEff
+uriage 305136 184965 18.157
+> (N.hat <- sum(weights(des.pps)))
+[1] 1251
+> (SE(tres.pps)^2) / (N.hat^2 * coef(svyvar(~uriage, des.pps)) / 10)
+  uriage 
+18.15669 
+> 

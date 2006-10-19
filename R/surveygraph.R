@@ -2,7 +2,8 @@
 svyplot<-function(formula,
                   design,
                   style=c("bubble","hex","grayhex","subsample"),
-                  sample.size=500, subset=NULL,legend=1,inches=0.05,...){
+                  sample.size=500, subset=NULL,legend=1,inches=0.05,
+                  amount=NULL, ...){
   
   style<-match.arg(style)
   if (style %in% c("hex","grayhex") && !require(hexbin)){
@@ -67,11 +68,11 @@ svyplot<-function(formula,
          subsample={
            index<-sample(length(X),sample.size,replace=TRUE, prob=W)
            if (is.numeric(X))
-             xs<-jitter(X[index],factor=3)
+             xs<-jitter(X[index],factor=3,amount=amount$x)
            else
              xs<-X[index]
            if (is.numeric(Y))
-             ys<-jitter(Y[index],factor=3)
+             ys<-jitter(Y[index],factor=3,amount=amount$y)
            else
              ys<-Y[index]
            plot(xs,ys,...)

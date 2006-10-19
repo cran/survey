@@ -1,4 +1,4 @@
-This is pdfeTeXk, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=pdflatex 2006.6.8)  3 OCT 2006 08:26
+This is pdfeTeXk, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=pdflatex 2006.6.8)  19 OCT 2006 09:42
 entering extended mode
  file:line:error style messages enabled.
 **\nonstopmode \input /var/local/tlumley/Rarchive/survey/inst/doc/survey.tex
@@ -250,4 +250,4 @@ PDF statistics:
 re/texmf/fonts/type1/bluesky/cm/cmtt10.pfb></usr/share/texmf/fonts/type1/bluesk
 y/cm/cmr10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr12.pfb></usr/share/t
 exmf/fonts/type1/bluesky/cm/cmr17.pfb>
-Output written on survey.pdf (6 pages, 60812 bytes).
+Output written on survey.pdf (6 pages, 60925 bytes).

@@ -4,7 +4,6 @@
 \alias{SE.svyquantile}
 \alias{svyquantile.survey.design}
 \alias{svyquantile.svyrep.design}
-\alias{svrepquantile}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Quantiles for sample surveys}
 \description{

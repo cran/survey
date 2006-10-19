@@ -10,7 +10,7 @@
 }
 \usage{
 svyplot(formula, design, style = c("bubble", "hex", "grayhex","subsample"),
-sample.size = 500, subset = NULL, legend = 1, inches = 0.05, ...)
+sample.size = 500, subset = NULL, legend = 1, inches = 0.05, amount=NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -21,6 +21,8 @@ sample.size = 500, subset = NULL, legend = 1, inches = 0.05, ...)
   \item{subset}{expression using variables in the design object}
   \item{legend}{For \code{style="hex"} or \code{"grayhex"}}
   \item{inches}{Scale for bubble plots}
+  \item{amount}{list with \code{x} and \code{y} components for amount of
+    jittering to use in subsample plots, or \code{NULL} for the default amount}
   \item{\dots}{Passed to \code{plot} methods}
 }
 \details{
@@ -53,9 +55,12 @@ svyplot(api00~api99, design=dstrat, style="bubble")
 svyplot(api00~api99, design=dstrat, style="hex", xlab="1999 API",ylab="2000 API")
 svyplot(api00~api99, design=dstrat, style="grayhex",legend=0)
 }
-## Subsampling doesn't really make sense for such a small survey
-svyplot(api00~api99, design=dstrat, style="subsample")
-svyplot(api00~stype, design=dstrat, style="subsample")
+
+dclus2<-svydesign(id=~dnum+snum,  weights=~pw,
+                    data=apiclus2, fpc=~fpc1+fpc2)
+svyplot(api00~api99, design=dclus2, style="subsample")
+svyplot(api00~api99, design=dclus2, style="subsample",
+          amount=list(x=25,y=25))
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

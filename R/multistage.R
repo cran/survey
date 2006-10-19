@@ -580,9 +580,9 @@ svytotal.survey.design2<-function(x,design, na.rm=FALSE, deff=FALSE,...){
     if (is.character(deff) || deff){
       nobs<-NROW(design$cluster)
       if (deff=="replace")
-        vsrs<-svyvar(x,design,na.rm=na.rm)*sum(weights(design)^2)
+        vsrs<-svyvar(x,design,na.rm=na.rm)*sum(weights(design))^2/nobs
       else
-        vsrs<-svyvar(x,design,na.rm=na.rm)*sum(weights(design)^2)*(N-nobs)/N
+        vsrs<-svyvar(x,design,na.rm=na.rm)*sum(weights(design))^2*(N-nobs)/(N*nobs)
       attr(total, "deff")<-v/vsrs
     }
     

@@ -1,6 +1,5 @@
 \name{svyratio}
 \alias{svyratio}
-\alias{svrepratio}
 \alias{print.svyratio}
 \alias{print.svyratio_separate}
 \alias{svyratio.svyrep.design}
@@ -20,7 +19,7 @@ survey samples. Estimating domain means can be done more easily with \code{\lin{
 \method{svyratio}{survey.design2}(numerator=formula, denominator,
    design,separate=FALSE, na.rm=FALSE,formula, covmat=FALSE,...)
 \method{svyratio}{svyrep.design}(numerator=formula, denominator, design,
-   na.rm=FALSE,formula, covmat=FALSE,...)
+   na.rm=FALSE,formula, covmat=FALSE,return.replicates=FALSE, ...)
 \method{svyratio}{twophase}(numerator=formula, denominator, design,
     separate=FALSE, na.rm=FALSE,formula,...)
 \method{predict}{svyratio}(object, total, se=TRUE,...)
@@ -39,7 +38,9 @@ survey samples. Estimating domain means can be done more easily with \code{\lin{
   \item{se}{Return standard errors?}
   \item{separate}{Estimate ratio separately for strata}
   \item{na.rm}{Remove missing values?}
-  \item{covmat}{Compute the full variance-covariance matrix of the ratios}
+  \item{covmat}{Compute the full variance-covariance matrix of the
+    ratios}
+  \item{return.replicates}{Return replicate estimates of ratios}
   \item{...}{Other unused arguments for other methods}
 }
 \details{

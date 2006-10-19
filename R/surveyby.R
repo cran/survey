@@ -173,10 +173,17 @@ SE.svyby <-function(object,...){
            
 }
 
-coef.svyby<-function(object,...){
-    aa<-attr(object,"svyby")
-    rval<-object[,max(aa$margins)+(1:aa$nstats)]
-    names(rval)<-row.names(object)
+coef.svyby<-function (object, ...)
+{
+    aa <- attr(object, "svyby")
+    rval <- object[, max(aa$margins) + (1:aa$nstats)]
+    if (is.null(dim(rval))){
+       names(rval) <- row.names(object)
+    } else {
+        rval<-as.vector(as.matrix(rval))
+        names(rval)<-outer(rownames(object),
+        gsub("statistics\\.","",aa$variables), paste, sep=":")
+    }
     rval
 }
 
@@ -196,5 +203,7 @@ vcov.svyby<-function(object,...){
     else
       rval<-as.matrix(se^2)
   }
+  nms<-names(coef(object))
+  dimnames(rval)<-list(nms,nms)
   rval
 }

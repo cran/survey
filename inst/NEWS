@@ -1,3 +1,10 @@
+3.6-5 Add return.replicates option to svyratio() (for ine.pt)
+
+      Add amount= option to svyplot
+
+      Design effects for totals were wrong for PPS 
+      sampling.  (Takahiro Tsuchiya)
+
 3.6-4 rownames fix for svyratio with a single statistic.
 
 3.6-3 raking by rake() now has slightly more accurate (smaller)

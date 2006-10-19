@@ -1,4 +1,4 @@
-This is pdfeTeXk, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=pdflatex 2006.6.8)  3 OCT 2006 08:26
+This is pdfeTeXk, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=pdflatex 2006.6.8)  19 OCT 2006 09:42
 entering extended mode
  file:line:error style messages enabled.
 **\nonstopmode \input /var/local/tlumley/Rarchive/survey/inst/doc/epi.tex
@@ -273,4 +273,4 @@ s/type1/bluesky/cm/cmmi10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmsltt10
 s/type1/bluesky/cm/cmtt10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr10.pf
 b></usr/share/texmf/fonts/type1/bluesky/cm/cmr12.pfb></usr/share/texmf/fonts/ty
 pe1/bluesky/cm/cmr17.pfb>
-Output written on epi.pdf (8 pages, 93804 bytes).
+Output written on epi.pdf (8 pages, 93899 bytes).
