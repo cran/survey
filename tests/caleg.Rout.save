@@ -1,6 +1,6 @@
 
-R version 2.5.0 Under development (unstable) (2006-09-25 r39513)
-Copyright (C) 2006 The R Foundation for Statistical Computing
+R : Copyright 2006, The R Foundation for Statistical Computing
+Version 2.3.1 (2006-06-01)
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -121,7 +121,7 @@ There were 29 warnings (use warnings() to see them)
 > 
 > svytotal(~enroll,dclus1g)
          total        SE
-enroll 3811472 1.987e-10
+enroll 3811472 2.366e-10
 > svytotal(~api.stu,dclus1g)
           total    SE
 api.stu 3242857 38967
@@ -159,4 +159,18 @@ api.stu 29565.98
 > svytotal(~api.stu, dstratg)
           total    SE
 api.stu 3190038 29566
+> 
+> ## postStratify vs calibrate in stratified sample (Ben French)
+> 
+> set.seed(17)
+> dat<-data.frame(y=rep(0:1,each=100),x=rnorm(200)+2*rep(0:1,each=100),
++                 z=rbinom(200,1,.2), fpc=rep(c(100,10000),each=100))
+> dat$w<-ifelse(dat$y,dat$z,1-dat$z)
+> popw<-data.frame(w=c("0","1"), Freq=c(2000,8000))
+>  des<-svydesign(id=~1,fpc=~fpc, data=dat,strata=~y)
+> postStratify(des,~w,popw)->dps
+> dcal<-calibrate(des,~factor(w), pop=c(10000,8000))
+> 
+> all.equal(SE(svymean(~x,dcal)),SE(svymean(~x,dps)))
+[1] TRUE
 > 

@@ -379,6 +379,7 @@ postStratify.survey.design<-function(design, strata, population, partial=FALSE,.
   designlabel <- do.call("interaction", strata)
   index<-match(designlabel, both$label)
 
+  attr(index,"oldweights")<-1/design$prob
   design$prob<-design$prob/reweight[index]
   attr(index,"weights")<-1/design$prob
   design$postStrata<-c(design$postStrata,list(index))
@@ -706,7 +707,7 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
     computeQuantiles<-function(xx,p=quantiles){
       oo<-order(xx)
       cum.w<-cumsum(w[oo])/sum(w)
-      cdf<-approxfun(cum.w,xx[oo],method="linear",f=1,
+      cdf<-approxfun(cum.w,xx[oo],method=method,f=f,
                      yleft=min(xx),yright=max(xx)) 
       cdf(p)
     }
@@ -738,7 +739,7 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
         p.low<-p+qnorm(alpha/2,lower.tail=TRUE)*SE(wtest)
         oo<-order(xx)
         cum.w<-cumsum(w[oo])/sum(w)
-        approx(cum.w,xx[oo],xout=c(p.low,p.up), method="linear",f=1,
+        approx(cum.w,xx[oo],xout=c(p.low,p.up), method=method,f=f,
                      yleft=min(xx),yright=max(xx))$y 
 
     }
@@ -966,8 +967,9 @@ svycoxph.survey.design<-function(formula,design,subset=NULL,...){
       g$weights<-bquote(.survey.prob.weights*.(g$weights))
     g[[1]]<-quote(coxph)
     g$data<-quote(data)
+    g$subset<-quote(.survey.prob.weights>0)
     
-    ##need to rescale weights for stability 
+    ##need to rescale weights for stability
     data$.survey.prob.weights<-(1/design$prob)/sum(1/design$prob)
     if (!all(all.vars(formula) %in% names(data))) 
         stop("all variables must be in design= argument")
@@ -980,15 +982,23 @@ svycoxph.survey.design<-function(formula,design,subset=NULL,...){
     nas<-g$na.action
     if (length(nas))
         design<-design[-nas,]
+
+    dbeta.subset<-resid(g,"dfbeta",weighted=TRUE)
+    if (nrow(design)==nrow(dbeta.subset)){
+      dbeta<-dbeta.subset
+    } else {
+      dbeta<-matrix(0,ncol=NCOL(dbeta.subset),nrow=nrow(design))
+      dbeta[is.finite(design$prob),]<-dbeta.subset
+    }
     
     if (inherits(design,"survey.design2"))
-      g$var<-svyrecvar(resid(g,"dfbeta",weighted=TRUE), design$cluster,
+      g$var<-svyrecvar(dbeta, design$cluster,
                     design$strata, design$fpc,
                     postStrata=design$postStrata)
     else if (inherits(design, "twophase"))
-      g$var<-twophasevar(resid(g,"dfbeta",weighted=TRUE), design)
+      g$var<-twophasevar(dbeta, design)
     else 
-      g$var<-svyCprod(resid(g,"dfbeta",weighted=TRUE), design$strata,
+      g$var<-svyCprod(dbeta, design$strata,
                     design$cluster[[1]], design$fpc,design$nPSU,
                     design$certainty,design$postStrata)
     

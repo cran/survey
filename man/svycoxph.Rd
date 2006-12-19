@@ -3,12 +3,12 @@
 \alias{svycoxph.survey.design2}
 \alias{svycoxph.survey.design}
 \alias{svycoxph.svyrep.design}
-\alias{print.svycoxph}
-\alias{model.frame.svycoxph}
-\alias{summary.svycoxph}
-\alias{anova.svycoxph}
-\alias{extractAIC.svycoxph}
-\alias{survfit.svycoxph}
+%\alias{print.svycoxph}
+%\alias{model.frame.svycoxph}
+%\alias{summary.svycoxph}
+%\alias{anova.svycoxph}
+%\alias{extractAIC.svycoxph}
+%\alias{survfit.svycoxph}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Survey-weighted Cox models.}
 \description{

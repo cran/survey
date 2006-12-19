@@ -56,3 +56,16 @@ total.enroll<-sum(apipop$enroll,na.rm=TRUE)
 predict(common, total=total.enroll)
 dstratg<-calibrate(dstrat,~enroll-1, total.enroll, variance=1)
 svytotal(~api.stu, dstratg)
+
+## postStratify vs calibrate in stratified sample (Ben French)
+
+set.seed(17)
+dat<-data.frame(y=rep(0:1,each=100),x=rnorm(200)+2*rep(0:1,each=100),
+                z=rbinom(200,1,.2), fpc=rep(c(100,10000),each=100))
+dat$w<-ifelse(dat$y,dat$z,1-dat$z)
+popw<-data.frame(w=c("0","1"), Freq=c(2000,8000))
+ des<-svydesign(id=~1,fpc=~fpc, data=dat,strata=~y)
+postStratify(des,~w,popw)->dps
+dcal<-calibrate(des,~factor(w), pop=c(10000,8000))
+
+all.equal(SE(svymean(~x,dcal)),SE(svymean(~x,dps)))

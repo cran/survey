@@ -1,3 +1,17 @@
+3.6-6 svyquantile was not passing method= argument to approxfun() 
+      (Jacques Ferrez)
+ 
+      Documented that svyquantile(interval.type="score") may not be any
+      more accurate
+
+      Broken link due to typo in svyratio.Rd (Giuseppe Antonaci)
+
+      postStratify could overestimate standard errors for post-strata cutting
+      across existing sampling strata. (Ben French)
+
+      svycoxph() would not run for subsets of calibrated designs.
+      (Norman Breslow)
+
 3.6-5 Add return.replicates option to svyratio() (for ine.pt)
 
       Add amount= option to svyplot

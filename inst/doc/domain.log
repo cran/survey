@@ -1,11 +1,11 @@
-This is pdfeTeXk, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=pdflatex 2006.6.8)  19 OCT 2006 09:41
+This is pdfeTeXk, Version 3.141592-1.30.4-2.2 (Web2C 7.5.5) (format=pdflatex 2006.3.14)  19 DEC 2006 16:21
 entering extended mode
  file:line:error style messages enabled.
-**\nonstopmode \input /var/local/tlumley/Rarchive/survey/inst/doc/domain.tex
-(/var/local/tlumley/Rarchive/survey/inst/doc/domain.tex
-(/usr/share/texmf/tex/latex/base/article.cls
+**\nonstopmode \input /Users/thomas/survey/inst/doc/domain.tex
+(/Users/thomas/survey/inst/doc/domain.tex
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/base/article.cls
 Document Class: article 2004/02/16 v1.4f Standard LaTeX document class
-(/usr/share/texmf/tex/latex/base/size10.clo
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/base/size10.clo
 File: size10.clo 2004/02/16 v1.4f Standard LaTeX file (size option)
 )
 \c@part=\count79
@@ -20,42 +20,42 @@ File: size10.clo 2004/02/16 v1.4f Standard LaTeX file (size option)
 \belowcaptionskip=\skip42
 \bibindent=\dimen102
 )
-(/usr/share/texmf/tex/latex/url/url.sty
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/url/url.sty
 \Urlmuskip=\muskip10
 Package: url 2004/03/15  ver 3.1  Verb mode for urls, etc.
 )
-(/usr/local/tlumley/Rarchive/r-devel/R/share/texmf/Sweave.sty
+(/Library/Frameworks/R.framework/Resources/share/texmf/Sweave.sty
 Package: Sweave 
 
-(/usr/share/texmf/tex/latex/base/ifthen.sty
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/base/ifthen.sty
 Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
 )
-(/usr/share/texmf/tex/latex/graphics/graphicx.sty
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/graphics/graphicx.sty
 Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
 
-(/usr/share/texmf/tex/latex/graphics/keyval.sty
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/graphics/keyval.sty
 Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
 \KV@toks@=\toks14
 )
-(/usr/share/texmf/tex/latex/graphics/graphics.sty
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/graphics/graphics.sty
 Package: graphics 2001/07/07 v1.0n Standard LaTeX Graphics (DPC,SPQR)
 
-(/usr/share/texmf/tex/latex/graphics/trig.sty
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/graphics/trig.sty
 Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
 )
-(/usr/share/texmf/tex/latex/graphics/graphics.cfg
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/graphics/graphics.cfg
 File: graphics.cfg 2005/02/03 v1.3 graphics configuration of teTeX/TeXLive
 )
 Package graphics Info: Driver file: pdftex.def on input line 80.
 
-(/usr/share/texmf/tex/latex/graphics/pdftex.def
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/graphics/pdftex.def
 File: pdftex.def 2002/06/19 v0.03k graphics/color for pdftex
 \Gread@gobject=\count87
 ))
 \Gin@req@height=\dimen103
 \Gin@req@width=\dimen104
 )
-(/usr/share/texmf/tex/latex/fancyvrb/fancyvrb.sty
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/fancyvrb/fancyvrb.sty
 Package: fancyvrb 1998/07/17
 
 Style option: `fancyvrb' v2.6, with DG/SPQR fixes <1998/07/17> (tvz)
@@ -67,11 +67,11 @@ Style option: `fancyvrb' v2.6, with DG/SPQR fixes <1998/07/17> (tvz)
 \FV@OutFile=\write3
 
 No file fancyvrb.cfg.
-) (/usr/local/tlumley/Rarchive/r-devel/R/share/texmf/upquote.sty
+) (/Library/Frameworks/R.framework/Resources/share/texmf/upquote.sty
 Package: upquote 2003/08/11 v1.1 Covington's upright-quote modification to verb
 atim and verb
 
-(/usr/share/texmf/tex/latex/base/textcomp.sty
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/base/textcomp.sty
 Package: textcomp 2004/02/22 v1.99f Standard LaTeX package
 Package textcomp Info: Sub-encoding information:
 (textcomp)               5 = only ISO-Adobe without \textcurrency
@@ -86,7 +86,7 @@ Package textcomp Info: Sub-encoding information:
 (textcomp)             See the documentation for details.
 Package textcomp Info: Setting ? sub-encoding to TS1/1 on input line 71.
 
-(/usr/share/texmf/tex/latex/base/ts1enc.def
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/base/ts1enc.def
 File: ts1enc.def 2001/06/05 v3.0e (jk/car/fm) Standard LaTeX file
 )
 LaTeX Info: Redefining \oldstylenums on input line 266.
@@ -138,26 +138,26 @@ Package textcomp Info: Setting pplj sub-encoding to TS1/3 on input line 324.
 Package textcomp Info: Setting ptmx sub-encoding to TS1/4 on input line 325.
 Package textcomp Info: Setting ptmj sub-encoding to TS1/4 on input line 326.
 ))
-(/usr/share/texmf/tex/latex/base/fontenc.sty
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/base/fontenc.sty
 Package: fontenc 2004/02/22 v1.99f Standard LaTeX package
 
-(/usr/share/texmf/tex/latex/base/t1enc.def
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/base/t1enc.def
 File: t1enc.def 2004/02/22 v1.99f Standard LaTeX file
 LaTeX Font Info:    Redeclaring font encoding T1 on input line 43.
 ))
-(/usr/share/texmf/tex/latex/ae/ae.sty
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/ae/ae.sty
 Package: ae 2001/02/12 1.3 Almost European Computer Modern
 
-(/usr/share/texmf/tex/latex/base/fontenc.sty
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/base/fontenc.sty
 Package: fontenc 2004/02/22 v1.99f Standard LaTeX package
 
-(/usr/share/texmf/tex/latex/base/t1enc.def
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/base/t1enc.def
 File: t1enc.def 2004/02/22 v1.99f Standard LaTeX file
 LaTeX Font Info:    Redeclaring font encoding T1 on input line 43.
 )
 LaTeX Font Info:    Try loading font information for T1+aer on input line 100.
 
-(/usr/share/texmf/tex/latex/ae/t1aer.fd
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/ae/t1aer.fd
 File: t1aer.fd 1997/11/16 Font definitions for T1/aer.
 )))) (./domain.aux)
 \openout1 = `domain.aux'.
@@ -177,13 +177,13 @@ LaTeX Font Info:    ... okay on input line 8.
 LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 8.
 LaTeX Font Info:    Try loading font information for TS1+cmr on input line 8.
 
-(/usr/share/texmf/tex/latex/base/ts1cmr.fd
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    ... okay on input line 8.
 
-(/usr/share/texmf/tex/context/base/supp-pdf.tex
-(/usr/share/texmf/tex/context/base/supp-mis.tex
+(/usr/local/teTeX/share/texmf.local/tex/context/base/supp-pdf.tex
+(/usr/local/teTeX/share/texmf.local/tex/context/base/supp-mis.tex
 loading : Context Support Macros / Miscellaneous (2004.10.26)
 \protectiondepth=\count91
 \scratchcounter=\count92
@@ -223,7 +223,7 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <6> on input line 9.
 LaTeX Font Info:    Try loading font information for T1+aett on input line 24.
- (/usr/share/texmf/tex/latex/ae/t1aett.fd
+ (/usr/local/teTeX/share/texmf.tetex/tex/latex/ae/t1aett.fd
 File: t1aett.fd 1997/11/16 Font definitions for T1/aett.
 )
 LaTeX Font Info:    External font `cmex10' loaded for size
@@ -232,23 +232,42 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <5> on input line 59.
  [1
 
-{/usr/share/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2] [3] [4] [5] (./d
-omain.aux) ) 
+{/usr/local/teTeX/share/texmf.local/fonts/map/pdftex/updmap/pdftex.map}]
+LaTeX Font Info:    Try loading font information for TS1+aett on input line 80.
+
+
+(/Library/Frameworks/R.framework/Resources/share/texmf/ts1aett.fd
+File: ts1aett.fd 
+)
+LaTeX Font Info:    Try loading font information for TS1+cmtt on input line 80.
+
+
+(/usr/local/teTeX/share/texmf.tetex/tex/latex/base/ts1cmtt.fd
+File: ts1cmtt.fd 1999/05/25 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `TS1/aett/m/n' in size <10> not available
+(Font)              Font shape `TS1/cmtt/m/n' tried instead on input line 80.
+ [2] [3] [4]
+[5] (./domain.aux) ) 
 Here is how much of TeX's memory you used:
- 2165 strings out of 94500
- 28336 string characters out of 1176767
- 71033 words of memory out of 1000000
- 5314 multiletter control sequences out of 10000+50000
- 19290 words of font info for 48 fonts, out of 500000 for 2000
- 580 hyphenation exceptions out of 1000
- 35i,6n,21p,324b,280s stack positions out of 1500i,500n,5000p,200000b,5000s
+ 2199 strings out of 95137
+ 30074 string characters out of 1183013
+ 2068411 words of memory out of 4523246
+ 5320 multiletter control sequences out of 10000+50000
+ 19587 words of font info for 49 fonts, out of 2000000 for 2000
+ 58 hyphenation exceptions out of 5000
+ 35i,6n,21p,310b,292s stack positions out of 5000i,500n,6000p,200000b,40000s
 PDF statistics:
- 37 PDF objects out of 300000
+ 40 PDF objects out of 300000
  0 named destinations out of 131072
- 1 words of extra memory for PDF output out of 65536
-</usr/share/texmf/fonts/type1/bluesky/cm/cmbx12.pfb></usr/share/tex
-mf/fonts/type1/bluesky/cm/cmmi10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/c
-msltt10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmtt10.pfb></usr/share/tex
-mf/fonts/type1/bluesky/cm/cmr10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cm
-r12.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr17.pfb>
-Output written on domain.pdf (5 pages, 66533 bytes).
+ 1 words of extra memory for PDF output out of 10000
+</usr/local/teTeX/share/texmf.tetex/fonts/type1/bluesky/cm/
+cmbx12.pfb>{/usr/local/teTeX/share/texmf.local/fonts/enc/dvips/cm-super/cm-supe
+r-ts1.enc}</usr/local/teTeX/share/texmf.local/fonts/type1/public/cm-super/sftt1
+000.pfb></usr/local/teTeX/share/texmf.tetex/fonts/type1/bluesky/cm/cmmi10.pfb><
+/usr/local/teTeX/share/texmf.tetex/fonts/type1/bluesky/cm/cmsltt10.pfb></usr/lo
+cal/teTeX/share/texmf.tetex/fonts/type1/bluesky/cm/cmtt10.pfb></usr/local/teTeX
+/share/texmf.tetex/fonts/type1/bluesky/cm/cmr10.pfb></usr/local/teTeX/share/tex
+mf.tetex/fonts/type1/bluesky/cm/cmr12.pfb></usr/local/teTeX/share/texmf.tetex/f
+onts/type1/bluesky/cm/cmr17.pfb>
+Output written on domain.pdf (5 pages, 84534 bytes).

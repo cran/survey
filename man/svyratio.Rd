@@ -13,7 +13,7 @@
 \title{Ratio estimation}
 \description{
 Ratio estimation and estimates of totals based on ratios for complex
-survey samples. Estimating domain means can be done more easily with \code{\lin{svymean}}.
+survey samples. Estimating domain means can be done more easily with \code{\link{svymean}}.
 }
 \usage{
 \method{svyratio}{survey.design2}(numerator=formula, denominator,

@@ -48,8 +48,8 @@ Compute quantiles for data from complex surveys.
   corresponds to inverting a robust score test.  At the upper and lower
   limits of the confidence interval, a test of the null hypothesis that
   the cumulative distribution function is equal to the target quantile
-  just rejects.  This was the default before version 2.9 and should be
-  more accurate, but is much slower.
+  just rejects.  This was the default before version 2.9. It is much
+  slower, and Dorfman & Valliant (1993) suggest it is not any more accurate.
   
   Standard errors are computed from these confidence intervals by
   dividing the confidence interval length by \code{2*qnorm(alpha/2)}.
@@ -89,6 +89,9 @@ empirical cdf, specify \code{method="constant"} and \code{f=0}.
   Binder DA (1991) Use of estimating functions for interval estimation
   from complex surveys. \emph{Proceedings of the ASA Survey Research
     Methods Section}  1991: 34-42
+
+  Dorfman A, Valliant R (1993) Quantile variance estimators in complex
+  surveys. Proceedings of the ASA Survey Research Methods Section. 1993: 866-871
   
   Francisco CA, Fuller WA (1986) Estimation of the distribution
   function with a complex survey. Technical Report, Iowa State

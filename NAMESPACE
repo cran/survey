@@ -142,6 +142,7 @@ S3method(dimnames, repweights_compressed)
 
 S3method(degf, survey.design2)
 S3method(degf, svyrep.design)
+S3method(degf, twophase)
 
 S3method(cv,default)
 S3method(cv,svyratio)

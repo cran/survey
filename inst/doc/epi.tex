@@ -109,16 +109,16 @@ twophase(id = list(~id, ~id), subset = ~in.ccs, strata = list(NULL,
 
 Coefficients:
                                Estimate Std. Error t value Pr(>|t|)    
-(Intercept)                     -2.5701     0.1288 -19.953  < 2e-16 ***
-factor(stage)2                   0.5482     0.1979   2.769 0.005711 ** 
-factor(stage)3                   0.4791     0.2032   2.358 0.018523 *  
+(Intercept)                     -2.5701     0.1288 -19.956  < 2e-16 ***
+factor(stage)2                   0.5482     0.1979   2.769 0.005708 ** 
+factor(stage)3                   0.4791     0.2032   2.359 0.018515 *  
 factor(stage)4                   1.0037     0.2592   3.872 0.000114 ***
 factor(histol)2                  1.3505     0.3108   4.346 1.51e-05 ***
-factor(stage)2:factor(histol)2   0.1152     0.4410   0.261 0.793890    
-factor(stage)3:factor(histol)2   0.5066     0.4242   1.194 0.232579    
-factor(stage)4:factor(histol)2   0.9785     0.6214   1.575 0.115632    
+factor(stage)2:factor(histol)2   0.1152     0.4410   0.261 0.793887    
+factor(stage)3:factor(histol)2   0.5066     0.4241   1.194 0.232572    
+factor(stage)4:factor(histol)2   0.9785     0.6214   1.575 0.115629    
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 (Dispersion parameter for binomial family taken to be 1.000876)
 
@@ -152,16 +152,16 @@ twophase(id = list(~id, ~id), subset = ~in.ccs, strata = list(NULL,
 
 Coefficients:
                                Estimate Std. Error t value Pr(>|t|)    
-(Intercept)                    -2.71604    0.10829 -25.082  < 2e-16 ***
-factor(stage)2                  0.78141    0.14728   5.306 1.35e-07 ***
-factor(stage)3                  0.80093    0.15252   5.251 1.81e-07 ***
-factor(stage)4                  1.07293    0.17819   6.021 2.34e-09 ***
-factor(histol)2                 1.45836    0.31783   4.589 4.97e-06 ***
-factor(stage)2:factor(histol)2 -0.04743    0.43498  -0.109    0.913    
-factor(stage)3:factor(histol)2  0.28064    0.41301   0.680    0.497    
-factor(stage)4:factor(histol)2  0.90983    0.63777   1.427    0.154    
+(Intercept)                    -2.71604    0.10824 -25.092  < 2e-16 ***
+factor(stage)2                  0.78141    0.14725   5.307 1.34e-07 ***
+factor(stage)3                  0.80093    0.15249   5.252 1.80e-07 ***
+factor(stage)4                  1.07293    0.17817   6.022 2.33e-09 ***
+factor(histol)2                 1.45836    0.31781   4.589 4.96e-06 ***
+factor(stage)2:factor(histol)2 -0.04743    0.43497  -0.109    0.913    
+factor(stage)3:factor(histol)2  0.28064    0.41299   0.680    0.497    
+factor(stage)4:factor(histol)2  0.90983    0.63776   1.427    0.154    
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 (Dispersion parameter for binomial family taken to be 1.000876)
 
@@ -182,16 +182,16 @@ calibrate(dccs2, phase = 2, formula = ~interaction(instit, stage,
 
 Coefficients:
                                Estimate Std. Error t value Pr(>|t|)    
-(Intercept)                    -2.71604    0.10827 -25.085  < 2e-16 ***
-factor(stage)2                  0.78141    0.14727   5.306 1.35e-07 ***
-factor(stage)3                  0.80093    0.15252   5.251 1.80e-07 ***
-factor(stage)4                  1.07293    0.17806   6.026 2.28e-09 ***
-factor(histol)2                 1.45836    0.31664   4.606 4.58e-06 ***
-factor(stage)2:factor(histol)2 -0.04743    0.43421  -0.109    0.913    
-factor(stage)3:factor(histol)2  0.28064    0.41259   0.680    0.497    
+(Intercept)                    -2.71604    0.10823 -25.095  < 2e-16 ***
+factor(stage)2                  0.78141    0.14724   5.307 1.34e-07 ***
+factor(stage)3                  0.80093    0.15249   5.252 1.79e-07 ***
+factor(stage)4                  1.07293    0.17804   6.027 2.26e-09 ***
+factor(histol)2                 1.45836    0.31662   4.606 4.57e-06 ***
+factor(stage)2:factor(histol)2 -0.04743    0.43419  -0.109    0.913    
+factor(stage)3:factor(histol)2  0.28064    0.41257   0.680    0.497    
 factor(stage)4:factor(histol)2  0.90983    0.62991   1.444    0.149    
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 (Dispersion parameter for binomial family taken to be 1.000876)
 
@@ -409,11 +409,11 @@ svycoxph.svyrep.design(formula = Surv(start, stop, event) ~ factor(stage) +
 
 
                   coef exp(coef) se(coef)    z       p
-factor(stage)2  0.7359      2.09   0.1622 4.54 5.7e-06
-factor(stage)3  0.5976      1.82   0.1730 3.45 5.5e-04
-factor(stage)4  1.3907      4.02   0.2039 6.82 9.2e-12
-factor(histol)2 1.5045      4.50   0.1671 9.00 0.0e+00
-I(age/12)       0.0432      1.04   0.0243 1.78 7.6e-02
+factor(stage)2  0.7359      2.09   0.1760 4.18 2.9e-05
+factor(stage)3  0.5976      1.82   0.1742 3.43 6.0e-04
+factor(stage)4  1.3907      4.02   0.2104 6.61 3.9e-11
+factor(histol)2 1.5045      4.50   0.1635 9.20 0.0e+00
+I(age/12)       0.0432      1.04   0.0252 1.71 8.7e-02
 
 Likelihood ratio test=NA  on 5 df, p=NA  n= 1239 
 \end{Soutput}
