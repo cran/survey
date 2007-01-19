@@ -212,6 +212,8 @@ regcalibrate.svyrep.design<-function(design, formula, population,compress=NA,lam
     
   design$repweights<-repwt
   design$call<-sys.call(-1)
+  design$degf<-NULL
+  design$degf<-degf(design)
 
   design
 }

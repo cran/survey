@@ -1,9 +1,9 @@
 
 make.formula<-function(names) formula(paste("~",paste(names,collapse="+")))
 
-dimnames.survey.design<-function(object) dimnames(object$variables)
-dimnames.svyrep.design<-function(object) dimnames(object$variables)
-dimnames.twophase<-function(object) dimnames(object$phase1$sample$variables)
+dimnames.survey.design<-function(x) dimnames(x$variables)
+dimnames.svyrep.design<-function(x) dimnames(x$variables)
+dimnames.twophase<-function(x) dimnames(x$phase1$sample$variables)
 
 oldsvydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
                     data=NULL, nest=FALSE, check.strata=!nest,weights=NULL){
@@ -984,8 +984,8 @@ svycoxph.survey.design<-function(formula,design,subset=NULL,...){
         design<-design[-nas,]
 
     dbeta.subset<-resid(g,"dfbeta",weighted=TRUE)
-    if (nrow(design)==nrow(dbeta.subset)){
-      dbeta<-dbeta.subset
+    if (nrow(design)==NROW(dbeta.subset)){
+      dbeta<-as.matrix(dbeta.subset)
     } else {
       dbeta<-matrix(0,ncol=NCOL(dbeta.subset),nrow=nrow(design))
       dbeta[is.finite(design$prob),]<-dbeta.subset

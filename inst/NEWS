@@ -1,3 +1,11 @@
+3.6-8 A fix in 3.6-6 had broken svycoxph when only a single predictor
+      variable was used (Lisa McShane)
+
+3.6-7 svycoxph() is much faster for replicate weights
+
+      degf.svyrep.design uses a cached value rather than
+      recomputing.
+
 3.6-6 svyquantile was not passing method= argument to approxfun() 
       (Jacques Ferrez)
  

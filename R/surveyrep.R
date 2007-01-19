@@ -398,8 +398,9 @@ as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","Fa
   rval<-list(repweights=repweights, pweights=pweights,
              type=type, rho=fay.rho,scale=scale, rscales=rscales,
              call=sys.call(), combined.weights=FALSE, selfrep=selfrep)
-  rval$variables <- design$variables  
+  rval$variables <- design$variables
   class(rval)<-"svyrep.design"
+  rval$degf<-degf(rval)
   rval
 }
 
@@ -503,6 +504,7 @@ svrepdesign<-function(variables=NULL,repweights=NULL, weights=NULL,
     class(rval)<-"repweights"
   rval$repweights<-repweights
   class(rval)<-"svyrep.design"
+  rval$degf<-degf(rval)
   rval
   
 }
@@ -563,6 +565,8 @@ image.svyrep.design<-function(x, ..., col=grey(seq(.5,1,length=30)),
       x$variables<-x$variables[i,j, drop=FALSE]
     else
       x$variables<-x$variables[i,,drop=FALSE]
+    x$degf<-NULL
+    x$degf<-degf(x)
   } else {
     x$variables<-x$variables[,j,drop=FALSE]
   }
@@ -1007,7 +1011,8 @@ svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replica
   g$design<-NULL
   g$return.replicates<-NULL
   g$weights<-quote(.survey.prob.weights)
-  g[[1]]<-quote(coxph)      
+  g[[1]]<-quote(coxph)
+  g$x<-TRUE
   
   scale<-design$scale
   rscales<-design$rscales
@@ -1040,12 +1045,28 @@ svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replica
 
   ## coxph doesn't allow zero weights
   EPSILON<-1e-10
-  
-  g$init<-beta0
+
+  if(full$method %in% c("efron","breslow")){
+    if (attr(full$y,"type")=="right")
+      fitter<-coxph.fit
+    else if(attr(full$y,"type")=="counting")
+      fitter<-survival:::agreg.fit
+    else stop("invalid survival type")
+  } else fitter<-survival:::agexact.fit
+                 
+##  g$init<-beta0
+## for(i in 1:ncol(wts)){
+##    .survey.prob.weights<-as.vector(wts[,i])*pw1+EPSILON
+##    betas[i,]<-with(data,coef(eval(g)))
+##  }
   for(i in 1:ncol(wts)){
-    .survey.prob.weights<-as.vector(wts[,i])*pw1+EPSILON
-    betas[i,]<-with(data,coef(eval(g)))
+    betas[i,]<-fitter(full$x, full$y, full$strata, full$offset,
+                      coef(full), coxph.control(),
+                      as.vector(wts[,i])*pw1+EPSILON,
+                      full$method,  names(full$resid))$coef
+
   }
+
   
   if (length(nas))
     design<-design[-nas,]
@@ -1607,7 +1628,10 @@ postStratify.svyrep.design<-function(design, strata, population,
   if (compress) design$repweights<-compressWeights(design$repweights)
   
   design$call<-sys.call(-1)
-  
+  if(!is.null(design$degf)){
+    design$degf<-NULL
+    design$degf<-degf(design)
+  }
   design
 }
 
@@ -1627,7 +1651,9 @@ rake<-function(design, sample.margins, population.margins,
 
     if (is.rep && is.null(compress))
       compress<-inherits(design$repweights,"repweights_compressed")
-     
+
+    if (is.rep) design$degf<-NULL
+    
     if (length(sample.margins)!=length(population.margins))
         stop("sample.margins and population.margins do not match.")
 
@@ -1690,6 +1716,8 @@ rake<-function(design, sample.margins, population.margins,
 
     if (is.rep && compress)
       design$repweights<-compressWeights(design$repweights)
+    if(is.rep)
+      design$degf<-degf(design)
     
     if(!converged)
         warning("Raking did not converge after ", iter, " iterations.\n")
@@ -1707,7 +1735,10 @@ degf<-function(design,...) UseMethod("degf")
 degf.svyrep.design<-function(design,tol=1e-5,...){
   if (!inherits(design,"svyrep.design"))
     stop("Not a survey design with replicate weights")
- qr(weights(design,"analysis"), tol=1e-5)$rank-1
+  rval<-design$degf ##cached version
+  if(is.null(rval))
+    rval<-qr(weights(design,"analysis"), tol=1e-5)$rank-1
+  rval
 }
 
 degf.survey.design2<-function(design,...){

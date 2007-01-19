@@ -30,3 +30,5 @@ g<-function(form){
 f()
 g(Surv(acs.46)~stype)
 
+## check coxph for a single predictor
+svycoxph(Surv(acs.46)~api00,design=dstrat)
