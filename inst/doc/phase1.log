@@ -1,4 +1,4 @@
-This is pdfeTeXk, Version 3.141592-1.30.4-2.2 (Web2C 7.5.5) (format=pdflatex 2006.3.14)  19 JAN 2007 10:21
+This is pdfeTeXk, Version 3.141592-1.30.4-2.2 (Web2C 7.5.5) (format=pdflatex 2006.3.14)  27 FEB 2007 15:02
 entering extended mode
  file:line:error style messages enabled.
 **\nonstopmode \input /Users/thomas/survey/inst/doc/phase1.tex
@@ -255,4 +255,4 @@ type1/bluesky/cm/cmex10.pfb></usr/local/teTeX/share/texmf.tetex/fonts/type1/blu
 esky/cm/cmmi10.pfb></usr/local/teTeX/share/texmf.tetex/fonts/type1/bluesky/cm/c
 mr10.pfb></usr/local/teTeX/share/texmf.tetex/fonts/type1/bluesky/cm/cmr12.pfb><
 /usr/local/teTeX/share/texmf.tetex/fonts/type1/bluesky/cm/cmr17.pfb>
-Output written on phase1.pdf (2 pages, 66559 bytes).
+Output written on phase1.pdf (2 pages, 66264 bytes).

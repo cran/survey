@@ -1,4 +1,4 @@
-This is pdfeTeXk, Version 3.141592-1.30.4-2.2 (Web2C 7.5.5) (format=pdflatex 2006.3.14)  19 JAN 2007 10:20
+This is pdfeTeXk, Version 3.141592-1.30.4-2.2 (Web2C 7.5.5) (format=pdflatex 2006.3.14)  27 FEB 2007 15:02
 entering extended mode
  file:line:error style messages enabled.
 **\nonstopmode \input /Users/thomas/survey/inst/doc/domain.tex
@@ -256,7 +256,7 @@ Here is how much of TeX's memory you used:
  5320 multiletter control sequences out of 10000+50000
  19587 words of font info for 49 fonts, out of 2000000 for 2000
  58 hyphenation exceptions out of 5000
- 35i,6n,21p,310b,292s stack positions out of 5000i,500n,6000p,200000b,40000s
+ 35i,6n,21p,310b,280s stack positions out of 5000i,500n,6000p,200000b,40000s
 PDF statistics:
  40 PDF objects out of 300000
  0 named destinations out of 131072
@@ -270,4 +270,4 @@ cal/teTeX/share/texmf.tetex/fonts/type1/bluesky/cm/cmtt10.pfb></usr/local/teTeX
 /share/texmf.tetex/fonts/type1/bluesky/cm/cmr10.pfb></usr/local/teTeX/share/tex
 mf.tetex/fonts/type1/bluesky/cm/cmr12.pfb></usr/local/teTeX/share/texmf.tetex/f
 onts/type1/bluesky/cm/cmr17.pfb>
-Output written on domain.pdf (5 pages, 84293 bytes).
+Output written on domain.pdf (5 pages, 83986 bytes).

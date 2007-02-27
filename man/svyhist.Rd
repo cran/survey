@@ -7,8 +7,9 @@
 Histograms and boxplots weighted by the sampling weights. 
 }
 \usage{
-svyhist(formula, design, xlab = NULL, main = NULL,
-  probability=TRUE,freq=!probability, ...)
+svyhist(formula, design, breaks = "Sturges",
+      include.lowest = TRUE, right = TRUE, xlab = NULL,
+       main = NULL, probability = TRUE, freq = !probability, ...)
 svyboxplot(formula,design,...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -18,6 +19,7 @@ svyboxplot(formula,design,...)
   \item{xlab}{x-axis label}
   \item{main}{Main title}
   \item{probability,freq}{Y-axis is probability density or frequency}
+  \item{breaks, include.lowest, right}{As for \code{\link{hist}}}
   \item{\dots}{Other arguments to \code{\link{hist}} or \code{\link{bxp}}}
 }
 

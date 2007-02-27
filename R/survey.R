@@ -696,11 +696,21 @@ svyquantile<-function(x,design,quantiles,...) UseMethod("svyquantile", design)
 
 svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
                                     ci=FALSE, method="linear",f=1,
-                                    interval.type=c("Wald","score"),...){
+                                    interval.type=c("Wald","score"),
+                                    na.rm=FALSE, ...){
     if (inherits(x,"formula"))
-		x<-model.frame(x,model.frame(design))
+      x<-model.frame(x,model.frame(design),na.action=na.pass)
     else if(typeof(x) %in% c("expression","symbol"))
-        x<-eval(x, model.frame(design))
+      x<-eval(x, model.frame(design),na.action=na.pass)
+    
+    if (na.rm){
+        nas<-rowSums(is.na(x))
+        design<-design[nas==0,]
+        if (length(nas)>length(design$prob))
+          x<-x[nas==0,,drop=FALSE]
+        else
+          x[nas>0,]<-0
+      }
 
     w<-weights(design)
     
@@ -990,6 +1000,7 @@ svycoxph.survey.design<-function(formula,design,subset=NULL,...){
       dbeta<-matrix(0,ncol=NCOL(dbeta.subset),nrow=nrow(design))
       dbeta[is.finite(design$prob),]<-dbeta.subset
     }
+    g$inv.info<-g$var
     
     if (inherits(design,"survey.design2"))
       g$var<-svyrecvar(dbeta, design$cluster,
@@ -1002,9 +1013,9 @@ svycoxph.survey.design<-function(formula,design,subset=NULL,...){
                     design$cluster[[1]], design$fpc,design$nPSU,
                     design$certainty,design$postStrata)
     
-    g$naive.var<-NULL
     g$wald.test<-coef(g)%*%solve(g$var,coef(g))
-    g$loglik<-c(NA,NA)
+    g$ll<-g$loglik
+    g$loglik<-NULL
     g$rscore<-NULL
     g$score<-NA
     g$degf.resid<-degf(design)-length(coef(g)[!is.na(coef(g))])+1
@@ -1021,6 +1032,7 @@ model.frame.svycoxph<-function(formula,...){
     f[[1]]<-as.name("model.frame")
     f$data<-quote(data)
     f$design<-NULL
+    f$method<-f$control<-f$singular.ok<-f$model<-f$x<-f$y<-NULL
     f$formula<-formula(formula)
     if (is.null(f$weights))
         f$weights<-quote(.survey.prob.weights)
@@ -1087,7 +1099,8 @@ svyglm.survey.design<-function(formula,design,subset=NULL,...){
       if (!all(all.vars(formula) %in% names(data))) 
 	stop("all variables must be in design= argument")
       g<-with(list(data=data), eval(g))
-
+      g$naive.cov<-summary(g)$cov.unscaled
+      
       nas<-g$na.action
       if (length(nas))
 	design<-design[-nas,]

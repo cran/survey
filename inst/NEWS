@@ -1,3 +1,15 @@
+3.6-9 Bootstrap weights used last stratum size rather than harmonic mean
+      for n/(n-1) factor (Djalma Pessoa)
+
+      method= argument to svycoxph() didn't work (Lisa McShane)
+
+      svyquantile did not treat missing values as a domain
+      (Nicole Glazer)
+
+      fix for change in pmax/pmin (Brian Ripley)
+
+      Add pchisqsum for distribution of quadratic forms.
+
 3.6-8 A fix in 3.6-6 had broken svycoxph when only a single predictor
       variable was used (Lisa McShane)
 

@@ -1,31 +1,9 @@
+##    WARNING WARNING WARNING WARNING
 ##
-##  standard errors using pairwise sampling probabilities
 ##
-
+## Experimental work in progress for sparse-matrix 
+## representations of survey designs. 
 ##
-## don't need fpc, do need probabilities
-##
-## prob is either a list of lists of matrices, a list of Matrices,
-##      a single matrix or a formula
-##
-##      if a formula, pairwise= specifies the approximation to use
-##
-##      if a single matrix or list of Matrices, don't want strata
-##      if a single matrix, don't even want id.
-##
-## we compute and store \check{Delta}= (pi_ij/pi_ipi_j -1)/pi_ij
-##  (and perhaps pi_ij)?
-
-pairdesign<-function(id, prob, strata, data, pairwise=c("srs","overton")){
-    
-    if (is.formula(id))
-        id<-model.frame(id, data)
-
-
-        
-
-
-}
 
 ##
 ## here prob is a vector, dcheck is a matrix, list of Matrices,
@@ -34,6 +12,10 @@ pairdesign<-function(id, prob, strata, data, pairwise=c("srs","overton")){
 
 pi2Dcheck<-function(pmat){
     (pmat-outer(diag(pmat)))/pmat
+}
+
+iidDcheck<-function(n){
+  diag(n)
 }
 
 strat2Dcheck<-function(strata, prob){
@@ -55,9 +37,10 @@ multi.strat2Dcheck<-function(id,strata,probs){
    for(stage in 1:nstage){
        uid<-!duplicated(id[,stage])
        rval[[stage]]<-list(id=id[,stage],
-                           dcheck=strat2Dcheck(strata[uid,stage], probs[uid,stage]
-                           ))
-   }
+                           dcheck=strat2Dcheck(strata[uid,stage],
+                             probs[uid,stage])
+                           )
+     }
    rval
  }
 
@@ -101,10 +84,14 @@ htvar.matrix<-function(xcheck, Dcheck){
 
 ygvar.matrix<-function(xcheck,Dcheck){
   ht<-htvar.matrix(xcheck,Dcheck)
-  corr<-apply(xcheck,2, function(xicheck)
-        apply(xcheck,2, function(xjcheck)
-              sum(Dcheck%*%(xicheck*xjcheck))
-              ))   
+  if (is.null(dim(xcheck))){
+    corr <- sum(Dcheck%*%(xcheck*xcheck))    
+  } else {
+    corr <- apply(xcheck,2, function(xicheck)
+                apply(xcheck,2, function(xjcheck)
+                      sum(Dcheck%*%(xicheck*xjcheck))
+                      ))
+  }
   ht-corr
 }
 
@@ -115,3 +102,26 @@ twophaseDcheck<-function(Dcheck1,subset,Dcheck2){
 
 
 
+svytotal.ht<-function(x, wt, Dcheck){
+  if (is.null(dim(x))){
+     total <- sum(x*wt)
+     estfun<-x-total/sum(wt)
+     list(total, htvar.matrix(wt*estfun, Dcheck))
+   } else {
+     total<-colSums(x*wt)
+     estfun<-sweep(x,2,total/sum(wt))
+     list(total, htvar.matrix(wt*estfun, Dcheck))
+   }
+}
+
+svymean.ht<-function(x, wt, Dcheck){
+  if (is.null(dim(x))){
+     total <- sum(x*wt)
+     estfun<-(x-total/sum(wt))/sum(wt)
+     list(total/sum(wt), htvar.matrix(wt*estfun, Dcheck))
+   } else {
+     total<-colSums(x*wt)
+     estfun<-sweep(x,2,total/sum(wt))/sum(wt)
+     list(total/sum(wt), htvar.matrix(wt*estfun, Dcheck))
+   }
+}

@@ -7,7 +7,7 @@ The MU284 population comes from Sarndal et al, and the complete data are
 available from Statlib. These data are a two-stage sample from the
 population, analyzed on page 143 of the book.
 }
-\usage{data(mm)}
+\usage{data(mu284)}
 \format{
   A data frame with 15 observations on the following 5 variables.
   \describe{

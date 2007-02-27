@@ -2,10 +2,15 @@
 
 bootstratum<-function(psu, popsize, replicates){
   upsu<-sample(unique(psu))
-  if (is.null(popsize))
-    replicate(replicates, table(factor(sample(upsu,length(upsu),replace=TRUE),levels=unique(psu))))
-  else
-    replicate(replicates,table(factor(sample(rep(upsu,length=popsize), length(upsu)), levels=unique(psu))))
+  if (is.null(popsize)){
+    replicate(replicates,
+              table(factor(sample(upsu,length(upsu),replace=TRUE),
+                                       levels=unique(psu))))
+  } else {
+    replicate(replicates,
+              table(factor(sample(rep(upsu,length=popsize), length(upsu)),
+                           levels=unique(psu))))
+  }
 }
 
 bootweights<-function(strata, psu, replicates=50, fpc=NULL,
@@ -41,12 +46,13 @@ bootweights<-function(strata, psu, replicates=50, fpc=NULL,
                    correction=1-npsu/this.fpc)
       if (this.fpc> 100*npsu)
         warning("Sampling fraction <1% in stratum",s," treated as zero.")
-      weights[this.stratum,]<-bootstratum(upsu[this.stratum], popsize=this.fpc,replicates=replicates)
+      weights[this.stratum,]<-bootstratum(upsu[this.stratum],
+                                          popsize=this.fpc,replicates=replicates)
     }
   }
 
   ## harmonic mean of stratum sizes
-  psu.per.strata<-1/mean(1/table(this.stratum))
+  psu.per.strata<-1/mean(1/table(ustrata))
   
   if (compress){
     rw<-list(weights=weights,index=index)
@@ -55,5 +61,6 @@ bootweights<-function(strata, psu, replicates=50, fpc=NULL,
     rw<-weights[index,]
   }
 
-  list(repweights=rw, scale=psu.per.strata/((psu.per.strata-1)*(replicates-1)),rscales=rep(1,replicates))
+  list(repweights=rw, scale=psu.per.strata/((psu.per.strata-1)*(replicates-1)),
+       rscales=rep(1,replicates))
 }

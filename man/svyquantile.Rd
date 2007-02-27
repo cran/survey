@@ -11,7 +11,8 @@ Compute quantiles for data from complex surveys.
 }
 \usage{
 \method{svyquantile}{survey.design}(x, design, quantiles, alpha=0.05,
- ci=FALSE, method = "linear", f = 1, interval.type=c("Wald","score"),...)
+ ci=FALSE, method = "linear", f = 1, interval.type=c("Wald","score"),
+ na.rm=FALSE,...)
 \method{svyquantile}{svyrep.design}(x, design, quantiles,
  method ="linear", interval.type=c("probability","quantile"), f = 1,
  return.replicates=FALSE,...)
@@ -28,6 +29,7 @@ Compute quantiles for data from complex surveys.
   \item{alpha}{Level for confidence interval}
   \item{interval.type}{See Details below}
   \item{return.replicates}{Return the replicate means?}
+  \item{na.rm}{Remove \code{NA}s?}
   \item{...}{arguments for future expansion}
   \item{object}{Object returned by \code{svyquantile.survey.design}}
 }

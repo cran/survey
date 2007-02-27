@@ -1,11 +1,12 @@
-svyhist<-function(formula, design, xlab=NULL,
+svyhist<-function(formula, design, breaks = "Sturges", 
+                  include.lowest = TRUE, right = TRUE, xlab=NULL,
                   main=NULL, probability=TRUE,
                   freq=!probability,...){
     mf<-model.frame(formula,design$variables)
     if (ncol(mf)>1) stop("Only one variable allowed.")
     variable<-mf[,1]
     varname<-names(mf)
-    h <- hist(variable, ..., plot=FALSE)
+    h <- hist(variable,  plot=FALSE)
     props <- coef(svymean(~cut(variable, h$breaks),
                           design, na.rm=TRUE))
     h$density<-props/diff(h$breaks)

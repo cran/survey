@@ -94,8 +94,8 @@ svyboxplot<-function(formula, design, ...){
                     quantiles=c(0,0.25,0.5,0.75,1))
         n<-NCOL(qs)
         iqr<- qs[,n-1]-qs[,n-3]
-        low<-pmax(qs[,n-4],qs[n-2]-1.5*iqr)
-        hi<-pmin(qs[,n],qs[n-1]+1.5*iqr)
+        low<-pmax(qs[,n-4],qs[,n-2]-1.5*iqr)
+        hi<-pmin(qs[,n],qs[,n-1]+1.5*iqr)
         stats<-t(as.matrix(cbind(low,qs[,n-(3:1)],hi)))
         z<-list(stats=stats,n=coef(svytotal(groups,design)))
         for(i in 1:ncol(stats)){
