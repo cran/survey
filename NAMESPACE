@@ -6,7 +6,8 @@ export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        withReplicates, hadamard, paley, is.hadamard, bootweights,
        jk1weights,jknweights, brrweights, regTermTest, degf, nonresponse, 
        sparseCells, neighbours, joinCells, compressWeights, make.formula,
-       svycontrast,svyCprod, svyrecvar, grake, svrVar,pchisqsum)
+       svycontrast,svyCprod, svyrecvar, grake, svrVar,pchisqsum,
+       make.calfun, cal.linear, cal.raking, cal.logit)
 
 S3method(svymean,survey.design)
 S3method(svymean,svyrep.design)
@@ -129,6 +130,7 @@ S3method(print, svyquantile)
 S3method(print, svyratio)
 S3method(print, svyratio_separate)
 S3method(print, twophase)
+S3method(print, calfun)
 
 S3method(dim,repweights_compressed)
 S3method(dim,survey.design)

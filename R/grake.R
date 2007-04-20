@@ -1,4 +1,16 @@
 
+make.calfun<-function(Fm1,dF, name){
+  if (!identical(names(formals(Fm1)), c("u","bounds")))
+    stop("wrong argument names for Fm1")
+  if(!identical(names(formals(dF)), c("u","bounds")))
+    stop("wrong argument names for dF")
+  rval<-list(Fm1=Fm1, dF=dF, name=name)
+  class(rval)<-"calfun"
+  rval
+}
+
+print.calfun<-function(x,...) cat("calibration metric: ",x$name,"\n")
+
 calibrate<-function(design, ...) UseMethod("calibrate")
 
 calibrate.survey.design2<-function(design, formula, population,
@@ -6,8 +18,8 @@ calibrate.survey.design2<-function(design, formula, population,
                                     bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
                                     maxit=50, epsilon=1e-7, verbose=FALSE,
                                     ...){
-
-  if (calfun=="linear" && (bounds==c(-Inf,Inf))){
+  if (is.character(calfun)) calfun<-match.arg(calfun)
+  if (is.character(calfun) && calfun=="linear" && (bounds==c(-Inf,Inf))){
     ## old code is better for ill-conditioned linear calibration
     rval<-regcalibrate(design,formula,population,
                        aggregate.stage=aggregate.stage, stage=stage,
@@ -16,6 +28,12 @@ calibrate.survey.design2<-function(design, formula, population,
     return(rval)
   }
 
+  if(is.character(calfun))
+    calfun<-switch(calfun,linear=cal.linear, raking=cal.raking, logit=cal.logit)
+  else
+    if(!inherits(calfun,"calfun"))
+      stop("'calfun' must be a string or of class 'calfun'.")
+  
   if (!is.null(aggregate.stage)){
     aggindex<-design$cluster[[aggregate.stage]]
   }
@@ -58,7 +76,6 @@ calibrate.survey.design2<-function(design, formula, population,
   if (is.null(!all(abs(qr.resid(tqr,whalf)))))
     warning("G-calibration models must have an intercept")
 
-  calfun<-match.arg(calfun)
   g<-grake(mm,ww,calfun, bounds=bounds,population=population,
            verbose=verbose,epsilon=epsilon,maxit=maxit)
   
@@ -80,7 +97,8 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
                                    bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
                                    maxit=50, epsilon=1e-7, verbose=FALSE,
                                    ...){
-  if (calfun=="linear" && (bounds==c(-Inf,Inf))){
+  if (is.character(calfun)) calfun<-match.arg(calfun)
+  if (is.character(calfun) && calfun=="linear" && (bounds==c(-Inf,Inf))){
     ## old code is better for ill-conditioned linear calibration
     rval<-regcalibrate(design,formula,population, compress=compress,
                        aggregate.index=aggregate.index,
@@ -138,7 +156,10 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
     }
   }
 
-  calfun <- match.arg(calfun)
+  if(is.character(calfun))
+    calfun<-switch(calfun, linear=cal.linear, raking=cal.raking, logit=cal.logit)
+  else if (!inherits(calfun,"calfun"))
+    stop("'calfun' must be a string or a 'calfun' object")
   gtotal <- grake(mm,ww,calfun,bounds=bounds,population=population,
                   verbose=verbose, epsilon=epsilon, maxit=maxit)
 
@@ -166,51 +187,54 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
   design
 }
 
-
-
+cal.linear<-make.calfun(function(u,bounds) pmin(pmax(u+1,bounds[1]),bounds[2])-1,
+                        function(u, bounds) as.numeric(u<bounds[2]-1 & u>bounds[1]-1),
+                        "linear calibration")
+cal.raking<-make.calfun(function(u,bounds) pmin(pmax(exp(u),bounds[1]),bounds[2])-1,
+                        function(u, bounds) ifelse(u<bounds[2]-1 & u>bounds[1]-1,exp(u),0),
+                        "raking")
+cal.logit<-make.calfun(
+                       function(u,bounds) {
+                         L <- bounds[1]
+                         U <- bounds[2]
+                         A <- (U-L)/((U-1)*(1-L))
+                         eAu <- exp(A*u)
+                         ( L*(U-1) + U*(1-L)*eAu)/(U-1+(1-L)*eAu)-1
+                       },
+                       function(u,bounds) {
+                         L <- bounds[1]
+                         U <- bounds[2]
+                         A <- (U-L)/((U-1)*(1-L))
+                         eAu <- exp(A*u)
+                         U*(1-L)*eAu*A/(U-1+(1-L)*eAu)-( (L*(U-1)+U*(1-L)*eAu)*( (1-L)*eAu*A ) )/(U-1+(1-L)*eAu)^2
+                       },
+                       "logit calibration"
+                       )
+                      
 grake<-function(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit){
 
   sample.total<-colSums(mm*ww)
   require(MASS) ##ginv
+  if(!inherits(calfun,"calfun")) stop("'calfun' must be of class 'calfun'")
   
-  Fm1<-switch(calfun,
-              linear=function(u) pmin(pmax(u+1,bounds[1]),bounds[2])-1,
-              raking=function(u) pmin(pmax(exp(u),bounds[1]),bounds[2])-1,
-              logit=function(u) {
-                L <- bounds[1]
-                U <- bounds[2]
-                A <- (U-L)/((U-1)*(1-L))
-                eAu <- exp(A*u)
-                ( L*(U-1) + U*(1-L)*eAu)/(U-1+(1-L)*eAu)-1
-              } 
-              )
-  dF<-switch(calfun,
-             linear=function(u) as.numeric(u<bounds[2]-1 & u>bounds[1]-1),
-             raking=function(u) ifelse(u<bounds[2]-1 & u>bounds[1]-1,exp(u),0),
-             logit=function(u) {
-               L <- bounds[1]
-               U <- bounds[2]
-               A <- (U-L)/((U-1)*(1-L))
-               eAu <- exp(A*u)
-               U*(1-L)*eAu*A/(U-1+(1-L)*eAu)-( (L*(U-1)+U*(1-L)*eAu)*( (1-L)*eAu*A ) )/(U-1+(1-L)*eAu)^2
-             }
-             )
+  Fm1<-calfun$Fm1
+  dF<-calfun$dF
 
   xeta<-drop(mm%*%eta)
-  g<-1+Fm1(xeta)
+  g<-1+Fm1(xeta, bounds)
 
   iter<-1
 
   repeat({
-    Tmat<-crossprod(mm*ww*dF(xeta), mm)
+    Tmat<-crossprod(mm*ww*dF(xeta, bounds), mm)
 
-    misfit<-(population-sample.total-colSums(mm*ww*Fm1(xeta)))
+    misfit<-(population-sample.total-colSums(mm*ww*Fm1(xeta, bounds)))
     deta<-ginv(Tmat)%*%misfit
     eta<-eta+deta
 
     xeta<- drop(mm%*%eta)
-    g<-1+Fm1(xeta)
-    misfit<-(population-sample.total-colSums(mm*ww*Fm1(xeta)))
+    g<-1+Fm1(xeta, bounds)
+    misfit<-(population-sample.total-colSums(mm*ww*Fm1(xeta, bounds)))
     
     if (verbose)
       print(misfit)

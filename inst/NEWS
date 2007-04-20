@@ -1,3 +1,13 @@
+3.6-10 Added error message for missing sampling indicator in two-phase
+      design (Lucia Hindorff)
+
+      Added tests/kalton.R with reweighting examples.
+
+      make.calfun() for creating user-specified calibration distances. 
+ 
+      NOTE: Calling grake() directly now requires a calfun object rather than 
+      a string: see help(make.calfun).
+
 3.6-9 Bootstrap weights used last stratum size rather than harmonic mean
       for n/(n-1) factor (Djalma Pessoa)
 

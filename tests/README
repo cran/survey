@@ -19,6 +19,9 @@ domain.R: Check that domain estimators of means and their standard
 
 fpc.R: Many ways to specify fpc
 
+kalton.R: Calibration examples from Kalton & Flore-Cervantes, 
+          J Off Stat, 19(2) 81-97
+
 lonely.psu.R: All the lonely PSU options
 
 multistage.R: Check that a two-stage cluster sample analysis agrees with

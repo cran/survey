@@ -232,7 +232,7 @@ months) at diagnosis
 \end{Sinput}
 \begin{Soutput}
        mean     SE
-rel 0.18642 0.0122
+rel 0.17156 0.0107
 \end{Soutput}
 \begin{Sinput}
 > svyratio(~I(rel * as.numeric(age > 36)), ~as.numeric(age > 36), 
@@ -243,10 +243,10 @@ Ratio estimator: svyratio.twophase(~I(rel * as.numeric(age > 36)), ~as.numeric(a
     36), dccs8)
 Ratios=
                               as.numeric(age > 36)
-I(rel * as.numeric(age > 36))            0.1864159
+I(rel * as.numeric(age > 36))            0.1715595
 SEs=
                               as.numeric(age > 36)
-I(rel * as.numeric(age > 36))           0.01215685
+I(rel * as.numeric(age > 36))           0.01074035
 \end{Soutput}
 \begin{Sinput}
 > summary(svyglm(rel ~ I(age > 36) + 0, dccs8))
@@ -261,12 +261,12 @@ twophase(id = list(~seqno, ~seqno), strata = list(NULL, ~interaction(rel,
 
 Coefficients:
                  Estimate Std. Error t value Pr(>|t|)    
-I(age > 36)FALSE 0.101711   0.007703   13.20   <2e-16 ***
-I(age > 36)TRUE  0.186416   0.012157   15.33   <2e-16 ***
+I(age > 36)FALSE 0.110275   0.008463   13.03   <2e-16 ***
+I(age > 36)TRUE  0.171559   0.010740   15.97   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
-(Dispersion parameter for gaussian family taken to be 0.1199802)
+(Dispersion parameter for gaussian family taken to be 0.1208303)
 
 Number of Fisher Scoring iterations: 2
 \end{Soutput}

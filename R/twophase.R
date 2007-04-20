@@ -7,11 +7,13 @@ twophase<-function(id,strata=NULL, probs=NULL, weights=NULL, fpc=NULL,
                 probs=probs[[1]],fpc=fpc[[1]],data=data)
 
   if(inherits(subset,"formula"))
-    subset<-eval.parent(model.frame(subset,data=data))[[1]]
+    subset<-eval.parent(model.frame(subset,data=data,na.action=na.pass))[[1]]
 
   if(!is.logical(subset) && sort(unique(subset))==c(0,1))
       subset<-as.logical(subset)
 
+  if (any(is.na(subset))) stop("missing values in 'subset'")
+  
   d1s<-svydesign(id=id[[1]],strata=strata[[1]],weights=weights[[1]],
                 probs=probs[[1]],fpc=fpc[[1]],data=data[subset,])
   d1s$prob<-d1$prob[subset]
@@ -629,7 +631,8 @@ calibrate.twophase<-function(design, phase=2, formula, population,
         
     } else if(phase==2){
 
-        if (match.arg(calfun)=="rrz"){
+        if (is.character(calfun)) calfun<-match.arg(calfun)
+        if (is.character(calfun) && calfun=="rrz"){
             design<-estWeights(design, formula,...)
             design$call<-sys.call(-1)
             return(design)

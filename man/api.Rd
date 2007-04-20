@@ -65,7 +65,9 @@ data(api)
   \code{apipop} is the entire population,
  \code{apiclus1} is a cluster sample of school districts, \code{apistrat} is
   a sample stratified by \code{stype}, and \code{apiclus2} is a two-stage
-  cluster sample of schools within districts. 
+  cluster sample of schools within districts.  The sampling weights in
+ \code{apiclus1} are incorrect (the weight should be 757/15) but are as 
+  obtained from UCLA.
 }
 \source{
   Data were obtained from the survey sampling help pages of UCLA

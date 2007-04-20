@@ -72,7 +72,10 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
   unbounded linear calibration use the Newton-Raphson algorithm
   described by Deville et al (1993). This algorithm is exposed for other
   uses in the \code{grake} function.  Unbounded linear calibration uses
-  an algorithm that is less sensitive to collinearity.
+  an algorithm that is less sensitive to collinearity. The calibration
+  function may be specified as a string naming one of the three built-in
+  functions or as an object of class \code{calfun}, allowing
+  user-defined functions. See \code{\link{make.calfun}} for details.
 
   For two-phase designs \code{calfun="rrz"} estimates the sampling
   probabilities using logistic regression as described by Robins et al
@@ -124,6 +127,9 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
 \references{
 Deville J-C, Sarndal C-E, Sautory O (1993) Generalized Raking
 Procedures in Survey Sampling. JASA 88:1013-1020
+
+Kalton G, Flores-Cervantes I (2003) "Weighting methods" J Official
+ Stat 19(2) 81-97
   
 Sarndal C-E, Swensson B, Wretman J. "Model Assisted Survey
 Sampling". Springer. 1991.
@@ -145,6 +151,10 @@ Belgium. Statistics Belgium Working Paper No 3.
   to use auxiliary information
   
   \code{vignette("epi")} for an example of calibration in two-phase designs
+
+   \code{survey/tests/kalton.R} for examples replicating those in Kalton & Flores-Cervantes (2003)
+
+   \code{\link{make.calfun}} for user-defined calibration distances.
 }
 \examples{
 data(api)
@@ -214,6 +224,10 @@ svytotal(~stype, dclus1g3b)
 ## generalised raking
 (dclus1g3c <- calibrate(dclus1, ~stype+api99, c(pop.totals,
     api99=3914069), calfun="raking"))
+range(weights(dclus1g3c)/weights(dclus1))
+
+(dclus1g3c <- calibrate(dclus1, ~stype+api99, c(pop.totals,
+    api99=3914069), calfun=cal.raking))
 range(weights(dclus1g3c)/weights(dclus1))
 
 (dclus1g3d <- calibrate(dclus1, ~stype+api99, c(pop.totals,
