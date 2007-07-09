@@ -1,6 +1,6 @@
 
-R : Copyright 2006, The R Foundation for Statistical Computing
-Version 2.3.1 (2006-06-01)
+R version 2.4.1 (2006-12-18)
+Copyright (C) 2006 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -29,10 +29,10 @@ Type 'q()' to quit R.
 > 
 > svymean(~api00, rclus1r)
         mean     SE
-api00 641.23 26.871
+api00 641.23 26.873
 > svytotal(~enroll, rclus1r)
           mean     SE
-enroll 3647300 463253
+enroll 3647300 463511
 > 
 > ff<-~stype+sch.wide
 > poptotals<-colSums(model.matrix(ff,model.frame(ff,apipop)))
@@ -47,38 +47,30 @@ api00 641.23 26.874
 enroll 3647280 463582
 > 
 > summary(weights(rclus1g)/weights(rclus1r))
-       V1               V2               V3               V4        
- Min.   :0.9978   Min.   :0.9978   Min.   :0.9984   Min.   :0.9985  
- 1st Qu.:0.9987   1st Qu.:0.9988   1st Qu.:0.9990   1st Qu.:0.9991  
- Median :0.9999   Median :0.9998   Median :0.9998   Median :0.9997  
- Mean   :0.9996   Mean   :0.9996   Mean   :0.9997   Mean   :0.9997  
- 3rd Qu.:1.0005   3rd Qu.:1.0005   3rd Qu.:1.0004   3rd Qu.:1.0003  
- Max.   :1.0014   Max.   :1.0014   Max.   :1.0010   Max.   :1.0010  
- NA's   :3.0000   NA's   :3.0000   NA's   :2.0000   NA's   :4.0000  
-       V5               V6               V7               V8        
- Min.   :0.9980   Min.   :0.9983   Min.   :0.9984   Min.   :0.9973  
- 1st Qu.:0.9988   1st Qu.:0.9990   1st Qu.:0.9990   1st Qu.:0.9984  
- Median :0.9999   Median :1.0001   Median :0.9997   Median :1.0001  
- Mean   :0.9996   Mean   :0.9997   Mean   :0.9997   Mean   :0.9995  
- 3rd Qu.:1.0004   3rd Qu.:1.0003   3rd Qu.:1.0004   3rd Qu.:1.0005  
- Max.   :1.0012   Max.   :1.0009   Max.   :1.0011   Max.   :1.0017  
- NA's   :1.0000   NA's   :3.0000   NA's   :3.0000   NA's   :3.0000  
-       V9              V10              V11              V12        
- Min.   :0.9975   Min.   :0.9979   Min.   :0.9980   Min.   :0.9953  
- 1st Qu.:0.9986   1st Qu.:0.9988   1st Qu.:0.9988   1st Qu.:0.9971  
- Median :1.0000   Median :0.9994   Median :1.0002   Median :0.9996  
- Mean   :0.9995   Mean   :0.9995   Mean   :0.9996   Mean   :0.9991  
- 3rd Qu.:1.0005   3rd Qu.:1.0004   3rd Qu.:1.0004   3rd Qu.:1.0010  
- Max.   :1.0015   Max.   :1.0013   Max.   :1.0011   Max.   :1.0035  
- NA's   :5.0000   NA's   :2.0000   NA's   :6.0000   NA's   :4.0000  
-      V13              V14              V15        
- Min.   :0.9987   Min.   :0.9980   Min.   :0.9978  
- 1st Qu.:0.9992   1st Qu.:0.9988   1st Qu.:0.9987  
- Median :0.9998   Median :0.9999   Median :0.9999  
- Mean   :0.9997   Mean   :0.9996   Mean   :0.9996  
- 3rd Qu.:1.0003   3rd Qu.:1.0004   3rd Qu.:1.0005  
- Max.   :1.0008   Max.   :1.0013   Max.   :1.0014  
- NA's   :3.0000   NA's   :1.0000   NA's   :3.0000  
+       V1          V2          V3          V4          V5          V6   
+ Min.   :1   Min.   :1   Min.   :1   Min.   :1   Min.   :1   Min.   :1  
+ 1st Qu.:1   1st Qu.:1   1st Qu.:1   1st Qu.:1   1st Qu.:1   1st Qu.:1  
+ Median :1   Median :1   Median :1   Median :1   Median :1   Median :1  
+ Mean   :1   Mean   :1   Mean   :1   Mean   :1   Mean   :1   Mean   :1  
+ 3rd Qu.:1   3rd Qu.:1   3rd Qu.:1   3rd Qu.:1   3rd Qu.:1   3rd Qu.:1  
+ Max.   :1   Max.   :1   Max.   :1   Max.   :1   Max.   :1   Max.   :1  
+ NA's   :3   NA's   :3   NA's   :2   NA's   :4   NA's   :1   NA's   :3  
+       V7          V8          V9         V10         V11         V12        
+ Min.   :1   Min.   :1   Min.   :1   Min.   :1   Min.   :1   Min.   :0.9997  
+ 1st Qu.:1   1st Qu.:1   1st Qu.:1   1st Qu.:1   1st Qu.:1   1st Qu.:0.9998  
+ Median :1   Median :1   Median :1   Median :1   Median :1   Median :1.0000  
+ Mean   :1   Mean   :1   Mean   :1   Mean   :1   Mean   :1   Mean   :0.9999  
+ 3rd Qu.:1   3rd Qu.:1   3rd Qu.:1   3rd Qu.:1   3rd Qu.:1   3rd Qu.:1.0001  
+ Max.   :1   Max.   :1   Max.   :1   Max.   :1   Max.   :1   Max.   :1.0002  
+ NA's   :3   NA's   :3   NA's   :5   NA's   :2   NA's   :6   NA's   :4.0000  
+      V13         V14         V15   
+ Min.   :1   Min.   :1   Min.   :1  
+ 1st Qu.:1   1st Qu.:1   1st Qu.:1  
+ Median :1   Median :1   Median :1  
+ Mean   :1   Mean   :1   Mean   :1  
+ 3rd Qu.:1   3rd Qu.:1   3rd Qu.:1  
+ Max.   :1   Max.   :1   Max.   :1  
+ NA's   :3   NA's   :1   NA's   :3  
 > 
 > 
 > ## Do it for a design without replicate weights

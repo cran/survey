@@ -57,7 +57,7 @@ print(all.equal(as.vector(SE(cch1)), as.vector(SE(cch2)),tolerance=0.0006))
 ## bug report from Takahiro Tsuchiya for version 3.4
 ## We do not match Sarndal exactly, because our phase-one
 ## estimator has O(1/n.phase.2) bias.
-rei<-read.table(textConnection(
+rei<-read.table(tmp<-textConnection(
 "  id   N n.a h n.ah n.h   sub  y
 1   1 300  20 1   12   5  TRUE  1
 2   2 300  20 1   12   5  TRUE  2
@@ -80,6 +80,7 @@ rei<-read.table(textConnection(
 19 19 300  20 2    8   3 FALSE NA
 20 20 300  20 2    8   3 FALSE NA
 "), header=TRUE)
+close(tmp)
 
 des.rei <- twophase(id=list(~id,~id), strata=list(NULL,~h),
                     fpc=list(~N,NULL), subset=~sub, data=rei)

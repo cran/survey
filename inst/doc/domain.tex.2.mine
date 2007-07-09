@@ -1,0 +1,296 @@
+\documentclass{article}
+\usepackage{url}
+%\VignetteIndexEntry{Estimates in subpopulations}
+\usepackage{Sweave}
+\author{Thomas Lumley}
+\title{Estimates in subpopulations.}
+
+\begin{document}
+\maketitle
+
+Estimating a mean or total in a subpopulation (domain) from a survey, eg the
+mean blood pressure in women, is not done simply by taking the subset
+of data in that subpopulation and pretending it is a new survey.  This
+approach would give correct point estimates but incorrect standard
+errors.
+
+The standard way to derive domain means is as ratio estimators. I
+think it is easier to derive them as regression coefficients.  These
+derivations are not important for R users, since subset operations on
+survey design objects automatically do the necessary adjustments, but
+they may be of interest.  The various ways of constructing domain mean
+estimators are useful in quality control for the survey package, and
+some of the examples here are taken from
+\texttt{survey/tests/domain.R}.
+
+
+Suppose that in the artificial \texttt{fpc} data set we want to
+estimate the mean of \texttt{x} when \texttt{x>4}.
+\begin{Schunk}
+\begin{Sinput}
+> library(survey)
+> data(fpc)
+> dfpc <- svydesign(id = ~psuid, strat = ~stratid, weight = ~weight, 
++     data = fpc, nest = TRUE)
+> dsub <- subset(dfpc, x > 4)
+> svymean(~x, design = dsub)
+\end{Sinput}
+\begin{Soutput}
+   mean     SE
+x 6.195 0.7555
+\end{Soutput}
+\end{Schunk}
+
+The \texttt{subset} function constructs a survey design object with
+information about this subpopulation and \texttt{svymean} computes the
+mean. The same operation can be done for a set of subpopulations with
+\texttt{svyby}.
+\begin{Schunk}
+\begin{Sinput}
+> svyby(~x, ~I(x > 4), design = dfpc, svymean)
+\end{Sinput}
+\begin{Soutput}
+      I(x > 4) statistics.x      se.x
+FALSE    FALSE     3.314286 0.3117042
+TRUE      TRUE     6.195000 0.7555129
+\end{Soutput}
+\end{Schunk}
+
+In a regression model with a binary covariate $Z$ and no intercept,
+there are two coefficients that estimate the mean of the outcome
+variable in the subpopulations with $Z=0$ and $Z=1$, so we can
+construct the domain mean estimator by regression.
+\begin{Schunk}
+\begin{Sinput}
+> summary(svyglm(x ~ I(x > 4) + 0, design = dfpc))
+\end{Sinput}
+\begin{Soutput}
+Call:
+svyglm(x ~ I(x > 4) + 0, design = dfpc)
+
+Survey design:
+svydesign(id = ~psuid, strat = ~stratid, weight = ~weight, data = fpc, 
+    nest = TRUE)
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+I(x > 4)FALSE   3.3143     0.3117   10.63 0.000127 ***
+I(x > 4)TRUE    6.1950     0.7555    8.20 0.000439 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+
+(Dispersion parameter for gaussian family taken to be 2.557379)
+
+Number of Fisher Scoring iterations: 2
+\end{Soutput}
+\end{Schunk}
+
+Finally, the classical derivation of the domain mean estimator is as a
+ratio where the numerator is $X$ for observations in the domain and 0
+otherwise and the denominator is 1 for observations in the domain and
+0 otherwise
+\begin{Schunk}
+\begin{Sinput}
+> svyratio(~I(x * (x > 4)), ~as.numeric(x > 4), dfpc)
+\end{Sinput}
+\begin{Soutput}
+Ratio estimator: svyratio.survey.design2(~I(x * (x > 4)), ~as.numeric(x > 4), 
+    dfpc)
+Ratios=
+               as.numeric(x > 4)
+I(x * (x > 4))             6.195
+SEs=
+               as.numeric(x > 4)
+I(x * (x > 4))         0.7555129
+\end{Soutput}
+\end{Schunk}
+
+The estimator is implemented by setting the sampling weight to zero
+for observations not in the domain.  For most survey design objects
+this allows a reduction in memory use, since only the number of zero
+weights in each sampling unit needs to be kept. For more complicated
+survey designs, such as post-stratified designs, all the data are kept
+and there is no reduction in memory use.
+
+
+\subsection*{More complex examples}
+Verifying that \texttt{svymean} agrees with the ratio and regression
+derivations is particularly useful for more complicated designs where
+published examples are less readily available.
+
+This example shows calibration (GREG) estimators of domain means for
+the California Academic Performance Index (API).
+\begin{Schunk}
+\begin{Sinput}
+> data(api)
+> dclus1 <- svydesign(id = ~dnum, weights = ~pw, data = apiclus1, 
++     fpc = ~fpc)
+> pop.totals <- c("(Intercept)" = 6194, stypeH = 755, stypeM = 1018)
+> gclus1 <- calibrate(dclus1, ~stype + api99, c(pop.totals, api99 = 3914069))
+> svymean(~api00, subset(gclus1, comp.imp == "Yes"))
+\end{Sinput}
+\begin{Soutput}
+        mean     SE
+api00 672.05 6.5182
+\end{Soutput}
+\begin{Sinput}
+> svyratio(~I(api00 * (comp.imp == "Yes")), ~as.numeric(comp.imp == 
++     "Yes"), gclus1)
+\end{Sinput}
+\begin{Soutput}
+Ratio estimator: svyratio.survey.design2(~I(api00 * (comp.imp == "Yes")), ~as.numeric(comp.imp == 
+    "Yes"), gclus1)
+Ratios=
+                               as.numeric(comp.imp == "Yes")
+I(api00 * (comp.imp == "Yes"))                       672.049
+SEs=
+                               as.numeric(comp.imp == "Yes")
+I(api00 * (comp.imp == "Yes"))                      6.518153
+\end{Soutput}
+\begin{Sinput}
+> summary(svyglm(api00 ~ comp.imp - 1, gclus1))
+\end{Sinput}
+\begin{Soutput}
+Call:
+svyglm(api00 ~ comp.imp - 1, gclus1)
+
+Survey design:
+calibrate(dclus1, ~stype + api99, c(pop.totals, api99 = 3914069))
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+comp.impNo   649.706     12.563   51.72   <2e-16 ***
+comp.impYes  672.049      6.518  103.10   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+
+(Dispersion parameter for gaussian family taken to be 10519.86)
+
+Number of Fisher Scoring iterations: 2
+\end{Soutput}
+\end{Schunk}
+
+Two-stage samples with full finite-population corrections
+\begin{Schunk}
+\begin{Sinput}
+> data(mu284)
+> dmu284 <- svydesign(id = ~id1 + id2, fpc = ~n1 + n2, data = mu284)
+> svymean(~y1, subset(dmu284, y1 > 40))
+\end{Sinput}
+\begin{Soutput}
+    mean     SE
+y1 48.69 1.1088
+\end{Soutput}
+\begin{Sinput}
+> svyratio(~I(y1 * (y1 > 40)), ~as.numeric(y1 > 40), dmu284)
+\end{Sinput}
+\begin{Soutput}
+Ratio estimator: svyratio.survey.design2(~I(y1 * (y1 > 40)), ~as.numeric(y1 > 
+    40), dmu284)
+Ratios=
+                  as.numeric(y1 > 40)
+I(y1 * (y1 > 40))            48.69014
+SEs=
+                  as.numeric(y1 > 40)
+I(y1 * (y1 > 40))            1.108825
+\end{Soutput}
+\begin{Sinput}
+> summary(svyglm(y1 ~ I(y1 > 40) + 0, dmu284))
+\end{Sinput}
+\begin{Soutput}
+Call:
+svyglm(y1 ~ I(y1 > 40) + 0, dmu284)
+
+Survey design:
+svydesign(id = ~id1 + id2, fpc = ~n1 + n2, data = mu284)
+
+Coefficients:
+                Estimate Std. Error t value Pr(>|t|)    
+I(y1 > 40)FALSE   34.419      1.842   18.69 0.000334 ***
+I(y1 > 40)TRUE    48.690      1.109   43.91  2.6e-05 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+
+(Dispersion parameter for gaussian family taken to be 27.96987)
+
+Number of Fisher Scoring iterations: 2
+\end{Soutput}
+\end{Schunk}
+
+Stratified two-phase sampling of children with Wilm's Tumor,
+estimating relapse probability for those older than 3 years (36
+months) at diagnosis
+\begin{Schunk}
+\begin{Sinput}
+> library("survival")
+> data(nwtco)
+> nwtco$incc2 <- as.logical(with(nwtco, ifelse(rel | instit == 
++     2, 1, rbinom(nrow(nwtco), 1, 0.1))))
+> dccs8 <- twophase(id = list(~seqno, ~seqno), strata = list(NULL, 
++     ~interaction(rel, stage, instit)), data = nwtco, subset = ~incc2)
+> svymean(~rel, subset(dccs8, age > 36))
+\end{Sinput}
+\begin{Soutput}
+       mean     SE
+<<<<<<< .mine
+rel 0.18135 0.0116
+=======
+rel 0.17388 0.0114
+>>>>>>> .r16
+\end{Soutput}
+\begin{Sinput}
+> svyratio(~I(rel * as.numeric(age > 36)), ~as.numeric(age > 36), 
++     dccs8)
+\end{Sinput}
+\begin{Soutput}
+Ratio estimator: svyratio.twophase(~I(rel * as.numeric(age > 36)), ~as.numeric(age > 
+    36), dccs8)
+Ratios=
+                              as.numeric(age > 36)
+<<<<<<< .mine
+I(rel * as.numeric(age > 36))            0.1813533
+=======
+I(rel * as.numeric(age > 36))            0.1738818
+>>>>>>> .r16
+SEs=
+                              as.numeric(age > 36)
+<<<<<<< .mine
+I(rel * as.numeric(age > 36))           0.01164626
+=======
+I(rel * as.numeric(age > 36))           0.01140925
+>>>>>>> .r16
+\end{Soutput}
+\begin{Sinput}
+> summary(svyglm(rel ~ I(age > 36) + 0, dccs8))
+\end{Sinput}
+\begin{Soutput}
+Call:
+svyglm(rel ~ I(age > 36) + 0, dccs8)
+
+Survey design:
+twophase(id = list(~seqno, ~seqno), strata = list(NULL, ~interaction(rel, 
+    stage, instit)), data = nwtco, subset = ~incc2)
+
+Coefficients:
+                 Estimate Std. Error t value Pr(>|t|)    
+<<<<<<< .mine
+I(age > 36)FALSE 0.104323   0.007926   13.16   <2e-16 ***
+I(age > 36)TRUE  0.181353   0.011646   15.57   <2e-16 ***
+=======
+I(age > 36)FALSE 0.108740   0.008574   12.68   <2e-16 ***
+I(age > 36)TRUE  0.173882   0.011409   15.24   <2e-16 ***
+>>>>>>> .r16
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+
+<<<<<<< .mine
+(Dispersion parameter for gaussian family taken to be 0.1202867)
+=======
+(Dispersion parameter for gaussian family taken to be 0.1207114)
+>>>>>>> .r16
+
+Number of Fisher Scoring iterations: 2
+\end{Soutput}
+\end{Schunk}
+
+\end{document}

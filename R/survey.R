@@ -240,7 +240,7 @@ print.survey.design<-function(x,varnames=FALSE,design.summaries=FALSE,...){
 "[.survey.design"<-function (x,i, ...){
   
   if (!missing(i)){ 
-    if (is.calibrated(design)){
+    if (is.calibrated(x)){
       tmp<-x$prob[i,]
       x$prob<-rep(Inf, length(x$prob))
       x$prob[i,]<-tmp
@@ -701,7 +701,7 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
     if (inherits(x,"formula"))
       x<-model.frame(x,model.frame(design),na.action=na.pass)
     else if(typeof(x) %in% c("expression","symbol"))
-      x<-eval(x, model.frame(design),na.action=na.pass)
+      x<-eval(x, model.frame(design,na.action=na.pass))
     
     if (na.rm){
         nas<-rowSums(is.na(x))
@@ -1127,13 +1127,12 @@ svy.varcoef<-function(glm.object,design){
     Ainv<-summary(glm.object)$cov.unscaled
     estfun<-model.matrix(glm.object)*resid(glm.object,"working")*glm.object$weights
     if (inherits(design,"survey.design2"))
-      B<-svyrecvar(estfun,design$cluster,design$strata,design$fpc,postStrata=design$postStrata)
+      svyrecvar(estfun%*%Ainv,design$cluster,design$strata,design$fpc,postStrata=design$postStrata)
     else if (inherits(design, "twophase"))
-      B <- twophasevar(estfun, design)
+      twophasevar(estfun%*%Ainv, design)
     else
-      B<-svyCprod(estfun,design$strata,design$cluster[[1]],design$fpc, design$nPSU,
+      svyCprod(estfun%*%Ainv,design$strata,design$cluster[[1]],design$fpc, design$nPSU,
                   design$certainty,design$postStrata)
-    Ainv%*%B%*%Ainv
   }
 
 residuals.svyglm<-function(object,type = c("deviance", "pearson", "working", 

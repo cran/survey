@@ -32,7 +32,7 @@ regTermTest<-function(model,test.terms, null=NULL,df=Inf){
     else if (inherits(model,"coxph"))
       df<-model$n-length(coef(model))
     else if (inherits(model, "MIresult"))
-      df<-min(x$df[index])
+      df<-min(model$df[index])
     else
       df<-length(resid(model))-length(coef(model))
   }

@@ -1,6 +1,6 @@
 ## from Takahiro Tsuchiya
 library(survey)
-kigyo<-read.table(textConnection("  obs uriage srs.w pps.w
+kigyo<-read.table(tmp<-textConnection("  obs uriage srs.w pps.w
 1    1     15   100    20
 2    2    143   100   200
 3    3     21   100    11
@@ -12,6 +12,7 @@ kigyo<-read.table(textConnection("  obs uriage srs.w pps.w
 9    9     15   100    10
 10  10     86   100    55
 ",open="r"),header=TRUE)
+close(tmp)
 des.srs <- svydesign(ids=~1, weights=~srs.w, data=kigyo)
 (res.srs <- svymean(~uriage, des.srs, deff=TRUE))
 (SE(res.srs)^2) / ((1-10/1000) * coef(svyvar(~uriage, des.srs)) / 10)

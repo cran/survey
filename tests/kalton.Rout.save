@@ -1,13 +1,11 @@
 
-R version 2.4.1 (2006-12-18)
-Copyright (C) 2006 The R Foundation for Statistical Computing
+R version 2.6.0 Under development (unstable) (2007-06-27 r42086)
+Copyright (C) 2007 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
 Type 'license()' or 'licence()' for distribution details.
-
-  Natural language support but running in an English locale
 
 R is a collaborative project with many contributors.
 Type 'contributors()' for more information and
@@ -30,6 +28,9 @@ Type 'q()' to quit R.
 > gregpop<-colSums(model.matrix(~as.numeric(a)+as.numeric(b),kaltonpop))
 > 
 > dkalton<-svydesign(id=~1,data=kaltonsample)
+Warning message:
+In svydesign(id = ~1, data = kaltonsample) :
+  No weights or probabilities supplied, assuming equal probability
 > 
 > dps<-postStratify(dkalton,~a+b,xtabs(~a+b,kaltonpop))
 > 
@@ -37,6 +38,7 @@ Type 'q()' to quit R.
 > 
 > dcalps<-calibrate(dkalton, ~a*b, jointpop)
 > dcalrake<-calibrate(dkalton,~a+b, marginalpop, calfun="raking")
+Loading required package: MASS
 > dlinear<-calibrate(dkalton, ~a+b, marginalpop)
 > 
 > dtrunclinear<-calibrate(dkalton, ~a+b, marginalpop,bounds=c(0.5,2.2))

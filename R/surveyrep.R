@@ -1608,17 +1608,18 @@ postStratify.svyrep.design<-function(design, strata, population,
   designlabel <- do.call("interaction", strata)
   index<-match(designlabel, both$label)
 
+  oldpw<-design$pweights
   design$pweights<-design$pweights*reweight[index]
 
   
   if (design$combined.weights){
-    replicateFreq<- rowsum(as.matrix(repweights),
+    replicateFreq<- rowsum(as.matrix(design$repweights),
                            match(designlabel, both$label),
                            reorder=TRUE)
     repreweight<-  both$Pop.Freq/replicateFreq
     design$repweights <- as.matrix(design$repweights)*repreweight[index]
   } else { 
-    replicateFreq<- rowsum(as.matrix(design$repweights)*design$pweights,
+    replicateFreq<- rowsum(as.matrix(design$repweights)*oldpw,
                            match(designlabel, both$label),
                            reorder=TRUE)
     repreweight<- both$Pop.Freq/replicateFreq

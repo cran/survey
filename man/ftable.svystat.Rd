@@ -19,7 +19,6 @@ Reformat the output of survey computations to a table.
     the resulting table (see examples)}
   \item{...}{Arguments for future expansion}
 }
-}
 \value{
  An object of class \code{"ftable"}
 }

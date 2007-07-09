@@ -1,6 +1,6 @@
 
-R : Copyright 2006, The R Foundation for Statistical Computing
-Version 2.3.1 (2006-06-01)
+R version 2.6.0 Under development (unstable) (2007-06-27 r42086)
+Copyright (C) 2007 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -121,7 +121,7 @@ There were 29 warnings (use warnings() to see them)
 > 
 > svytotal(~enroll,dclus1g)
          total        SE
-enroll 3811472 2.366e-10
+enroll 3811472 1.987e-10
 > svytotal(~api.stu,dclus1g)
           total    SE
 api.stu 3242857 38967

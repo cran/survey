@@ -1,3 +1,9 @@
+3.6-11 postStratify() for repweights was standardizing the replicates to 
+      slightly wrong population totals. (Alistair Gray)
+
+      vcov() for two-phase designs gives the contributions from each phase
+      for a wider range of statistics. (Norman Breslow)
+
 3.6-10 Added error message for missing sampling indicator in two-phase
       design (Lucia Hindorff)
 

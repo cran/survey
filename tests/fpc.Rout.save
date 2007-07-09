@@ -1,6 +1,6 @@
 
-R : Copyright 2005, The R Foundation for Statistical Computing
-Version 2.3.0 Under development (unstable) (2005-11-29 r36544)
+R version 2.6.0 Under development (unstable) (2007-06-27 r42086)
+Copyright (C) 2007 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -12,7 +12,7 @@ Type 'contributors()' for more information and
 'citation()' on how to cite R or R packages in publications.
 
 Type 'demo()' for some demos, 'help()' for on-line help, or
-'help.start()' for a HTML browser interface to help.
+'help.start()' for an HTML browser interface to help.
 Type 'q()' to quit R.
 
 > library(survey)
@@ -32,8 +32,7 @@ fpc> fpc
 7       2     2      4  3 12 6.6
 8       2     3      4  3 12 4.2
 
-fpc> withoutfpc <- svydesign(weights = ~weight, ids = ~psuid, 
-    strata = ~stratid, variables = ~x, data = fpc, nest = TRUE)
+fpc> withoutfpc<-svydesign(weights=~weight, ids=~psuid, strata=~stratid, variables=~x, data=fpc, nest=TRUE)
 
 fpc> withoutfpc
 Stratified Independent Sampling design (with replacement)
@@ -44,9 +43,8 @@ fpc> svymean(~x, withoutfpc)
     mean     SE
 x 5.4481 0.7413
 
-fpc> withfpc <- svydesign(weights = ~weight, ids = ~psuid, 
-    strata = ~stratid, fpc = ~Nh, variables = ~x, data = fpc, 
-    nest = TRUE)
+fpc> withfpc<-svydesign(weights=~weight, ids=~psuid, strata=~stratid,
+fpc+ fpc=~Nh, variables=~x, data=fpc, nest=TRUE)
 
 fpc> withfpc
 Stratified Independent Sampling design
@@ -57,39 +55,37 @@ fpc> svymean(~x, withfpc)
     mean    SE
 x 5.4481 0.616
 
-fpc> withfpc <- svydesign(prob = ~I(1/weight), ids = ~psuid, 
-    strata = ~stratid, fpc = ~Nh, variables = ~x, data = fpc, 
-    nest = TRUE)
+fpc> ## Other equivalent forms 
+fpc> withfpc<-svydesign(prob=~I(1/weight), ids=~psuid, strata=~stratid,
+fpc+ fpc=~Nh, variables=~x, data=fpc, nest=TRUE)
 
 fpc> svymean(~x, withfpc)
     mean    SE
 x 5.4481 0.616
 
-fpc> withfpc <- svydesign(weights = ~weight, ids = ~psuid, 
-    strata = ~stratid, fpc = ~I(nh/Nh), variables = ~x, data = fpc, 
-    nest = TRUE)
+fpc> withfpc<-svydesign(weights=~weight, ids=~psuid, strata=~stratid,
+fpc+ fpc=~I(nh/Nh), variables=~x, data=fpc, nest=TRUE)
 
 fpc> svymean(~x, withfpc)
     mean    SE
 x 5.4481 0.616
 
-fpc> withfpc <- svydesign(weights = ~weight, ids = ~interaction(stratid, 
-    psuid), strata = ~stratid, fpc = ~I(nh/Nh), variables = ~x, 
-    data = fpc)
+fpc> withfpc<-svydesign(weights=~weight, ids=~interaction(stratid,psuid),
+fpc+ strata=~stratid, fpc=~I(nh/Nh), variables=~x, data=fpc)
 
 fpc> svymean(~x, withfpc)
     mean    SE
 x 5.4481 0.616
 
-fpc> withfpc <- svydesign(ids = ~psuid, strata = ~stratid, 
-    fpc = ~Nh, variables = ~x, data = fpc, nest = TRUE)
+fpc> withfpc<-svydesign(ids=~psuid, strata=~stratid, fpc=~Nh,
+fpc+  variables=~x,data=fpc,nest=TRUE)
 
 fpc> svymean(~x, withfpc)
     mean    SE
 x 5.4481 0.616
 
-fpc> withfpc <- svydesign(ids = ~psuid, strata = ~stratid, 
-    fpc = ~I(nh/Nh), variables = ~x, data = fpc, nest = TRUE)
+fpc> withfpc<-svydesign(ids=~psuid, strata=~stratid,
+fpc+ fpc=~I(nh/Nh), variables=~x, data=fpc, nest=TRUE)
 
 fpc> svymean(~x, withfpc)
     mean    SE

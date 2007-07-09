@@ -173,6 +173,6 @@ survey functions.
 
 
  }
-}
+
 \keyword{univar}% at least one, from doc/KEYWORDS
 \keyword{survey}% __ONLY ONE__ keyword per line

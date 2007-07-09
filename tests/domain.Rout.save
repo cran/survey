@@ -1,6 +1,6 @@
 
-R : Copyright 2006, The R Foundation for Statistical Computing
-Version 2.3.0 alpha (2006-04-04 r37646)
+R version 2.6.0 Under development (unstable) (2007-06-27 r42086)
+Copyright (C) 2007 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -37,8 +37,10 @@ x 6.195 0.7555
 FALSE    FALSE     3.314286 0.3117042
 TRUE      TRUE     6.195000 0.7555129
 Warning messages:
-1: Stratum (1) has only one PSU at stage 1 in: onestrat(x[index, , drop = FALSE], clusters[index], nPSU[index][1],  
-2: Stratum (2) has only one PSU at stage 1 in: onestrat(x[index, , drop = FALSE], clusters[index], nPSU[index][1],  
+1: In onestrat(x[index, , drop = FALSE], clusters[index], nPSU[index][1],  :
+  Stratum (1) has only one PSU at stage 1
+2: In onestrat(x[index, , drop = FALSE], clusters[index], nPSU[index][1],  :
+  Stratum (2) has only one PSU at stage 1
 > m3<-svyglm(x~I(x>4)+0,design=dfpc)
 > summary(m3)
 

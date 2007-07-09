@@ -136,6 +136,5 @@ empirical cdf, specify \code{method="constant"} and \code{f=0}.
   svyquantile(~arrests+alive, design=scdrep, quantile=0.5, interval="quantile")
 
  }
-}
 \keyword{univar}% at least one, from doc/KEYWORDS
 \keyword{survey}% __ONLY ONE__ keyword per line

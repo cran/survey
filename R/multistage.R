@@ -293,7 +293,7 @@ multistage<-function(x, clusters,  stratas, nPSUs, fpcs,
         j<-match(clusters[index,1],cali$index)
         if (length(unique(j))!=1)
           stop("Internal problem in g-calibration data: stage",stage,
-               ", cluster", clus)
+               ", cluster", j)
         j<-j[[1]]
         x[index,]<-qr.resid(cali$qr[[j]], x[index,,drop=FALSE]/cali$w[[j]])*cali$w[[j]]
       }

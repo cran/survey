@@ -18,7 +18,7 @@ three emergency service areas.
     \item{alive}{number reaching hospital alive}
   }
 }
-}
+
 \source{
 Levy and Lemeshow. "Sampling of Populations" (3rd edition). Wiley.
 }

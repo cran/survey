@@ -32,5 +32,5 @@ hosprep<-as.svrepdesign(hospdes)
 svytotal(~births, design=hospdes)
 svytotal(~births, design=hosprep)
 
-}}
+}
 \keyword{datasets}

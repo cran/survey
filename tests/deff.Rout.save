@@ -1,6 +1,6 @@
 
-R version 2.5.0 Under development (unstable) (2006-10-16 r39648)
-Copyright (C) 2006 The R Foundation for Statistical Computing
+R version 2.6.0 Under development (unstable) (2007-06-27 r42086)
+Copyright (C) 2007 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -17,7 +17,7 @@ Type 'q()' to quit R.
 
 > ## from Takahiro Tsuchiya
 > library(survey)
-> kigyo<-read.table(textConnection("  obs uriage srs.w pps.w
+> kigyo<-read.table(tmp<-textConnection("  obs uriage srs.w pps.w
 + 1    1     15   100    20
 + 2    2    143   100   200
 + 3    3     21   100    11
@@ -29,6 +29,7 @@ Type 'q()' to quit R.
 + 9    9     15   100    10
 + 10  10     86   100    55
 + ",open="r"),header=TRUE)
+> close(tmp)
 > des.srs <- svydesign(ids=~1, weights=~srs.w, data=kigyo)
 > (res.srs <- svymean(~uriage, des.srs, deff=TRUE))
           mean      SE   DEff
