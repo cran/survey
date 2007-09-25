@@ -155,7 +155,7 @@ jknweights<-function(strata,psu, fpc=NULL,
   }
   if (compress){
     repweights<-list(weights=repweights,index=match(psu,unq))
-    class(repweights)<- "repweights_compressed"
+    class(repweights)<- c("repweights_compressed","repweights")
   } else class(repweights)<-"repweights"
   list(type="jkn", repweights=repweights, rscales=rscales, scale=scale)
 }
@@ -599,7 +599,7 @@ update.svyrep.design<-function(object,...){
 weights.svyrep.design<-function(object,type=c("replication","sampling","analysis"),...){
   type<-match.arg(type)
   switch(type,
-         replication=weights(object$repweights),
+         replication= as.matrix(object$repweights),
          sampling=object$pweights,
          analysis=if(object$combined.weights) as.matrix(object$repweights) else as.matrix(object$repweights)*object$pweights)
 }

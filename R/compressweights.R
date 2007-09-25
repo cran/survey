@@ -16,7 +16,7 @@
       ## this is faster than just subscripting x$weights (!)
       x<-list(index=x$index,
               weights=x$weights[,...,drop=FALSE])
-      class(x)<-"repweights_compressed"
+      class(x)<-c("repweights_compressed","repweights")
   }
   x
 }
@@ -46,7 +46,7 @@ compressWeights.default<-function(rw,...){
   tmp<-apply(mat,1,function(x) paste(x,collapse="\r"))
   unq<-!duplicated(mat)
   rval<-list(weights=mat[unq,],index=match(tmp,tmp[unq]))
-  class(rval)<-"repweights_compressed"
+  class(rval)<-c("repweights_compressed","repweights")
   rval
 }
 

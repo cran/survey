@@ -2,7 +2,7 @@ svyhist<-function(formula, design, breaks = "Sturges",
                   include.lowest = TRUE, right = TRUE, xlab=NULL,
                   main=NULL, probability=TRUE,
                   freq=!probability,...){
-    mf<-model.frame(formula,design$variables)
+    mf<-model.frame(formula,design$variables, na.action=na.pass)
     if (ncol(mf)>1) stop("Only one variable allowed.")
     variable<-mf[,1]
     varname<-names(mf)

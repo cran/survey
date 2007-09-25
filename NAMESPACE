@@ -7,7 +7,7 @@ export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        jk1weights,jknweights, brrweights, regTermTest, degf, nonresponse, 
        sparseCells, neighbours, joinCells, compressWeights, make.formula,
        svycontrast,svyCprod, svyrecvar, grake, svrVar,pchisqsum,
-       make.calfun, cal.linear, cal.raking, cal.logit)
+       make.calfun, cal.linear, cal.raking, cal.logit, svycdf)
 
 S3method(svymean,survey.design)
 S3method(svymean,svyrep.design)
@@ -115,7 +115,8 @@ S3method(print,summary.twophase)
 S3method(print,summary.svyrep.design)
 S3method(print,summary.svyglm)
 S3method(print,summary.svytable)
-
+S3method(print,svycdf)
+S3method(plot,svycdf)
 S3method(print, nonresponse)
 S3method(print, nonresponseSubset)
 S3method(print, regTermTest)

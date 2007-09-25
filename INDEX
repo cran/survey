@@ -14,6 +14,7 @@ as.svrepdesign          Compute replication weights for a design
 svyplot                 Survey-weighted graphics
 svyhist                 Survey-weighted histogram
 svysmooth               Smoothers and density estimates
+svycdf                  Cumulative distribution functions
 svyboxplot              Survey-weighted boxplots
 svyby                   Tables of statistics 
 ftable.svystat          Formatted tables of statistics

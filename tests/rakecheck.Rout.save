@@ -1,6 +1,6 @@
 
-R version 2.4.1 (2006-12-18)
-Copyright (C) 2006 The R Foundation for Statistical Computing
+R version 2.7.0 Under development (unstable) (2007-09-25 r42975)
+Copyright (C) 2007 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -47,30 +47,30 @@ api00 641.23 26.874
 enroll 3647280 463582
 > 
 > summary(weights(rclus1g)/weights(rclus1r))
-       V1          V2          V3          V4          V5          V6   
- Min.   :1   Min.   :1   Min.   :1   Min.   :1   Min.   :1   Min.   :1  
- 1st Qu.:1   1st Qu.:1   1st Qu.:1   1st Qu.:1   1st Qu.:1   1st Qu.:1  
- Median :1   Median :1   Median :1   Median :1   Median :1   Median :1  
- Mean   :1   Mean   :1   Mean   :1   Mean   :1   Mean   :1   Mean   :1  
- 3rd Qu.:1   3rd Qu.:1   3rd Qu.:1   3rd Qu.:1   3rd Qu.:1   3rd Qu.:1  
- Max.   :1   Max.   :1   Max.   :1   Max.   :1   Max.   :1   Max.   :1  
- NA's   :3   NA's   :3   NA's   :2   NA's   :4   NA's   :1   NA's   :3  
-       V7          V8          V9         V10         V11         V12        
- Min.   :1   Min.   :1   Min.   :1   Min.   :1   Min.   :1   Min.   :0.9997  
- 1st Qu.:1   1st Qu.:1   1st Qu.:1   1st Qu.:1   1st Qu.:1   1st Qu.:0.9998  
- Median :1   Median :1   Median :1   Median :1   Median :1   Median :1.0000  
- Mean   :1   Mean   :1   Mean   :1   Mean   :1   Mean   :1   Mean   :0.9999  
- 3rd Qu.:1   3rd Qu.:1   3rd Qu.:1   3rd Qu.:1   3rd Qu.:1   3rd Qu.:1.0001  
- Max.   :1   Max.   :1   Max.   :1   Max.   :1   Max.   :1   Max.   :1.0002  
- NA's   :3   NA's   :3   NA's   :5   NA's   :2   NA's   :6   NA's   :4.0000  
-      V13         V14         V15   
- Min.   :1   Min.   :1   Min.   :1  
- 1st Qu.:1   1st Qu.:1   1st Qu.:1  
- Median :1   Median :1   Median :1  
- Mean   :1   Mean   :1   Mean   :1  
- 3rd Qu.:1   3rd Qu.:1   3rd Qu.:1  
- Max.   :1   Max.   :1   Max.   :1  
- NA's   :3   NA's   :1   NA's   :3  
+       V1           V2          V3          V4           V5          V6   
+ Min.   : 1   Min.   :1   Min.   :1   Min.   : 1   Min.   :1   Min.   :1  
+ 1st Qu.: 1   1st Qu.:1   1st Qu.:1   1st Qu.: 1   1st Qu.:1   1st Qu.:1  
+ Median : 1   Median :1   Median :1   Median : 1   Median :1   Median :1  
+ Mean   : 1   Mean   :1   Mean   :1   Mean   : 1   Mean   :1   Mean   :1  
+ 3rd Qu.: 1   3rd Qu.:1   3rd Qu.:1   3rd Qu.: 1   3rd Qu.:1   3rd Qu.:1  
+ Max.   : 1   Max.   :1   Max.   :1   Max.   : 1   Max.   :1   Max.   :1  
+ NA's   :11   NA's   :4   NA's   :2   NA's   :13   NA's   :2   NA's   :4  
+       V7          V8           V9         V10          V11    
+ Min.   :1   Min.   : 1   Min.   :1   Min.   : 1   Min.   : 1  
+ 1st Qu.:1   1st Qu.: 1   1st Qu.:1   1st Qu.: 1   1st Qu.: 1  
+ Median :1   Median : 1   Median :1   Median : 1   Median : 1  
+ Mean   :1   Mean   : 1   Mean   :1   Mean   : 1   Mean   : 1  
+ 3rd Qu.:1   3rd Qu.: 1   3rd Qu.:1   3rd Qu.: 1   3rd Qu.: 1  
+ Max.   :1   Max.   : 1   Max.   :1   Max.   : 1   Max.   : 1  
+ NA's   :4   NA's   :16   NA's   :9   NA's   :34   NA's   :21  
+      V12               V13          V14         V15    
+ Min.   : 0.9997   Min.   : 1   Min.   :1   Min.   : 1  
+ 1st Qu.: 1.0001   1st Qu.: 1   1st Qu.:1   1st Qu.: 1  
+ Median : 1.0001   Median : 1   Median :1   Median : 1  
+ Mean   : 1.0000   Mean   : 1   Mean   :1   Mean   : 1  
+ 3rd Qu.: 1.0001   3rd Qu.: 1   3rd Qu.:1   3rd Qu.: 1  
+ Max.   : 1.0002   Max.   : 1   Max.   :1   Max.   : 1  
+ NA's   :37.0000   NA's   :13   NA's   :1   NA's   :12  
 > 
 > 
 > ## Do it for a design without replicate weights

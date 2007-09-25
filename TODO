@@ -12,9 +12,7 @@ Possible additional developments in no particular order
  - Survival curve estimation (the standard errors are the only 
 	non-trivial part of this)
 
- - Large data sets: design object with references to data stored in a 
-   database. Linear regression, but probably no other regression models.
-  [SQLite data frames may solve this]
+ - Large data sets: see the surveyNG package
 
  - GEE. 
 
