@@ -1,3 +1,9 @@
+3.6-13 Change in tolerances so that calibrate() works better with collinear
+       calibration variables (Richard Valliant)
+
+       calibrate() can be forced to return an answer even when the specified
+       accuracy was not achieved.
+
 3.6-12 svyhist() handles missing data better.
 
       Added svycdf() for cumulative distribution function estimate.

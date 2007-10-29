@@ -22,11 +22,11 @@ calibrate(design,...)
 \method{calibrate}{survey.design2}(design, formula, population,
        aggregate.stage=NULL, stage=0, variance=NULL,
        bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
-       maxit=50,epsilon=1e-7,verbose=FALSE,...)
+       maxit=50,epsilon=1e-7,verbose=FALSE,force=FALSE,...)
 \method{calibrate}{svyrep.design}(design, formula, population,compress=NA,
        aggregate.index=NULL, variance=NULL, bounds=c(-Inf,Inf),
        calfun=c("linear","raking","logit"),
-       maxit=50, epsilon=1e-7, verbose=FALSE, ...)
+       maxit=50, epsilon=1e-7, verbose=FALSE,force=FALSE, ...)
 \method{calibrate}{twophase}(design, phase=2,formula, population,
        calfun=c("linear","raking","logit","rrz"),...)
 grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
@@ -54,6 +54,7 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
   \item{maxit}{Number of iterations}
   \item{epsilon}{tolerance in matching population total}
   \item{verbose}{print lots of uninteresting information}
+  \item{force}{Return an answer even if the specified accuracy was not achieved}
   \item{phase}{Phase of a two-phase design to calibrate (only
     \code{phase=2} currently implemented.)}
   \item{mm}{model matrix}
@@ -77,6 +78,13 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
   functions or as an object of class \code{calfun}, allowing
   user-defined functions. See \code{\link{make.calfun}} for details.
 
+  Calibration with bounds, or on highly collinear data, may fail. If
+  \code{force=TRUE} the approximately calibrated design object will
+  still be returned (useful for examining why it failed). A failure in
+  calibrating a set of replicate weights when the sampling weights were
+  successfully calibrated will give only a warning, not an error.
+
+  
   For two-phase designs \code{calfun="rrz"} estimates the sampling
   probabilities using logistic regression as described by Robins et al
   (1994). \code{\link{estWeights}} will do the same thing.
@@ -92,7 +100,7 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
   given if the original weights are not constant within levels of
   \code{aggregate.index}.
   
-  In a model with two-stage sampling population totals may be available
+  In a model with two-phase sampling population totals may be available
   for the PSUs actually sampled, but not for the whole population.  In
   this situation, calibrating within each PSU reduces with second-stage
   contribution to variance. This generalizes to multistage sampling.

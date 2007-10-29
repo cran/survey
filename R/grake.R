@@ -16,7 +16,7 @@ calibrate<-function(design, ...) UseMethod("calibrate")
 calibrate.survey.design2<-function(design, formula, population,
                                     aggregate.stage=NULL, stage=0, variance=NULL,
                                     bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
-                                    maxit=50, epsilon=1e-7, verbose=FALSE,
+                                    maxit=50, epsilon=1e-7, verbose=FALSE, force=FALSE,
                                     ...){
   if (is.character(calfun)) calfun<-match.arg(calfun)
   if (is.character(calfun) && calfun=="linear" && (bounds==c(-Inf,Inf))){
@@ -78,7 +78,8 @@ calibrate.survey.design2<-function(design, formula, population,
 
   g<-grake(mm,ww,calfun, bounds=bounds,population=population,
            verbose=verbose,epsilon=epsilon,maxit=maxit)
-  
+
+  if (!force && !is.null(attr(g,"failed"))) stop("Calibration failed")
   design$prob<-design$prob/g
   
   caldata <- list(qr=tqr, w=g*whalf, stage=0, index=NULL)
@@ -95,7 +96,7 @@ calibrate.survey.design2<-function(design, formula, population,
 calibrate.svyrep.design<-function(design, formula, population,compress=NA,
                                    aggregate.index=NULL, variance=NULL,
                                    bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
-                                   maxit=50, epsilon=1e-7, verbose=FALSE,
+                                   maxit=50, epsilon=1e-7, verbose=FALSE,force=FALSE,
                                    ...){
   if (is.character(calfun)) calfun<-match.arg(calfun)
   if (is.character(calfun) && calfun=="linear" && (bounds==c(-Inf,Inf))){
@@ -163,6 +164,8 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
   gtotal <- grake(mm,ww,calfun,bounds=bounds,population=population,
                   verbose=verbose, epsilon=epsilon, maxit=maxit)
 
+  if (!force && !is.null(attr(gtotal,"failed"))) stop("Calibration failed")
+
   design$pweights<-design$pweights*gtotal
   
   for(i in 1:NCOL(repwt)){
@@ -229,7 +232,7 @@ grake<-function(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verb
     Tmat<-crossprod(mm*ww*dF(xeta, bounds), mm)
 
     misfit<-(population-sample.total-colSums(mm*ww*Fm1(xeta, bounds)))
-    deta<-ginv(Tmat)%*%misfit
+    deta<-ginv(Tmat, tol=256*.Machine$double.eps)%*%misfit
     eta<-eta+deta
 
     xeta<- drop(mm%*%eta)
@@ -242,7 +245,12 @@ grake<-function(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verb
     if (all(abs(misfit)/(1+abs(population))<epsilon)) break
 
     iter <- iter+1
-    if (iter>maxit) stop("Failed to converge in ",iter," iterations")
+    if (iter>maxit) {
+       achieved<-max((abs(misfit)/(1+abs(population))))
+       warning("Failed to converge: eps=",achieved," in ",iter," iterations")
+       attr(g,"failed")<-achieved
+       break;
+     }
   })
 
   attr(g,"eta")<-eta
