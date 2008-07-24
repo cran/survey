@@ -9,8 +9,10 @@
   for sampling weights.
 }
 \usage{
-svyplot(formula, design, style = c("bubble", "hex", "grayhex","subsample"),
-sample.size = 500, subset = NULL, legend = 1, inches = 0.05, amount=NULL, ...)
+svyplot(formula, design, style = c("bubble", "hex", "grayhex","subsample","transparent"),
+sample.size = 500, subset = NULL, legend = 1, inches = 0.05,
+amount=NULL, basecol="black",
+alpha=c(0, 0.8),...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -22,21 +24,31 @@ sample.size = 500, subset = NULL, legend = 1, inches = 0.05, amount=NULL, ...)
   \item{legend}{For \code{style="hex"} or \code{"grayhex"}}
   \item{inches}{Scale for bubble plots}
   \item{amount}{list with \code{x} and \code{y} components for amount of
-    jittering to use in subsample plots, or \code{NULL} for the default amount}
+    jittering to use in subsample plots, or \code{NULL} for the default
+    amount}
+  \item{basecol}{base color for transparent plots, or a function to
+    compute the color (see below)}
+  \item{alpha}{minimum and maximum opacity for transparent plots}
   \item{\dots}{Passed to \code{plot} methods}
 }
 \details{
   Bubble plots are scatterplots with circles whose area is proportional
   to the sampling weight.  The two "hex" styles produce hexagonal
   binning scatterplots, and require the \code{hexbin} package from
-  Bioconductor.
+  Bioconductor. The "transparent" style plots points with opacity
+  proportional to sampling weight.
+
   
   The \code{subsample} method uses the sampling weights to create a
   sample from approximately the population distribution and passes this to \code{\link{plot}}
   
   Bubble plots are suited to small surveys, hexagonal binning and
-  subsampling to large surveys where plotting all the points would
+  transparency to large surveys where plotting all the points would
   result in too much overlap.
+
+  \code{basecol} can be a function taking one data frame argument, which
+  will be passed the data frame of variables from the survey object.
+  This could be memory-intensive for large data sets.
 }
 \value{
   None
@@ -50,6 +62,7 @@ data(api)
 dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
 
 svyplot(api00~api99, design=dstrat, style="bubble")
+svyplot(api00~api99, design=dstrat, style="transparent",pch=19)
 \dontrun{
 ## these two require the hexbin package from Bioconductor
 svyplot(api00~api99, design=dstrat, style="hex", xlab="1999 API",ylab="2000 API")
@@ -61,6 +74,11 @@ dclus2<-svydesign(id=~dnum+snum,  weights=~pw,
 svyplot(api00~api99, design=dclus2, style="subsample")
 svyplot(api00~api99, design=dclus2, style="subsample",
           amount=list(x=25,y=25))
+
+svyplot(api00~api99, design=dstrat,
+  basecol=function(df){c("goldenrod","tomato","sienna")[as.numeric(df$stype)]},
+  style="transparent",pch=19,alpha=c(0,1))
+legend("topleft",col=c("goldenrod","tomato","sienna"), pch=19, legend=c("E","H","M"))
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

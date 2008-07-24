@@ -6,8 +6,11 @@ export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        withReplicates, hadamard, paley, is.hadamard, bootweights,
        jk1weights,jknweights, brrweights, regTermTest, degf, nonresponse, 
        sparseCells, neighbours, joinCells, compressWeights, make.formula,
-       svycontrast,svyCprod, svyrecvar, grake, svrVar,pchisqsum,
-       make.calfun, cal.linear, cal.raking, cal.logit, svycdf)
+       svycontrast,svyCprod, svyrecvar, grake, svrVar, pchisqsum,
+       make.calfun, cal.linear, cal.raking, cal.logit, svycdf, svykappa)
+
+S3method(svydesign, default)
+S3method(svydesign, imputationList)
 
 S3method(svymean,survey.design)
 S3method(svymean,svyrep.design)
@@ -198,6 +201,9 @@ S3method(as.vector, repweights_compressed)
 S3method(as.data.frame,svrepstat)
 S3method(as.data.frame,svystat)
 
+S3method(with,svyimputationList)
+S3method(print, svyimputationList)
+
 S3method(`[`, survey.design)
 S3method(`[`, survey.design2)
 S3method(`[`, svyrep.design)
@@ -206,4 +212,6 @@ S3method(`[`, repweights_compressed)
 S3method(`[`, nonresponse)
 
 S3method(`[<-`, survey.design)         
+         
+
          

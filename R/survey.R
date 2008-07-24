@@ -917,28 +917,29 @@ svytable.survey.design<-function(formula, design, Ntotal=NULL, round=FALSE,...){
   
   ## unstratified or unadjusted
   if (length(Ntotal)<=1 || !design$has.strata){
-     if (length(formula)==3)
-         tblcall<-bquote(xtabs(I(weights*.(formula[[2]]))~.(formula[[3]]), data=design$variables))
+    if (length(formula)==3)
+      tblcall<-bquote(xtabs(I(weights*.(formula[[2]]))~.(formula[[3]]), data=model.frame(design)))
        else
-          tblcall<-bquote(xtabs(weights~.(formula[[2]]), data=design$variables))
-       tbl<-eval(tblcall)
-       if (!is.null(Ntotal)) {
-         if(length(formula)==3)
-           tbl<-tbl/sum(Ntotal)
-         else
-           tbl<-tbl*sum(Ntotal)/sum(tbl)
-       }
-       if (round)
-         tbl<-round(tbl)
-     attr(tbl,"call")<-match.call()
-     class(tbl)<-c("svytable",class(tbl))
-     return(tbl)
-   }
-   ## adjusted and stratified
+         tblcall<-bquote(xtabs(weights~.(formula[[2]]), data=model.frame(design)))
+    tbl<-eval(tblcall)
+    if (!is.null(Ntotal)) {
+      if(length(formula)==3)
+        tbl<-tbl/sum(Ntotal)
+      else
+        tbl<-tbl*sum(Ntotal)/sum(tbl)
+    }
+    if (round)
+      tbl<-round(tbl)
+    attr(tbl,"call")<-match.call()
+    class(tbl)<-c("svytable",class(tbl))
+    return(tbl)
+  }
+  ## adjusted and stratified
   if (length(formula)==3)
-    tblcall<-bquote(xtabs(I(weights*.(formula[[2]]))~design$strata[,1]+.(formula[[3]]), data=design$variables))
+    tblcall<-bquote(xtabs(I(weights*.(formula[[2]]))~design$strata[,1]+.(formula[[3]]), data=model.frame(design)))
   else
-    tblcall<-bquote(xtabs(weights~design$strata[,1]+.(formula[[2]]), data=design$variables))
+    tblcall<-bquote(xtabs(weights~design$strata[,1]+.(formula[[2]]), data=model.frame(design)))
+  
   tbl<-eval(tblcall)
   
   ss<-match(sort(unique(design$strata[,1])), Ntotal[,1])

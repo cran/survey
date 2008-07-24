@@ -73,7 +73,7 @@ calibrate.survey.design2<-function(design, formula, population,
   }
   
   tqr<-qr(mm*whalf)
-  if (is.null(!all(abs(qr.resid(tqr,whalf)))))
+  if (!all(abs(qr.resid(tqr,whalf))<1e-10))
     warning("G-calibration models must have an intercept")
 
   g<-grake(mm,ww,calfun, bounds=bounds,population=population,

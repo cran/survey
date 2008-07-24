@@ -3,8 +3,14 @@
 ##  in multistage samples.
 ##
 
-svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
-                    data=NULL, nest=FALSE, check.strata=!nest,weights=NULL){
+svydesign<-function(ids, probs = NULL, strata = NULL, variables = NULL, 
+    fpc = NULL, data=NULL, nest = FALSE, check.strata = !nest, 
+    weights = NULL,...){
+	UseMethod("svydesign", data)
+	}
+
+svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
+                    data=NULL, nest=FALSE, check.strata=!nest,weights=NULL,...){
 
     ## less memory-hungry version for sparse tables
     interaction<-function (..., drop = TRUE) {
@@ -167,7 +173,7 @@ svydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
     rval$call<-match.call()
     rval$variables<-variables
     rval$fpc<-fpc
-    rval$call<-sys.call()
+    rval$call<-sys.call(-1)
     class(rval)<-c("survey.design2","survey.design")
     rval
   }

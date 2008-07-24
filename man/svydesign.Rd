@@ -21,7 +21,7 @@
 }
 \usage{
 svydesign(ids, probs=NULL, strata = NULL, variables = NULL, fpc=NULL,
-data = NULL, nest = FALSE, check.strata = !nest, weights=NULL)
+data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,...)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -35,10 +35,13 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL)
   \item{fpc}{Finite population correction: see Details below}
   \item{weights}{Formula or vector specifying sampling weights as an
     alternative to \code{prob}}
-  \item{data}{Data frame to look up variables in the formula arguments}
+  \item{data}{Data frame to look up variables in the formula
+    arguments, or \code{imputationList} object, see below}
   \item{nest}{If \code{TRUE}, relabel cluster ids to enforce nesting
     within strata}
-  \item{check.strata}{If \code{TRUE}, check that clusters are nested in strata}.
+  \item{check.strata}{If \code{TRUE}, check that clusters are nested in
+    strata}.
+  \item{\dots}{for future expansion}
 }
 \details{
    The \code{svydesign} object combines a data frame and all the survey
@@ -104,6 +107,10 @@ of these strata for variance computation is determined by
 \code{options("survey.lonely.psu")}.  See \code{\link{svyCprod}} for
 details.
 
+If \code{data} is an \code{imputationList} object (from the "mitools"
+package), \code{svydesign} will return a \code{svyimputationList} object
+containing a set of designs. Use \code{\link{with.svyimputationList}} to
+do analyses on these designs and \code{MIcombine} to combine the results.
 
 }
 
@@ -123,6 +130,8 @@ An object of class \code{survey.design}.
   \code{\link{as.svrepdesign}} for converting to replicate weight designs,
   \code{\link{subset.survey.design}} for domain estimates,
   \code{\link{update.survey.design}} to add variables.
+
+  \code{mitools} package for using multiple imputations
 }
 
 

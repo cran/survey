@@ -1,3 +1,14 @@
+3.7    Added style="transparent" to svyplot().
+
+       svyby() and svytable() work on twophase objects.
+
+       svychisq() has statistic="lincom" for linear combination of chisquare, 
+       the exact asymptotic distribution. 
+
+       Added interface to mitools package for analyzing multiple imputations
+
+       svykappa() for Cohen's kappa (for Tobias Verbeke)
+
 3.6-13 Change in tolerances so that calibrate() works better with collinear
        calibration variables (Richard Valliant)
 

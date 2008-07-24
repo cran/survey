@@ -8,6 +8,7 @@ calibrate		Calibration and generalised raking
 estWeight               Estimated weights for two-phase designs
 svrepdesign             Replication-weight designs
 as.svrepdesign          Compute replication weights for a design
+svydesign.imputationList  Designs for multiply-imputed data.
 
                  -----
 
@@ -36,6 +37,7 @@ svyvar
 svyratio
 svytable                Contingency tables
 svychisq                Tests for two-way tables
+svykappa                Cohen's kappa for inter-rater agreement
 svymle                  Maximum pseudolikelihood estimation in complex
                         surveys
 

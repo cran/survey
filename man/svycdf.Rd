@@ -25,8 +25,9 @@ svycdf(formula, design, na.rm = TRUE)
 
 \value{
  An object of class \code{svycdf}, which is a list of step functions (of
- class \code{\link{stepfun}}}}
-}
+ class \code{\link{stepfun}})
+ }
+
 
 \seealso{ \code{\link{svyquantile}}, \code{\link{svyhist}}, \code{\link{plot.stepfun}}}
 \examples{

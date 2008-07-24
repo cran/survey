@@ -1,9 +1,9 @@
 
 svyplot<-function(formula,
                   design,
-                  style=c("bubble","hex","grayhex","subsample"),
+                  style=c("bubble","hex","grayhex","subsample","transparent"),
                   sample.size=500, subset=NULL,legend=1,inches=0.05,
-                  amount=NULL, ...){
+                  amount=NULL,basecol="black",alpha=c(0,0.8), ...){
   
   style<-match.arg(style)
   if (style %in% c("hex","grayhex") && !require(hexbin)){
@@ -76,6 +76,18 @@ svyplot<-function(formula,
            else
              ys<-Y[index]
            plot(xs,ys,...)
+         },
+         transparent={
+           transcol<-function(base,opacity){
+             rgbs<-col2rgb(base)/255
+             rgb(rgbs[1,],rgbs[2,], rgbs[3,], alpha=opacity)
+           }
+           if(is.function(basecol)) basecol<-basecol(model.frame(design))
+           w<-weights(design)
+           maxw<-max(w)
+           minw<-0
+           alphas<- (alpha[1]*(maxw-w)+alpha[2]*(w-minw))/(maxw-minw)
+           plot(X,Y,col=transcol(basecol,alphas),...)
          })
 
 }

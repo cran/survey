@@ -5,12 +5,9 @@
 
 svychisq<-function(formula, design,...) UseMethod("svychisq",design)
 
-svychisq.svyrep.design <- function(formual, design,...){
-  .NotYetImplemented()
-}
 
 svychisq.survey.design<-function(formula, design,
-                   statistic=c("F","Chisq","Wald","adjWald"),
+                   statistic=c("F","Chisq","Wald","adjWald","lincom"),
                    na.rm=TRUE,...){
   if (ncol(attr(terms(formula),"factors"))>2)
     stop("Only 2-way tables at the moment")
@@ -116,10 +113,17 @@ svychisq.survey.design<-function(formula, design,
     pearson$p.value<-pf(pearson$statistic, d0, d0*nu, lower.tail=FALSE)
     attr(pearson$statistic,"names")<-"F"
     pearson$parameter<-c(ndf=d0,ddf=d0*nu)
-  }  else {
+    pearson$method<-"Pearson's X^2: Rao & Scott adjustment"
+  }  else if (match.arg(statistic)=="lincom") {
+    pearson$pvalue<-pchisqsum(pearson$statistic, rep(1,ncol(Delta)), eigen(Delta,only.values=TRUE)$values,
+                              lower.tail=FALSE,method="integration")
+    pearson$parameter<-NULL
+    pearson$method<-"Pearson's X^2: asymptotic exact distribution"
+  } else{
     pearson$p.value<-pchisq(pearson$statistic/mean(diag(Delta)),
-                               df=NCOL(Delta),lower.tail=FALSE)
+                            df=NCOL(Delta),lower.tail=FALSE)
     pearson$parameter<-c(df=NCOL(Delta))
+    pearson$method<-"Pearson's X^2: Rao & Scott adjustment"
   }
 
   if (returnNA){
@@ -128,7 +132,7 @@ svychisq.survey.design<-function(formula, design,
   }
   
   pearson$data.name<-deparse(sys.call(-1))
-  pearson$method<-"Pearson's X^2: Rao & Scott adjustment"
+
   pearson
   
 }
@@ -261,7 +265,7 @@ summary.svreptable<-function(object,...){
   object
 }
 
-summary.svytable<-function(object, statistic=c("F","Chisq","Wald","adjWald"),...){
+summary.svytable<-function(object, statistic=c("F","Chisq","Wald","adjWald","lincom"),...){
 
   statistic<-match.arg(statistic)
   call<-attr(object, "call")

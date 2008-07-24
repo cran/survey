@@ -7,7 +7,7 @@ svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
                 drop.empty.groups=TRUE, covmat=FALSE){
 
   if (inherits(by, "formula"))
-    byfactors<-model.frame(by, design$variables, na.action=na.pass)
+    byfactors<-model.frame(by, model.frame(design), na.action=na.pass)
   else
     byfactors<-as.data.frame(by)
 

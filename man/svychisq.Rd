@@ -21,10 +21,10 @@
 \usage{
 \method{svytable}{survey.design}(formula, design, Ntotal = NULL, round = FALSE,...)
 \method{svytable}{svyrep.design}(formula, design, Ntotal = sum(weights(design, "sampling")), round = FALSE,...)
-\method{svychisq}{survey.design}(formula, design, statistic = c("F",  "Chisq","Wald","adjWald"),na.rm=TRUE,...)
+\method{svychisq}{survey.design}(formula, design, statistic = c("F",  "Chisq","Wald","adjWald","lincom"),na.rm=TRUE,...)
 \method{svychisq}{svyrep.design}(formula, design, statistic = c("F",  "Chisq","Wald","adjWald"),na.rm=TRUE,...)
 \method{summary}{svytable}(object, statistic = c("F",
-"Chisq","Wald","adjWald"),...)
+"Chisq","Wald","adjWald","lincom"),...)
 degf(design, ...)
 \method{degf}{survey.design2}(design, ...)
 \method{degf}{svyrep.design}(design, tol=1e-5,...)
@@ -84,6 +84,9 @@ independence. The adjustment given by \code{statistic="adjWald"} reduces
 the statistic when the number of PSUs is small compared to the number of
 degrees of freedom of the test. Rao and Thomas (1990) compare these
 tests and find the adjustment benefical.
+
+\code{statistic="lincom"} uses the exact asymptotic distribution, which
+is a linear combination of chi-squared variables (see \code{\link{pchisqsum}}).
 
 For designs using replicate weights the code is essentially the same as
 for designs with sampling structure, since the necessary variance
