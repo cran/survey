@@ -1,3 +1,9 @@
+3.8    svyolr() for proportional odds and related models.
+
+       license is now GPL 2|3 to accomodate code ripped from MASS package
+
+       svykm() for survival curves (no standard errors yet)
+
 3.7    Added style="transparent" to svyplot().
 
        svyby() and svytable() work on twophase objects.

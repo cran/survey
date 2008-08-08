@@ -7,16 +7,21 @@ requests from users, including:
   Ben French
   Jacques Ferrez
   Daniella Gollinelli
+  Alistair Gray
+  Lucia Hindorff
+  Lisa McShane
   Ana Patricia Martins
   Daryl Morris
   Ana Quiterio
   Gillian Raab
+  Brian Ripley
   Fred Rohde
   Steve Roberts
   Andrew Robinson
   Lee Sieswerda
   Phil Smith
   Takahiro Tsuchiya
+  Richard Valliant
   Tobias Verbeke
   Renzo Vettori
   Diego Zardetto
@@ -24,6 +29,8 @@ requests from users, including:
 and from initial dicussions with Chris Wild and Alastair Scott. 
 
 Patrick Aboyoun did the S-PLUS port.
+
+The svyolr() code is largely ripped from the MASS package of Venables & Ripley.
 
 There are probably others who should be listed but whose names have been
 lost due to poor record-keeping. 

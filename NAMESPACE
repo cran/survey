@@ -7,7 +7,8 @@ export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        jk1weights,jknweights, brrweights, regTermTest, degf, nonresponse, 
        sparseCells, neighbours, joinCells, compressWeights, make.formula,
        svycontrast,svyCprod, svyrecvar, grake, svrVar, pchisqsum,
-       make.calfun, cal.linear, cal.raking, cal.logit, svycdf, svykappa)
+       make.calfun, cal.linear, cal.raking, cal.logit, svycdf, svykappa, svykm,
+       svyolr)
 
 S3method(svydesign, default)
 S3method(svydesign, imputationList)
@@ -90,6 +91,18 @@ S3method(image,svyrep.design)
 S3method(plot,svysmooth)
 S3method(print,svysmooth)
 S3method(lines,svysmooth)
+
+S3method(svykm, survey.design)
+S3method(plot,svykm)
+S3method(lines, svykm)
+S3method(plot,svykmlist)
+S3method(quantile, svykm)
+
+S3method(svyolr,survey.design2)
+S3method(vcov,svyolr)
+S3method(summary, svyolr)
+S3method(print, svyolr)
+S3method(print, summary.svyolr)
 
 S3method(ftable,svrepstat)
 S3method(ftable,svystat)

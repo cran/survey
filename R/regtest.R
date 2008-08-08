@@ -126,11 +126,28 @@ svycontrast.svystat<-function(stat, contrasts,...){
   coef
 }
 
-svycontrast.svyby<-function(stat, contrasts,...){
+svycontrast.svystat<-function(stat, contrasts,...){
   if (!is.list(contrasts))
     contrasts<-list(contrast=contrasts)
   if (is.call(contrasts[[1]])){
-      rval<-nlcon(contrasts,as.list(coef(stat)), vcov(stat))
+    rval<-nlcon(contrasts,as.list(coef(stat)), vcov(stat))
+    class(rval)<-"svrepstat"
+    attr(rval,"statistic")<-"nlcon"
+    return(rval)
+  }
+  contrasts<-match.names(names(coef(stat)),contrasts)
+  contrasts<-do.call(rbind,contrasts)
+  coef<-contrast(coef(stat),vcov(stat),contrasts)
+  class(coef)<-"svystat"
+  attr(coef,"statistic")<-"contrast"
+  coef
+}
+
+svycontrast.svyolr<-function(stat, contrasts,...){
+  if (!is.list(contrasts))
+    contrasts<-list(contrast=contrasts)
+  if (is.call(contrasts[[1]])){
+      rval<-nlcon(contrasts,as.list(c(coef(stat),stat$zeta)), vcov(stat))
       class(rval)<-"svystat"
       attr(rval,"statistic")<-"nlcon"
       return(rval)
@@ -147,6 +164,7 @@ svycontrast.svyby<-function(stat, contrasts,...){
 
 svycontrast.svyglm<-svycontrast.svystat
 svycontrast.svycoxph<-svycontrast.svystat
+svycontrast.svyby<-svycontrast.svystat
 
 svycontrast.svrepstat<-function(stat, contrasts,...){
   if (!is.list(contrasts))
