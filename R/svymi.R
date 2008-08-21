@@ -15,6 +15,27 @@ print.svyimputationList<-function(x,...){
   print(x$call)
 }
 
+
+subset.svyimputationList<-function(x, subset,...,all=FALSE){
+    n<-nrow(x$designs[[1]])
+    e<-substitute(subset)
+    r<-eval(e,x$designs[[1]]$variables, parent.frame())
+	same<-TRUE
+	for(i in 2:length(x$designs)){
+		r1<-eval(e,x$designs[[i]]$variables, parent.frame())
+		r1<-r1 & !is.na(r1)
+		if (any(r!=r1)) {
+			same<-FALSE
+			if (all) r <- r & r1 else r<- r | r1
+		   }
+		}
+	if (!same) warning('subset differed between imputations')
+	for(i in 1:length(x$designs)) 
+		x$designs[[i]]<-x$designs[[i]][r,]
+	x$call<-sys.call(-1)
+	x
+	}
+
 with.svyimputationList<-function (data, expr, fun, ...) {
     pf <- parent.frame()
     if (!is.null(match.call()$expr)) {

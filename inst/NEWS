@@ -1,3 +1,11 @@
+3.8-1  Added subset.svyimputationList
+
+       coef.svyolr returns intercepts as well (by default).
+
+       svyolr() has a method for replicate-weight designs
+
+       print methods for svykm, svykmlist weren't exported.
+
 3.8    svyolr() for proportional odds and related models.
 
        license is now GPL 2|3 to accomodate code ripped from MASS package

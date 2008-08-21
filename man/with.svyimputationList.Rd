@@ -1,5 +1,6 @@
 \name{with.svyimputationList}
 \alias{with.svyimputationList}
+\alias{subset.svyimputationList}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Analyse multiple imputations}
 \description{
@@ -10,13 +11,18 @@ as a function.
 }
 \usage{
 \method{with}{svyimputationList}(data, expr, fun, ...)
+\method{subset}{svyimputationList}(x, subset,...,all=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{data}{A \code{svyimputationList} object }
+  \item{data,x}{A \code{svyimputationList} object }
   \item{expr}{An expression giving a survey analysis}
   \item{fun}{A function taking a survey design object as its argument }
   \item{\dots}{for future expansion }
+ \item{subset}{An logical expression specifying the subset}
+\item{all}{If \code{TRUE} the subset is those where the expression is \code{TRUE} 
+  for all imputations, otherwise it is those where the expression is \code{TRUE} for
+  any imputation.}
 }
 
 \value{

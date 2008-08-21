@@ -1,5 +1,28 @@
 svyolr<-function(formula, design,...) UseMethod("svyolr",design)
 
+svyolr.svyrep.design<-function(formula,design,...,return.replicates=FALSE){
+ 	require(MASS)
+ 	environment(formula)<-environment()
+ 	df<-model.frame(design)
+ 	pwt<-weights(design,"sampling")
+   
+ 	rval<-suppressWarnings(polr(formula,data=df,...,Hess=FALSE,model=FALSE,
+ 		weights=pwt))
+ 	start<-c(rval$coefficients,rval$zeta)
+ 	rw<-weights(design,"analysis")
+ 	betas<-apply(rw,2,function(w) {
+ 		environment(formula)<-environment()
+ 		m<-polr(formula,data=df,Hess=FALSE, start=start, model=FALSE, weights=w)
+ 		c(m$coefficients, m$zeta)
+ 		})
+ 	rval$var<-svrVar(t(betas),design$scale,design$rscales)
+ 	class(rval)<-"svyolr"
+ 	rval$call<-sys.call(-1)
+ 	if (return.replicates) rval$replicates<-t(betas)
+ 	rval
+ 	}
+
+
 svyolr.survey.design2<-function (formula, design,  start, ...,  na.action=na.omit, 
  method = c("logistic", "probit", "cloglog", "cauchit")) 
 {
@@ -163,6 +186,7 @@ svyolr.survey.design2<-function (formula, design,  start, ...,  na.action=na.omi
     fit
 }
 
+
 vcov.svyolr<-function(object,...) object$var
 
 print.svyolr<-function (x, ...) 
@@ -173,7 +197,7 @@ print.svyolr<-function (x, ...)
     }
     if (length(coef(x))) {
         cat("\nCoefficients:\n")
-        print(coef(x), ...)
+        print(coef(x,intercept=FALSE), ...)
     }
     else {
         cat("\nNo coefficients\n")
@@ -184,11 +208,18 @@ print.svyolr<-function (x, ...)
   }
 
 
+coef.svyolr<-function(object,intercepts=TRUE,...) {
+	if(intercepts)
+	    c(object$coefficients, object$zeta)
+	else
+	    object$coefficients
+	}
+
 summary.svyolr<-function (object, digits = max(3, .Options$digits - 3), correlation = FALSE, 
     ...) 
 {
-    cc <- c(coef(object), object$zeta)
-    pc <- length(coef(object))
+    cc <- coef(object)
+    pc <- length(coef(object, FALSE))
     q <- length(object$zeta)
     coef <- matrix(0, pc + q, 3, dimnames = list(names(cc), c("Value", 
         "Std. Error", "t value")))

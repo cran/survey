@@ -1,6 +1,7 @@
 \name{svyolr}
 \alias{svyolr}
 \alias{svyolr.survey.design2}
+\alias{svyolr.svyrep.design}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Proportional odds and related models }
 \description{
@@ -10,17 +11,19 @@
 \usage{
 svyolr(formula, design, ...)
 \method{svyolr}{survey.design2}(formula, design, start, ..., na.action = na.omit, method = c("logistic", 
-    "probit", "cloglog", "cauchit")) 
+    "probit", "cloglog", "cauchit"))
+\method{svyolr}{svyrep.design}(formula,design,...,return.replicates=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{formula}{Formula: the response must be a factor with at least
     three levels}
   \item{design}{survey design object }
-  \item{\dots}{ ~~Describe \code{\dots} here~~ }
+  \item{\dots}{dots}
   \item{start}{Optional starting values for optimization}
   \item{na.action}{handling of missing values}
   \item{method}{Link function}
+  \item{return.replicates}{return the individual replicate-weight estimates}
 }
 \value{
   An object of class \code{svyolr}

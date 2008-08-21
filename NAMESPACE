@@ -57,7 +57,7 @@ S3method(coef,svrepstat)
 S3method(coef,svystat)
 S3method(coef,svyby)
 S3method(coef,svymle)
-
+S3method(coef, svyolr)
 
 S3method(SE,default)
 S3method(SE,svrepstat)
@@ -94,11 +94,14 @@ S3method(lines,svysmooth)
 
 S3method(svykm, survey.design)
 S3method(plot,svykm)
+S3method(print,svykm)
+S3method(print,svykmlist)
 S3method(lines, svykm)
 S3method(plot,svykmlist)
 S3method(quantile, svykm)
 
 S3method(svyolr,survey.design2)
+S3method(svyolr,svyrep.design)
 S3method(vcov,svyolr)
 S3method(summary, svyolr)
 S3method(print, svyolr)
@@ -216,6 +219,7 @@ S3method(as.data.frame,svystat)
 
 S3method(with,svyimputationList)
 S3method(print, svyimputationList)
+S3method(subset, svyimputationList)
 
 S3method(`[`, survey.design)
 S3method(`[`, survey.design2)
