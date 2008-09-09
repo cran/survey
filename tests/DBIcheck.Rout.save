@@ -1,0 +1,58 @@
+
+R version 2.7.0 (2008-04-22)
+Copyright (C) 2008 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> 
+> library(survey)
+> library(RSQLite)
+Loading required package: DBI
+> 
+> data(api)
+> dclus1<-svydesign(id=~dnum, weights=~pw, fpc=~fpc,data=apiclus1)
+> dbclus1<-svydesign(id=~dnum, weights=~pw, fpc=~fpc,
++ data="apiclus1",dbtype="SQLite", dbname=system.file("api.db",package="survey"))
+> 
+> m<-svymean(~api00+stype,dclus1)
+> m.db<-svymean(~api00+stype, dbclus1)
+> all.equal(coef(m),coef(m.db))
+[1] TRUE
+> all.equal(vcov(m), vcov(m.db))
+[1] TRUE
+> 
+> r<-svyratio(~api.stu, ~enroll, design=dclus1)
+> r.db<-svyratio(~api_stu, ~enroll, design=dbclus1)
+> all.equal(coef(r), coef(r.db))
+[1] TRUE
+> all.equal(SE(r), SE(r.db))
+[1] "Attributes: < Component 2: Component 1: 1 string mismatch >"
+> 
+> b<-svyby(~api99+api00,~stype, design=dclus1, svymean, deff=TRUE)
+> b.db<-svyby(~api99+api00,~stype, design=dbclus1,svymean, deff=TRUE)
+> all.equal(coef(b), coef(b.db))
+[1] TRUE
+> all.equal(SE(b), SE(b.db))
+[1] TRUE
+> all.equal(deff(b), deff(b.db))
+[1] TRUE
+> 
+> l<-svyglm(api00~api99+mobility, design=dclus1)
+> l.db<-svyglm(api00~api99+mobility, design=dbclus1)
+> all.equal(coef(l),coef(l.db))
+[1] TRUE
+> all.equal(vcov(l), vcov(l.db))
+[1] TRUE
+> 
+> 

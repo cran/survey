@@ -1,5 +1,6 @@
 \name{svyplot}
 \alias{svyplot}
+\alias{svyplot.default}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Plots for survey data }
 \description{
@@ -9,7 +10,8 @@
   for sampling weights.
 }
 \usage{
-svyplot(formula, design, style = c("bubble", "hex", "grayhex","subsample","transparent"),
+svyplot(formula, design,...)
+\method{svyplot}{default}(formula, design, style = c("bubble", "hex", "grayhex","subsample","transparent"),
 sample.size = 500, subset = NULL, legend = 1, inches = 0.05,
 amount=NULL, basecol="black",
 alpha=c(0, 0.8),...)

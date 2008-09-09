@@ -1,5 +1,6 @@
 
-svykappa<-function(formula, design,...) {
+svykappa<-function(formula, design,...) UseMethod("svykappa",design)
+svykappa.default<-function(formula, design,...) {
    
    if (ncol(attr(terms(formula),"factors"))!=2)
      stop("kappa is only computed for two variables")

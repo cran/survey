@@ -13,6 +13,7 @@ svydesign.imputationList  Designs for multiply-imputed data.
                  -----
 
 svyplot                 Survey-weighted graphics
+svycoplot               Conditioning plots for survey data
 svyhist                 Survey-weighted histogram
 svysmooth               Smoothers and density estimates
 svycdf                  Cumulative distribution functions

@@ -1,8 +1,10 @@
 ##
 ##  tables of statistics.
 ##
+svyby<-function(formula, by, design,...) UseMethod("svyby",design)
 
-svyby<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
+
+svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
                 keep.names=TRUE,verbose=FALSE,vartype=c("se","cv","cvpct","var"),
                 drop.empty.groups=TRUE, covmat=FALSE){
 

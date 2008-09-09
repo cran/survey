@@ -1,5 +1,6 @@
 \name{svyby}
 \alias{svyby}
+\alias{svyby.default}
 \alias{SE.svyby}
 \alias{deff.svyby}
 \alias{coef.svyby}
@@ -9,7 +10,8 @@
 Compute survey statistics on subsets of a survey defined by factors. 
 }
 \usage{
-svyby(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE,
+svyby(formula, by ,design,...)
+\method{svyby}{default}(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE,
 keep.names = TRUE,verbose=FALSE, vartype=c("se","cv","cvpct","var"),
  drop.empty.groups=TRUE, covmat=FALSE)
 \method{SE}{svyby}(object,...)

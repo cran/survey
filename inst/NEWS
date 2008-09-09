@@ -1,3 +1,10 @@
+3.9    Added database-backed design objects. The data= argument to svydesign 
+       can be the name of a database table in a relational database with a
+       DBI-compatible interface. Only the meta-data is kept in R, other variables
+       are loaded as necessary.
+
+3.8-2  Added svycoplot()
+
 3.8-1  Added subset.svyimputationList
 
        coef.svyolr returns intercepts as well (by default).

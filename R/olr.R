@@ -17,7 +17,8 @@ svyolr.svyrep.design<-function(formula,design,...,return.replicates=FALSE){
  		})
  	rval$var<-svrVar(t(betas),design$scale,design$rscales)
  	class(rval)<-"svyolr"
- 	rval$call<-sys.call(-1)
+ 	rval$call<-sys.call()
+        rval$call[[1]]<-as.name(.Generic)
  	if (return.replicates) rval$replicates<-t(betas)
  	rval
  	}
@@ -165,7 +166,7 @@ svyolr.survey.design2<-function (formula, design,  start, ...,  na.action=na.omi
     fit <- list(coefficients = beta, zeta = zeta, deviance = deviance, 
         fitted.values = fitted, lev = lev, terms = Terms, df.residual = sum(wt) - 
             pc - q, edf = pc + q, n = sum(wt), nobs = sum(wt), 
-        call = sys.call(-1), method = method, convergence = res$convergence, 
+        method = method, convergence = res$convergence, 
         niter = niter)
 
     dn <- c(names(beta), names(zeta))
@@ -173,6 +174,9 @@ svyolr.survey.design2<-function (formula, design,  start, ...,  na.action=na.omi
     dimnames(H) <- list(dn, dn)
     fit$Hessian <- H
 
+    fit$call<-sys.call()
+    fit$call[[1]]<-as.name(.Generic)
+    
     inffun<- gmini(res$par)%*%solve(H)
     fit$var<-svyrecvar(inffun, design$cluster, 
                      design$strata, design$fpc,

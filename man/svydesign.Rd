@@ -1,15 +1,7 @@
 \name{svydesign}
 \alias{svydesign}
-\alias{oldsvydesign}
-\alias{summary.survey.design}
-\alias{summary.survey.design2}
-\alias{print.summary.survey.design}
-\alias{print.summary.survey.design2}
-\alias{print.survey.design}
-\alias{print.survey.design2}
-\alias{[<-.survey.design}
-\alias{[.survey.design2}
-\alias{model.frame.survey.design}
+\alias{svydesign.imputationList}
+\alias{svydesign.character}
 \alias{na.omit.survey.design}
 \alias{na.exclude.survey.design}
 \alias{na.fail.survey.design}
@@ -22,6 +14,12 @@
 \usage{
 svydesign(ids, probs=NULL, strata = NULL, variables = NULL, fpc=NULL,
 data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,...)
+\method{svydesign}{imputationList}(ids, probs = NULL, strata = NULL, variables = NULL, 
+    fpc = NULL, data, nest = FALSE, check.strata = !nest, weights = NULL, 
+    ...)
+\method{svydesign}{character}(ids, probs = NULL, strata = NULL, variables = NULL, 
+    fpc = NULL, data, nest = FALSE, check.strata = !nest, weights = NULL, 
+    dbtype = "SQLite", dbname, ...)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -36,11 +34,13 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,...)
   \item{weights}{Formula or vector specifying sampling weights as an
     alternative to \code{prob}}
   \item{data}{Data frame to look up variables in the formula
-    arguments, or \code{imputationList} object, see below}
+    arguments, or database table name, or \code{imputationList} object, see below}
   \item{nest}{If \code{TRUE}, relabel cluster ids to enforce nesting
     within strata}
   \item{check.strata}{If \code{TRUE}, check that clusters are nested in
     strata}.
+  \item{dbtype}{name of database driver to pass to \code{dbDriver}}
+  \item{dbname}{name of database (eg file name for SQLite)}
   \item{\dots}{for future expansion}
 }
 \details{
@@ -107,6 +107,19 @@ of these strata for variance computation is determined by
 \code{options("survey.lonely.psu")}.  See \code{\link{svyCprod}} for
 details.
 
+\code{data} may be a character string giving the name of a table or view
+in a relational database that can be accessed through the \code{DBI}
+interface. In this case \code{dbtype} must be the name of the database
+driver and \code{dbname} must be the name by which the driver identifies
+the specific database (eg file name for SQLite). The appropriate
+database interface package must be loaded (eg \code{RSQLite} for
+SQLite).  The survey design object will contain only the design
+meta-data, and actual variables will be loaded from the database as
+needed.  Use \code{\link{close.DBIsvydesign}} to close the database
+connection and \code{\link{open.DBIsvydesign}} to reopen the connection,
+eg, after loading a saved object. 
+ 
+
 If \code{data} is an \code{imputationList} object (from the "mitools"
 package), \code{svydesign} will return a \code{svyimputationList} object
 containing a set of designs. Use \code{\link{with.svyimputationList}} to
@@ -153,7 +166,15 @@ dclus2wr2<-svydesign(id=~dnum, weights=weights(dclus2), data=apiclus2)
 
 ## syntax for stratified cluster sample
 ##(though the data weren't really sampled this way)
-svydesign(id=~dnum, strata=~stype, weights=~pw, data=apistrat, nest=TRUE)
+svydesign(id=~dnum, strata=~stype, weights=~pw, data=apistrat,
+nest=TRUE)
+
+##database example: requires RSQLite
+\dontrun{
+library(RSQLite)
+dbclus1<-svydesign(id=~dnum, weights=~pw, fpc=~fpc,
+data="apiclus1",dbtype="SQLite", dbname=system.file("api.db",package="survey"))
+}
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

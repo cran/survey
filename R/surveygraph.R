@@ -1,5 +1,5 @@
-
-svyplot<-function(formula,
+svyplot<-function(formula, design,...) UseMethod("svyplot",design)
+svyplot.default<-function(formula,
                   design,
                   style=c("bubble","hex","grayhex","subsample","transparent"),
                   sample.size=500, subset=NULL,legend=1,inches=0.05,
@@ -131,4 +131,51 @@ svyboxplot<-function(formula, design, ...){
 }
 
 
+
+svycoplot<-function(formula, design, style=c("hexbin","transparent"),
+                            basecol="black",alpha=c(0,0.8),hexscale=c("relative","absolute"),...) UseMethod("svycoplot",design)
+svycoplot.default<-function(formula, design, style=c("hexbin","transparent"),
+                            basecol="black",alpha=c(0,0.8),hexscale=c("relative","absolute"),...){
+  require(lattice)
+  style<-match.arg(style)
+  wt<-weights(design,"sampling")
+  
+  switch(style,
+         hexbin={
+           require(hexbin)
+           hexscale<-match.arg(hexscale)
+           xyplot(formula, data=model.frame(design), xbins=10,
+                  panel=function(x,y,style="centroids",xbins,subscripts,...) {
+                    if (!length(x)) return(panel.xyplot(x,y,...))
+                    vp<-current.viewport()
+                    wd<-convertWidth(vp$width,unitTo="cm",valueOnly=TRUE)
+                    ht<-convertHeight(vp$height,unitTo="cm",valueOnly=TRUE)
+                    W<-wt[subscripts]
+                    rval<-hexbin(x,y,ID=TRUE,xbins=xbins,shape=ht/wd,xbnds=vp$xscale,ybnds=vp$yscale)
+                    cell<-rval@cID
+                    rval@count<-as.vector(tapply(W,cell,sum))
+                    rval@xcm<-as.vector(tapply(1:length(x), cell,
+                                               function(ii) weighted.mean(x[ii],W[ii])))
+                    rval@ycm<-as.vector(tapply(1:length(y), cell,
+                                               function(ii) weighted.mean(x[ii],W[ii])))
+                    grid.hexagons(rval,style=style, maxarea=switch(hexscale, relative=0.8,absolute=0.8*sum(W)/sum(wt)))
+                  })
+         }, transparent={
+           if(is.function(basecol)) basecol<-basecol(model.frame(design))
+           transcol<-function(base,opacity){
+             rgbs<-col2rgb(base)/255
+             rgb(rgbs[1,],rgbs[2,], rgbs[3,], alpha=opacity)
+           }
+           maxw<-max(wt)
+           minw<-0
+           alphas<- (alpha[1]*(maxw-wt)+alpha[2]*(wt-minw))/(maxw-minw)
+           cols<-transcol(basecol,alphas)
+           xyplot(formula, data=model.frame(design), 
+                  panel=function(x,y,basecol="black",subscripts,...) {
+                    a<-alphas[subscripts]
+                    panel.xyplot(x,y,col=cols[subscripts],pch=19,...)
+                  })
+         }
+         )
+}
 

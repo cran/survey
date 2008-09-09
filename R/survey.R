@@ -1110,7 +1110,8 @@ svyglm.survey.design<-function(formula,design,subset=NULL,...){
       g$df.residual <- degf(design)+1-length(coef(g)[!is.na(coef(g))])
       
       class(g)<-c("svyglm",class(g))
-      g$call<-sys.call(-1)
+      g$call<-sys.call()
+      g$call[[1]]<-as.name(.Generic)
       g$survey.design<-design 
       g
 }

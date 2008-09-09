@@ -422,20 +422,20 @@ print.survey.design2<-function(x,varnames=FALSE,design.summaries=FALSE,...){
   }
   if (varnames){
     cat("Data variables:\n")
-    print(names(x$variables))
+    print(colnames(x))
   }
   invisible(x)
 }
 
     
 summary.survey.design2<-function(object,...){
-  class(object)<-"summary.survey.design2"
+  class(object)<-c("summary.survey.design2",class(object))
   object
 }
 
 print.summary.survey.design2<-function(x,...){
   y<-x
-  class(y)<-"survey.design2"
+  class(y)<-c("survey.design2",class(x))
   print(y,varnames=TRUE,design.summaries=TRUE,...)
 }	
      

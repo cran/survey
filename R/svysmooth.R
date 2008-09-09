@@ -1,4 +1,5 @@
-svysmooth<-function(formula, design,method="locpoly",bandwidth,...){
+svysmooth<-function(formula,design,method="locpoly",bandwidth,...) UseMethod("svysmooth", design)
+svysmooth.default<-function(formula, design,method="locpoly",bandwidth,...){
   switch(match.arg(method),
          locpoly=svylocpoly(formula,design,bandwidth=bandwidth,...))
 }

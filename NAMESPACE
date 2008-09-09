@@ -8,40 +8,65 @@ export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        sparseCells, neighbours, joinCells, compressWeights, make.formula,
        svycontrast,svyCprod, svyrecvar, grake, svrVar, pchisqsum,
        make.calfun, cal.linear, cal.raking, cal.logit, svycdf, svykappa, svykm,
-       svyolr)
+       svyolr,svycoplot)
 
 S3method(svydesign, default)
 S3method(svydesign, imputationList)
+S3method(svydesign, character)
+
+S3method(close,DBIsvydesign)
+S3method(open,DBIsvydesign)
+S3method(summary,DBIsvydesign)
+S3method(print, summary.DBIsvydesign)
+S3method(print, DBIsvydesign)
+
 
 S3method(svymean,survey.design)
 S3method(svymean,svyrep.design)
 S3method(svymean,survey.design2)
 S3method(svymean,twophase)
+S3method(svymean, DBIsvydesign)
 
 S3method(svytotal,survey.design)
 S3method(svytotal,svyrep.design)
 S3method(svytotal,survey.design2)
 S3method(svytotal,twophase)
+S3method(svytotal, DBIsvydesign)
 
 S3method(svyratio,survey.design)
 S3method(svyratio,svyrep.design)
 S3method(svyratio,survey.design2)
 S3method(svyratio,twophase)
+S3method(svyratio, DBIsvydesign)
 
 S3method(svyvar,survey.design)
 S3method(svyvar,svyrep.design)
+S3method(svyvar, DBIsvydesign)
 
 S3method(svyquantile,survey.design)
 S3method(svyquantile,svyrep.design)
+S3method(svyquantile, DBIsvydesign)
 
 S3method(svytable,survey.design)
 S3method(svytable,svyrep.design)
 
 S3method(svychisq,survey.design)
 S3method(svychisq,svyrep.design)
+S3method(svychisq,DBIsvydesign)
+
+S3method(svykappa,default)
+S3method(svykappa, DBIsvydesign)
 
 S3method(svyglm,survey.design)
 S3method(svyglm,svyrep.design)
+S3method(svyglm, DBIsvydesign)
+
+S3method(svyplot,default)
+S3method(svyplot, DBIsvydesign)
+S3method(svycoplot,default)
+S3method(svycoplot, DBIsvydesign)
+S3method(svysmooth, default)
+S3method(svysmooth, DBIsvydesign)
 
 S3method(predict, svyglm)
 S3method(predict, svyratio)
@@ -49,6 +74,7 @@ S3method(predict, svyratio_separate)
 
 S3method(svycoxph,survey.design)
 S3method(svycoxph,svyrep.design)
+S3method(svycoxph, DBIsvydesign)
 
 S3method(residuals, svrepglm)
 S3method(residuals, svyglm)
@@ -93,6 +119,7 @@ S3method(print,svysmooth)
 S3method(lines,svysmooth)
 
 S3method(svykm, survey.design)
+S3method(svykm, DBIsvydesign)
 S3method(plot,svykm)
 S3method(print,svykm)
 S3method(print,svykmlist)
@@ -102,6 +129,7 @@ S3method(quantile, svykm)
 
 S3method(svyolr,survey.design2)
 S3method(svyolr,svyrep.design)
+S3method(svyolr,DBIsvydesign)
 S3method(vcov,svyolr)
 S3method(summary, svyolr)
 S3method(print, svyolr)
@@ -155,10 +183,12 @@ S3method(print, calfun)
 S3method(dim,repweights_compressed)
 S3method(dim,survey.design)
 S3method(dim,twophase)
+S3method(dim, DBIsvydesign)
 
 S3method(dimnames,survey.design)
 S3method(dimnames,svyrep.design)
 S3method(dimnames,twophase)
+S3method(dimnames, DBIsvydesign)
 
 S3method(dimnames, repweights_compressed)
 
@@ -175,10 +205,12 @@ S3method(deff,svyby)
 S3method(postStratify,survey.design)
 S3method(postStratify,svyrep.design)
 S3method(postStratify,twophase)
+S3method(postStratify,DBIsvydesign)
 
 S3method(calibrate,survey.design2)
 S3method(calibrate,svyrep.design)
 S3method(calibrate,twophase)
+S3method(calibrate, DBIsvydesign)
 
 S3method(estWeights,data.frame)
 S3method(estWeights,twophase)
@@ -190,10 +222,15 @@ S3method(compressWeights, svyrep.design)
 S3method(subset,survey.design)
 S3method(subset,svyrep.design)
 S3method(subset,twophase)
+S3method(subset, DBIsvydesign)
 
 S3method(update,survey.design)
 S3method(update,svyrep.design)
 S3method(update,twophase)
+S3method(update,DBIsvydesign)
+
+S3method(svyby, default)
+S3method(svyby, DBIsvydesign)
 
 S3method(regcalibrate, survey.design2)
 S3method(regcalibrate, svyrep.design)
@@ -227,6 +264,8 @@ S3method(`[`, svyrep.design)
 S3method(`[`, twophase)
 S3method(`[`, repweights_compressed)
 S3method(`[`, nonresponse)
+S3method(`[`, DBIsvydesign)
+         
 
 S3method(`[<-`, survey.design)         
          
