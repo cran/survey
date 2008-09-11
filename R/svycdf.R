@@ -1,4 +1,6 @@
-svycdf<-function(formula, design,na.rm=TRUE){
+svycdf<-function(formula,design,na.rm=TRUE,...) UseMethod("svycdf",design)
+
+svycdf.default<-function(formula, design,na.rm=TRUE,...){
     if (inherits(formula, "formula")) 
         x <- model.frame(formula, model.frame(design), na.action = na.pass)
     else if (typeof(formula) %in% c("expression", "symbol")) 
@@ -24,9 +26,11 @@ svycdf<-function(formula, design,na.rm=TRUE){
     		attr(cdf,"call")<-call.i
     		rval[[names(x)[i]]]<-cdf
 	}
-	class(rval)<-"svycdf"
-	attr(rval,"call")<-sys.call()
-	rval
+    class(rval)<-"svycdf"
+    cc<-sys.call()
+    cc[[1]]<-as.name(.Generic)
+    attr(rval,"call")<-cc
+    rval
 }
 
 

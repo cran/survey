@@ -27,19 +27,32 @@ svydesign.character<-function (ids, probs = NULL, strata = NULL, variables = NUL
     ...) 
 {
 
-  db<-dbDriver(dbtype)
-  dbconn<- dbConnect(db, dbname,...)
-  
+  if (dbtype == "ODBC"){
+    library(RODBC)
+    if (dbname=="")
+      dbconn<-odbcDriverConnect(dbname,...)
+    else
+      dbconn<-odbcConnect(dbname,...)
+  } else {
+    db<-dbDriver(dbtype)
+    dbconn<- dbConnect(db, dbname,...)
+  }
   design.vars<-c(all.vars(ids), all.vars(probs), all.vars(strata),all.vars(fpc), all.vars(weights))
   design.query<-paste("select", paste(design.vars,collapse=","), "from", data)
-  design.data<-dbGetQuery(dbconn, design.query)
-
+  if (dbtype=="ODBC")
+    design.data<-sqlQuery(dbconn, design.query)
+  else
+    design.data<-dbGetQuery(dbconn, design.query)
+    
   rval<-svydesign(ids=ids, probs=probs, strata=strata, data=design.data,
                   fpc=fpc, variables=variables, nest=nest,check.strata=check.strata,
                   weights=weights)
   rval$db<-list(dbname=dbname, tablename=data, connection=dbconn, dbtype=dbtype)
   rval$data<-NULL
-  class(rval)<-c("DBIsvydesign",class(rval))
+  if (dbtype=="ODBC")
+    class(rval)<-c("ODBCsvydesign",class(rval))
+  else
+    class(rval)<-c("DBIsvydesign",class(rval))
   rval
 }
 
@@ -86,8 +99,25 @@ svyquantile.DBIsvydesign<-function(x, design,quantiles,...){
 }
 
 
+dropFactor<-function(mf, w){
+  if(!any(w==0)) return(mf)
+  dropped<-w==0
+  for(i in 1:ncol(mf)) {
+    if (is.factor(mf[[i]])){
+      fi<-mf[[i]]
+      if (all(dropped[fi==levels(fi)[1]])){
+        tt<-table(fi[!dropped])
+        l<-min(which(tt>0))-1
+        levs<-levels(fi)
+        levels(mf[[i]])<-c(levs[-(1:l)],levs[1:l])
+      }
+    }
+  }
+  mf
+}
+
 svyglm.DBIsvydesign<-function(formula, design,...){
-  design$variables<-DBIgetvars(formula, design$db$connection, design$db$tablename)
+  design$variables<-dropFactor(DBIgetvars(formula, design$db$connection, design$db$tablename),weights(design))
   NextMethod("svyglm",design)
 }
 
@@ -105,13 +135,25 @@ svycoplot.DBIsvydesign<-function(formula,design, style=c("hexbin","transparent")
   NextMethod("svycoplot",design)
 }
 
-svyolr.DBIsvydesign<-function(formula,design,...){
+svyboxplot.DBIsvydesign<-function(formula,design, ...){
   design$variables<-DBIgetvars(formula, design$db$connection, design$db$tablename)
+  NextMethod("svyboxplot",design)
+
+}
+
+svycdf.DBIsvydesign<-function(formula,design, na.rm=TRUE, ...){
+  design$variables<-DBIgetvars(formula, design$db$connection, design$db$tablename)
+  NextMethod("svycdf",design)
+
+}
+
+svyolr.DBIsvydesign<-function(formula,design,...){
+  design$variables<-dropFactor(DBIgetvars(formula, design$db$connection, design$db$tablename), weights(design))
   NextMethod("svyolr",design)
 }
 
 svycoxph.DBIsvydesign<-function(formula,design,...){
-  design$variables<-DBIgetvars(formula, design$db$connection, design$db$tablename)
+  design$variables<-dropFactor(DBIgetvars(formula, design$db$connection, design$db$tablename),weights(design))
   NextMethod("svycoxph",design)
 }
 

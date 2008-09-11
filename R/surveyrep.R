@@ -1203,7 +1203,7 @@ print.summary.svyglm<-function (x, digits = max(3, getOption("digits") - 3),
                 sep = "")
         else cat("\nCoefficients:\n")
         coefs <- x$coefficients
-        if (!is.null(aliased <- is.na(x$coefficients)) && any(aliased)) {
+        if (!is.null(aliased <- is.na(x$coefficients[,1])) && any(aliased)) {
             cn <- names(aliased)
             coefs <- matrix(NA, length(aliased), 4, dimnames = list(cn, 
                 colnames(coefs)))
@@ -1743,7 +1743,8 @@ degf.svyrep.design<-function(design,tol=1e-5,...){
 }
 
 degf.survey.design2<-function(design,...){
-  length(unique(design$cluster[, 1])) - length(unique(design$strata[, 1]))
+  inset<- weights(design,"sampling")!=0
+  length(unique(design$cluster[inset, 1])) - length(unique(design$strata[inset, 1]))
 }
 
 degf.twophase<-function(design,...){

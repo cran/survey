@@ -1,3 +1,12 @@
+3.9-1  improvments in svyby, degf, svyglm for subsets of calibrated designs or 
+       database-backed designs.
+
+       svyboxplot() and svycdf() now work with database-backed designs.
+
+       ODBC support for database-backed designs.
+
+       modified the degrees of freedom calculation in svyglm.
+
 3.9    Added database-backed design objects. The data= argument to svydesign 
        can be the name of a database table in a relational database with a
        DBI-compatible interface. Only the meta-data is kept in R, other variables

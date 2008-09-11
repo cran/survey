@@ -9,8 +9,9 @@ regTermTest<-function(model,test.terms, null=NULL,df=Inf){
   if(inherits(test.terms,"formula"))
     test.terms<-attr(terms(test.terms),"term.labels")
 
+  okbeta<-!is.na(coef(model,na.rm=FALSE)) ## na.rm for svyglm
   tt<-attr(terms(model),"term.labels")
-  aa<-attr(model.matrix(model),"assign")
+  aa<-attr(model.matrix(model),"assign")[okbeta]
   if(inherits(model,"coxph") && attr(terms(model),"intercept"))
     aa<-aa[-1]
   index<-which(aa %in% match(canonicalOrder(test.terms),canonicalOrder(tt)))
@@ -18,6 +19,7 @@ regTermTest<-function(model,test.terms, null=NULL,df=Inf){
     stop("Terms didn't match:",canonicalOrder(test.terms),canonicalOrder(tt))
   
   beta<-coef(model)[index]
+
   if (!is.null(NULL))
     beta<-beta-null
   V<-vcov(model)[index,index]

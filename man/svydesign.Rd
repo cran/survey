@@ -108,16 +108,21 @@ of these strata for variance computation is determined by
 details.
 
 \code{data} may be a character string giving the name of a table or view
-in a relational database that can be accessed through the \code{DBI}
-interface. In this case \code{dbtype} must be the name of the database
-driver and \code{dbname} must be the name by which the driver identifies
-the specific database (eg file name for SQLite). The appropriate
-database interface package must be loaded (eg \code{RSQLite} for
-SQLite).  The survey design object will contain only the design
-meta-data, and actual variables will be loaded from the database as
-needed.  Use \code{\link{close.DBIsvydesign}} to close the database
-connection and \code{\link{open.DBIsvydesign}} to reopen the connection,
-eg, after loading a saved object. 
+in a relational database that can be accessed through the \code{DBI} or \code{ODBC}
+interfaces. For DBI interfaces \code{dbtype} should be the name of the database
+driver and \code{dbname} should be the name by which the driver identifies
+the specific database (eg file name for SQLite). For ODBC databases
+\code{dbtype} should be \code{"ODBC"} and \code{dbname} should be the
+registed DSN for the database. On the Windows GUI, \code{dbname=""} will
+produce a dialog box for interactive selection. 
+
+The appropriate database interface package must already be loaded (eg
+\code{RSQLite} for SQLite, \code{RODBC} for ODBC).  The survey design
+object will contain only the design meta-data, and actual variables will
+be loaded from the database as needed.  Use
+\code{\link[dest=close.DBIsvydesign]{close}} to close the database connection and
+\code{\link[dest=open.DBIsvydesign]{open}} to reopen the connection, eg, after
+loading a saved object.
  
 
 If \code{data} is an \code{imputationList} object (from the "mitools"
@@ -126,11 +131,6 @@ containing a set of designs. Use \code{\link{with.svyimputationList}} to
 do analyses on these designs and \code{MIcombine} to combine the results.
 
 }
-
-\note{
-  Use \code{oldsvydesign}, which has the same arguments, to create
-  objects with the structure used before version 2.9.
-  }
 
 \value{
 An object of class \code{survey.design}.
@@ -145,6 +145,9 @@ An object of class \code{survey.design}.
   \code{\link{update.survey.design}} to add variables.
 
   \code{mitools} package for using multiple imputations
+
+  \url{http://faculty.washington.edu/tlumley/survey/} for examples of
+  database-backed objects.
 }
 
 

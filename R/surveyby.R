@@ -17,9 +17,13 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
     if (!inherits(design,"svyrep.design"))
       stop("covmat=TRUE not implemented for this design type")
   }
-  
+
+  ## all combinations that actually occur in this design
   byfactor<-do.call("interaction", byfactors)
-  uniques <- which(!duplicated(byfactors))
+  dropped<- weights(design,"sampling")==0
+  uniquelevels<-unique(byfactor[!dropped])
+  uniques <- match(uniquelevels, byfactor)
+
   
   ## some people insist on using vectors rather than formulas
   ## so I suppose we should be nice to them

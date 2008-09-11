@@ -10,7 +10,7 @@ variables.  In contrast to \code{\link{svyquantile}}, this does not do
 any interpolation: the result is a right-continuous step function.
 }
 \usage{
-svycdf(formula, design, na.rm = TRUE)
+svycdf(formula, design, na.rm = TRUE,...)
 \method{print}{svycdf}(x,...)
 \method{plot}{svycdf}(x,...)
 }

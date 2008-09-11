@@ -7,7 +7,7 @@ svyplot.default<-function(formula,
   
   style<-match.arg(style)
   if (style %in% c("hex","grayhex") && !require(hexbin)){
-    stop(style," plots require the hexbin package")
+    stop(style," plots require the hexbin package (from Bioconductor)")
   }
 
   subset<-substitute(subset)
@@ -92,11 +92,13 @@ svyplot.default<-function(formula,
 
 }
 
-svyboxplot<-function(formula, design, ...){
+svyboxplot<-function(formula, design,...) UseMethod("svyboxplot",design)
+svyboxplot.default<-function(formula, design, ...){
     
     formula<-as.formula(formula)
     if(length(formula)!=3) stop("need a two-sided formula")
-    if(length(formula[[3]])!=1) stop("only one rhs variable allowed")
+    if(length(formula[[3]])>2) stop("only one rhs variable allowed")
+    
     outcome<-eval(bquote(~.(formula[[2]])))
     
     if (length(attr(terms(formula),"term.labels"))){
@@ -142,7 +144,7 @@ svycoplot.default<-function(formula, design, style=c("hexbin","transparent"),
   
   switch(style,
          hexbin={
-           require(hexbin)
+           require(hexbin) || stop("hexbin package is required (from Bioconductor)")
            hexscale<-match.arg(hexscale)
            xyplot(formula, data=model.frame(design), xbins=10,
                   panel=function(x,y,style="centroids",xbins,subscripts,...) {

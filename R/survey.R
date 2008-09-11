@@ -610,7 +610,7 @@ cv<-function(object,...) UseMethod("cv")
 
 cv.default<-function(object,...){
   rval<-SE(object)/coef(object)
-  if (any(coef(object)<0)) warning("CV may not be useful for negative statistics")
+  if (any(coef(object)<0,na.rm=TRUE)) warning("CV may not be useful for negative statistics")
   rval
 }
 
@@ -1122,12 +1122,23 @@ print.svyglm<-function(x,...){
 
 }
 
+coef.svyglm<-function(object,...,na.rm=TRUE) {
+  beta<-object$coefficients
+  if (!na.rm || length(beta)==object$rank)
+    beta
+  else
+    beta[object$qr$pivot[1:object$rank]]
+}
+
 vcov.svyglm<-function(object,...)  object$cov.unscaled
 
 
 svy.varcoef<-function(glm.object,design){
     Ainv<-summary(glm.object)$cov.unscaled
     estfun<-model.matrix(glm.object)*resid(glm.object,"working")*glm.object$weights
+    if (glm.object$rank<NCOL(estfun)){
+      estfun<-estfun[,glm.object$qr$pivot[1:glm.object$rank]]
+    }
     if (inherits(design,"survey.design2"))
       svyrecvar(estfun%*%Ainv,design$cluster,design$strata,design$fpc,postStrata=design$postStrata)
     else if (inherits(design, "twophase"))
@@ -1201,16 +1212,12 @@ summary.svyglm<-function (object, correlation = FALSE, df.resid=NULL,...)
         dd <- sqrt(diag(covmat))
         ans$correlation <- covmat/outer(dd, dd)
     }
-    ans$aliased<-is.na(object$coef)
+    ans$aliased<-is.na(coef(object,na.rm=FALSE))
     ans$survey.design<-list(call=object$survey.design$call)
     class(ans) <- c("summary.svyglm","summary.glm")
     return(ans)
 }
 
-print.summary.svyglm<-function(x,...){
-  print(x$survey.design$call,varnames=FALSE,design.summaries=FALSE,...)
-  NextMethod("print")
-}
 
 logLik.svyglm<-function(object,...){
    stop("svyglm not fitted by maximum likelihood.")

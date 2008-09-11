@@ -1,6 +1,6 @@
 
-R version 2.6.0 Under development (unstable) (2007-06-27 r42086)
-Copyright (C) 2007 The R Foundation for Statistical Computing
+R version 2.7.0 (2008-04-22)
+Copyright (C) 2008 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -44,7 +44,7 @@ svydesign(weights = 1, ids = ~0, strata = ~stratid, variables = ~x,
 x 44.2 6.237
 > a<-svydesign(ids=~0, strata=~stratid, variables=~x, data=fpc, nest=TRUE)
 Warning message:
-In svydesign(ids = ~0, strata = ~stratid, variables = ~x, data = fpc,  :
+In svydesign.default(ids = ~0, strata = ~stratid, variables = ~x,  :
   No weights or probabilities supplied, assuming equal probability
 > a
 Stratified Independent Sampling design (with replacement)
@@ -63,7 +63,7 @@ svydesign(ids = ~0, strata = ~stratid, prob = ~I(1/weight), variables = ~x,
 x 5.4481 0.7413
 > a<-svydesign(ids=~psuid, strata=~stratid, variables=~x, data=fpc, nest=TRUE)
 Warning message:
-In svydesign(ids = ~psuid, strata = ~stratid, variables = ~x, data = fpc,  :
+In svydesign.default(ids = ~psuid, strata = ~stratid, variables = ~x,  :
   No weights or probabilities supplied, assuming equal probability
 > a
 Stratified Independent Sampling design (with replacement)
@@ -74,7 +74,7 @@ svydesign(ids = ~psuid, strata = ~stratid, variables = ~x, data = fpc,
 x 5.525 0.7796
 > a<-svydesign(ids=~psuid, variables=~x, data=fpc, nest=TRUE)
 Warning message:
-In svydesign(ids = ~psuid, variables = ~x, data = fpc, nest = TRUE) :
+In svydesign.default(ids = ~psuid, variables = ~x, data = fpc, nest = TRUE) :
   No weights or probabilities supplied, assuming equal probability
 > a
 1 - level Cluster Sampling design (with replacement)
@@ -103,7 +103,7 @@ svydesign(ids = ~stratid + psuid, weights = ~weight, variables = ~x,
 x 5.4481 0.5465
 > a<-svydesign(ids=~stratid+psuid, variables=~x, data=fpc)
 Warning message:
-In svydesign(ids = ~stratid + psuid, variables = ~x, data = fpc) :
+In svydesign.default(ids = ~stratid + psuid, variables = ~x, data = fpc) :
   No weights or probabilities supplied, assuming equal probability
 > a
 2 - level Cluster Sampling design (with replacement)

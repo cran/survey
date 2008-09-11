@@ -4,8 +4,8 @@ citEntry(entry="misc",
    author="Thomas Lumley",
    year=2008,
    title="survey: analysis of complex survey samples",
-   note="R package version 3.9",
-   textVersion="T. Lumley (2008) \"survey: analysis of complex survey samples\". R package version 3.6-5." )
+   note="R package version 3.9-1",
+   textVersion="T. Lumley (2008) \"survey: analysis of complex survey samples\". R package version 3.9-1." )
 
 
 

@@ -1,6 +1,6 @@
 
-R version 2.6.0 Under development (unstable) (2007-06-27 r42086)
-Copyright (C) 2007 The R Foundation for Statistical Computing
+R version 2.7.0 (2008-04-22)
+Copyright (C) 2008 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -65,7 +65,7 @@ factor(stage)2:factor(histol)2   0.1152     0.4410   0.261 0.793890
 factor(stage)3:factor(histol)2   0.5066     0.4242   1.194 0.232579    
 factor(stage)4:factor(histol)2   0.9785     0.6214   1.575 0.115632    
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 (Dispersion parameter for binomial family taken to be 1.000876)
 
@@ -92,7 +92,7 @@ factor(stage)2:factor(histol)2 -0.04743    0.43498  -0.109    0.913
 factor(stage)3:factor(histol)2  0.28064    0.41301   0.680    0.497    
 factor(stage)4:factor(histol)2  0.90983    0.63777   1.427    0.154    
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 (Dispersion parameter for binomial family taken to be 1.000876)
 
@@ -119,7 +119,7 @@ factor(stage)2:factor(histol)2 -0.04743    0.43421  -0.109    0.913
 factor(stage)3:factor(histol)2  0.28064    0.41259   0.680    0.497    
 factor(stage)4:factor(histol)2  0.90983    0.62991   1.444    0.149    
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 (Dispersion parameter for binomial family taken to be 1.000876)
 
@@ -144,7 +144,7 @@ factor(stage)2   0.7814     0.1473   5.306 1.49e-07 ***
 factor(stage)3   0.8009     0.1525   5.251 1.98e-07 ***
 factor(stage)4   1.0729     0.1782   6.021 2.74e-09 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 (Dispersion parameter for binomial family taken to be 1.001333)
 
@@ -163,11 +163,11 @@ subset(gccs8, histol == 1)
 Coefficients:
                Estimate Std. Error t value Pr(>|t|)    
 (Intercept)     -2.7160     0.1083 -25.085  < 2e-16 ***
-factor(stage)2   0.7814     0.1473   5.306 1.35e-07 ***
-factor(stage)3   0.8009     0.1525   5.251 1.80e-07 ***
-factor(stage)4   1.0729     0.1781   6.026 2.27e-09 ***
+factor(stage)2   0.7814     0.1473   5.306 1.48e-07 ***
+factor(stage)3   0.8009     0.1525   5.251 1.97e-07 ***
+factor(stage)4   1.0729     0.1781   6.026 2.65e-09 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 (Dispersion parameter for binomial family taken to be 1.000876)
 
