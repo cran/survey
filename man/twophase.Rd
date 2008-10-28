@@ -2,7 +2,6 @@
 \alias{twophase}
 \alias{twophasevar}
 \alias{[.twophase}
-\alias{dim.twophase}
 \alias{subset.twophase}
 \alias{print.twophase}
 \alias{summary.twophase}

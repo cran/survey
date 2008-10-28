@@ -5,7 +5,6 @@
 \alias{na.omit.survey.design}
 \alias{na.exclude.survey.design}
 \alias{na.fail.survey.design}
-\alias{dim.survey.design}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Survey sample analysis.}
 \description{
@@ -123,6 +122,9 @@ be loaded from the database as needed.  Use
 \code{\link[dest=close.DBIsvydesign]{close}} to close the database connection and
 \code{\link[dest=open.DBIsvydesign]{open}} to reopen the connection, eg, after
 loading a saved object.
+
+The database interface does not attempt to modify the underlying
+database and so can be used with read-only permissions on the database.
  
 
 If \code{data} is an \code{imputationList} object (from the "mitools"

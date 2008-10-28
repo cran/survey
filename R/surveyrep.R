@@ -406,11 +406,12 @@ as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","Fa
 
 
 
+svrepdesign<-function(variables, repweights, weights,data=NULL,...) UseMethod("svrepdesign",data)
 
-svrepdesign<-function(variables=NULL,repweights=NULL, weights=NULL,
+svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
                       data=NULL,type=c("BRR","Fay","JK1", "JKn","bootstrap","other"),
                       combined.weights=FALSE, rho=NULL, bootstrap.average=NULL,
-                      scale=NULL,rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"))
+                      scale=NULL,rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),...)
 {
   
   type<-match.arg(type)
@@ -706,7 +707,7 @@ svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="li
     attr(rval,"var")<-vv
     attr(rval, "statistic")<-"quantiles"
     if (return.replicates)
-      rval<-list(mean=rval, replicates=lapply(results,"[[","replicates"))
+      rval<-list(mean=rval, replicates=do.call(cbind,lapply(results,"[[","replicates")))
     class(rval)<-"svrepstat"
     rval
 
@@ -731,6 +732,7 @@ svrVar<-function(thetas, scale, rscales,na.action=getOption("na.action")){
     v<- sum( (thetas-meantheta)^2*rscales)*scale
   }
   attr(v,"na.replicates")<-naa
+  attr(v,"means")<-meantheta
   return(v)
 }
 
@@ -1750,3 +1752,5 @@ degf.survey.design2<-function(design,...){
 degf.twophase<-function(design,...){
   degf(design$phase2)
 }
+
+dim.svyrep.design<-function(x) dim(x$variables)

@@ -21,10 +21,10 @@
 \usage{
 \method{svytable}{survey.design}(formula, design, Ntotal = NULL, round = FALSE,...)
 \method{svytable}{svyrep.design}(formula, design, Ntotal = sum(weights(design, "sampling")), round = FALSE,...)
-\method{svychisq}{survey.design}(formula, design, statistic = c("F",  "Chisq","Wald","adjWald","lincom"),na.rm=TRUE,...)
-\method{svychisq}{svyrep.design}(formula, design, statistic = c("F",  "Chisq","Wald","adjWald"),na.rm=TRUE,...)
+\method{svychisq}{survey.design}(formula, design, statistic = c("F",  "Chisq","Wald","adjWald","lincom","saddlepoint"),na.rm=TRUE,...)
+\method{svychisq}{svyrep.design}(formula, design, statistic = c("F",  "Chisq","Wald","adjWald","lincom","saddlepoint"),na.rm=TRUE,...)
 \method{summary}{svytable}(object, statistic = c("F",
-"Chisq","Wald","adjWald","lincom"),...)
+"Chisq","Wald","adjWald","lincom","saddlepoint"),...)
 degf(design, ...)
 \method{degf}{survey.design2}(design, ...)
 \method{degf}{svyrep.design}(design, tol=1e-5,...)
@@ -86,7 +86,9 @@ degrees of freedom of the test. Rao and Thomas (1990) compare these
 tests and find the adjustment benefical.
 
 \code{statistic="lincom"} uses the exact asymptotic distribution, which
-is a linear combination of chi-squared variables (see \code{\link{pchisqsum}}).
+is a linear combination of chi-squared variables (see
+\code{\link{pchisqsum}}, and \code{statistic="lincom"} uses a
+saddlepoint approximation to this distribution.
 
 For designs using replicate weights the code is essentially the same as
 for designs with sampling structure, since the necessary variance
@@ -103,9 +105,12 @@ At the moment, \code{svychisq} works only for 2-dimensional tables.
   returns a \code{htest} object.
 }
 \references{
-  Koch, GG, Freeman, DH, Freeman, JL (1975) "Strategies in the
-  multivariate analysis of data from complex surveys" International
-  Statistical Review 43: 59-78
+Davies RB (1973). "Numerical inversion of a characteristic function"
+Biometrika 60:415-7
+
+Koch, GG, Freeman, DH, Freeman, JL (1975) "Strategies in the
+multivariate analysis of data from complex surveys" International
+Statistical Review 43: 59-78
   
 Rao, JNK, Scott, AJ (1984) "On Chi-squared Tests For Multiway
 Contigency Tables with Proportions Estimated From Survey Data"  Annals
@@ -123,7 +128,7 @@ for simple goodness-of-fit statistics under cluster sampling" JASA 82:630-636
   variance under simple random sampling be estimated using the observed
   proportions or the the predicted proportions under the null
   hypothesis? \code{svychisq} uses the observed proportions, following
-  simulations by Sribney (1998)}
+  simulations by Sribney (1998), and the choices made in Stata}
 
 
 \seealso{\code{\link{svytotal}} and \code{\link{svymean}} report totals
@@ -131,6 +136,8 @@ for simple goodness-of-fit statistics under cluster sampling" JASA 82:630-636
   
   See \code{\link{svyby}} and \code{\link{ftable.svystat}} to construct
   more complex tables of summary statistics.
+
+  See \code{\link{svyloglin}} for loglinear models.
 }
 \examples{
   data(api)

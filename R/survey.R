@@ -265,7 +265,7 @@ print.survey.design<-function(x,varnames=FALSE,design.summaries=FALSE,...){
   x
 }
 
-dim.survey.design<-function(x,...){
+dim.survey.design<-function(x){
 	dim(x$variables)
 }
 
@@ -608,9 +608,9 @@ deff.default <- function(object, quietly=FALSE,...){
 
 cv<-function(object,...) UseMethod("cv")
 
-cv.default<-function(object,...){
+cv.default<-function(object, warn=TRUE, ...){
   rval<-SE(object)/coef(object)
-  if (any(coef(object)<0,na.rm=TRUE)) warning("CV may not be useful for negative statistics")
+  if (warn && any(coef(object)<0,na.rm=TRUE)) warning("CV may not be useful for negative statistics")
   rval
 }
 
@@ -697,9 +697,9 @@ svyquantile<-function(x,design,quantiles,...) UseMethod("svyquantile", design)
 svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
                                     ci=FALSE, method="linear",f=1,
                                     interval.type=c("Wald","score"),
-                                    na.rm=FALSE, ...){
+                                    na.rm=FALSE,se=ci, ...){
     if (inherits(x,"formula"))
-      x<-model.frame(x,model.frame(design),na.action=na.pass)
+      x<-model.frame(x ,model.frame(design), na.action=na.pass)
     else if(typeof(x) %in% c("expression","symbol"))
       x<-eval(x, model.frame(design,na.action=na.pass))
     
@@ -760,7 +760,7 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
     else
       rval<-computeQuantiles(x)
 
-    if (!ci) return(rval)
+    if (!ci & !se) return(rval)
 
     interval.type<-match.arg(interval.type)
     computeCI<-switch(interval.type, score=computeScoreCI, Wald=computeWaldCI)
@@ -774,9 +774,11 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
     else
       cis<-sapply(quantiles, function(qq) computeCI(x,qq))
 
+    if (ci)
+      rval<-list(quantiles=rval,CIs=cis)
+    else
+      rval<-list(quantiles=rval)
     
-    rval<-list(quantiles=rval,CIs=cis)
-
     if (is.null(dim(x)))
         ses<-(cis[2,]-cis[1,])/(2*qnorm(alpha/2,lower.tail=FALSE))
     else
@@ -790,9 +792,30 @@ SE.svyquantile<-function(object,...){
     attr(object,"SE")
 }
 
+vcov.svyquantile<-function(object,...){
+  se<-SE(object)
+  if (is.null(se)) stop("no uncertainty information present")
+  v<-matrix(NA,length(se),length(se))
+  warning("Only diagonal of vcov() available")
+  diag(v)<-se
+  v
+}
+
+coef.svyquantile<-function(object,...){
+  rval<-as.vector(object$quantiles)
+  if(ncol(object$quantiles)==1)
+    names(rval)<-rownames(object$quantiles)
+  else if (nrow(object$quantiles)==1)
+    names(rval)<-colnames(object$quantiles)
+  else names(rval)<-t(outer(colnames(object$quantiles),rownames(object$quantiles),paste,sep=":"))
+  rval
+}
+
 print.svyquantile<-function(x,...){
     print(list(quantiles=x$quantiles, CIs=x$CIs))
 }
+
+coef.svyratio<-function(object,...) object$ratio
 
 SE.svyratio<-function(object,...){
   sqrt(object$var)
@@ -1458,9 +1481,9 @@ model.frame.svyrep.design<-function(formula,...){
 }
 
 
-predict.svyglm <- function(object, newdata, total=NULL,
+predict.svyglm <- function(object, newdata=object$model, total=NULL,
                            type = c("link", "response"),se=TRUE,
-                           vcov=TRUE,...){
+                           vcov=FALSE,...){
 
     tt<-delete.response(terms(formula(object)))
     mf<-model.frame(tt,data=newdata)

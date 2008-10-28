@@ -32,6 +32,7 @@ svycontrast             linear combinations of estimates
 svycoxph                Survey-weighted Cox models
 svyglm                  Survey-weighted generalised linear models.
 svyolr                  Ordinal logistic regression
+svyloglin               Loglinear models
 svyquantile             Summary statistics for sample surveys
 svytotal
 svymean

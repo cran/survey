@@ -335,23 +335,35 @@ as.fpc<-function(df,strata,ids){
   }
   
   fpc<-as.matrix(df)
-  if (xor(ispopsize<-any(df>1), all(df>=1)))
+  if (xor(ispopsize<-any(df>1), all(df>=1))){
+    big<-which(fpc>=1,arr.ind=TRUE)
+    small<-which(fpc<1,arr.ind=TRUE)
+    cat("record",big[1,1]," stage",big[1,2],": fpc=", fpc[big[1,,drop=FALSE]],"\n")
+    cat("record",small[1,1]," stage ",small[1,2],": fpc=", fpc[small[1,,drop=FALSE]],"\n")      
     stop("Must have all fpc>=1 or all fpc<=1")
+  }
+  
   if (ispopsize){
     popsize<-fpc
   } else {
     popsize<-sampsize/(fpc)
   }
-  if (any(popsize<sampsize))
-    stop("FPC implies >100% sampling in some strata.")
-  if (!ispopsize && any(popsize>1e10) )
-    warning("FPC implies population larger than ten billion.")
-
+  if (any(popsize<sampsize)){
+    toobig<-which(popsize<sampsize,arr.ind=TRUE)
+    cat("record",toobig[1,1],"stage",toobig[1,2],": popsize=",popsize[toobig[1,,drop=FALSE]]," sampsize=",sampsize[toobig[1,,drop=FALSE]],"\n")
+    stop("FPC implies >100% sampling in some strata")
+  }
+  if (!ispopsize && any(popsize>1e10) ){
+    big<-which(popsize>1e10,arr.ind=TRUE)
+    warning("FPC implies population larger than ten billion (record",big[1,1]," stage ",big[1,2],")")
+  }
   ## check that fpc is constant within strata.
   for(i in 1:ncol(popsize)){
     diff<-by(popsize[,i], list(strata[,i]), count)
-    if (any(as.vector(diff)>1))
-      warning("`fpc' varies within strata at stage",i)
+    if (any(as.vector(diff)>1)){
+      j<-which(as.vector(diff)>1)[1]
+      warning("`fpc' varies within strata: stratum ",names(diff)[j], " at stage ",i)
+    }
   }
   
   rval<-list(popsize=popsize, sampsize=sampsize)

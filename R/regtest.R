@@ -12,7 +12,7 @@ regTermTest<-function(model,test.terms, null=NULL,df=Inf){
   okbeta<-!is.na(coef(model,na.rm=FALSE)) ## na.rm for svyglm
   tt<-attr(terms(model),"term.labels")
   aa<-attr(model.matrix(model),"assign")[okbeta]
-  if(inherits(model,"coxph") && attr(terms(model),"intercept"))
+  if((inherits(model,"coxph")|| inherits(model,"svyloglin")) && attr(terms(model),"intercept"))
     aa<-aa[-1]
   index<-which(aa %in% match(canonicalOrder(test.terms),canonicalOrder(tt)))
   if (any(is.na(index)))
@@ -35,6 +35,8 @@ regTermTest<-function(model,test.terms, null=NULL,df=Inf){
       df<-model$n-length(coef(model))
     else if (inherits(model, "MIresult"))
       df<-min(model$df[index])
+    else if (inherits(model,"svyloglin"))
+      df<-model$df+1-length(index)
     else
       df<-length(resid(model))-length(coef(model))
   }

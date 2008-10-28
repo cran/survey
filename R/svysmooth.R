@@ -1,12 +1,59 @@
-svysmooth<-function(formula,design,method="locpoly",bandwidth,...) UseMethod("svysmooth", design)
-svysmooth.default<-function(formula, design,method="locpoly",bandwidth,...){
+svysmooth<-function(formula,design,method=c("locpoly","quantreg"),bandwidth,quantile,df,...) UseMethod("svysmooth", design)
+svysmooth.default<-function(formula, design,method=c("locpoly","quantreg"),bandwidth,quantile,df=4,...){
   switch(match.arg(method),
-         locpoly=svylocpoly(formula,design,bandwidth=bandwidth,...))
+         locpoly=svylocpoly(formula,design,bandwidth=bandwidth,...),
+         quantreg=svyrqss(formula,design,quantile=quantile,df=df,...)
+         )
 }
 
+fitted.rq<-function(object,...) object$x%*% object$coefficients/object$weights
+
+svyrqss<-function(formula,design,quantile=0.5,df=4,...){
+  require("quantreg") || stop("needs quantreg package")
+  require("splines") || stop("needs splines package, which should be part of R")
+
+  mf<-model.frame(formula, model.frame(design))
+  tt<-attr(terms(formula),"term.labels")
+  df<-rep(df, length=length(tt))
+  quantile<-rep(quantile, length=length(tt))
+
+  if (length(formula)==3){
+    density<-FALSE
+  } else {
+    density<-TRUE
+    stop("type='quantreg' does not do densities")
+  }
+  
+  w<-weights(design,type="sampling")
+  environment(formula)<-environment()
+
+  ll<-vector("list", length(tt))
+  for(i in 1:length(tt)){
+    termi<-as.name(tt[i])
+    ff<-eval(bquote(update(formula,.~bs(.(termi),df=.(df[i])))))
+    rqfit<-rq(ff, tau=quantile[i],weights=w,data=mf,...)
+    xx<-mf[,i+1]
+    oo<-order(xx)
+    ll[[i]]<-list(x=xx[oo],y=fitted.rq(rqfit)[oo])
+  }
+  names(ll)<-attr(terms(formula),"term.labels")
+  
+  attr(ll,"call")<-sys.call(-2)
+  attr(ll,"density")<-density
+  if(density)
+    attr(ll,"ylab")<-"Density"
+  else
+    attr(ll,"ylab")<-deparse(formula[[2]])
+
+  class(ll)<-"svysmooth"
+  
+  ll
+
+}
+  
 svylocpoly<-function(formula, design, ngrid=401, xlim=NULL,
                      ylim=NULL, bandwidth,...){
-  require("KernSmooth")
+  require("KernSmooth") || stop("needs KernSmooth package")
 
   mf<-model.frame(formula,model.frame(design))
   mm<-model.matrix(terms(formula),mf)
@@ -63,6 +110,8 @@ print.svysmooth<-function(x,...){
   print(attr(x,"call"))
   invisible(x)
 }
+
+
 
 plot.svysmooth<-function(x, which=NULL,type="l",xlabs=NULL,ylab=NULL,...){
   if (is.null(which))

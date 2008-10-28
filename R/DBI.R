@@ -1,26 +1,3 @@
-## svydesign(id=~SDPPSU6, strat=~SDPSTRA6, weight=~WTPFQX6, data="set1",dbtype="SQLite",dbname="~/nhanes/imp.db", nest=TRUE)->dhanes
-
-DBIgetvars<-function(formula, dbconnection, tables,db.only=TRUE){
-     if(is.null(formula)) return(NULL)
-     if(!inherits(formula,"formula")) return(formula)
-     vars<-all.vars(formula)
-     if (db.only) {
-     	  in.db<-vars
-     	} else{
-         query<-sub("@tab@",tables,"select * from @tab@ limit 1")
-         oneline<-dbGetQuery(dbconnection,query)
-         in.db<-vars[vars %in% names(oneline)]
-     }
-     
-     query<-paste("select",paste(in.db,collapse=", "),"from",tables)
-     df<-dbGetQuery(dbconnection, query)
-     is.string<-sapply(df,is.character)
-     if(any(is.string)) {
-         for(i in which(is.string)) df[[i]]<-as.factor(df[[i]])
-     }
-     df
-   }
-
 
 svydesign.character<-function (ids, probs = NULL, strata = NULL, variables = NULL, 
     fpc = NULL, data, nest = FALSE, check.strata = !nest, weights = NULL, dbtype="SQLite",dbname,
@@ -48,7 +25,8 @@ svydesign.character<-function (ids, probs = NULL, strata = NULL, variables = NUL
                   fpc=fpc, variables=variables, nest=nest,check.strata=check.strata,
                   weights=weights)
   rval$db<-list(dbname=dbname, tablename=data, connection=dbconn, dbtype=dbtype)
-  rval$data<-NULL
+  rval$variables<-NULL
+  rval$call<-sys.call(-1)
   if (dbtype=="ODBC")
     class(rval)<-c("ODBCsvydesign",class(rval))
   else
@@ -83,18 +61,18 @@ open.DBIsvydesign<-function(con,...){
 }
 
 svymean.DBIsvydesign<-function(x, design,...){
-  design$variables<-DBIgetvars(x, design$db$connection, design$db$tablename)
+  design$variables<-getvars(x, design$db$connection, design$db$tablename,updates=design$updates)
   NextMethod("svymean",design)
 }
 
 
 svytotal.DBIsvydesign<-function(x, design,na.rm=FALSE,...){
-  design$variables<-DBIgetvars(x, design$db$connection, design$db$tablename)
+  design$variables<-getvars(x, design$db$connection, design$db$tablename,updates=design$updates)
   NextMethod("svytotal",design)
 }
 
 svyquantile.DBIsvydesign<-function(x, design,quantiles,...){
-  design$variables<-DBIgetvars(x, design$db$connection, design$db$tablename)
+  design$variables<-getvars(x, design$db$connection, design$db$tablename,updates=design$updates)
   NextMethod("svyquantile",design)
 }
 
@@ -107,9 +85,9 @@ dropFactor<-function(mf, w){
       fi<-mf[[i]]
       if (all(dropped[fi==levels(fi)[1]])){
         tt<-table(fi[!dropped])
-        l<-min(which(tt>0))-1
+        l<-min(which(tt>0))
         levs<-levels(fi)
-        levels(mf[[i]])<-c(levs[-(1:l)],levs[1:l])
+        mf[[i]]<-relevel(mf[[i]],ref=levs[l])
       }
     }
   }
@@ -117,99 +95,106 @@ dropFactor<-function(mf, w){
 }
 
 svyglm.DBIsvydesign<-function(formula, design,...){
-  design$variables<-dropFactor(DBIgetvars(formula, design$db$connection, design$db$tablename),weights(design))
+  design$variables<-dropFactor(getvars(formula, design$db$connection, design$db$tablename,updates=design$updates),
+                               weights(design))
   NextMethod("svyglm",design)
 }
 
 
 
 svyplot.DBIsvydesign<-function(formula,design,...){
-  design$variables<-DBIgetvars(formula, design$db$connection, design$db$tablename)
+  design$variables<-getvars(formula, design$db$connection, design$db$tablename,updates=design$updates)
+  design$variables[weights(design)==0,]<-NA
   NextMethod("svyplot",design)
 }
 
 
 svycoplot.DBIsvydesign<-function(formula,design, style=c("hexbin","transparent"),
                             basecol="black",alpha=c(0,0.8),hexscale=c("relative","absolute"),...){
-  design$variables<-DBIgetvars(formula, design$db$connection, design$db$tablename)
+  design$variables<-getvars(formula, design$db$connection, design$db$tablename, updates=design$updates)
+  design$variables[weights(design)==0,]<-NA
   NextMethod("svycoplot",design)
 }
 
 svyboxplot.DBIsvydesign<-function(formula,design, ...){
-  design$variables<-DBIgetvars(formula, design$db$connection, design$db$tablename)
-  NextMethod("svyboxplot",design)
-
+  design$variables<-getvars(formula, design$db$connection, design$db$tablename,updates=design$updates)
+  design$variables[weights(design)==0,]<-NA
+  class(design)<-setdiff(class(design),"DBIsvydesign")
+  svyboxplot(formula,design,...)
 }
 
+
 svycdf.DBIsvydesign<-function(formula,design, na.rm=TRUE, ...){
-  design$variables<-DBIgetvars(formula, design$db$connection, design$db$tablename)
+  design$variables<-getvars(formula, design$db$connection, design$db$tablename,updates=design$updates)
   NextMethod("svycdf",design)
 
 }
 
 svyolr.DBIsvydesign<-function(formula,design,...){
-  design$variables<-dropFactor(DBIgetvars(formula, design$db$connection, design$db$tablename), weights(design))
+  design$variables<-dropFactor(getvars(formula, design$db$connection, design$db$tablename,updates=design$updates),
+                               weights(design))
   NextMethod("svyolr",design)
 }
 
 svycoxph.DBIsvydesign<-function(formula,design,...){
-  design$variables<-dropFactor(DBIgetvars(formula, design$db$connection, design$db$tablename),weights(design))
+  design$variables<-dropFactor(getvars(formula, design$db$connection, design$db$tablename,updates=design$updates),
+                               weights(design))
   NextMethod("svycoxph",design)
 }
 
 svyvar.DBIsvydesign<-function(x,design,na.rm=FALSE,...){
-  design$variables<-DBIgetvars(x, design$db$connection, design$db$tablename)
+  design$variables<-getvars(x, design$db$connection, design$db$tablename,updates=design$updates)
   NextMethod("svyvar",design)
 }
 
 
 
 svykm.DBIsvydesign<-function(formula,design,...){
-  design$variables<-DBIgetvars(formula, design$db$connection, design$db$tablename)
+  design$variables<-getvars(formula, design$db$connection, design$db$tablename,updates=design$updates)
   NextMethod("svykm",design)
 }
 
 
 svykappa.DBIsvydesign<-function(formula,design,...){
-  design$variables<-DBIgetvars(formula, design$db$connection, design$db$tablename)
+  design$variables<-getvars(formula, design$db$connection, design$db$tablename,updates=design$updates)
   NextMethod("svykappa",design)
 }
 
 
-svysmooth.DBIsvydesign<-function(formula,design,...){
-  design$variables<-DBIgetvars(formula, design$db$connection, design$db$tablename)
+svysmooth.DBIsvydesign<-function(formula,design,method=c("locpoly","quantreg"),bandwidth,quantile,df,...){
+  design$variables<-getvars(formula, design$db$connection, design$db$tablename,updates=design$updates)
   NextMethod("svysmooth",design)
 }
 
 
 svychisq.DBIsvydesign<-function(formula,design,...){
-  design$variables<-DBIgetvars(formula, design$db$connection, design$db$tablename)
+  design$variables<-getvars(formula, design$db$connection, design$db$tablename,updates=design$updates)
   NextMethod("svychisq",design)
 }
 
 svyratio.DBIsvydesign<-function(numerator, denominator, design,...){
-  design$variables<-cbind(DBIgetvars(numerator,design$db$connection, design$db$tablename),
-                          DBIgetvars(denominator,design$db$connection, design$db$tablename))
+  design$variables<-cbind(getvars(numerator,design$db$connection, design$db$tablename,updates=design$updates),
+                          getvars(denominator,design$db$connection, design$db$tablename,updates=design$updates))
   NextMethod("svyratio",design)
 
 }
 
 
 svyby.DBIsvydesign<-function(formula, by, design,...){
-  design$variables<-cbind(DBIgetvars(formula,design$db$connection, design$db$tablename),
-                          DBIgetvars(by,design$db$connection, design$db$tablename))
+  design$variables<-cbind(getvars(formula,design$db$connection, design$db$tablename,updates=design$updates),
+                          getvars(by,design$db$connection, design$db$tablename,updates=design$updates))
   class(design)<-setdiff(class(design),"DBIsvydesign")
   svyby(formula,by,design,...)
 }
 
 svytable.DBIsvydesign<-function(formula,design,...){
-  design$variables<-DBIgetvars(formula, design$db$connection, design$db$tablename)
+  design$variables<-getvars(formula, design$db$connection, design$db$tablename,updates=design$updates)
   NextMethod("svytable",design)
 }
 
 
 calibrate.DBIsvydesign<-function(design,formula,...){
-  design$variables<-DBIgetvars(formula, design$db$connection, design$db$tablename)
+  design$variables<-getvars(formula, design$db$connection, design$db$tablename,updates=design$updates)
   NextMethod("calibrate",design)
 }
 postStratify.DBIsvydesign<-function(design, strata, population, partial = FALSE, ...) .NotYetImplemented()
@@ -220,7 +205,7 @@ postStratify.DBIsvydesign<-function(design, strata, population, partial = FALSE,
 subset.DBIsvydesign<-function (x, subset, ...) 
 {
     e <- substitute(subset)
-    x$variables<-DBIgetvars(make.formula(all.vars(e)), x$db$connection, x$db$tablename)
+    x$variables<-getvars(make.formula(all.vars(e)), x$db$connection, x$db$tablename,updates=x$updates)
     r <- eval(e, x$variables, parent.frame())
     r <- r & !is.na(r)
     x <- x[r, ]
@@ -228,17 +213,26 @@ subset.DBIsvydesign<-function (x, subset, ...)
     x
 }
 
-update.DBIsvydesign<-function(object,...) stop("Not yet implemented")
 
-dim.DBIsvydesign<-function(x,...){
-   nrow<-NROW(x$prob)
-   ncol<-NCOL(dbGetQuery(x$db$conn, paste("select * from", x$db$tablename, "limit 1")))
+
+dim.DBIsvydesign<-function(x){
+  w<-weights(x)
+  nrow<-sum(w!=0)
+   coln<-names(dbGetQuery(x$db$conn, paste("select * from", x$db$tablename, "limit 1")))
+   if (!is.null(x$updates)){
+     update.names<-do.call(c, lapply(x$updates, names))
+     ncol<-length(unique(c(coln,update.names)))
+   } else ncol<-length(coln)
    c(nrow,ncol)
 }
 
-dimnames.DBIsvydesign<-function(x,...){
-   rown<-rownames(x$cluster)
+dimnames.DBIsvydesign<-function(x){
+   rown<-rownames(x$cluster)[weights(x)!=0]
    coln<-names(dbGetQuery(x$db$conn, paste("select * from", x$db$tablename, "limit 1")))
+   if (!is.null(x$updates)){
+     update.names<-do.call(c, lapply(x$updates, names))
+     coln<-unique(c(coln,update.names))
+   }
    list(rown,coln)
 }
 

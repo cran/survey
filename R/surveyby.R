@@ -44,11 +44,11 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
   
   if (keep.var){
       unwrap <-function(x){
-        rval<-c(statistics=if(covmat) unclass(x[[1]]) else unclass(x))
+        rval<-c(coef(x))
         nvar<-length(rval)
         rval<-c(rval,c(se=SE(x),
-                       cv=cv(x),
-                       `cv%`=cv(x)*100,
+                       cv=cv(x,warn=FALSE),
+                       `cv%`=cv(x,warn=FALSE)*100,
                        var=SE(x)^2)[rep((nvartype-1)*(nvar),each=nvar)+(1:nvar)])
         if(!is.null(attr(x,"deff")))
           rval<-c(rval,DEff=deff(x))
@@ -188,7 +188,7 @@ coef.svyby<-function (object, ...)
     } else {
         rval<-as.vector(as.matrix(rval))
         names(rval)<-outer(rownames(object),
-        gsub("statistics\\.","",aa$variables), paste, sep=":")
+                           gsub("statistics\\.","",aa$variables), paste, sep=":")
     }
     rval
 }
@@ -204,6 +204,7 @@ vcov.svyby<-function(object,...){
   if(is.null(rval)){
     warning("Only diagonal elements of vcov() available")
     se<-SE(object)
+    if (is.data.frame(se)) se<-as.vector(as.matrix(se))
     if(length(se)>1)
       rval<-diag(se^2)
     else

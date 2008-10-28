@@ -1,3 +1,39 @@
+3.10   update() methods for database-backed designs.
+
+       improvements in graphics for subsets of database-backed designs.
+
+       barplot methods for svystat, svrepstat, svyby objects.
+
+       svytable() for database-backed designs
+
+       quantiles work with svyby(covmat=TRUE) for replicate-weight designs.
+
+       fix printing of p-value in svychisq, type="lincom"
+
+       better error messages for misspecified fpc in svydesign()
+
+       database-backed analysis of multiple imputations.
+
+       formatting changes to coef.svyquantile, SE.svyquantile, svyby
+
+       svrepdesign works with multiple imputations (though not with databases)
+
+       fix for missing factor levels in subsets of database-backed designs
+
+       allow svychisq(statistic='lincom') with replicate weights.
+
+       quantile regression smoothers in svysmooth()
+
+       add svychisq.twophase() (for Norm Breslow)
+
+       changed defaults in predict.svyglm so that plot.lm works
+         (for Patricia Berglund)
+ 
+       svyloglin() for loglinear models, with Wald and Rao-Scott tests.
+
+       pchisqsum() (and svychisq, anova.svylogin) have a saddlepoint approximation.
+
+
 3.9-1  improvments in svyby, degf, svyglm for subsets of calibrated designs or 
        database-backed designs.
 

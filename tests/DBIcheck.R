@@ -28,3 +28,18 @@ l.db<-svyglm(api00~api99+mobility, design=dbclus1)
 all.equal(coef(l),coef(l.db))
 all.equal(vcov(l), vcov(l.db))
 
+dclus1<-update(dclus1, apidiff=api00-api99)
+dclus1<-update(dclus1, apipct= apidiff/api99)
+dbclus1<-update(dbclus1, apidiff=api00-api99)
+dbclus1<-update(dbclus1, apipct= apidiff/api99)
+
+u<-svymean(~api00+apidiff+apipct, dclus1)
+u.db<-svymean(~api00+apidiff+apipct, dbclus1)
+all.equal(u, u.db)
+
+all.equal(nrow(dclus1),nrow(dbclus1))
+all.equal(nrow(subset(dclus1,stype=="E")),
+          nrow(subset(dbclus1,stype=="E")))
+
+
+

@@ -1,5 +1,7 @@
 \name{svrepdesign}
 \alias{svrepdesign}
+\alias{svrepdesign.default}
+\alias{svrepdesign.imputationList}
 \alias{[.svyrep.design}
 \alias{image.svyrep.design}
 \alias{print.svyrep.design}
@@ -14,10 +16,12 @@ the sampling design (partly for privacy reasons).  This function specifies the
 data structure for such a survey. 
 }
 \usage{
-svrepdesign(variables = NULL, repweights = NULL, weights = NULL, data =
+svrepdesign(variables , repweights , weights, data,...)
+\method{svrepdesign}{default}(variables = NULL, repweights = NULL, weights = NULL, data =
 NULL, type = c("BRR", "Fay", "JK1","JKn","bootstrap","other"),
 combined.weights=FALSE, rho = NULL, bootstrap.average=NULL,
-scale=NULL, rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"))
+scale=NULL, rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),...)
+\method{svrepdesign}{imputationList}(variables=NULL, repweights,weights,data,...)
 \method{image}{svyrep.design}(x, ..., col=grey(seq(.5,1,length=30)), type.=c("rep","total"))
 }
 %- maybe also `usage' for other objects documented here.
@@ -51,7 +55,11 @@ below}
   
   The JK1 and JKn types are both jackknife estimators deleting one
   cluster at a time. JKn is designed for stratified and JK1 for
-  unstratified designs. 
+  unstratified designs.
+
+  Averaged bootstrap weights ("mean bootstrap") are used for some
+  surveys from Statistics Canada. Yee et al (1999) describe their
+  construction and use for one such survey.
   
   The variance is computed as the sum of squared deviations of the
   replicates from their mean.  This may be rescaled: \code{scale} is an
@@ -60,7 +68,6 @@ below}
   replication weights incorporate the sampling weights
   (\code{combined.weights=TRUE}) or for \code{type="other"} these must
   be specified, otherwise they can be guessed from the weights.
-
 
   A finite population correction may be specified for \code{type="other"},
   \code{type="JK1"} and \code{type="JKn"}.  \code{fpc} must be a vector
@@ -81,13 +88,19 @@ below}
   \code{summary}, \code{weights}, \code{image}.
 }
 \references{Levy and Lemeshow. "Sampling of Populations". Wiley.
+
   Shao and Tu. "The Jackknife and Bootstrap." Springer.
+
+  Yee et al (1999). Bootstrat Variance Estimation for the National
+    Population Health Survey. Proceedings of the ASA Survey Research
+    Methodology Section. \url{ http://www.amstat.org/Sections/Srms/Proceedings/papers/1999_136.pdf}
 }
 
 \note{To use replication-weight analyses on a survey specified by
   sampling design, use \code{as.svrepdesign} to convert it. }
 
-\seealso{\code{\link{as.svrepdesign}}, \code{\link{svydesign}}, \code{\link{brrweights}} }
+\seealso{\code{\link{as.svrepdesign}}, \code{\link{svydesign}},
+  \code{\link{brrweights}}, \code{bootweights} }
 
 \examples{
 data(scd)

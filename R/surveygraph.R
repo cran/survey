@@ -93,11 +93,11 @@ svyplot.default<-function(formula,
 }
 
 svyboxplot<-function(formula, design,...) UseMethod("svyboxplot",design)
-svyboxplot.default<-function(formula, design, ...){
+svyboxplot.default<-function(formula, design, col=NULL, ...){
     
     formula<-as.formula(formula)
     if(length(formula)!=3) stop("need a two-sided formula")
-    if(length(formula[[3]])>2) stop("only one rhs variable allowed")
+    ##if(length(formula[[3]])>2) stop("only one rhs variable allowed")
     
     outcome<-eval(bquote(~.(formula[[2]])))
     
@@ -105,13 +105,13 @@ svyboxplot.default<-function(formula, design, ...){
         groups<-eval(bquote(~.(formula[[3]])))
         qs <- svyby(outcome,groups,design,svyquantile,ci=FALSE,
                     keep.var=FALSE,
-                    quantiles=c(0,0.25,0.5,0.75,1))
+                    quantiles=c(0,0.25,0.5,0.75,1),na.rm=TRUE)
         n<-NCOL(qs)
         iqr<- qs[,n-1]-qs[,n-3]
         low<-pmax(qs[,n-4],qs[,n-2]-1.5*iqr)
         hi<-pmin(qs[,n],qs[,n-1]+1.5*iqr)
         stats<-t(as.matrix(cbind(low,qs[,n-(3:1)],hi)))
-        z<-list(stats=stats,n=coef(svytotal(groups,design)))
+        z<-list(stats=stats,n=coef(svytotal(groups,design,na.rm=TRUE)))
         for(i in 1:ncol(stats)){
             out<-c(if(qs[i,n]!=hi[i]) qs[i,n],
                    if(qs[i,n-4]!=low[i])qs[i,n-4])
@@ -121,7 +121,7 @@ svyboxplot.default<-function(formula, design, ...){
         }
     } else {
         qs<-svyquantile(outcome,design,ci=FALSE,
-                        quantiles=c(0,0.25,0.5,0.75,1))
+                        quantiles=c(0,0.25,0.5,0.75,1),na.rm=TRUE)
         iqr<-qs[4]-qs[2]
         z<-list(stats=matrix(c(max(qs[1],qs[2]-1.5*iqr),
                 qs[2:4],min(qs[5],qs[4]+1.5*iqr))),
@@ -129,7 +129,8 @@ svyboxplot.default<-function(formula, design, ...){
         z$out<-c(if(qs[5]!=z$stats[5]) qs[5],
                  if(qs[1]!=z$stats[1]) qs[1])
     }
-    bxp(z,...)
+    if (is.null(col)) col<-par("bg")
+    bxp(z,boxfill=col,...)
 }
 
 
@@ -181,3 +182,25 @@ svycoplot.default<-function(formula, design, style=c("hexbin","transparent"),
          )
 }
 
+
+barplot.svystat<-function(height,...) barplot(coef(height),...)
+barplot.svrepstat<-function(height,...) barplot(coef(height),...)
+
+barplot.svyby<-function(height,beside=TRUE,...){    
+  aa <- attr(height, "svyby")
+  rval <- height[, max(aa$margins) + (1:aa$nstats)]
+  if (is.null(dim(rval))) {
+    if (length(aa$margins)<2){
+      names(rval) <- row.names(height)
+    } else {
+      rval<-matrix(rval, nrow=length(unique(height[,aa$margins[1]])))
+      rownames(rval) <- unique(height[,aa$margins[1]])
+      colnames(rval)<-levels(do.call(interaction, height[,aa$margins[-1],drop=FALSE]))
+    }
+  } else {
+    rval <- as.matrix(rval)
+    colnames(rval)<-sub("statistics\\.","",colnames(rval))
+    rval<-t(rval)
+  }
+  barplot(rval,beside=beside,...)
+}

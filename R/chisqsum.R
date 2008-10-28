@@ -1,6 +1,6 @@
 
 pchisqsum<-function(x,df,a,lower.tail=TRUE,
-                    method=c("satterthwaite","integration")){
+                    method=c("satterthwaite","integration","saddlepoint")){
   
   satterthwaite<-function(a,df){
     if(any(df>1)){
@@ -45,8 +45,10 @@ pchisqsum<-function(x,df,a,lower.tail=TRUE,
   if (method=="integration"){
     
     for(i in seq(length=length(x))){
+      if (guess[i]< 1e-5 || guess[i]> 1-1e-5)
+        next ## don't even try.
       ff<-make.integrand(x[i],df,a)
-      rval<-integrate(ff,-Inf,Inf,subdivisions=1000,
+      rval<-integrate(ff,-Inf,Inf,subdivisions=10000,
                           abs.tol=abstol[i],rel.tol=reltol[i],stop.on.error=FALSE)
       if (inherits(rval, "try-error") || rval$message!="OK"){
         warning("integration failed for x=",x[i],", using Satterthwaite approximation")
@@ -54,29 +56,36 @@ pchisqsum<-function(x,df,a,lower.tail=TRUE,
       guess[i]<- if (lower.tail) 1/2-rval$value else 1/2+rval$value
     }
     return(guess)
-  }  
+  } else if (method=="saddlepoint"){
+    for(i in seq(length=length(x))){
+      lambda<-rep(a,df)
+      sad<-sapply(x,saddle,lambda=lambda)
+      if (lower.tail) sad<-1-sad
+      guess<-ifelse(is.na(sad),guess,sad)
+    }
+    return(guess)
+  }
 }
 
-
-##
-## presumably we need something involving null and alternative covariance matrices
-## to compare two models.
-##
-lrtdistn<-function(dev, modelcov,varu=NULL,robu=NULL,
-              method=c("satterthwaite","integration")){
-
-   if(!xor(is.null(varu), is.null(robu)))
-     stop("Must specify exactly one of varu and robu")
-   
-   if (is.null(robu)){
-     amhalf<-chol(modelcov)
-     m<-amhalf%*%varu%*%t(amhalf)
-   } else {
-     ahalf<-chol(solve(modelcov))
-     m<-ahalf%*%robu%*%t(ahalf)
-   }
-   e<-eigen(m,only.values=TRUE)$values
-   method<-match.arg(method)
-   pchisqsum(dev, df=rep(1,NCOL(m)), a=e,
-             method=method, lower.tail=FALSE)
+saddle<-function(x,lambda){
+  d<-max(lambda)
+  lambda<-lambda/d
+  x<-x/d
+  k0<-function(zeta) -sum(log(1-2*zeta*lambda))/2
+  kprime0<-function(zeta) sapply(zeta, function(zz) sum(lambda/(1-2*zz*lambda)))
+  kpprime0<-function(zeta) 2*sum(lambda^2/(1-2*zeta*lambda)^2)
+  n<-length(lambda)
+  if (x>1.2*sum(lambda))
+    hatzeta<-uniroot(function(zeta) kprime0(zeta)-x,
+                     lower=-0.01,upper=1/2-1/(3*x),tol=1e-8)$root
+  else
+     return(NA)
+  
+  w<-sign(hatzeta)*sqrt(2*(hatzeta*x-k0(hatzeta)))
+  v<-hatzeta*sqrt(kpprime0(hatzeta))
+  if (abs(hatzeta)<1e-3)
+    pnorm(w,lower.tail=FALSE)
+  else
+    pnorm(w+log(v/w)/w, lower.tail=FALSE)
 }
+

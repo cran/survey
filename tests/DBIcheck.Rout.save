@@ -1,5 +1,5 @@
 
-R version 2.7.0 (2008-04-22)
+R version 2.7.2 (2008-08-25)
 Copyright (C) 2008 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
@@ -35,7 +35,7 @@ Loading required package: DBI
 > r<-svyratio(~api.stu, ~enroll, design=dclus1)
 > r.db<-svyratio(~api_stu, ~enroll, design=dbclus1)
 > all.equal(coef(r), coef(r.db))
-[1] TRUE
+[1] "Attributes: < Component 2: Component 1: 1 string mismatch >"
 > all.equal(SE(r), SE(r.db))
 [1] "Attributes: < Component 2: Component 1: 1 string mismatch >"
 > 
@@ -54,5 +54,23 @@ Loading required package: DBI
 [1] TRUE
 > all.equal(vcov(l), vcov(l.db))
 [1] TRUE
+> 
+> dclus1<-update(dclus1, apidiff=api00-api99)
+> dclus1<-update(dclus1, apipct= apidiff/api99)
+> dbclus1<-update(dbclus1, apidiff=api00-api99)
+> dbclus1<-update(dbclus1, apipct= apidiff/api99)
+> 
+> u<-svymean(~api00+apidiff+apipct, dclus1)
+> u.db<-svymean(~api00+apidiff+apipct, dbclus1)
+> all.equal(u, u.db)
+[1] TRUE
+> 
+> all.equal(nrow(dclus1),nrow(dbclus1))
+[1] TRUE
+> all.equal(nrow(subset(dclus1,stype=="E")),
++           nrow(subset(dbclus1,stype=="E")))
+[1] TRUE
+> 
+> 
 > 
 > 

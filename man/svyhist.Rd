@@ -10,7 +10,7 @@ Histograms and boxplots weighted by the sampling weights.
 svyhist(formula, design, breaks = "Sturges",
       include.lowest = TRUE, right = TRUE, xlab = NULL,
        main = NULL, probability = TRUE, freq = !probability, ...)
-svyboxplot(formula,design,...)
+svyboxplot(formula, design,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,11 +27,13 @@ svyboxplot(formula,design,...)
 The histogram breakpoints are computed as if the sample were a
 simple random sample of the same size.
 
+The grouping variable in \code{svyboxplot}, if present, must be a factor.
+
 The boxplot whiskers go to the maximum and minimum observations or to
 1.5 interquartile ranges beyond the end of the box, whichever is
 closer. The maximum and minimum are plotted as outliers if they are
 beyond the ends of the whiskers, but other outlying points are not
-plotted. This is likely to change in the future.  \code{svyboxplot}
+plotted. This may  change in the future.  \code{svyboxplot}
 requires a two-sided formula; use \code{variable~1} for a single boxplot.
  }
 
