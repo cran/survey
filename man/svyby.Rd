@@ -13,7 +13,7 @@ Compute survey statistics on subsets of a survey defined by factors.
 svyby(formula, by ,design,...)
 \method{svyby}{default}(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE,
 keep.names = TRUE,verbose=FALSE, vartype=c("se","cv","cvpct","var"),
- drop.empty.groups=TRUE, covmat=FALSE)
+ drop.empty.groups=TRUE, covmat=FALSE, return.replicates=FALSE)
 \method{SE}{svyby}(object,...)
 \method{deff}{svyby}(object,...)
 \method{coef}{svyby}(object,...)
@@ -42,6 +42,8 @@ keep.names = TRUE,verbose=FALSE, vartype=c("se","cv","cvpct","var"),
 \item{covmat}{If \code{TRUE}, compute covariances between estimates for
   different subsets (currently only for replicate-weight
   designs). Allows \code{\link{svycontrast}} to be used on output.}
+\item{return.replicates}{Only for replicate-weight designs. If
+  \code{TRUE}, return all the replicates as an attribute of the result}
 \item{object}{An object of class \code{"svyby"}}
 }
 
@@ -80,6 +82,8 @@ svyby(~api99+api00, ~stype+sch.wide, rclus1, svymean, keep.var=FALSE)
 mns<-svyby(~api99, ~stype, rclus1, svymean,covmat=TRUE)
 vcov(mns)
 svycontrast(mns, c(E = 1, M = -1))
+
+str(svyby(~api99, ~stype, rclus1, svymean,return.replicates=TRUE))
 
 
 ## extractor functions

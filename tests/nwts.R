@@ -27,13 +27,13 @@ dccs8<-twophase(id=list(~id,~id),subset=~in.ccs,
 
 gccs8<-calibrate(dccs2,phase=2,formula=~interaction(instit,stage,rel))
 
-summary(svyglm(rel~factor(stage)*factor(histol),family=binomial,design=dccs2))
-summary(svyglm(rel~factor(stage)*factor(histol),family=binomial,design=dccs8))
-summary(svyglm(rel~factor(stage)*factor(histol),family=binomial,design=gccs8))
+summary(svyglm(rel~factor(stage)*factor(histol),family=quasibinomial,design=dccs2))
+summary(svyglm(rel~factor(stage)*factor(histol),family=quasibinomial,design=dccs8))
+summary(svyglm(rel~factor(stage)*factor(histol),family=quasibinomial,design=gccs8))
 
 ## check subsets of calibrated designs.
 summary(svyglm(rel~factor(stage),
-               family=binomial,design=subset(dccs8,histol==1)))
+               family=quasibinomial,design=subset(dccs8,histol==1)))
 summary(svyglm(rel~factor(stage),
-               family=binomial,design=subset(gccs8,histol==1)))
+               family=quasibinomial,design=subset(gccs8,histol==1)))
 

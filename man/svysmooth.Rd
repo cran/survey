@@ -3,6 +3,7 @@
 \alias{plot.svysmooth}
 \alias{print.svysmooth}
 \alias{lines.svysmooth}
+\alias{make.panel.svysmooth}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Scatterplot smoothing and density estimation}
 \description{
@@ -13,6 +14,7 @@ data.
 svysmooth(formula, design, method = c("locpoly","quantreg"), bandwidth,quantile,df, ...)
 \method{plot}{svysmooth}(x, which=NULL, type="l", xlabs=NULL, ylab=NULL,...)
 \method{lines}{svysmooth}(x,which=NULL,...)
+make.panel.svysmooth(design,bandwidth=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -38,6 +40,11 @@ performed for each one.
 For \code{method="locpoly"} the extra arguments are passed to \code{locpoly}
 from the KernSmooth package, for \code{method="quantreg"} they are
 passed to \code{rq} from the quantreg package.
+
+\code{make.panel.svysmooth()} makes a function that plots points and
+draws a weighted smooth curve through them, a weighted replacement for
+\code{\link{panel.smooth}} that can be passed to functions such as
+\code{\link{termplot}} or \code{\link{plot.lm}}.
 }
 \value{
 An object of class \code{svysmooth}, a list of lists, each with \code{x} and \code{y} components.
@@ -58,6 +65,10 @@ An object of class \code{svysmooth}, a list of lists, each with \code{x} and \co
 
  svyhist(~api99,design=dstrat)
  lines(dens,col="purple",lwd=3)
+
+ m<-svyglm(api00~sin(api99/100)+stype, design=dstrat)
+ termplot(m, data=model.frame(dstrat), partial.resid=TRUE, se=TRUE,
+  smooth=make.panel.svysmooth(dstrat))
 }
 \keyword{hplot}% at least one, from doc/KEYWORDS
 \keyword{survey}

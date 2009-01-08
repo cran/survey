@@ -73,12 +73,14 @@ svyolr.survey.design2<-function (formula, design,  start, ...,  na.action=na.omi
     }
     m <- match.call(expand.dots = FALSE)
     method <- match.arg(method)
+
+    if (method=="cloglog") require(MASS) ## for Gumbel
+
     pfun <- switch(method, logistic = plogis, probit = pnorm, 
         cloglog = pgumbel, cauchit = pcauchy)
     dfun <- switch(method, logistic = dlogis, probit = dnorm, 
         cloglog = dgumbel, cauchit = dcauchy)
 
-    if (method=="cloglog") require(MASS) ## for Gumbel
 
     m<-model.frame(formula,model.frame(design),na.action=na.pass)
     Terms <- attr(m, "terms")

@@ -1119,7 +1119,7 @@ svyglm.survey.design<-function(formula,design,subset=NULL,...){
       g[[1]]<-quote(glm)      
 
       ##need to rescale weights for stability in binomial
-      data$.survey.prob.weights<-(1/design$prob)/sum(1/design$prob)
+      data$.survey.prob.weights<-(1/design$prob)/mean(1/design$prob)
       if (!all(all.vars(formula) %in% names(data))) 
 	stop("all variables must be in design= argument")
       g<-with(list(data=data), eval(g))
@@ -1179,7 +1179,7 @@ residuals.svyglm<-function(object,type = c("deviance", "pearson", "working",
 	   mu <- object$fitted.values
     	   wts <- object$prior.weights
            pwts<- 1/object$survey.design$prob
-           pwts<- pwts/sum(pwts)
+           pwts<- pwts/mean(pwts)
 	   r<-(y - mu) * sqrt(wts/pwts)/(sqrt(object$family$variance(mu)))
 	   if (is.null(object$na.action)) 
         	r
@@ -1243,15 +1243,220 @@ summary.svyglm<-function (object, correlation = FALSE, df.resid=NULL,...)
 
 
 logLik.svyglm<-function(object,...){
-   stop("svyglm not fitted by maximum likelihood.")
+   warning("svyglm not fitted by maximum likelihood.")
+   object$deviance
 }
 
 extractAIC.svyglm<-function(fit,...){
     stop("svyglm not fitted by maximum likelihood")
 }
 
+confint.svyglm<-function(object,parm,level=0.95,method=c("Wald","likelihood"),ddf=Inf,...){
+  method<-match.arg(method)
+  if(method=="Wald")
+    return(confint.default(object,parm=parm,level=level,...))
+  pnames <- names(coef(object))
+  if (missing(parm)) 
+    parm <- seq_along(pnames)
+  else if (is.character(parm))
+    parm <- match(parm, pnames, nomatch = 0)
+  lambda<-diag(object$cov.unscaled[parm,parm,drop=FALSE])/diag(object$naive.cov[parm,parm,drop=FALSE])
+  if(is.null(ddf)) ddf<-object$df.residual
+  if (ddf==Inf)
+    level<- 1-2*pnorm(qnorm((1-level)/2)*sqrt(lambda))
+  else {
+    level<- 1-2*pnorm(qt((1-level)/2,df=ddf)*sqrt(lambda))
+  }
+  rval<-vector("list",length(parm))
+  for(i in 1:length(parm)){
+    rval[[i]]<-NextMethod(object=object,parm=parm[i],level=level[i],...)
+  }
+  names(rval)<-pnames[parm]
+  if (length(rval)==1)
+    rval<-rval[[1]]
+  else
+    rval<-do.call(rbind,rval)
+  attr(rval,"levels")<-level
+  rval
+}
+
 
 svymle<-function(loglike, gradient=NULL, design, formulas,
+                 start=NULL, control=list(maxit=1000),
+                 na.action="na.fail", method=NULL,...){
+  if(is.null(method))
+    method<-if(is.null(gradient)) "Nelder-Mead" else "nlm"
+  
+  if (!inherits(design,"survey.design")) 
+	stop("design is not a survey.design")
+  weights<-weights(design)
+  wtotal<-sum(weights)
+ 
+  if (is.null(control$fnscale))
+      control$fnscale <- -wtotal/length(weights)
+  if (inherits(design, "twophase"))
+    data<-design$phase1$sample$variables
+  else 
+    data<-design$variables
+
+## Get the response variable
+  nms<-names(formulas)
+  if (nms[1]==""){
+	if (inherits(formulas[[1]],"formula"))
+	  y<-eval.parent(model.frame(formulas[[1]],data=data,na.action=na.pass))
+	else
+	  y<-eval(y,data,parent.frame())
+	formulas[1]<-NULL
+	if (FALSE && NCOL(y)>1) stop("Y has more than one column")
+    }   else {
+  	## one formula must have response
+	has.response<-sapply(formulas,length)==3
+	if (sum(has.response)!=1) stop("Need a response variable")
+	ff<-formulas[[which(has.response)]]
+	ff[[3]]<-1
+	y<-eval.parent(model.frame(ff,data=data,na.action=na.pass))
+	formulas[[which(has.response)]]<-delete.response(terms(formulas[[which(has.response)]]))
+        nms<-c("",nms)
+  }
+
+  if(length(which(nms==""))>1) stop("Formulas must have names")
+
+  mf<-vector("list",length(formulas))
+  vnms <- unique(do.call(c, lapply(formulas, all.vars)))
+  uformula <- make.formula(vnms)
+  mf <- model.frame(uformula, data=data,na.action=na.pass)
+  mf <- cbind(`(Response)`=y, mf)
+  mf<-mf[,!duplicated(colnames(mf)),drop=FALSE]
+  
+  mf<-get(na.action)(mf)  
+  nas<-attr(mf,"na.action")
+  if (length(nas))
+    design<-design[-nas,]
+  weights<-1/design$prob
+  wtotal<-sum(weights)
+  
+  Y<-mf[,1]
+  mm<-lapply(formulas,model.matrix, data=mf)
+
+  ## parameter names
+  parnms<-lapply(mm,colnames)
+  for(i in 1:length(parnms))
+	parnms[[i]]<-paste(nms[i+1],parnms[[i]],sep=".")
+  parnms<-unlist(parnms)
+
+  # maps position in theta to model matrices
+  np<-c(0,cumsum(sapply(mm,NCOL)))
+
+
+  objectivefn<-function(theta,...){
+     args<-vector("list",length(nms))
+     args[[1]]<-Y
+     for(i in 2:length(nms))
+	args[[i]]<-mm[[i-1]]%*%theta[(np[i-1]+1):np[i]]
+     names(args)<-nms
+     args<-c(args, ...)
+     sum(do.call("loglike",args)*weights)
+  }
+
+  if (is.null(gradient)) {
+     grad<-NULL
+  } else {  
+     fnargs<-names(formals(loglike))[-1]
+     grargs<-names(formals(gradient))[-1]
+     if(!identical(fnargs,grargs))
+       stop("loglike and gradient have different arguments.")
+     reorder<-na.omit(match(grargs,nms[-1]))
+     grad<-function(theta,...){
+       args<-vector("list",length(nms))
+       args[[1]]<-Y
+       for(i in 2:length(nms))
+	  args[[i]]<-drop(mm[[i-1]]%*%theta[(np[i-1]+1):np[i]])
+       names(args)<-nms
+       args<-c(args,...)
+       rval<-NULL
+       tmp<-do.call("gradient",args)
+       for(i in reorder){
+	   rval<-c(rval, colSums(as.matrix(tmp[,i]*weights*mm[[i]])))
+	}
+       drop(rval)
+     }
+  }
+
+  theta0<-numeric(np[length(np)])
+  if (is.list(start))
+      st<-do.call("c",start)
+  else
+      st<-start
+
+  if (length(st)==length(theta0)) {
+	theta0<-st
+  } else {
+	stop("starting values wrong length")
+  }
+
+  if (method=="nlm"){
+      ff<-function(theta){
+          rval<- -objectivefn(theta)
+          if (is.na(rval)) rval<- -Inf
+          attr(rval,"grad")<- -grad(theta)
+          rval
+      }
+      rval<-nlm(ff, theta0,hessian=TRUE)
+      if (rval$code>3) warning("nlm did not converge")
+      rval$par<-rval$estimate
+  } else {
+      rval<-optim(theta0, objectivefn, grad,control=control,
+              hessian=TRUE,method=method,...)
+      if (rval$conv!=0) warning("optim did not converge")
+  }
+
+  
+
+
+  names(rval$par)<-parnms
+  dimnames(rval$hessian)<-list(parnms,parnms)
+
+  if (is.null(gradient)) {
+	rval$invinf<-solve(-rval$hessian)
+	rval$scores<-NULL
+	rval$sandwich<-NULL
+    }  else {
+       theta<-rval$par
+       args<-vector("list",length(nms))
+       args[[1]]<-Y
+       for(i in 2:length(nms))
+	  args[[i]]<-drop(mm[[i-1]]%*%theta[(np[i-1]+1):np[i]])
+       names(args)<-nms
+       args<-c(args,...)
+       deta<-do.call("gradient",args)
+       rval$scores<-NULL
+       for(i in reorder)
+       	 rval$scores<-cbind(rval$scores,deta[,i]*weights*mm[[i]])
+
+       rval$invinf<-solve(-rval$hessian)
+       dimnames(rval$invinf)<-list(parnms,parnms)
+
+       db<-rval$scores%*%rval$invinf
+       if (inherits(design,"survey.design2"))
+         rval$sandwich<-svyrecvar(db,design$cluster,design$strata, design$fpc, 
+                               postStrata=design$postStrata)
+       else if (inherits(design, "twophase"))
+         rval$sandwich<-twophasevar(db,design)
+       else
+         rval$sandwich<-svyCprod(db,design$strata,design$cluster[[1]],
+                                 design$fpc, design$nPSU,
+                                 design$certainty, design$postStrata)
+       dimnames(rval$sandwich)<-list(parnms,parnms)
+     }
+  rval$call<-match.call()
+  rval$design<-design
+  class(rval)<-"svymle"
+  rval
+
+}
+
+
+svymleOLD<-function(loglike, gradient=NULL, design, formulas,
                  start=NULL, control=list(maxit=1000),
                  na.action="na.fail", method=NULL,...){
   if(is.null(method))
@@ -1295,9 +1500,13 @@ svymle<-function(loglike, gradient=NULL, design, formulas,
   mf<-vector("list",length(formulas))
   for(i in 1:length(formulas)){
 	mf[[i]]<-eval.parent(model.frame(formulas[[i]], data=data, na.action=na.pass))
-  	if (NCOL(mf[[i]])==0) mf[[i]]<-NULL
 	}
-  mf<-as.data.frame(do.call("cbind",c(y,mf)))
+  notnulls<-sapply(mf,function(mfi) NCOL(mfi)!=0)
+  mf<-mf[notnulls]
+  if (any(notnulls))
+    mf<-as.data.frame(do.call("cbind",c(y,mf)))
+  else
+    mf<-y
   names(mf)[1]<-"(Response)"
   mf<-mf[,!duplicated(colnames(mf)),drop=FALSE]
 
@@ -1481,10 +1690,75 @@ model.frame.svyrep.design<-function(formula,...){
 }
 
 
-predict.svyglm <- function(object, newdata=object$model, total=NULL,
-                           type = c("link", "response"),se=TRUE,
-                           vcov=FALSE,...){
+predterms<-function(object,se=FALSE,terms=NULL){
+  tt<-terms(object)
+  n <- length(object$residuals)
+  p <- object$rank
+  p1 <- seq_len(p)
+  piv <- object$qr$pivot[p1]
+  beta<-coef(object)
+  X<-mm<-model.matrix(object)
+  aa <- attr(mm, "assign")
+  ll <- attr(tt, "term.labels")
+  hasintercept <- attr(tt, "intercept") > 0L
+  if (hasintercept) 
+    ll <- c("(Intercept)", ll)
+  aaa <- factor(aa, labels = ll)
+  asgn <- split(order(aa), aaa)
+  if (hasintercept) {
+    asgn$"(Intercept)" <- NULL
+    }
+  avx <- colMeans(mm)
+  termsconst <- sum(avx[piv] * beta[piv])
+  nterms <- length(asgn)
+  ip <- matrix(ncol = nterms, nrow = NROW(X))
+  if (nterms > 0) {
+    predictor <- matrix(ncol = nterms, nrow = NROW(X))
+    dimnames(predictor) <- list(rownames(X), names(asgn))
+    
+    if (hasintercept) 
+      X <- sweep(X, 2L, avx, check.margin = FALSE)
+    unpiv <- rep.int(0L, NCOL(X))
+    unpiv[piv] <- p1
+    for (i in seq.int(1L, nterms, length.out = nterms)) {
+      iipiv <- asgn[[i]]
+      ii <- unpiv[iipiv]
+      iipiv[ii == 0L] <- 0L
+      predictor[, i] <- if (any(iipiv > 0L)) 
+        X[, iipiv, drop = FALSE] %*% beta[iipiv]
+      else 0
+      if (se){
+        ip[,i]<-if (any(iipiv > 0L)) 
+          rowSums(as.matrix(X[, iipiv, drop = FALSE] %*% vcov(object)[ii,ii]) * X[, iipiv, drop = FALSE]) else 0
+      }
+    }
+    if (!is.null(terms)) {
+      predictor <- predictor[, terms, drop = FALSE]
+      if (se) 
+        ip <- ip[, terms, drop = FALSE]
+    }
+  }
+  else {
+    predictor <- ip <- matrix(0, n, 0)
+  }
+  attr(predictor, "constant") <- if (hasintercept) 
+    termsconst
+  else 0
+  if(se)
+          dimnames(ip)<-dimnames(predictor)
+  if (se) list(fit=predictor,se.fit=sqrt(ip)) else predictor
+}
 
+
+predict.svyglm <- function(object, newdata=NULL, total=NULL,
+                           type = c("link", "response","terms"),
+                           se.fit=(type!="terms"),
+                           vcov=FALSE,...){
+    if(is.null(newdata))
+      newdata<-model.frame(object$survey.design)
+    type<-match.arg(type)
+    if (type=="terms")
+      return(predterms(object,se=se.fit,...))
     tt<-delete.response(terms(formula(object)))
     mf<-model.frame(tt,data=newdata)
     mm<-model.matrix(tt,mf)
@@ -1492,10 +1766,9 @@ predict.svyglm <- function(object, newdata=object$model, total=NULL,
         mm[,attr(tt,"intercept")]<-mm[,attr(tt,"intercept")]*total
     }
     eta<-drop(mm %*% coef(object))
-    type<-match.arg(type)
     d<-drop(object$family$mu.eta(eta))
     eta<-switch(type, link=eta, response=object$family$linkinv(eta))
-    if(se){
+    if(se.fit){
         if(vcov){
             vv<-mm %*% vcov(object) %*% t(mm)
             attr(eta,"var")<-switch(type,

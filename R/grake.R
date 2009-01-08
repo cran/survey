@@ -225,11 +225,11 @@ grake<-function(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verb
 
   xeta<-drop(mm%*%eta)
   g<-1+Fm1(xeta, bounds)
-
+  deriv <- dF(xeta, bounds)
   iter<-1
 
   repeat({
-    Tmat<-crossprod(mm*ww*dF(xeta, bounds), mm)
+    Tmat<-crossprod(mm*ww*deriv, mm)
 
     misfit<-(population-sample.total-colSums(mm*ww*Fm1(xeta, bounds)))
     deta<-ginv(Tmat, tol=256*.Machine$double.eps)%*%misfit
@@ -237,6 +237,16 @@ grake<-function(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verb
 
     xeta<- drop(mm%*%eta)
     g<-1+Fm1(xeta, bounds)
+    deriv <- dF(xeta, bounds)
+    while(iter<maxit && any(is.na(g),is.na(deriv))){
+      iter<-iter+1
+      deta<-deta/2
+      eta<-eta-deta
+      xeta<- drop(mm%*%eta)
+      g<-1+Fm1(xeta, bounds)
+      deriv <- dF(xeta, bounds)
+      if(verbose) print("Step halving")
+    }
     misfit<-(population-sample.total-colSums(mm*ww*Fm1(xeta, bounds)))
     
     if (verbose)

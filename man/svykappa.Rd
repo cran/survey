@@ -4,7 +4,8 @@
 \title{Cohen's kappa for agreement}
 \description{
  Computes the unweighted kappa measure of agreement between two raters
- and the standard error.
+ and the standard error. The measurements must both be factor variables
+ in the survey design object.
 }
 \usage{
 svykappa(formula, design, ...)

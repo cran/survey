@@ -12,7 +12,9 @@ svyrqss<-function(formula,design,quantile=0.5,df=4,...){
   require("quantreg") || stop("needs quantreg package")
   require("splines") || stop("needs splines package, which should be part of R")
 
-  mf<-model.frame(formula, model.frame(design))
+  mf<-model.frame(formula, model.frame(design), na.action=na.omit)
+  naa<-attr(mf,"na.action")
+
   tt<-attr(terms(formula),"term.labels")
   df<-rep(df, length=length(tt))
   quantile<-rep(quantile, length=length(tt))
@@ -25,6 +27,7 @@ svyrqss<-function(formula,design,quantile=0.5,df=4,...){
   }
   
   w<-weights(design,type="sampling")
+  if (length(naa)) w<-w[-naa]
   environment(formula)<-environment()
 
   ll<-vector("list", length(tt))
@@ -60,6 +63,8 @@ svylocpoly<-function(formula, design, ngrid=401, xlim=NULL,
   if(attr(terms(formula),"intercept"))
     mm<-mm[,-1,drop=FALSE]
 
+  naa<-attr(mf,"na.action")
+  
   bandwidth<-rep(bandwidth, length=ncol(mm))
 
   if (length(formula)==3){
@@ -75,7 +80,8 @@ svylocpoly<-function(formula, design, ngrid=401, xlim=NULL,
     xlim<-matrix(xlim,nrow=2)
   
   w<-weights(design,type="sampling")
-
+  if (length(naa)) w<-w[-naa]
+  
   ll<-vector("list", ncol(mm))
   for(i in 1:NCOL(mm)){
     gx<-seq(min(xlim[,i]), max(xlim[,i]), length=ngrid)

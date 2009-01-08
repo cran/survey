@@ -49,7 +49,10 @@ computed by \code{\link{svychisq}}.
 
 The \code{anova} method can only compare two models if they are for
 exactly the same multiway table (same variables and same order). The
-\code{update} method will help with this.
+\code{update} method will help with this. It is also much faster to use
+\code{update} than \code{svyloglin} for a large data set: its time
+complexity depends only on the size of the model, not on the size of the
+data set.
 
  It is not possible to fit a model using a variable created inline, eg
 \code{I(x<10)}, since the multiway table is based on all variables used
@@ -70,7 +73,7 @@ Rao, JNK, Scott, AJ (1984) "On Chi-squared Tests For Multiway Contingency Tables
  b<-update(a,~.^2)
  an<-anova(a,b)
  an
- print(an, statistic="saddlepoint")
+ print(an, pval="saddlepoint")
 
  ## Wald test
  regTermTest(b, ~stype:comp.imp)

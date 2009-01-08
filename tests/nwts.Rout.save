@@ -1,5 +1,5 @@
 
-R version 2.7.0 (2008-04-22)
+R version 2.7.2 (2008-08-25)
 Copyright (C) 2008 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
@@ -19,6 +19,14 @@ Type 'q()' to quit R.
 > ## examples from Breslow & Chatterjee: Applied Statistics 1999 No. 4, p458
 > ## data from Norman Breslow's web page.
 > library(survey)
+
+Attaching package: 'survey'
+
+
+	The following object(s) are masked from package:graphics :
+
+	 dotchart 
+
 > load("nwts.rda")
 > nwtsnb<-nwts
 > nwtsnb$case<-nwts$case-nwtsb$case
@@ -44,10 +52,10 @@ Type 'q()' to quit R.
 > 
 > gccs8<-calibrate(dccs2,phase=2,formula=~interaction(instit,stage,rel))
 > 
-> summary(svyglm(rel~factor(stage)*factor(histol),family=binomial,design=dccs2))
+> summary(svyglm(rel~factor(stage)*factor(histol),family=quasibinomial,design=dccs2))
 
 Call:
-svyglm(rel ~ factor(stage) * factor(histol), family = binomial, 
+svyglm(rel ~ factor(stage) * factor(histol), family = quasibinomial, 
     design = dccs2)
 
 Survey design:
@@ -67,14 +75,14 @@ factor(stage)4:factor(histol)2   0.9785     0.6214   1.575 0.115632
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
-(Dispersion parameter for binomial family taken to be 1.000876)
+(Dispersion parameter for quasibinomial family taken to be 1.000876)
 
-Number of Fisher Scoring iterations: 5
+Number of Fisher Scoring iterations: 4
 
-> summary(svyglm(rel~factor(stage)*factor(histol),family=binomial,design=dccs8))
+> summary(svyglm(rel~factor(stage)*factor(histol),family=quasibinomial,design=dccs8))
 
 Call:
-svyglm(rel ~ factor(stage) * factor(histol), family = binomial, 
+svyglm(rel ~ factor(stage) * factor(histol), family = quasibinomial, 
     design = dccs8)
 
 Survey design:
@@ -94,14 +102,14 @@ factor(stage)4:factor(histol)2  0.90983    0.63777   1.427    0.154
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
-(Dispersion parameter for binomial family taken to be 1.000876)
+(Dispersion parameter for quasibinomial family taken to be 1.000876)
 
-Number of Fisher Scoring iterations: 5
+Number of Fisher Scoring iterations: 4
 
-> summary(svyglm(rel~factor(stage)*factor(histol),family=binomial,design=gccs8))
+> summary(svyglm(rel~factor(stage)*factor(histol),family=quasibinomial,design=gccs8))
 
 Call:
-svyglm(rel ~ factor(stage) * factor(histol), family = binomial, 
+svyglm(rel ~ factor(stage) * factor(histol), family = quasibinomial, 
     design = gccs8)
 
 Survey design:
@@ -121,17 +129,17 @@ factor(stage)4:factor(histol)2  0.90983    0.62991   1.444    0.149
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
-(Dispersion parameter for binomial family taken to be 1.000876)
+(Dispersion parameter for quasibinomial family taken to be 1.000876)
 
-Number of Fisher Scoring iterations: 5
+Number of Fisher Scoring iterations: 4
 
 > 
 > ## check subsets of calibrated designs.
 > summary(svyglm(rel~factor(stage),
-+                family=binomial,design=subset(dccs8,histol==1)))
++                family=quasibinomial,design=subset(dccs8,histol==1)))
 
 Call:
-svyglm(rel ~ factor(stage), family = binomial, design = subset(dccs8, 
+svyglm(rel ~ factor(stage), family = quasibinomial, design = subset(dccs8, 
     histol == 1))
 
 Survey design:
@@ -146,15 +154,15 @@ factor(stage)4   1.0729     0.1782   6.021 2.74e-09 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
-(Dispersion parameter for binomial family taken to be 1.001333)
+(Dispersion parameter for quasibinomial family taken to be 1.001333)
 
 Number of Fisher Scoring iterations: 5
 
 > summary(svyglm(rel~factor(stage),
-+                family=binomial,design=subset(gccs8,histol==1)))
++                family=quasibinomial,design=subset(gccs8,histol==1)))
 
 Call:
-svyglm(rel ~ factor(stage), family = binomial, design = subset(gccs8, 
+svyglm(rel ~ factor(stage), family = quasibinomial, design = subset(gccs8, 
     histol == 1))
 
 Survey design:
@@ -169,9 +177,14 @@ factor(stage)4   1.0729     0.1781   6.026 2.65e-09 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
-(Dispersion parameter for binomial family taken to be 1.000876)
+(Dispersion parameter for quasibinomial family taken to be 1.000876)
 
-Number of Fisher Scoring iterations: 5
+Number of Fisher Scoring iterations: 4
 
+Warning messages:
+1: In summary.glm(g) :
+  observations with zero weight not used for calculating dispersion
+2: In summary.glm(glm.object) :
+  observations with zero weight not used for calculating dispersion
 > 
 > 

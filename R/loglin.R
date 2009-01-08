@@ -14,9 +14,9 @@ tr2<-function(m) sum(m*m)
 svyloglin.survey.design<-function(formula,design,...){
   if (length(formula)!=2) stop("needs a one-sided formula")
   mdata<-model.frame(design)[,all.vars(formula)]
-  mf<-model.frame(formula,mdata)
+  mf<-model.frame(formula,mdata,na.action=na.pass)
   n<-nrow(mf)
-  hatp<-svymean(~I(do.call(interaction,mf)),design)
+  hatp<-svymean(~I(do.call(interaction,mf)),design,na.rm=TRUE)
   dat<-do.call(expand.grid,lapply(mdata,function(x) sort(unique(x))))
   dat<-as.data.frame(lapply(dat,as.factor))
   dat$y<-coef(hatp)*n
@@ -27,7 +27,8 @@ svyloglin.survey.design<-function(formula,design,...){
   P1<-(diag(fitted(m1)/n)-tcrossprod(fitted(m1)/n))/n
   V<-vcov(hatp)
   
-  XX<-model.matrix(m1)[,-1,drop=FALSE]	
+  XX<-model.matrix(m1)[,-1,drop=FALSE]
+  XX<-sweep(XX,2,colMeans(XX))
   Vtheta<-solve(t(XX)%*%P1%*%XX)%*%(t(XX)%*%V%*%XX)%*%solve(t(XX)%*%P1%*%XX)/(n*n)
   
   rval<-list(model=m1, var=Vtheta, prob.table=hatp,df.null=degf(design),n=n)
@@ -48,7 +49,7 @@ coef.svyloglin<-function(object,...,intercept=FALSE){
 }
 vcov.svyloglin<-function(object,...) object$var
 deviance.svyloglin<-function(object,...) deviance(object$model)
-
+degf.svyloglin<-function(design,...) length(design$prob.table)-length(coef(design))-1
 terms.svyloglin<-function(x,...) terms(x$model,...)
 model.matrix.svyloglin<-function(object,...) model.matrix(object$model,...)
 
@@ -60,6 +61,7 @@ update.svyloglin<-function(object, formula,...){
   V<-vcov(object$prob.table)
   
   XX<-model.matrix(model)[,-1,drop=FALSE]
+  XX<-sweep(XX,2,colMeans(XX))
   A<-solve(t(XX)%*%P1%*%XX)
   B<-t(XX)%*%V%*%XX
   Vtheta<-A%*%B%*%A/(n*n)
@@ -87,6 +89,8 @@ anova.svyloglin<-function(object,object1,...,integrate=FALSE){
   pi0<-fitted(m0)/n
   X1<-model.matrix(m0)[,-1,drop=FALSE]
   X2<-model.matrix(m1)[,-1,drop=FALSE]
+  X1<-sweep(X1,2,colMeans(X1))
+  X2<-sweep(X2,2,colMeans(X2))
   P1<-(diag(fitted(m1)/n)-tcrossprod(fitted(m1)/n))/n
   P0<-(diag(fitted(m0)/n)-tcrossprod(fitted(m0)/n))/n
   Psat<-(diag(coef(object$prob.table))-tcrossprod(coef(object$prob.table)))/n
@@ -141,9 +145,15 @@ print.anova.svyloglin<-function(x,pval=c("F","saddlepoint","lincom","chisq"),...
                         lower.tail=FALSE,method="integration")
   }
   cat("Deviance=",x$dev$dev,"p=",
-      switch(pval,lincom=x$dev$p[1],saddlepoint=x$dev$p[4],chisq=x$dev$p[2],F=x$dev$p[3]),"\n")
+      switch(pval,lincom=x$dev$p[1],
+             saddlepoint=x$dev$p[4],
+             chisq=x$dev$p[2],
+             F=x$dev$p[3]),"\n")
   cat("Score=",x$score$chisq,"p=",
-      switch(pval,lincom=x$score$p[1],saddlepoint=x$score$p[4],chisq=x$score$p[2],F=x$score$p[3]),"\n")
+      switch(pval,lincom=x$score$p[1],
+             saddlepoint=x$score$p[4],
+             chisq=x$score$p[2],
+             F=x$score$p[3]),"\n")
   invisible(x)
 }
 
@@ -155,8 +165,31 @@ summary.svyloglin<-function(object,...){
 
 print.summary.svyloglin<-function(x,...){
 	print(x$ll)
-	print(cbind(coef=coef(x$ll)[-1],
+	print(cbind(coef=coef(x$ll),
                     se=SE(x$ll),
-                    p=2*pnorm(abs(coef(x$ll)[-1]/SE(x$ll)),lower.tail=FALSE)))
+                    p=2*pnorm(abs(coef(x$ll)/SE(x$ll)),lower.tail=FALSE)))
 	invisible(x)
 	}
+
+svyloglin.svyrep.design<-svyloglin.survey.design
+
+svyloglin.DBIsvydesign<-function (formula, design, ...) 
+{
+    design$variables <- dropFactor(getvars(formula, design$db$connection, 
+        design$db$tablename, updates = design$updates), weights(design))
+    class(design)<-c("survey.design2","survey.design")    
+    rval<-svyloglin(formula,design)
+    rval$call<-sys.call()
+    rval$call[[1]]<-as.name(.Generic)
+    rval
+}
+svyloglin.ODBCsvydesign<-function (formula, design, ...) 
+{
+    design$variables <- dropFactor(getvars(formula, design$db$connection, 
+        design$db$tablename, updates = design$updates), weights(design))
+    class(design)<-c("survey.design2","survey.design")    
+    rval<-svyloglin(formula,design)
+    rval$call<-sys.call()
+    rval$call[[1]]<-as.name(.Generic)
+    rval
+}

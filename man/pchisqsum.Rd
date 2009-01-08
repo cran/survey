@@ -28,10 +28,10 @@ Vector of cumulative probabilities
 
   \code{"integration"} inverts the characteristic function
   numerically. This is relatively slow, and not reliable for p-values
-  below about 1e-5 in the upper tail, but is highly accurate for moderate p-values
+  below about 1e-5 in the upper tail, but is highly accurate for moderate p-values.
 
   \code{"saddlepoint"} uses a saddlepoint approximation when
-  \code{x>1.2*sum(lambda)} and the Satterthwaite approximation for
+  \code{x>1.05*sum(a)} and the Satterthwaite approximation for
   smaller \code{x}. This is fast and is accurate in the upper tail, where
   accuracy is important.
 
@@ -41,8 +41,9 @@ Vector of cumulative probabilities
 Davies RB (1973). "Numerical inversion of a characteristic function"
 Biometrika 60:415-7
 
-Kuonen D (1999) Saddlepoint Approximations for Distributions of Quadratic Forms in Normal Variables
- Biometrika, Vol. 86, No. 4 (Dec., 1999), pp. 929-935 
+Kuonen D (1999) Saddlepoint Approximations for Distributions of
+Quadratic Forms in Normal Variables. Biometrika, Vol. 86, No. 4
+(Dec., 1999), pp. 929-935 
 
 }
 \seealso{\code{\link{pchisq}}}

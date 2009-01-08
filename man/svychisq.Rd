@@ -87,7 +87,7 @@ tests and find the adjustment benefical.
 
 \code{statistic="lincom"} uses the exact asymptotic distribution, which
 is a linear combination of chi-squared variables (see
-\code{\link{pchisqsum}}, and \code{statistic="lincom"} uses a
+\code{\link{pchisqsum}}, and \code{statistic="saddlepoint"} uses a
 saddlepoint approximation to this distribution.
 
 For designs using replicate weights the code is essentially the same as

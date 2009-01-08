@@ -1,11 +1,10 @@
 \name{svycontrast}
 \alias{svycontrast}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Linear constrasts of survey statistics }
+\title{Linear and nonlinearconstrasts of survey statistics }
 \description{
-Computes linear contrasts from objects of class \code{svrepstat} or
-\code{svystat}.
-
+Computes linear or nonlinear contrasts of estimates produced by survey
+functions (or any object with \code{coef} and \code{vcov} methods).
 }
 \usage{
 svycontrast(stat, contrasts, ...)

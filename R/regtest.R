@@ -169,6 +169,7 @@ svycontrast.svyolr<-function(stat, contrasts,...){
 svycontrast.svyglm<-svycontrast.svystat
 svycontrast.svycoxph<-svycontrast.svystat
 svycontrast.svyby<-svycontrast.svystat
+svycontrast.default<-svycontrast.svystat
 
 svycontrast.svrepstat<-function(stat, contrasts,...){
   if (!is.list(contrasts))

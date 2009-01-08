@@ -2,24 +2,31 @@
 \alias{barplot.svystat}
 \alias{barplot.svrepstat}
 \alias{barplot.svyby}
+\alias{dotchart}
+\alias{dotchart.svystat}
+\alias{dotchart.svrepstat}
+\alias{dotchart.svyby}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{ Barplots }
+\title{ Barplots and Dotplots }
 \description{
-Draws a barplot based on results from a survey analysis. The default
+Draws a barplot or dotplot based on results from a survey analysis. The default
 barplot method already works for results from \code{\link{svytable}}.
 }
 \usage{
 \method{barplot}{svystat}(height, ...)
-
 \method{barplot}{svrepstat}(height, ...)
-
 \method{barplot}{svyby}(height,beside=TRUE, ...)
+
+\method{dotchart}{svystat}(x,...,pch=19)
+\method{dotchart}{svrepstat}(x,...,pch=19)
+\method{dotchart}{svyby}(x,...,pch=19)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{height}{Analysis result }
+  \item{height,x}{Analysis result }
   \item{beside}{Grouped, rather than stacked, bars}
-  \item{\dots}{ Arguments to \code{\link{barplot}} }
+  \item{\dots}{ Arguments to \code{\link{barplot}} or \code{dotchart} }
+  \item{pch}{Overrides the default in \code{dotchart.default}}
 }
 
 
@@ -34,6 +41,7 @@ barplot(a, names.arg=c("Elementary","High","Middle"), col="purple", main="Propor
 
 b<-svyby(~enroll+api.stu, ~stype, dclus1, svymean)
 barplot(b,beside=TRUE,legend=TRUE)
+dotchart(b)
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

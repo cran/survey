@@ -1,3 +1,41 @@
+3.10-1 svycoplot can now pass ... arguments to xyplot(), not just to panel.
+
+       svycontrast() has a 'default' method that assumes only a coef() 
+       and vcov() method are available.
+
+       Fixed example code for anova.svyloglin. 
+
+       Added predict(,type="terms"), termplot(), residuals(,type="partial") 
+       for svyglm.  As a result, the default for se= in
+       predict.svyglm has changed. 
+
+       make.panel.svysmooth() makes a weighted smoother as a slot-in
+       replacement for panel.smooth(), eg in termplot().
+
+       print.summary.svyloglin was broken (Norm Breslow).
+
+       confint() method for svyglm has both Wald-type and
+       likelihood-type confidence intervals (based on Rao-Scott test)
+
+       documented that svykappa() requires factor variables. 
+
+       svysmooth() doesn't fail when data are missing.
+
+       documented that update.svyloglin is faster than fitting a new
+       model.
+
+       dotchart() methods for svyby, svystat, svrepstat
+
+       svyloglin() handles missing data better.
+
+       svymle() didn't work if constant parameters were in any 
+       position other than last.
+
+       svyby() now has a return.replicates argument (for Phil Smith).
+
+       logit and raking calibration could run into NaN problems with
+       impossible bounds.  Step-halving seems to fix the problem.
+
 3.10   update() methods for database-backed designs.
 
        improvements in graphics for subsets of database-backed designs.

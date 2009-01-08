@@ -1,3 +1,14 @@
+make.panel.svysmooth<-function(design,bandwidth=NULL){
+  function(x,y,span=2/3,col.smooth="red",col=par("col"),bg=NA,pch=par("pch"),cex=1,...){
+    if(is.null(bandwidth))
+      bandwidth<-range(x)*span/3
+    s<-svysmooth(y~x,design=design,bandwidth=bandwidth)
+    points(x,y,pch=pch,bg=bg,col=col)
+    lines(s[[1]],col=col.smooth,...)
+  }
+}
+
+
 svyplot<-function(formula, design,...) UseMethod("svyplot",design)
 svyplot.default<-function(formula,
                   design,
@@ -138,7 +149,7 @@ svyboxplot.default<-function(formula, design, col=NULL, ...){
 svycoplot<-function(formula, design, style=c("hexbin","transparent"),
                             basecol="black",alpha=c(0,0.8),hexscale=c("relative","absolute"),...) UseMethod("svycoplot",design)
 svycoplot.default<-function(formula, design, style=c("hexbin","transparent"),
-                            basecol="black",alpha=c(0,0.8),hexscale=c("relative","absolute"),...){
+                            basecol="black",alpha=c(0,0.8),hexscale=c("relative","absolute"),xbins=15,...){
   require(lattice)
   style<-match.arg(style)
   wt<-weights(design,"sampling")
@@ -147,7 +158,7 @@ svycoplot.default<-function(formula, design, style=c("hexbin","transparent"),
          hexbin={
            require(hexbin) || stop("hexbin package is required (from Bioconductor)")
            hexscale<-match.arg(hexscale)
-           xyplot(formula, data=model.frame(design), xbins=10,
+           xyplot(formula, data=model.frame(design), xbins=xbins,
                   panel=function(x,y,style="centroids",xbins,subscripts,...) {
                     if (!length(x)) return(panel.xyplot(x,y,...))
                     vp<-current.viewport()
@@ -161,8 +172,9 @@ svycoplot.default<-function(formula, design, style=c("hexbin","transparent"),
                                                function(ii) weighted.mean(x[ii],W[ii])))
                     rval@ycm<-as.vector(tapply(1:length(y), cell,
                                                function(ii) weighted.mean(x[ii],W[ii])))
-                    grid.hexagons(rval,style=style, maxarea=switch(hexscale, relative=0.8,absolute=0.8*sum(W)/sum(wt)))
-                  })
+                    grid.hexagons(rval,style=style, maxarea=switch(hexscale, relative=0.8,
+                                                      absolute=0.8*sum(W)/sum(wt)))
+                  },...)
          }, transparent={
            if(is.function(basecol)) basecol<-basecol(model.frame(design))
            transcol<-function(base,opacity){
@@ -177,7 +189,7 @@ svycoplot.default<-function(formula, design, style=c("hexbin","transparent"),
                   panel=function(x,y,basecol="black",subscripts,...) {
                     a<-alphas[subscripts]
                     panel.xyplot(x,y,col=cols[subscripts],pch=19,...)
-                  })
+                  },...)
          }
          )
 }
@@ -203,4 +215,29 @@ barplot.svyby<-function(height,beside=TRUE,...){
     rval<-t(rval)
   }
   barplot(rval,beside=beside,...)
+}
+
+dotchart.default<-graphics::dotchart
+dotchart<-function(x,...,pch=19) UseMethod("dotchart")
+dotchart.svystat<-function(x,...,pch=19) dotchart(coef(x),...,pch=pch)
+dotchart.svrepstat<-function(x,...,pch=19) dotchart(coef(x),...,pch=pch)
+
+dotchart.svyby<-function(x,...,pch=19){
+  height<-x
+  aa <- attr(height, "svyby")
+  rval <- height[, max(aa$margins) + (1:aa$nstats)]
+  if (is.null(dim(rval))) {
+    if (length(aa$margins)<2){
+      names(rval) <- row.names(height)
+    } else {
+      rval<-matrix(rval, nrow=length(unique(height[,aa$margins[1]])))
+      rownames(rval) <- unique(height[,aa$margins[1]])
+      colnames(rval)<-levels(do.call(interaction, height[,aa$margins[-1],drop=FALSE]))
+    }
+  } else {
+    rval <- as.matrix(rval)
+    colnames(rval)<-sub("statistics\\.","",colnames(rval))
+    rval<-t(rval)
+  }
+  dotchart(rval,...,pch=pch)
 }

@@ -6,14 +6,14 @@ svyby<-function(formula, by, design,...) UseMethod("svyby",design)
 
 svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
                 keep.names=TRUE,verbose=FALSE,vartype=c("se","cv","cvpct","var"),
-                drop.empty.groups=TRUE, covmat=FALSE){
+                drop.empty.groups=TRUE, covmat=FALSE, return.replicates=FALSE){
 
   if (inherits(by, "formula"))
     byfactors<-model.frame(by, model.frame(design), na.action=na.pass)
   else
     byfactors<-as.data.frame(by)
 
-  if(covmat){
+  if(covmat || return.replicates){
     if (!inherits(design,"svyrep.design"))
       stop("covmat=TRUE not implemented for this design type")
   }
@@ -64,7 +64,7 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
                           data<-formula
                         else
                           data<-subset(formula, byfactor %in% byfactor[i])
-                        if (covmat) {
+                        if (covmat || return.replicates) {
                           FUN(data,
                               design[byfactor %in% byfactor[i],],
                               deff=deff,...,return.replicates=TRUE)
@@ -75,7 +75,7 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
                         }
                       })
       rval<-t(sapply(results, unwrap))
-      if (covmat) {
+      if (covmat || return.replicates) {
         replicates<-do.call(cbind,lapply(results,"[[","replicates"))
         covmat.mat<-svrVar(replicates,design$scale,design$rscales)
       }
@@ -158,6 +158,8 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
 
   if(covmat)
     attr(rval,"var")<-covmat.mat
+  if (return.replicates)
+    attr(rval,"replicates")<-replicates
   attr(rval,"call")<-sys.call()
   class(rval)<-c("svyby","data.frame")
   rval

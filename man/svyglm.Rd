@@ -21,8 +21,9 @@ with inverse-probability weighting and design-based standard errors.
 return.replicates=FALSE, na.action)
 \method{summary}{svyglm}(object, correlation = FALSE, df.resid=NULL,
 ...)
-\method{predict}{svyglm}(object,newdata=object$model,total=NULL,
-                         type=c("link","response"),se=TRUE,vcov=FALSE,...)
+\method{predict}{svyglm}(object,newdata=NULL,total=NULL,
+                         type=c("link","response","terms"),
+                         se.fit=(type != "terms"),vcov=FALSE,...)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -43,8 +44,8 @@ return.replicates=FALSE, na.action)
   \item{newdata}{new data frame for prediction}
   \item{total}{population size when predicting population total}
   \item{type}{linear predictor (\code{link}) or response}
-  \item{se}{if \code{TRUE}, return variances of predictions}
-  \item{vcov}{if \code{TRUE} and \code{se=TRUE} return
+  \item{se.fit}{if \code{TRUE}, return variances of predictions}
+  \item{vcov}{if \code{TRUE} and \code{se=TRUE} return full
     variance-covariance matrix of predictions}
 }
 \details{

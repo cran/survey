@@ -9,16 +9,7 @@ Possible additional developments in no particular order
 	- using population first-order inclusion probabilities
 	- using Overton's approximation and sample inclusion probabilities
 
- - Survival curve estimation (the standard errors are the only 
-	non-trivial part of this)
-
- - Large data sets: see the surveyNG package
-
  - GEE. 
-
- - imputation
-
- - methods for multiple-response categorical data
 
  - Parametric survival models (you can do these with svymle)
 
