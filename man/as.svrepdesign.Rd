@@ -4,10 +4,14 @@
 \title{Convert a survey design to use replicate weights}
 \description{
   Creates a replicate-weights survey design object from a traditional
-  strata/cluster survey design object. 
+  strata/cluster survey design object. \code{JK1} and \code{JKn} are
+  jackknife methods, \code{BRR} is Balanced Repeated Replicates and
+  \code{Fay} is Fay's modification of this, \code{bootstrap} is Canty
+  and Davison's bootstrap and \code{subbootstrap} is Rao and Wu's
+  \eqn{(n-1)} bootstrap.
 }
 \usage{
-as.svrepdesign(design, type=c("auto", "JK1", "JKn", "BRR", "bootstrap","Fay"),
+as.svrepdesign(design, type=c("auto", "JK1", "JKn", "BRR", "bootstrap","subbootstrap","Fay"),
 fay.rho = 0, ..., compress=TRUE)
 }
 %- maybe also `usage' for other objects documented here.
@@ -27,7 +31,7 @@ fay.rho = 0, ..., compress=TRUE)
 }
 
 \seealso{\code{\link{brrweights}}, \code{\link{svydesign}},
-  \code{\link{svrepdesign}}, \code{\link{bootweights}}
+  \code{\link{svrepdesign}}, \code{\link{bootweights}}, \code{\link{subbootweights}}
 }
 
 \examples{

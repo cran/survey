@@ -1,0 +1,60 @@
+
+R version 2.7.2 (2008-08-25)
+Copyright (C) 2008 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(survey)
+
+Attaching package: 'survey'
+
+
+	The following object(s) are masked from package:graphics :
+
+	 dotchart 
+
+> data(election)
+> 
+> dpps<- svydesign(id=~1, weights=~wt, fpc=~p, data=election_pps, pps="brewer")
+> dppswr <-svydesign(id=~1, weights=~wt, data=election_pps)
+> svytotal(~Bush+Kerry+Nader, dpps)
+         total      SE
+Bush  64518472 2447629
+Kerry 51202102 2450787
+Nader   478530  102420
+> svytotal(~Bush+Kerry+Nader, dppswr)
+         total      SE
+Bush  64518472 2671455
+Kerry 51202102 2679433
+Nader   478530  105303
+> 
+> ##subsets
+> svytotal(~Bush+Kerry+Nader, subset(dpps, Nader>0))
+         total      SE
+Bush  34944285 5399833
+Kerry 25581714 4028434
+Nader   478530  102420
+> 
+> ##multistage: should agree with STRS analysis
+> data(api)
+> dclus2<-svydesign(id = ~dnum + snum, fpc = ~fpc1 + fpc2, data = apiclus2)
+> dclus2pps<-svydesign(id = ~dnum + snum, fpc = ~I(40/fpc1) + I(pmin(1,5/fpc2)), data = apiclus2)
+> 
+> all.equal(svytotal(~sch.wide,dclus2), svytotal(~sch.wide,dclus2pps))
+[1] TRUE
+> all.equal(svymean(~sch.wide,dclus2), svymean(~sch.wide,dclus2pps))
+[1] TRUE
+> all.equal(svytotal(~enroll,dclus2), svytotal(~enroll,dclus2pps))
+[1] TRUE
+> 

@@ -5,12 +5,12 @@
 
 svydesign<-function(ids, probs = NULL, strata = NULL, variables = NULL, 
     fpc = NULL, data=NULL, nest = FALSE, check.strata = !nest, 
-    weights = NULL,...){
+    weights = NULL,pps=FALSE,...){
 	UseMethod("svydesign", data)
 	}
 
 svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
-                    data=NULL, nest=FALSE, check.strata=!nest,weights=NULL,...){
+                    data=NULL, nest=FALSE, check.strata=!nest,weights=NULL,pps=FALSE,...){
 
     ## less memory-hungry version for sparse tables
     interaction<-function (..., drop = TRUE) {
@@ -137,14 +137,23 @@ svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
         for(i in 2:N)
           strata[,i]<-interaction(strata[,min(i,NS)], ids[,i-1])
       }
-        
-      ## Finite population correction: specified per observation
-      ## Also incorporates design sample sizes formerly in nPSU
 
+    ## PPS: valid choices currently are FALSE and "brewer"
+    if (is.logical(pps) && pps) stop("'pps' must be FALSE or \"brewer\"")
+    if (is.character(pps)) {
+      if (is.na(pmatch(pps, "brewer")))
+        stop("'pps' must be FALSE or \"brewer\"")
+      else
+        pps<-TRUE
+    }
+    
+    ## Finite population correction: specified per observation
+    ## Also incorporates design sample sizes formerly in nPSU
+    
       if (!is.null(fpc) && !is.numeric(fpc) && !is.data.frame(fpc))
         stop("fpc must be a matrix or dataframe or NULL")
 
-      fpc<-as.fpc(fpc,strata, ids)
+      fpc<-as.fpc(fpc,strata, ids, pps=pps)
 
       ## if FPC specified, but no weights, use it for weights
     if (is.null(probs) && is.null(weights)){
@@ -174,6 +183,7 @@ svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
     rval$variables<-variables
     rval$fpc<-fpc
     rval$call<-sys.call(-1)
+    rval$pps<-pps
     class(rval)<-c("survey.design2","survey.design")
     rval
   }
@@ -181,21 +191,28 @@ svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
 onestrat<-function(x,cluster,nPSU,fpc, lonely.psu,stratum=NULL,stage=1,cal=cal){
   
   if (is.null(fpc))
-      f<-1
+      f<-rep(1,NROW(x))
   else{
       f<-ifelse(fpc==Inf, 1, (fpc-nPSU)/fpc)
   }
+
   if (nPSU>1)
       scale<-f*nPSU/(nPSU-1)
   else
       scale<-f
-  if (f<0.0000001)## self-representing stratum
+  if (all(f<0.0000001))## self-representing stratum
       return(matrix(0,NCOL(x),NCOL(x)))
 
+  scale<-scale[!duplicated(cluster)]
+  
   x<-rowsum(x,cluster)
   nsubset<-nrow(x)
-  if (nsubset<nPSU)
-      x<-rbind(x,matrix(0,ncol=ncol(x),nrow=nPSU-nrow(x)))
+  
+  if (nsubset<nPSU) {
+    ##can't be PPS, so scale must be a constant
+    x<-rbind(x,matrix(0,ncol=ncol(x),nrow=nPSU-nrow(x)))
+    scale<-rep(scale[1],NROW(x))
+  }
   if (lonely.psu!="adjust" || nsubset>1 ||
       (nPSU>1 & !getOption("survey.adjust.domain.lonely")))
       x<-sweep(x, 2, colMeans(x), "-")
@@ -207,12 +224,12 @@ onestrat<-function(x,cluster,nPSU,fpc, lonely.psu,stratum=NULL,stage=1,cal=cal){
     }
   
   if (nPSU>1){
-      return(crossprod(x)*scale)
+      return(crossprod(x*sqrt(scale)))
   } else {
-      rval<-switch(lonely.psu,
-                   certainty=scale*crossprod(x),
-                   remove=scale*crossprod(x),
-                   adjust=scale*crossprod(x),
+      rval<-switch(lonely.psu, 
+                   certainty=crossprod(x*sqrt(scale)),
+                   remove=crossprod(x*sqrt(scale)),
+                   adjust=crossprod(x*sqrt(scale)),
                    average=NA*crossprod(x),
                    fail= stop("Stratum (",stratum,") has only one PSU at stage ",stage),
                    stop("Can't handle lonely.psu=",lonely.psu)
@@ -225,7 +242,7 @@ onestrat<-function(x,cluster,nPSU,fpc, lonely.psu,stratum=NULL,stage=1,cal=cal){
 onestage<-function(x, strata, clusters, nPSU, fpc, lonely.psu=getOption("survey.lonely.psu"),stage=0, cal){
   stratvars<-tapply(1:NROW(x), list(factor(strata)), function(index){
     onestrat(x[index,,drop=FALSE], clusters[index],
-             nPSU[index][1], fpc[index][1],
+             nPSU[index][1], fpc[index], ##fpc[index][1], to allow pps(brewer)
              lonely.psu=lonely.psu,stratum=strata[index][1], stage=stage,cal=cal)
   })
   p<-NCOL(x)
@@ -319,7 +336,7 @@ multistage<-function(x, clusters,  stratas, nPSUs, fpcs,
 
 
 ## fpc not given are zero: full sampling.
-as.fpc<-function(df,strata,ids){
+as.fpc<-function(df,strata,ids,pps=FALSE){
 
   count<-function(x) length(unique(x))
   
@@ -344,27 +361,39 @@ as.fpc<-function(df,strata,ids){
   }
   
   if (ispopsize){
+    if(pps) stop("fpc must be specified as sampling fraction for PPS sampling")
     popsize<-fpc
   } else {
     popsize<-sampsize/(fpc)
   }
   if (any(popsize<sampsize)){
     toobig<-which(popsize<sampsize,arr.ind=TRUE)
-    cat("record",toobig[1,1],"stage",toobig[1,2],": popsize=",popsize[toobig[1,,drop=FALSE]]," sampsize=",sampsize[toobig[1,,drop=FALSE]],"\n")
+    cat("record",toobig[1,1],"stage",toobig[1,2],": popsize=",popsize[toobig[1,,drop=FALSE]],
+        " sampsize=", sampsize[toobig[1,,drop=FALSE]],"\n")
     stop("FPC implies >100% sampling in some strata")
   }
-  if (!ispopsize && any(popsize>1e10) ){
-    big<-which(popsize>1e10,arr.ind=TRUE)
+  if (!ispopsize && any(is.finite(popsize) & (popsize>1e10))){
+    big<-which(popsize>1e10 & is.finite(popsize),arr.ind=TRUE)
     warning("FPC implies population larger than ten billion (record",big[1,1]," stage ",big[1,2],")")
   }
-  ## check that fpc is constant within strata.
-  for(i in 1:ncol(popsize)){
-    diff<-by(popsize[,i], list(strata[,i]), count)
-    if (any(as.vector(diff)>1)){
-      j<-which(as.vector(diff)>1)[1]
-      warning("`fpc' varies within strata: stratum ",names(diff)[j], " at stage ",i)
+  if(!pps){
+    ## check that fpc is constant within strata.
+    for(i in 1:ncol(popsize)){
+      diff<-by(popsize[,i], list(strata[,i]), count)
+      if (any(as.vector(diff)>1)){
+        j<-which(as.vector(diff)>1)[1]
+        warning("`fpc' varies within strata: stratum ",names(diff)[j], " at stage ",i)
+      }
     }
-  }
+  } else{
+    ## check that fpc is constant with clusters
+     diff<-by(popsize[,i], list(ids[,i]), count)
+      if (any(as.vector(diff)>1)){
+        j<-which(as.vector(diff)>1)[1]
+        warning("`fpc' varies within cluster: cluster ",names(diff)[j], " at stage ",i)
+      }
+   }
+  
   
   rval<-list(popsize=popsize, sampsize=sampsize)
   class(rval)<-"survey_fpc"
@@ -503,10 +532,11 @@ as.svydesign2<-function(object){
   
 }
 
+is.pps<-function(x) if(is.null(x$pps)) FALSE else (x$pps!=FALSE)
     
 "[.survey.design2"<-function (x,i, ..., drop=TRUE){
   if (!missing(i)){ 
-      if (is.calibrated(x) || !drop){
+      if (is.calibrated(x) || is.pps(x) || !drop){
           ## Set weights to zero: no memory saving possible
           ## There should be an easier way to complement a subscript..
           if (is.logical(i))

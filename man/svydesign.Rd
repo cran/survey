@@ -12,12 +12,12 @@
 }
 \usage{
 svydesign(ids, probs=NULL, strata = NULL, variables = NULL, fpc=NULL,
-data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,...)
+data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,pps=FALSE,...)
 \method{svydesign}{imputationList}(ids, probs = NULL, strata = NULL, variables = NULL, 
-    fpc = NULL, data, nest = FALSE, check.strata = !nest, weights = NULL, 
+    fpc = NULL, data, nest = FALSE, check.strata = !nest, weights = NULL, pps=FALSE,
     ...)
 \method{svydesign}{character}(ids, probs = NULL, strata = NULL, variables = NULL, 
-    fpc = NULL, data, nest = FALSE, check.strata = !nest, weights = NULL, 
+    fpc = NULL, data, nest = FALSE, check.strata = !nest, weights = NULL, pps=FALSE,
     dbtype = "SQLite", dbname, ...)
 }
 %- maybe also `usage' for other objects documented here.
@@ -38,6 +38,9 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,...)
     within strata}
   \item{check.strata}{If \code{TRUE}, check that clusters are nested in
     strata}.
+  \item{pps}{\code{"brewer"} to use Brewer's approximatio for PPS
+    sampling without replacement.  \code{fpc} must then be specified as
+    sampling fractions, not as population sizes}
   \item{dbtype}{name of database driver to pass to \code{dbDriver}}
   \item{dbname}{name of database (eg file name for SQLite)}
   \item{\dots}{for future expansion}
@@ -68,7 +71,8 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,...)
    population that has been sampled. In either case the relevant
    population size is the sampling units.  That is, sampling 100 units
    from a population stratum of size 500 can be specified as 500 or as
-   100/500=0.2.
+   100/500=0.2.  The exception is when \code{pps="brewer"}, where the
+   sampling probability (which will be different for each PSU) must be used.
    
    If population sizes are specified but not sampling probabilities or
    weights, the sampling probabilities will be computed from the

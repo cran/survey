@@ -9,13 +9,15 @@ number of clusters available in the population.  It is called by
 \code{svydesign}, not directly by the user.
 }
 \usage{
-as.fpc(df, strata, ids)
+as.fpc(df, strata, ids,pps=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{df}{A data frame or matrix with population size information}
   \item{strata}{A data frame giving strata at each stage}
   \item{ids}{A data frame giving cluster ids at each stage}
+  \item{pps}{if \code{TRUE}, fpc information may vary within a stratum
+    and must be specified as a proportion rather than a population sizes}
 }
 \details{
   The population size information may be specified as the number of

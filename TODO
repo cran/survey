@@ -1,16 +1,29 @@
 Possible additional developments in no particular order
 
- - options to handle quantiles in rounded continuous data like SUDAAN does.
+ - options to handle quantiles in rounded continuous data like SUDAAN
+   does (if I can work out what it does).
 
  - Score-based confidence intervals for glms
 
+ - Rao-Scott type tests for glms.
+
  - More general HT estimator for sampling without replacement
  	- using joint inclusion probabilities
-	- using population first-order inclusion probabilities
+	- using population first-order inclusion probabilities and Hartley-Rao approximation
 	- using Overton's approximation and sample inclusion probabilities
+        [done] using Berger's approximation and sample inclusion probabilities.
 
  - GEE. 
 
  - Parametric survival models (you can do these with svymle)
 
  - linear mixed models?
+
+ - standard errors for survival curves, particularly in two-phase studies
+
+ - an interface to twophase and calibrate for IPTW estimation.
+
+ - Replicate weights for two-phase designs and for multistage designs
+   with large sampling fraction (Fukuoka's BBE)
+
+ - parallel processing for replicate weights?

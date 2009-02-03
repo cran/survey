@@ -8,7 +8,7 @@ export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        sparseCells, neighbours, joinCells, compressWeights, make.formula,
        svycontrast,svyCprod, svyrecvar, grake, svrVar, pchisqsum,
        make.calfun, cal.linear, cal.raking, cal.logit, svycdf, svykappa, svykm,
-       svyolr,svycoplot,svyloglin,make.panel.svysmooth,dotchart)
+       svyolr,svycoplot,svyloglin,make.panel.svysmooth,dotchart,subbootweights)
 
 S3method(svyloglin,survey.design)
 S3method(svyloglin,svyrep.design)

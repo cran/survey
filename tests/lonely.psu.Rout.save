@@ -1,6 +1,6 @@
 
-R version 2.6.0 Under development (unstable) (2007-06-27 r42086)
-Copyright (C) 2007 The R Foundation for Statistical Computing
+R version 2.7.2 (2008-08-25)
+Copyright (C) 2008 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -18,6 +18,14 @@ Type 'q()' to quit R.
 > 
 > ## lonely PSUs by design
 > library(survey)
+
+Attaching package: 'survey'
+
+
+	The following object(s) are masked from package:graphics :
+
+	 dotchart 
+
 > data(api)
 > ## not certainty PSUs by fpc
 > ds<-svydesign(id = ~1, weights = ~pw, strata = ~dnum, data = apiclus1)
@@ -43,7 +51,7 @@ Data variables:
 > 
 > options(survey.lonely.psu="fail")
 > try(svymean(~api00,ds))
-Error in switch(lonely.psu, certainty = scale * crossprod(x), remove = scale *  : 
+Error in switch(lonely.psu, certainty = crossprod(x * sqrt(scale)), remove = crossprod(x *  : 
   Stratum (413) has only one PSU at stage 1
 > try(svymean(~api00, as.svrepdesign(ds)))
 Error in jknweights(design$strata[, 1], design$cluster[, 1], fpc = fpc,  : 

@@ -44,6 +44,13 @@ one.stage=getOption("survey.ultimate.cluster"))
   
   If \code{one.stage} is a positive integer it specifies the number of
   stages of sampling to use in the recursive estimator.
+
+  If \code{pps="brewer"}, standard errors are estimated using Brewer's
+  approximation for PPS without replacement, option 2 of those described
+  by Berger (2004). The \code{fpc} argument must then be specified in
+  terms of sampling fractions, not population sizes (or omitted, but
+  then the \code{pps} argument would have no effect and the
+  with-replacement standard errors would be correct).
 }
 \value{
    A covariance matrix
@@ -54,7 +61,10 @@ one.stage=getOption("survey.ultimate.cluster"))
   
   Binder, David A. (1983).  On the variances of asymptotically normal
   estimators from complex surveys.  International Statistical Review,
-  51, 279-292. 
+  51, 279-292.
+
+  Brewer KRW (2002) Combined Survey Sampling Inference (Weighing Basu's
+  Elephants)  [Chapter 9]
 
   Cochran, W. (1977)  Sampling Techniques. 3rd edition. Wiley.
   
@@ -70,11 +80,9 @@ one.stage=getOption("survey.ultimate.cluster"))
   at least, sampling probabilities for units not included in the sample),
   information not generally available.
 
-  For a PPS survey one option is probably to treat the survey as 
-  sampled with replacement by omitting the fpc argument.  This appears
-  to be the most widely used solution with other software. Another
-  option is to treat the survey as if it were stratified, grouping
-  together units with similar sampling probabilities.
+  The quality of Brewer's approximation is excellent in Berger's
+  simulations, but the accuracy may vary depending on the sampling
+  algorithm used.
 }
 
 

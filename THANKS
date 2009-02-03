@@ -28,9 +28,11 @@ requests from users, including:
   Alan Zaslavksy
 and from dicussions with Chris Wild and Alastair Scott. 
 
-Patrick Aboyoun did the S-PLUS port.
+Some work on the package has been funded by Fondation Leducq through a
+grant to the LINAT collaboration and by the Marsden Fund through a
+grant to the University of Auckland.
+
+Patrick Aboyoun did the S-PLUS port of version 3.6-8
 
 The svyolr() code is largely ripped from the MASS package of Venables & Ripley.
 
-There are probably others who should be listed but whose names have been
-lost due to poor record-keeping. 

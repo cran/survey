@@ -1,7 +1,9 @@
 
 svydesign.character<-function (ids, probs = NULL, strata = NULL, variables = NULL, 
-    fpc = NULL, data, nest = FALSE, check.strata = !nest, weights = NULL, dbtype="SQLite",dbname,
-    ...) 
+                               fpc = NULL, data, nest = FALSE, check.strata = !nest,
+                               weights = NULL,pps=FALSE,
+                               dbtype="SQLite", dbname,
+                               ...) 
 {
 
   if (dbtype == "ODBC"){

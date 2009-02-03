@@ -33,6 +33,8 @@ nwts.R:	Compare results from twophase() to published two-phase
 nwts-cch.R: Compare results from twophase() to case-cohort analyses in
         survival package.
 
+pps.R: Brewer's approximation for pps without replacement
+
 quantile.R: quantile estimation on a lognormal sample
 
 rakecheck.R: check that raking by iterative post-stratification agrees with

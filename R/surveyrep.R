@@ -297,7 +297,7 @@ brrweights<-function(strata,psu, match=NULL, small=c("fail","split","merge"),
 ## Designs with replication weights rather than survey structure.
 ##
 
-as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","Fay"),
+as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","subbootstrap","Fay"),
                           fay.rho=0,...,compress=TRUE){
 
   type<-match.arg(type)
@@ -389,6 +389,16 @@ as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","Fa
     else
       r<-bootweights(design$strata,design$cluster[,1], fpc=fpc,
                      fpctype=fpctype, compress=compress,...)
+    pweights<-1/design$prob
+    repweights<-r$repweights
+    scale<-r$scale
+    rscales<-r$rscales
+  }else if (type=="subbootstrap"){
+    ##bootstrap
+    if (inherits(design,"survey.design2"))
+      r<-subbootweights(design$strata[,1],design$cluster[,1],compress=compress,...)
+    else
+      r<-subbootweights(design$strata,design$cluster[,1],compress=compress,...)
     pweights<-1/design$prob
     repweights<-r$repweights
     scale<-r$scale

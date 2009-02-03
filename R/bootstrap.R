@@ -1,4 +1,10 @@
 
+subbootstratum<-function(psu,replicates){
+ upsu<-sample(unique(psu))
+ replicate(replicates,
+           table(factor(sample(upsu, length(upsu)-1,replace=TRUE),
+                        levels=unique(psu))))
+}
 
 bootstratum<-function(psu, popsize, replicates){
   upsu<-sample(unique(psu))
@@ -62,5 +68,35 @@ bootweights<-function(strata, psu, replicates=50, fpc=NULL,
   }
 
   list(repweights=rw, scale=psu.per.strata/((psu.per.strata-1)*(replicates-1)),
+       rscales=rep(1,replicates))
+}
+
+subbootweights<-function(strata, psu, replicates=50,
+                      compress=TRUE){
+
+
+  index<-match(psu,psu[!duplicated(psu)])
+  upsu<-unique(psu)
+
+  strata<-as.character(strata)
+  weights<-matrix(nrow=length(upsu),ncol=replicates)
+  ustrata<-strata[!duplicated(psu)]
+  
+  for(s in unique(ustrata)){
+    this.stratum<-ustrata==s
+    npsu<-length(unique(upsu[this.stratum]))
+
+    weights[this.stratum,]<-bootstratum(upsu[this.stratum],NULL,replicates)
+    
+  }
+
+  if (compress){
+    rw<-list(weights=weights,index=index)
+    class(rw)<-"repweights_compressed"
+  } else {
+    rw<-weights[index,]
+  }
+
+  list(repweights=rw, scale=1/(replicates-1),
        rscales=rep(1,replicates))
 }

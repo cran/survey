@@ -1,3 +1,12 @@
+3.11   as.svrepdesign now has type="subbootweights" for
+       Rao and Wu n-1 bootstrap
+
+       An approximation for PPS without replacement due to Brewer 
+       is available in svydesign()
+
+       svydesign() no longer warns if some fpc are exactly zero, but
+       still warns if they are suspiciously large or small
+
 3.10-1 svycoplot can now pass ... arguments to xyplot(), not just to panel.
 
        svycontrast() has a 'default' method that assumes only a coef() 
