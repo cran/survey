@@ -40,6 +40,11 @@ print.svycdf<-function(x,...){
 	invisible(x)
 	}
 
-plot.svycdf<-function(x,...){
-	for(i in 1:length(x)) plot(x[[i]],xlab=names(x)[i],...)
-	}
+plot.svycdf<-function(x,xlab=NULL,...){
+  if(is.null(xlab)) 
+    xlab<-names(x)
+  else if (length(xlab)==1)
+    xlab<-rep(xlab,length(names(x)))
+  
+  for (i in 1:length(x)) plot(x[[i]], xlab =xlab[i], ...)
+}

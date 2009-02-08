@@ -69,3 +69,7 @@ postStratify(des,~w,popw)->dps
 dcal<-calibrate(des,~factor(w), pop=c(10000,8000))
 
 all.equal(SE(svymean(~x,dcal)),SE(svymean(~x,dps)))
+
+## missing data in calibrated design
+dps$variables$z[1]<-NA
+summary(svyglm(y~z+x,design=dps,family=quasibinomial))

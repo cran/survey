@@ -622,11 +622,14 @@ weights.survey.design<-function(object,...){
 
 svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="linear",
                                                    interval.type=c("probability","quantile"),f=1,
-                                                   return.replicates=FALSE,...){
+                                                   return.replicates=FALSE,
+                                                   ties=c("discrete","rounded"),...){
 
   if (!exists(".Generic",inherits=FALSE))
     .Deprecated("svyquantile")
+
   
+  ties<-match.arg(ties)
   interval<-match.arg(interval.type)
   if (design$type %in% c("JK1","JKn") && interval=="quantile")
     warning("Jackknife replicate weights may not give valid standard errors for quantiles")
@@ -679,32 +682,62 @@ svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="li
       }
     } else {
       ## interval on probability scale, backtransformed.
-      computeQuantiles<-function(xx){
-        oo<-order(xx)
-        w<-weights(design,"sampling")
-        cum.w<- cumsum(w[oo])/sum(w)
-        Qf<-approxfun(cum.w,xx[oo],method=method,f=f,
-                      yleft=min(xx),yright=max(xx),
-                      ties=max)
-        
-        point.estimates<-Qf(quantiles)
-        if(length(quantiles)==1)
-          estfun<-as.numeric(xx<point.estimates)
-        else
-          estfun<-0+outer(xx,point.estimates,"<")
-        est<-svymean(estfun,design, return.replicates=return.replicates)
-        if (return.replicates)
-          q.estimates<-matrix(Qf(est$replicates),nrow=NROW(est$replicates))
-        ci<-matrix(Qf(c(coef(est)+2*SE(est), coef(est)-2*SE(est))),ncol=2)
-        variances<-((ci[,1]-ci[,2])/4)^2
-        rval<-list(quantiles=point.estimates,
-                   variances=variances)
-        if (return.replicates)
-          rval<-c(rval, list(replicates=q.estimates))
-        rval
+      if (ties=="discrete"){
+        computeQuantiles<-function(xx){
+          oo<-order(xx)
+          w<-weights(design,"sampling")
+          cum.w<- cumsum(w[oo])/sum(w)
+          Qf<-approxfun(cum.w,xx[oo],method=method,f=f,
+                        yleft=min(xx),yright=max(xx),
+                        ties=max)
+          
+          point.estimates<-Qf(quantiles)
+          if(length(quantiles)==1)
+            estfun<-as.numeric(xx<point.estimates)
+          else
+            estfun<-0+outer(xx,point.estimates,"<")
+          est<-svymean(estfun,design, return.replicates=return.replicates)
+          if (return.replicates)
+            q.estimates<-matrix(Qf(est$replicates),nrow=NROW(est$replicates))
+          ci<-matrix(Qf(c(coef(est)+2*SE(est), coef(est)-2*SE(est))),ncol=2)
+          variances<-((ci[,1]-ci[,2])/4)^2
+          rval<-list(quantiles=point.estimates,
+                     variances=variances)
+          if (return.replicates)
+            rval<-c(rval, list(replicates=q.estimates))
+          rval
+        }
+      } else {
+        ## ties=rounded
+        computeQuantiles<-function(xx){
+          w<-weights(design,"sampling")
+          ww<-rowsum(w,xx,reorder=TRUE)
+          uxx<-sort(unique(xx))
+          cum.w<- cumsum(ww)/sum(ww)
+          Qf<-approxfun(cum.w,uxx,method=method,f=f,
+                        yleft=min(xx),yright=max(xx),
+                        ties=max)
+          
+          point.estimates<-Qf(quantiles)
+          if(length(quantiles)==1)
+            estfun<-as.numeric(xx<point.estimates)
+          else
+            estfun<-0+outer(xx,point.estimates,"<")
+          est<-svymean(estfun, design, return.replicates=return.replicates)
+          if (return.replicates)
+            q.estimates<-matrix(Qf(est$replicates),nrow=NROW(est$replicates))
+          ci<-matrix(Qf(c(coef(est)+2*SE(est), coef(est)-2*SE(est))),ncol=2)
+          variances<-((ci[,1]-ci[,2])/4)^2
+          rval<-list(quantiles=point.estimates,
+                     variances=variances)
+          if (return.replicates)
+            rval<-c(rval, list(replicates=q.estimates))
+          rval
+        }
+ 
       }
     }
-    
+  
     if (!is.null(dim(x)))
       results<-apply(x,2,computeQuantiles)
     else

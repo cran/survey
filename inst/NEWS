@@ -1,3 +1,15 @@
+3.11-1 svyglm() [and svyratio()] gave an error for post-stratified 
+       designs with missing data (Shelby Chartkoff)
+
+       svycoxph() gives a clearer error message for negative weights.
+
+       svyquantile() now has a 'betaWald' option, as proposed  
+       by Korn & Graubard (1998), and has an option for handling 
+       ties that appears similar to (some versions of) SUDAAN
+       (for Melanie Edwards)
+
+       plot.svycdf() has an xlab argument to override the default labels
+
 3.11   as.svrepdesign now has type="subbootweights" for
        Rao and Wu n-1 bootstrap
 

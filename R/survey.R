@@ -696,8 +696,8 @@ svyquantile<-function(x,design,quantiles,...) UseMethod("svyquantile", design)
 
 svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
                                     ci=FALSE, method="linear",f=1,
-                                    interval.type=c("Wald","score"),
-                                    na.rm=FALSE,se=ci, ...){
+                                    interval.type=c("Wald","score","betaWald"),
+                                    na.rm=FALSE,se=ci, ties=c("discrete","rounded"), ...){
     if (inherits(x,"formula"))
       x<-model.frame(x ,model.frame(design), na.action=na.pass)
     else if(typeof(x) %in% c("expression","symbol"))
@@ -721,16 +721,27 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
                      yleft=min(xx),yright=max(xx)) 
       cdf(p)
     }
-      
-    computeScoreCI<-function(xx,p){
     
-      U<-function(theta){ ((xx>theta)-(1-p))}
+    computeQuantilesRounded<-function(xx,p=quantiles){
+      ww<-rowsum(w,xx,reorder=TRUE)
+      xx<-sort(unique(xx))
+      cum.w <- cumsum(ww)/sum(ww)
+      cdf <- approxfun(cum.w, xx, method = method, f = f, 
+                       yleft = min(xx), yright = max(xx))
+      cdf(p)
+    }
       
+    
+    
+    computeScoreCI<-function(xx,p){
+      
+      U<-function(theta){ ((xx>theta)-(1-p))}
+        
       scoretest<-function(theta,qlimit){
         umean<-svymean(U(theta),design)
         umean/sqrt(attr(umean,"var"))-qlimit
       }
-
+      
       iqr<-IQR(xx)
       lower<-min(xx)+iqr/100
       upper<-max(xx)-iqr/100
@@ -740,30 +751,70 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
         uniroot(scoretest,interval=c(lower,upper),
                 qlimit=qnorm(alpha/2,lower.tail=TRUE),tol=tol)$root)
     }
-
-    computeWaldCI<-function(xx,p){
-        theta0<-computeQuantiles(xx,p)
-        U<- ((xx>theta0)-(1-p))
-        wtest<-svymean(U,design)
-        p.up<-p+qnorm(alpha/2,lower.tail=FALSE)*SE(wtest)
-        p.low<-p+qnorm(alpha/2,lower.tail=TRUE)*SE(wtest)
-        oo<-order(xx)
-        cum.w<-cumsum(w[oo])/sum(w)
-        approx(cum.w,xx[oo],xout=c(p.low,p.up), method=method,f=f,
-                     yleft=min(xx),yright=max(xx))$y 
-
+    
+    computePCI<-function(se,alpha,p){
+      if (interval.type=="Wald"){
+        p.up<-p+qnorm(alpha/2,lower.tail=FALSE)*se
+        p.low<-p+qnorm(alpha/2,lower.tail=TRUE)*se
+        c(p.low,p.up)
+      } else if (interval.type=="betaWald"){
+        n.eff <- (p*(1-p))/(se^2)
+        p.up<-qbeta(1-alpha/2, n.eff*p,n.eff*(1-p)+1)
+        p.low<-qbeta(alpha/2,  n.eff*p+1,n.eff*(1-p))
+        c(p.low,p.up)
+      }
+      
     }
     
+    computeWaldCI<-function(xx,p){
+      theta0<-computeQuantiles(xx,p)
+      U<- ((xx>theta0)-(1-p))
+      wtest<-svymean(U,design)
+      p.ci<-computePCI(SE(wtest),alpha,p)
+      p.low<-p.ci[1]
+      p.up<-p.ci[2]
+      oo<-order(xx)
+      cum.w<-cumsum(w[oo])/sum(w)
+      approx(cum.w,xx[oo],xout=c(p.low,p.up), method=method,f=f,
+             yleft=min(xx),yright=max(xx))$y 
+      
+    }
+    
+    computeWaldCIRounded<-function(xx,p){
+        theta0<-computeQuantilesRounded(xx,p)
+        U<- ((xx>theta0)-(1-p))
+        ww<-rowsum(w,xx, reorder=TRUE)
+        uxx <- sort(unique(xx))
+        wtest<-svymean(U,design)
+        p.ci<-computePCI(SE(wtest),alpha,p)
+        p.low<-p.ci[1]
+        p.up<-p.ci[2]
+        oo<-order(xx)
+        cum.w<-cumsum(ww)/sum(ww)
+        approx(cum.w,uxx,xout=c(p.low,p.up), method=method,f=f,
+               yleft=min(xx),yright=max(xx))$y 
+        
+      }
+
+    ties<-match.arg(ties)
+    computeQ<-switch(ties, discrete=computeQuantiles,rounded=computeQuantilesRounded)
+    
     if (!is.null(dim(x)))
-      rval<-t(matrix(apply(x,2,computeQuantiles),nrow=length(quantiles),
-                   dimnames=list(as.character(round(quantiles,2)),colnames(x))))
+        rval<-t(matrix(apply(x,2,computeQ),nrow=length(quantiles),
+                       dimnames=list(as.character(round(quantiles,2)),colnames(x))))
     else
-      rval<-computeQuantiles(x)
-
+      rval<-computeQ(x)
+    
     if (!ci & !se) return(rval)
-
+    
     interval.type<-match.arg(interval.type)
-    computeCI<-switch(interval.type, score=computeScoreCI, Wald=computeWaldCI)
+    
+    computeCI<-switch(paste(interval.type,ties,sep="."), score.discrete=computeScoreCI,
+                            score.rounded=stop("ties=\"rounded\" not available with interval.type=\"score\""),
+                            Wald.rounded=computeWaldCIRounded,
+                            betaWald.rounded=computeWaldCIRounded,
+                            Wald.discrete=computeWaldCI,
+                            betaWald.discrete=computeWaldCI)
     
     if (!is.null(dim(x)))
       cis<-array(apply(x,2,function(xx) sapply(quantiles,function(qq) computeCI(xx,qq))),
@@ -807,7 +858,9 @@ coef.svyquantile<-function(object,...){
     names(rval)<-rownames(object$quantiles)
   else if (nrow(object$quantiles)==1)
     names(rval)<-colnames(object$quantiles)
-  else names(rval)<-t(outer(colnames(object$quantiles),rownames(object$quantiles),paste,sep=":"))
+  else names(rval)<-t(outer(colnames(object$quantiles),
+                            rownames(object$quantiles),
+                            paste,sep=":"))
   rval
 }
 
@@ -987,6 +1040,8 @@ svycoxph.survey.design<-function(formula,design,subset=NULL,...){
     subset<-eval(subset, model.frame(design),parent.frame())
     if (!is.null(subset))
         design<-design[subset,]
+
+    if(any(weights(design)<0)) stop("weights must be non-negative")
     
     require(survival) || stop("Needs the survival package")
     data<-model.frame(design)
@@ -1002,6 +1057,7 @@ svycoxph.survey.design<-function(formula,design,subset=NULL,...){
     g[[1]]<-quote(coxph)
     g$data<-quote(data)
     g$subset<-quote(.survey.prob.weights>0)
+    g$model <- TRUE
     
     ##need to rescale weights for stability
     data$.survey.prob.weights<-(1/design$prob)/sum(1/design$prob)
@@ -1162,6 +1218,19 @@ svy.varcoef<-function(glm.object,design){
     if (glm.object$rank<NCOL(estfun)){
       estfun<-estfun[,glm.object$qr$pivot[1:glm.object$rank]]
     }
+    naa<-glm.object$na.action
+    ## the design may still have rows with weight zero for missing values
+    ## if there are weights or calibration. model.matrix will have removed them
+    if (length(naa) && (NROW(estfun)!=NROW(design$cluster))){
+      if ((length(naa)+NROW(estfun))!=NROW(design$cluster))
+        stop("length mismatch: this can't happen.")
+      n<-NROW(design$cluster)        
+      inx <- (1:n)[-naa]
+      ee <- matrix(0,nrow=n,ncol=NCOL(estfun))
+      ee[inx,]<-estfun
+      estfun<-ee
+    }
+
     if (inherits(design,"survey.design2"))
       svyrecvar(estfun%*%Ainv,design$cluster,design$strata,design$fpc,postStrata=design$postStrata)
     else if (inherits(design, "twophase"))
@@ -1180,7 +1249,15 @@ residuals.svyglm<-function(object,type = c("deviance", "pearson", "working",
     	   wts <- object$prior.weights
            pwts<- 1/object$survey.design$prob
            pwts<- pwts/mean(pwts)
-	   r<-(y - mu) * sqrt(wts/pwts)/(sqrt(object$family$variance(mu)))
+           ## missing values in calibrated/post-stratified designs
+           ## the rows will still be in the design object but not in the model
+           if (length(naa<-object$na.action) && (length(pwts)!=length(wts))){
+             if(length(naa)+length(wts) != length(pwts))
+               stop("length mismatch: this can't happen.")
+             inx<-(1:length(pwts))[-naa]
+           } else inx<-1:length(pwts)
+           r<-numeric(length(pwts))
+	   r[inx]<-(y - mu) * sqrt(wts/pwts[inx])/(sqrt(object$family$variance(mu)))
 	   if (is.null(object$na.action)) 
         	r
     	   else 
@@ -1669,7 +1746,7 @@ summary.svymle<-function(object,stderr=c("robust","model"),...){
     print(object$design)
 }
 
-model.frame.survey.design<-function(formula,...){
+model.frame.survey.design<-function(formula,...,drop=TRUE){
   formula$variables
 }
 model.frame.svyrep.design<-function(formula,...){

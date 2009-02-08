@@ -1,6 +1,7 @@
-Possible additional developments in no particular order
+Possible additional developments in no particular order:
+---------------------------------------------------------
 
- - options to handle quantiles in rounded continuous data like SUDAAN
+ [done?] options to handle quantiles in rounded continuous data like SUDAAN
    does (if I can work out what it does).
 
  - Score-based confidence intervals for glms
@@ -27,3 +28,7 @@ Possible additional developments in no particular order
    with large sampling fraction (Fukuoka's BBE)
 
  - parallel processing for replicate weights?
+
+ - Gini index and other summaries of concentration and inequality.
+
+ - Krista Giles' respondent-driven sampling estimators

@@ -11,11 +11,12 @@ Compute quantiles for data from complex surveys.
 }
 \usage{
 \method{svyquantile}{survey.design}(x, design, quantiles, alpha=0.05,
- ci=FALSE, method = "linear", f = 1, interval.type=c("Wald","score"),
- na.rm=FALSE,se=ci,...)
+ ci=FALSE, method = "linear", f = 1,
+ interval.type=c("Wald","score","betaWald"), na.rm=FALSE,se=ci,
+ ties=c("discrete","rounded"),...)
 \method{svyquantile}{svyrep.design}(x, design, quantiles,
  method ="linear", interval.type=c("probability","quantile"), f = 1,
- return.replicates=FALSE,...)
+ return.replicates=FALSE, ties=c("discrete","rounded"),...)
 \method{SE}{svyquantile}(object,...)
 }
 %- maybe also `usage' for other objects documented here.
@@ -29,6 +30,7 @@ Compute quantiles for data from complex surveys.
   \item{se}{Compute standard errors from the confidence interval length?}
   \item{alpha}{Level for confidence interval}
   \item{interval.type}{See Details below}
+  \item{ties}{See Details below}
   \item{return.replicates}{Return the replicate means?}
   \item{na.rm}{Remove \code{NA}s?}
   \item{...}{arguments for future expansion}
@@ -37,14 +39,27 @@ Compute quantiles for data from complex surveys.
 \details{
   Interval estimation for quantiles is complicated, because the
   influence function is not continuous.  Linearisation cannot be used,
-  and only some replication weight designs give valid results.
+  and only some replicate-weight designs give valid results.
   
   For \code{survey.design} objects the computation is controlled by
   \code{interval.type}. If \code{"Wald"}, a 95\% Wald confidence
   interval is constructed for the proportion below the estimated
   quantile. The inverse of the estimated CDF is used to map this to a
   confidence interval for the quantile. This is the method of
-  Woodruff (1952).
+  Woodruff (1952). For \code{"betaWald"} the same procedure is used, but
+  the confidence interval for the proportion is computed using the exact
+  binomial cdf with an effective sample size proposed by Korn & Graubard
+  (1998).
+
+  The definition of the CDF and thus of the quantiles is ambiguous in
+  the presence of ties.  With \code{ties="discrete"} the data are
+  treated as genuinely discrete, so the CDF has vertical steps at tied
+  observations. With \code{ties="rounded"} all the weights for tied
+  observations are summed and the CDF interpolates linearly between
+  distinct observed values, and so is a continuous function.  Combining
+  \code{interval.type="betaWald"} and \code{ties="discrete"} is (close
+  to) the proposal of Shah and Vaish(2006) and appears to agree fairly
+  closely with SUDAAN.
   
   If \code{interval.type="score"} we use a method described by Binder
   (1991) and due originally to Francisco and Fuller (1986), which
@@ -73,15 +88,6 @@ Compute quantiles for data from complex surveys.
   returns an object of class \code{svyrepstat}.
 }
 
-\note{
-By default, \code{svyquantile} interpolates between the two nearest
-observed values to obtain a quantile. This is the almost universal practice outside
-survey statistics, but  software for survey analysis often does not
-interpolate. Interpolation is discussed in the help for
-\code{\link{quantile}}; \code{svyquantile} uses type 4 of the 9 methods
-described there. For type 1 quantiles, the inverse of the weighted right-continuous
-empirical cdf, specify \code{method="constant"} and \code{f=0}.
-  }
 
 \author{Thomas Lumley}
 
@@ -95,12 +101,20 @@ empirical cdf, specify \code{method="constant"} and \code{f=0}.
 
   Dorfman A, Valliant R (1993) Quantile variance estimators in complex
   surveys. Proceedings of the ASA Survey Research Methods Section. 1993: 866-871
+
+  Korn EL, Graubard BI. (1998) Confidence Intervals For Proportions With
+  Small Expected Number of Positive Counts Estimated From Survey
+  Data. Survey Methodology 23:193-201.
   
   Francisco CA, Fuller WA (1986) Estimation of the distribution
   function with a complex survey. Technical Report, Iowa State
   University.
   
-  Shao J, Tu D (1995) \emph{The Jackknife and Bootstrap}. Springer.  
+  Shao J, Tu D (1995) \emph{The Jackknife and Bootstrap}. Springer.
+
+  Shah BV, Vaish AK (2006) Confidence Intervals for Quantile Estimation
+  from Complex Survey Data. Proceedings of the Section on Survey
+  Research Methods. 
   
   Woodruff RS (1952) Confidence intervals for medians and other
   position measures. JASA 57, 622-627.  

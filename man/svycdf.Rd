@@ -12,7 +12,7 @@ any interpolation: the result is a right-continuous step function.
 \usage{
 svycdf(formula, design, na.rm = TRUE,...)
 \method{print}{svycdf}(x,...)
-\method{plot}{svycdf}(x,...)
+\method{plot}{svycdf}(x,xlab=NULL,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -21,6 +21,7 @@ svycdf(formula, design, na.rm = TRUE,...)
   \item{na.rm}{remove missing data (case-wise deletion)?}
   \item{...}{other arguments to \code{\link{plot.stepfun}}}
   \item{x}{object of class \code{svycdf}}
+  \item{xlab}{a vector of x-axis labels or \code{NULL} for the default labels}
 }
 
 \value{

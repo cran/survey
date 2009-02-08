@@ -182,3 +182,26 @@ api.stu 3190038 29566
 > all.equal(SE(svymean(~x,dcal)),SE(svymean(~x,dps)))
 [1] TRUE
 > 
+> ## missing data in calibrated design
+> dps$variables$z[1]<-NA
+> summary(svyglm(y~z+x,design=dps,family=quasibinomial))
+
+Call:
+svyglm(y ~ z + x, design = dps, family = quasibinomial)
+
+Survey design:
+postStratify(des, ~w, popw)
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  -0.1203     0.3380  -0.356    0.722    
+z             6.2118     0.6451   9.630   <2e-16 ***
+x             2.2602     0.2514   8.992   <2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+(Dispersion parameter for quasibinomial family taken to be 1.919938)
+
+Number of Fisher Scoring iterations: 9
+
+> 

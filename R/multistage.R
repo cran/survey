@@ -748,11 +748,19 @@ svyratio.survey.design2<-function(numerator=formula, denominator, design, separa
 
     all<-cbind(numerator,denominator)
     nas<-!complete.cases(all)
-    if (na.rm==TRUE){
-        design<-design[!nas,]
+    if ((na.rm==TRUE) && any(nas)){
+      design<-design[!nas,]
+      if (NROW(design$cluster) == NROW(all)){
+        ## subset by zero weights
+        all[nas,]<-1
+        numerator[nas,]<-0
+        denominator[nas,]<-1
+      } else {
+        ## subset by actually dropping rows
         all<-all[!nas,,drop=FALSE]
         numerator<-numerator[!nas,,drop=FALSE]
         denominator<-denominator[!nas,,drop=FALSE]
+      }
     }
     allstats<-svytotal(all,design) 
     rval<-list(ratio=outer(allstats[1:nn],allstats[nn+1:nd],"/"))

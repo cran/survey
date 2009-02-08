@@ -5,10 +5,6 @@ porting.to.S            Notes on porting to S-PLUS
 ucla-examples.pdf       R versions of examples from the UCLA Academic 
                         Technology Services web site on survey analysis
 
-survey-vanderbilt.pdf   Slides from a talk at the Department of Biostatistics,
-                        Vanderbilt University, 2005/2/16. Describes 
-                        version 2.8-x.
-
 twostage.pdf            Analysis examples for two-stage sampling, 
 			showing agreement with SUDAAN. The comparisons with
                         Stata are with version 8; version 9 can do multistage
