@@ -1,11 +1,11 @@
 Package: survey
 Title: analysis of complex survey samples
 Description: Summary statistics, generalised linear models, Cox models, loglinear models, and general maximum pseudolikelihood estimation for multistage stratified, cluster-sampled, unequally weighted survey samples. Variances by Taylor series linearisation or replicate weights. Post-stratification, calibration, and raking. Two-phase designs. Graphics. 
-Version: 3.11-1
+Version: 3.11-2
 Author: Thomas Lumley
 Maintainer: Thomas Lumley <tlumley@u.washington.edu>
 License: GPL-2 | GPL-3
 Depends: R (>= 2.2.0)
 Suggests: survival, MASS, KernSmooth, hexbin, mitools, lattice, RSQLite, RODBC, quantreg, splines
 URL: http://faculty.washington.edu/tlumley/survey/
-Packaged: Sun Feb  8 10:31:13 2009; tlumley
+Packaged: Tue Feb 24 10:52:07 2009; tlumley

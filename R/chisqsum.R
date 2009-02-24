@@ -75,7 +75,7 @@ saddle<-function(x,lambda){
   kprime0<-function(zeta) sapply(zeta, function(zz) sum(lambda/(1-2*zz*lambda)))
   kpprime0<-function(zeta) 2*sum(lambda^2/(1-2*zeta*lambda)^2)
   n<-length(lambda)
-  if (x>1.2*sum(lambda))
+  if (x>1.05*sum(lambda))
     hatzeta<-uniroot(function(zeta) kprime0(zeta)-x,
                      lower=-0.01,upper=1/2-1/(3*x),tol=1e-8)$root
   else

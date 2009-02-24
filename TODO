@@ -27,7 +27,7 @@ Possible additional developments in no particular order:
  - Replicate weights for two-phase designs and for multistage designs
    with large sampling fraction (Fukuoka's BBE)
 
- - parallel processing for replicate weights?
+ - parallel processing for replicate weights, svyby(), svyrecvar()?
 
  - Gini index and other summaries of concentration and inequality.
 

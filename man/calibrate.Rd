@@ -104,11 +104,13 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
   for the PSUs actually sampled, but not for the whole population.  In
   this situation, calibrating within each PSU reduces with second-stage
   contribution to variance. This generalizes to multistage sampling.
-    The \code{stage} argument specifies which stage of sampling the
-  totals refer to.  Stage 0 is full population totals, stage 1 is
-  totals for PSUs, and so on.  The default, \code{stage=NULL} is
-  interpreted as stage 0 when a single population vector is supplied
-  and stage 1 when a list is supplied.
+  The \code{stage} argument specifies which stage of sampling the totals
+  refer to.  Stage 0 is full population totals, stage 1 is totals for
+  PSUs, and so on.  The default, \code{stage=NULL} is interpreted as
+  stage 0 when a single population vector is supplied and stage 1 when a
+  list is supplied. Calibrating to PSU totals will fail (with a message
+  about an exactly singular matrix) for PSUs that have fewer
+  observations than the number of calibration variables.
   
   For unbounded linear calibration only, the variance in the calibration
   model may depend on covariates.  If \code{variance=NULL} the
