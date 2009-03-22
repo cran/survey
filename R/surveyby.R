@@ -5,7 +5,7 @@ svyby<-function(formula, by, design,...) UseMethod("svyby",design)
 
 
 svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
-                keep.names=TRUE,verbose=FALSE,vartype=c("se","cv","cvpct","var"),
+                keep.names=TRUE,verbose=FALSE,vartype=c("se","ci","ci","cv","cvpct","var"),
                 drop.empty.groups=TRUE, covmat=FALSE, return.replicates=FALSE){
 
   if (inherits(by, "formula"))
@@ -39,7 +39,7 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
   
   if(missing(vartype)) vartype<-"se"
   vartype<-match.arg(vartype,several.ok=TRUE)
-  nvartype<-pmatch(vartype,eval(formals(sys.function())$vartype))
+  nvartype<-which(eval(formals(sys.function())$vartype) %in% vartype)
   if(any(is.na(nvartype))) stop("invalid vartype")
   
   if (keep.var){
@@ -47,6 +47,8 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
         rval<-c(coef(x))
         nvar<-length(rval)
         rval<-c(rval,c(se=SE(x),
+                       ci_l=confint(x)[,1],
+                       ci_u=confint(x)[,2],
                        cv=cv(x,warn=FALSE),
                        `cv%`=cv(x,warn=FALSE)*100,
                        var=SE(x)^2)[rep((nvartype-1)*(nvar),each=nvar)+(1:nvar)])
@@ -216,3 +218,16 @@ vcov.svyby<-function(object,...){
   dimnames(rval)<-list(nms,nms)
   rval
 }
+
+confint.svyquantile<-function(object,parm=NULL,level=NULL,...){
+  if (!is.null(level)) stop("need to re-run svyquantile to specify level")
+  ci<-t(matrix(as.vector(object$CIs),nrow=2))
+  colnames(ci)<-dimnames(object$CIs)[[1]]
+  rownames(ci)<-outer(dimnames(object$CIs)[[2]],
+                      dimnames(object$CIs)[[3]],paste,sep="_")
+  if (is.null(parm)) 
+    ci
+  else 
+    ci[parm,,drop=FALSE]
+}
+	

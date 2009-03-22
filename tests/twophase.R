@@ -3,11 +3,12 @@ library(survey)
 ## two-phase simple random sampling.
 data(pbc, package="survival")
 pbc$id<-1:nrow(pbc)
-(d2pbc<-twophase(id=list(~id,~id), data=pbc, subset=~I(trt==-9)))
+pbc$randomized<-with(pbc, !is.na(trt) & trt>-9)
+(d2pbc<-twophase(id=list(~id,~id), data=pbc, subset=~I(!randomized)))
 m<-svymean(~bili, d2pbc)
-all.equal(coef(m),with(pbc, mean(bili[trt==-9])))
-all.equal(SE(m),
-          with(pbc, sd(bili[trt==-9])/sqrt(sum(trt==-9))),
+all.equal(as.vector(coef(m)),with(pbc, mean(bili[!randomized])))
+all.equal(as.vector(SE(m)),
+          with(pbc, sd(bili[!randomized])/sqrt(sum(!randomized))),
           tolerance=0.001)
 
 ## two-stage sampling as two-phase

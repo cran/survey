@@ -59,7 +59,10 @@ getvars<-function (formula, dbconnection, tables, db.only = TRUE, updates=NULL)
     }
     else {
         query <- sub("@tab@", tables, "select * from @tab@ limit 1")
-        oneline <- dbGetQuery(dbconnection, query)
+        if (is(dbconnection,"DBIConnection"))
+          oneline <- dbGetQuery(dbconnection, query)
+        else ##ODBC
+          oneline <- sqlQuery(dbconnection, query)
         in.db <- infilter$varlist[infilter$varlist %in% names(oneline)]
     }
     query <- paste("select", paste(in.db, collapse = ", "), "from", 

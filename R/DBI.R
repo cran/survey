@@ -16,7 +16,8 @@ svydesign.character<-function (ids, probs = NULL, strata = NULL, variables = NUL
     db<-dbDriver(dbtype)
     dbconn<- dbConnect(db, dbname,...)
   }
-  design.vars<-c(all.vars(ids), all.vars(probs), all.vars(strata),all.vars(fpc), all.vars(weights))
+  design.vars<-c(all.vars(ids), all.vars(probs), all.vars(strata),
+                 all.vars(fpc), all.vars(weights))
   design.query<-paste("select", paste(design.vars,collapse=","), "from", data)
   if (dbtype=="ODBC")
     design.data<-sqlQuery(dbconn, design.query)

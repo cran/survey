@@ -58,8 +58,7 @@ Compute quantiles for data from complex surveys.
   observations are summed and the CDF interpolates linearly between
   distinct observed values, and so is a continuous function.  Combining
   \code{interval.type="betaWald"} and \code{ties="discrete"} is (close
-  to) the proposal of Shah and Vaish(2006) and appears to agree fairly
-  closely with SUDAAN.
+  to) the proposal of Shah and Vaish(2006) used in some versions of SUDAAN.
   
   If \code{interval.type="score"} we use a method described by Binder
   (1991) and due originally to Francisco and Fuller (1986), which
@@ -80,6 +79,9 @@ Compute quantiles for data from complex surveys.
   computes confidence on the probability scale and then transforms
   back to quantiles, the equivalent of \code{interval.type="Wald"} for
   \code{survey.design} objects (with \code{alpha=0.05}).
+
+  There is a \code{confint} method for \code{svyquantile} objects; it
+  simply extracts the pre-computed confidence interval.
   
 }
 \value{

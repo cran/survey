@@ -58,6 +58,10 @@ one.stage=getOption("survey.ultimate.cluster"))
 \references{
   Bellhouse DR (1985) Computing Methods for Variance Estimation in Complex Surveys.
   Journal of Official Statistics. Vol.1, No.3, 1985
+
+  Berger, Y.G. (2004), A Simple Variance Estimator for Unequal
+  Probability Sampling Without Replacement. Journal of Applied
+  Statistics, 31, 305-315.
   
   Binder, David A. (1983).  On the variances of asymptotically normal
   estimators from complex surveys.  International Statistical Review,

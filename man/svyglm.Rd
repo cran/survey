@@ -75,11 +75,15 @@ mean and total can also be obtained with \code{\link{calibrate}}.
 \author{Thomas Lumley}
 
 
-\seealso{ \code{\link{svydesign}},
-  \code{\link{glm}},
-  \code{\link{regTermTest},}
+\seealso{ 
+  \code{\link{glm}}, which is used to do most of the work.
+  
+  \code{\link{regTermTest}}, for multiparameter tests
 
-  \code{\link{calibrate}}
+  \code{\link{calibrate}}, for an alternative way to specify regression
+  estimators of population totals or means
+
+  \code{\link{svyttest}} for one-sample and two-sample t-tests.
 }
 
 \examples{

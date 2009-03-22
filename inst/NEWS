@@ -1,3 +1,23 @@
+3.12   Add svyttest() for t-tests, as a wrapper for svyglm
+
+       Add svyciprop() for confidence intervals for proportions,
+       especially near 0 or 1
+
+       confint() works with svycontrast(), svyquantile(), 
+       svyciprop() output.
+
+       bug fix for updates to ODBCsvydesign objects.
+
+       Add example of PPS sampling to example(svydesign), and link to 
+       help for variance estimation.  Add Berger(2004) reference.
+
+       svyby() now has vartype="ci" to report confidence intervals 
+       (for Ron Burns)
+
+       update survival examples to work with new version of survival
+       package.
+
+
 3.11-2 Document that calibrate() to PSU totals requires at least as
        many observations as calibration variables
 

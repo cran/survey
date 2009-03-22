@@ -8,7 +8,8 @@ export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        sparseCells, neighbours, joinCells, compressWeights, make.formula,
        svycontrast,svyCprod, svyrecvar, grake, svrVar, pchisqsum,
        make.calfun, cal.linear, cal.raking, cal.logit, svycdf, svykappa, svykm,
-       svyolr,svycoplot,svyloglin,make.panel.svysmooth,dotchart,subbootweights)
+       svyolr,svycoplot,svyloglin,make.panel.svysmooth,dotchart,subbootweights,
+       svyciprop,svyttest)
 
 S3method(svyloglin,survey.design)
 S3method(svyloglin,svyrep.design)
@@ -28,6 +29,12 @@ S3method(vcov,svyloglin)
 S3method(model.matrix,svyloglin)
 S3method(terms,svyloglin)
 S3method(degf,svyloglin)
+S3method(svyttest,default)
+
+S3method(print,svyciprop)
+S3method(vcov,svyciprop)
+S3method(confint,svyciprop)
+S3method(coef,svyciprop)
 
 
 S3method(svydesign, default)
@@ -147,6 +154,8 @@ S3method(coef, svyolr)
 S3method(coef, svyglm)
 
 S3method(confint,svyglm)
+S3method(confint, svyciprop)
+S3method(confint, svyquantile)
 
 S3method(SE,default)
 S3method(SE,svrepstat)

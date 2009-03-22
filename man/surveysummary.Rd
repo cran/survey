@@ -118,8 +118,17 @@ survey functions.
 \author{Thomas Lumley}
 
 \seealso{ \code{\link{svydesign}}, \code{\link{as.svrepdesign}},
-  \code{\link{svrepdesign}},  \code{\link{svyquantile}} , 
- \code{\link{ftable.svystat}}}
+  \code{\link{svrepdesign}} for constructing design objects.
+
+  \code{\link{svyquantile}}  for quantiles
+  
+  \code{\link{ftable.svystat}} for more attractive tables
+
+  \code{\link{svyciprop}} for more accurate confidence intervals for
+  proportions near 0 or 1.
+
+   \code{\link{svyttest}} for comparing two means.
+}
 
 \examples{
 

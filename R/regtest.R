@@ -105,10 +105,13 @@ contrast<-function(coef,var,contrasts){
     rval[!bad]<-contrasts[!bad,!badin,drop=FALSE]%*%coef[!badin]
     v<-matrix(NA,length(rval),length(rval))
     v[!bad,!bad]<-contrasts[!bad,!badin,drop=FALSE]%*%var[!badin,!badin,drop=FALSE]%*%t(contrasts[!bad,!badin,drop=FALSE])
+    dimnames(v)<-list(names(rval),names(rval))
     attr(rval, "var")<-v
   } else{
     rval<-contrasts%*%coef
-    attr(rval,"var")<-contrasts%*%var%*%t(contrasts)
+    v<-contrasts%*%var%*%t(contrasts)
+    dimnames(v)<-list(names(rval),names(rval))
+    attr(rval,"var")<-v
   }
   rval
 }
@@ -216,6 +219,7 @@ nlcon<-function(exprlist, datalist, varmat){
                             function(value) attr(value,"gradient")))
   var<-jac%*%varmat%*%t(jac)
   values<-do.call(c, values)
+  dimnames(var)<-list(names(values),names(values))
   attr(values, "var")<-var
   values
 }

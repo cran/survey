@@ -152,6 +152,9 @@ An object of class \code{survey.design}.
 
   \code{mitools} package for using multiple imputations
 
+  \code{\link{svyrecvar}} and \code{\link{svyCprod}} for details of
+  variance estimation
+
   \url{http://faculty.washington.edu/tlumley/survey/} for examples of
   database-backed objects.
 }
@@ -172,11 +175,14 @@ dclus2<-svydesign(id=~dnum+snum, fpc=~fpc1+fpc2, data=apiclus2)
 dclus2wr<-svydesign(id=~dnum+snum, weights=weights(dclus2), data=apiclus2)
 dclus2wr2<-svydesign(id=~dnum, weights=weights(dclus2), data=apiclus2)
 
-
 ## syntax for stratified cluster sample
 ##(though the data weren't really sampled this way)
 svydesign(id=~dnum, strata=~stype, weights=~pw, data=apistrat,
 nest=TRUE)
+
+## PPS sampling without replacement
+data(election)
+dpps<- svydesign(id=~1, weights=~wt, fpc=~p, data=election_pps, pps="brewer")
 
 ##database example: requires RSQLite
 \dontrun{

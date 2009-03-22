@@ -102,9 +102,11 @@ model the \code{stderr="model"} should work fairly well.
  ## showing that the response variable can be multivariate
 
  data(pbc, package="survival")
- biasmodel<-glm(I(trt>0)~age*edema,data=pbc)
+ pbc$randomized <- with(pbc, !is.na(trt) & trt>0)
+ biasmodel<-glm(randomized~age*edema,data=pbc)
  pbc$randprob<-fitted(biasmodel)
- dpbc<-svydesign(id=~1, prob=~randprob, strata=~edema, data=subset(pbc,trt>0))
+ dpbc<-svydesign(id=~1, prob=~randprob, strata=~edema,
+    data=subset(pbc,randomized))
 
  lcens<-function(x,mean,sd){
     ifelse(x[,2]==1,
@@ -126,12 +128,17 @@ model the \code{stderr="model"} should work fairly well.
         cbind(dm,ds)      
  }
 
-
-svymle(loglike=lcens, gradient=gcens, design=dpbc,
-      formulas=list(mean=I(cbind(time,status))~bili+protime+alb,
+if(getRversion()>="2.9.0"){
+  svymle(loglike=lcens, gradient=gcens, design=dpbc,
+      formulas=list(mean=I(cbind(time,status>0))~bili+protime+albumin,
                     sd=~1),
          start=list(c(10,0,0,0),c(1)))
-
+} else {
+  svymle(loglike=lcens, gradient=gcens, design=dpbc,
+      formulas=list(mean=I(cbind(time,status>0))~bili+protime+alb,
+                    sd=~1),
+         start=list(c(10,0,0,0),c(1)))
+}
 
 
 }

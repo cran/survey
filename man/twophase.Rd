@@ -107,11 +107,10 @@ Lin, DY and Ying, Z (1993). Cox regression with incomplete covariate measurement
 \examples{
  ## two-phase simple random sampling.
  data(pbc, package="survival")
+ pbc$randomized<-with(pbc, !is.na(trt) & trt>0)
  pbc$id<-1:nrow(pbc)
- d2pbc<-twophase(id=list(~id,~id), data=pbc, subset=~I(trt==-9))
+ d2pbc<-twophase(id=list(~id,~id), data=pbc, subset=~randomized)
  svymean(~bili, d2pbc)
- with(pbc, mean(bili[trt==-9]))
- with(pbc, sd(bili[trt==-9])/sqrt(sum(trt==-9)))
 
  ## two-stage sampling as two-phase
  data(mu284)

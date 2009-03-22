@@ -41,14 +41,14 @@ separate curves in a \code{svykmlist} object}
 \seealso{\code{\link{svycoxph}} }
 \examples{
 data(pbc, package="survival")
-
-biasmodel<-glm(I(trt>0)~age*edema,data=pbc)
+pbc$randomized <- with(pbc, !is.na(trt) & trt>0)
+biasmodel<-glm(randomized~age*edema,data=pbc)
 pbc$randprob<-fitted(biasmodel)
 
-dpbc<-svydesign(id=~1, prob=~randprob, strata=~edema, data=subset(pbc,trt>0))
+dpbc<-svydesign(id=~1, prob=~randprob, strata=~edema, data=subset(pbc,randomized))
 
-s1<-svykm(Surv(time,status)~1, design=dpbc)
-s2<-svykm(Surv(time,status)~I(bili>6), design=dpbc)
+s1<-svykm(Surv(time,status>0)~1, design=dpbc)
+s2<-svykm(Surv(time,status>0)~I(bili>6), design=dpbc)
 
 plot(s1)
 plot(s2)

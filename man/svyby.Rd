@@ -12,7 +12,7 @@ Compute survey statistics on subsets of a survey defined by factors.
 \usage{
 svyby(formula, by ,design,...)
 \method{svyby}{default}(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE,
-keep.names = TRUE,verbose=FALSE, vartype=c("se","cv","cvpct","var"),
+keep.names = TRUE,verbose=FALSE, vartype=c("se","ci","ci","cv","cvpct","var"),
  drop.empty.groups=TRUE, covmat=FALSE, return.replicates=FALSE)
 \method{SE}{svyby}(object,...)
 \method{deff}{svyby}(object,...)
@@ -50,6 +50,13 @@ keep.names = TRUE,verbose=FALSE, vartype=c("se","cv","cvpct","var"),
 \value{
   An object of class \code{"svyby"}: a data frame showing the factors and the results of \code{FUN}
 }
+\details{
+The variance type "ci" asks for confidence intervals, which are produced
+  by \code{confint}. In some cases additional options to \code{FUN} will
+  be needed to produce confidence intervals, for example,
+  \code{svyquantile} needs \code{ci=TRUE}
+
+  }
 
 \note{ Asking for a design effect (\code{deff=TRUE}) from a function
   that does not produce one will cause an error or incorrect formatting
@@ -63,11 +70,11 @@ data(api)
 dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
 
 svyby(~api99, ~stype, dclus1, svymean)
-svyby(~api99, ~stype, dclus1, svyquantile, quantiles=0.5,ci=TRUE)
+svyby(~api99, ~stype, dclus1, svyquantile, quantiles=0.5,ci=TRUE,vartype="ci")
 ## without ci=TRUE svyquantile does not compute standard errors
 svyby(~api99, ~stype, dclus1, svyquantile, quantiles=0.5, keep.var=FALSE)
 svyby(~api99, list(school.type=apiclus1$stype), dclus1, svymean)
-svyby(~api99+api00, ~stype, dclus1, svymean, deff=TRUE)
+svyby(~api99+api00, ~stype, dclus1, svymean, deff=TRUE,vartype="ci")
 svyby(~api99+api00, ~stype+sch.wide, dclus1, svymean, keep.var=FALSE)
 
 rclus1<-as.svrepdesign(dclus1)

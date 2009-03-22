@@ -51,15 +51,17 @@ do with the stratification of the sampling.
 ## Somewhat unrealistic example of nonresponse bias.
 data(pbc, package="survival")
 
-biasmodel<-glm(I(trt>0)~age*edema,data=pbc)
+pbc$randomized<-with(pbc, !is.na(trt) & trt>0)
+biasmodel<-glm(randomized~age*edema,data=pbc,family=binomial)
 pbc$randprob<-fitted(biasmodel)
+if (is.null(pbc$albumin)) pbc$albumin<-pbc$alb ##pre2.9.0
 
-dpbc<-svydesign(id=~1, prob=~randprob, strata=~edema, data=subset(pbc,trt>0))
+dpbc<-svydesign(id=~1, prob=~randprob, strata=~edema, data=subset(pbc,randomized))
 rpbc<-as.svrepdesign(dpbc)
 
-svycoxph(Surv(time,status)~log(bili)+protime+alb,design=dpbc)
+svycoxph(Surv(time,status>0)~log(bili)+protime+albumin,design=dpbc)
 
-svycoxph(Surv(time,status)~log(bili)+protime+alb,design=rpbc)
+svycoxph(Surv(time,status>0)~log(bili)+protime+albumin,design=rpbc)
 }
 \keyword{regression}% at least one, from doc/KEYWORDS
 \keyword{survival}% at least one, from doc/KEYWORDS
