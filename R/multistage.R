@@ -792,3 +792,4 @@ svyratio.survey.design2<-function(numerator=formula, denominator, design, separa
     rval
     
   }
+

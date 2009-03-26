@@ -35,7 +35,7 @@ keep.names = TRUE,verbose=FALSE, vartype=c("se","ci","ci","cv","cvpct","var"),
 \item{verbose}{If \code{TRUE}, print a label for each subset as it is
   processed.}
 \item{vartype}{Report variability as one or more of
-  standard error, coefficient of
+  standard error, confidence interval, coefficient of
   variation,  percent coefficient of variation, or variance}
 \item{drop.empty.groups}{If \code{FALSE}, report \code{NA} for empty
   groups, if \code{TRUE} drop them from the output}

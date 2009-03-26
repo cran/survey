@@ -128,7 +128,7 @@ model the \code{stderr="model"} should work fairly well.
         cbind(dm,ds)      
  }
 
-if(getRversion()>="2.9.0"){
+if(!is.null(pbc$albumin)){
   svymle(loglike=lcens, gradient=gcens, design=dpbc,
       formulas=list(mean=I(cbind(time,status>0))~bili+protime+albumin,
                     sd=~1),

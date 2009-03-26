@@ -201,6 +201,7 @@ S3method(print,svykmlist)
 S3method(lines, svykm)
 S3method(plot,svykmlist)
 S3method(quantile, svykm)
+S3method(confint,svykm)
 
 S3method(svyolr,survey.design2)
 S3method(svyolr,svyrep.design)

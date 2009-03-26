@@ -1,3 +1,14 @@
+3.13   Add standard errors to svykm() (for Norman Breslow)
+
+       fix typo in svyquantile(interval.type="betaWald") and add
+       'degrees of freedom' correction to the effective sample size.
+
+       add 'degrees of freedom' correction to effective sample size
+       in svyciprop, type="beta".
+
+       SE,coef for svyratio objects now optionally convert to a vector
+       and confint() now works on ratios.
+
 3.12   Add svyttest() for t-tests, as a wrapper for svyglm
 
        Add svyciprop() for confidence intervals for proportions,

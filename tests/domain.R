@@ -18,7 +18,7 @@ m3<-svyglm(x~I(x>4)+0,design=dfpc)
 summary(m3)
 (m4<-svyratio(~I(x*(x>4)),~as.numeric(x>4), dfpc))
 stopifnot(isTRUE(all.equal(SE(m2), as.vector(SE(m3)))))
-stopifnot(isTRUE(all.equal(SE(m2)[2], drop(SE(m4)))))
+stopifnot(isTRUE(all.equal(SE(m2)[2], as.vector(SE(m4)))))
 
 ## with strata
 data(api)

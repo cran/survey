@@ -6,6 +6,7 @@
 \alias{svyratio.survey.design}
 \alias{svyratio.survey.design2}
 \alias{svyratio.twophase}
+\alias{coef.svyratio}
 \alias{SE.svyratio}
 \alias{predict.svyratio}
 \alias{predict.svyratio_separate}
@@ -24,6 +25,8 @@ survey samples. Estimating domain (subpopulation) means can be done more easily 
     separate=FALSE, na.rm=FALSE,formula,...)
 \method{predict}{svyratio}(object, total, se=TRUE,...)
 \method{predict}{svyratio_separate}(object, total, se=TRUE,...)
+\method{SE}{svyratio}(object,...,drop=TRUE)
+\method{coef}{svyratio}(object,...,drop=TRUE)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -41,6 +44,7 @@ survey samples. Estimating domain (subpopulation) means can be done more easily 
   \item{covmat}{Compute the full variance-covariance matrix of the
     ratios}
   \item{return.replicates}{Return replicate estimates of ratios}
+  \item{drop}{Return a vector rather than a matrix}
   \item{...}{Other unused arguments for other methods}
 }
 \details{
@@ -109,7 +113,10 @@ stratum.totals<-list(E=1877350, H=1013824, M=920298)
 predict(sep, total=stratum.totals)
 predict(com, total=sum(unlist(stratum.totals)))
 
-
+SE(com)
+coef(com)
+coef(com, drop=FALSE)
+confint(com)
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
 

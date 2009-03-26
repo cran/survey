@@ -1,6 +1,6 @@
 
-R version 2.6.0 Under development (unstable) (2007-06-27 r42086)
-Copyright (C) 2007 The R Foundation for Statistical Computing
+R version 2.7.2 (2008-08-25)
+Copyright (C) 2008 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -24,6 +24,14 @@ Type 'q()' to quit R.
 > 
 > 
 > library(survey)
+
+Attaching package: 'survey'
+
+
+	The following object(s) are masked from package:graphics :
+
+	 dotchart 
+
 > data(fpc)
 > dfpc<-svydesign(id=~psuid,strat=~stratid,weight=~weight,data=fpc,nest=TRUE)
 > dsub<-subset(dfpc,x>4)
@@ -33,9 +41,9 @@ x 6.195 0.7555
 > 
 > ## These should give the same domain estimates and standard errors
 > (m2<-svyby(~x,~I(x>4),design=dfpc, svymean,keep.var=TRUE))
-      I(x > 4) statistics.x      se.x
-FALSE    FALSE     3.314286 0.3117042
-TRUE      TRUE     6.195000 0.7555129
+      I(x > 4)        x      se.x
+FALSE    FALSE 3.314286 0.3117042
+TRUE      TRUE 6.195000 0.7555129
 Warning messages:
 1: In onestrat(x[index, , drop = FALSE], clusters[index], nPSU[index][1],  :
   Stratum (1) has only one PSU at stage 1
@@ -56,7 +64,7 @@ Coefficients:
 I(x > 4)FALSE   3.3143     0.3117   10.63 0.000127 ***
 I(x > 4)TRUE    6.1950     0.7555    8.20 0.000439 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 (Dispersion parameter for gaussian family taken to be 2.557379)
 
@@ -72,7 +80,7 @@ SEs=
                as.numeric(x > 4)
 I(x * (x > 4))         0.7555129
 > stopifnot(isTRUE(all.equal(SE(m2), as.vector(SE(m3)))))
-> stopifnot(isTRUE(all.equal(SE(m2)[2], drop(SE(m4)))))
+> stopifnot(isTRUE(all.equal(SE(m2)[2], as.vector(SE(m4)))))
 > 
 > ## with strata
 > data(api)

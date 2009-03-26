@@ -759,8 +759,9 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
         c(p.low,p.up)
       } else if (interval.type=="betaWald"){
         n.eff <- (p*(1-p))/(se^2)
-        p.up<-qbeta(1-alpha/2, n.eff*p,n.eff*(1-p)+1)
-        p.low<-qbeta(alpha/2,  n.eff*p+1,n.eff*(1-p))
+        n.eff <- n.eff * ( qt(alpha/2, nrow(design)-1)/qt(alpha/2, degf(design)) )^2
+        p.up<-qbeta(1-alpha/2, n.eff*p+1, n.eff*(1-p))
+        p.low<-qbeta(alpha/2,  n.eff*p, n.eff*(1-p)+1)
         c(p.low,p.up)
       }
       
@@ -868,10 +869,20 @@ print.svyquantile<-function(x,...){
     print(list(quantiles=x$quantiles, CIs=x$CIs))
 }
 
-coef.svyratio<-function(object,...) object$ratio
-
-SE.svyratio<-function(object,...){
-  sqrt(object$var)
+coef.svyratio<-function(object,...,drop=TRUE){
+  if (!drop) return(object$ratio)
+  cf<-as.vector(object$ratio)
+  nms<-as.vector(outer(rownames(object$ratio),colnames(object$ratio),paste,sep="/"))
+  names(cf)<-nms
+  cf
+}
+ 
+SE.svyratio<-function(object,...,drop=TRUE){
+  if(!drop) return(sqrt(object$var))
+  se<-as.vector(sqrt(object$var))
+  nms<-as.vector(outer(rownames(object$ratio),colnames(object$ratio),paste,sep="/"))
+  names(se)<-nms
+  se
 }
 
 svyratio<-function(numerator,denominator, design,...){

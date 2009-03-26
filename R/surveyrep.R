@@ -1353,6 +1353,8 @@ vcov.svyratio <- function(object, ...){
         covmat<-matrix(NaN,length(object$var),length(object$var))
         diag(covmat)<-as.vector(object$var)
     }
+    nms<-as.vector(outer(rownames(object$ratio),colnames(object$ratio),paste,sep="/"))
+    dimnames(covmat)<-list(nms,nms)
     covmat
 }
 

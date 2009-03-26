@@ -10,7 +10,7 @@ replacement from the PSUs in each stratum. \code{subbootweights()}
 samples \code{n-1} PSUs from the \code{n} available (Rao and Wu),
 \code{bootweights} samples \code{n} (Canty and Davison).
 
-\code{subbootweights()} is most useful when the strata are large and may have
+\code{bootweights()} is most useful when the strata are large and may have
 large sampling fractions, \code{subbootweights()} is useful when the
 strata have a small number of PSUs and the sampling fractions are small.
 

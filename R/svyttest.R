@@ -61,6 +61,7 @@ svyciprop<-function(formula, design, method=c("logit","likelihood","asin","beta"
     rval<-coef(m)[1]
     attr(rval,"var")<-vcov(m)
     alpha<-1-level
+    n.eff<-n.eff*( qt(alpha/2, nrow(design)-1)/qt(alpha/2, degf(design)) )^2
     ci<-c(qbeta(alpha/2, n.eff*rval,n.eff*(1-rval)+1),
           qbeta(1-alpha/2, n.eff*rval+1, n.eff*(1-rval)))
   } else {
