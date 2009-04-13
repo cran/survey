@@ -3,6 +3,7 @@
 \alias{svycoxph.survey.design2}
 \alias{svycoxph.survey.design}
 \alias{svycoxph.svyrep.design}
+\alias{predict.svycoxph}
 %\alias{print.svycoxph}
 %\alias{model.frame.svycoxph}
 %\alias{summary.svycoxph}
@@ -12,10 +13,12 @@
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Survey-weighted Cox models.}
 \description{
-Fit a proportional hazards model to data from a complex survey design, with inverse-probability weighting and with standard errors corrected for cluster sampling.
+Fit a proportional hazards model to data from a complex survey design.
 }
 \usage{
 svycoxph(formula, design,subset=NULL, ...)
+\method{predict}{svycoxph}(object, newdata, se=FALSE,
+    type=c("lp", "risk", "expected", "terms","curve"),...)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -23,10 +26,16 @@ svycoxph(formula, design,subset=NULL, ...)
   \item{design}{ \code{survey.design} object. Must contain all variables
     in the formula}
   \item{subset}{Expression to select a subpopulation}
+  \item{object}{A \code{svycoxph} object}
+  \item{newdata}{New data for prediction}
+  \item{se}{Compute standard errors? This takes a lot of memory for
+    \code{type="curve"}}
+  \item{type}{"curve" does predicted survival curves. The other values
+    are passed to \code{predict.coxph()}}
   \item{\dots}{Other arguments passed to \code{coxph}. }
 }
 \details{
-The main difference between this function and the \code{robust=TRUE}
+The main difference between \code{svycoxph} function and the \code{robust=TRUE}
 option to \code{\link{coxph}} in the
 survival package is that this function accounts for the reduction in
 variance from stratified sampling and the increase in variance from
@@ -35,17 +44,44 @@ having only a small number of clusters.
 Note that \code{strata} terms in the model formula describe subsets that
 have a separate baseline hazard function and need not have anything to
 do with the stratification of the sampling.
+
+The standard errors for predicted survival curves are available only by linearization, not
+  by replicate weights (at the moment). Use
+  \code{\link{withReplicates}} to get standard errors with replicate
+  weights. Predicted survival curves are not available for stratified
+  Cox models.
+
+The standard errors use the delta-method approach of Williams (1995) for
+  the Nelson-Aalen estimator, modified to handle the Cox model following
+  Tsiatis (1981). The standard errors agree closely with \code{survfit.coxph}
+  for independent sampling when the model fits well, but are larger when
+  the model fits poorly.  
   }
 \value{
-  An object of class \code{svycoxph}.
+  An object of class \code{svycoxph} for \code{svycoxph}, an object of
+  class \code{svykm} or \code{svykmlist} for \code{predict(,type="curve")}.
 }
-
+\section{Warning}{
+The standard error calculation for survival curves uses memory
+  proportional to the sample size times the square of the number of events.
+  }
 \author{Thomas Lumley}
 
 \references{Binder DA. (1992) Fitting Cox's proportional hazards models
-  from survey data. Biometrika 79: 139-147}
-\seealso{ \code{\link{svydesign}}, \code{\link{coxph}},
-  \code{\link{svyCprod}}}
+  from survey data. Biometrika 79: 139-147
+
+Tsiatis AA (1981) A Large Sample Study of Cox's Regression Model. Annals
+of Statistics 9(1) 93-108
+
+Williams RL (1995) "Product-Limit Survival Functions with Correlated 
+Survival Times" Lifetime Data Analysis 1: 171--186
+
+}
+\seealso{  \code{\link{coxph}}, \code{\link{predict.coxph}}
+
+  \code{\link{svykm}} for estimation of Kaplan-Meier survival curves and
+  for methods that operate on survival curves.
+}
 
 \examples{
 ## Somewhat unrealistic example of nonresponse bias.
@@ -59,9 +95,16 @@ if (is.null(pbc$albumin)) pbc$albumin<-pbc$alb ##pre2.9.0
 dpbc<-svydesign(id=~1, prob=~randprob, strata=~edema, data=subset(pbc,randomized))
 rpbc<-as.svrepdesign(dpbc)
 
-svycoxph(Surv(time,status>0)~log(bili)+protime+albumin,design=dpbc)
+(model<-svycoxph(Surv(time,status>0)~log(bili)+protime+albumin,design=dpbc))
 
 svycoxph(Surv(time,status>0)~log(bili)+protime+albumin,design=rpbc)
+
+s<-predict(model,se=TRUE, type="curve",
+     newdata=data.frame(bili=c(3,9), protime=c(10,10), albumin=c(3.5,3.5)))
+plot(s[[1]],ci=TRUE,col="sienna")
+lines(s[[2]], ci=TRUE,col="royalblue")
+quantile(s[[1]], ci=TRUE)
+confint(s[[2]], parm=365*(1:5))
 }
 \keyword{regression}% at least one, from doc/KEYWORDS
 \keyword{survival}% at least one, from doc/KEYWORDS

@@ -66,7 +66,8 @@ Compute quantiles for data from complex surveys.
   limits of the confidence interval, a test of the null hypothesis that
   the cumulative distribution function is equal to the target quantile
   just rejects.  This was the default before version 2.9. It is much
-  slower, and Dorfman & Valliant (1993) suggest it is not any more accurate.
+  slower than \code{"Wald"}, and Dorfman & Valliant (1993) suggest it is
+  not any more accurate.
   
   Standard errors are computed from these confidence intervals by
   dividing the confidence interval length by \code{2*qnorm(alpha/2)}.
@@ -94,8 +95,11 @@ Compute quantiles for data from complex surveys.
 \author{Thomas Lumley}
 
 
-\seealso{ \code{\link{svydesign}}, \code{\link{svymean}},
-  \code{\link{as.svrepdesign}}, \code{\link{svrepdesign}}}
+\seealso{
+  \code{\link{svykm}} for quantiles of survival curves
+
+  \code{\link{svyciprop}} for confidence intervals on proportions.
+}
 \references{
   Binder DA (1991) Use of estimating functions for interval estimation
   from complex surveys. \emph{Proceedings of the ASA Survey Research

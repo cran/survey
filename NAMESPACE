@@ -179,6 +179,7 @@ S3method(extractAIC,svrepglm)
 S3method(extractAIC,svyglm)
 
 S3method(anova,svycoxph)
+S3method(predict,svycoxph)
 
 S3method(svycontrast,svrepstat)
 S3method(svycontrast,svystat)

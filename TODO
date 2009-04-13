@@ -20,7 +20,7 @@ Possible additional developments in no particular order:
 
  - linear mixed models?
 
- - standard errors for survival curves, particularly in two-phase studies
+ [done] standard errors for survival curves, particularly in two-phase studies
 
  - an interface to twophase and calibrate for IPTW estimation.
 

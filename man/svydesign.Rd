@@ -145,7 +145,6 @@ An object of class \code{survey.design}.
 
 
 \seealso{
-  \code{\link{postStratify}} for post-stratification,
   \code{\link{as.svrepdesign}} for converting to replicate weight designs,
   \code{\link{subset.survey.design}} for domain estimates,
   \code{\link{update.survey.design}} to add variables.

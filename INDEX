@@ -17,6 +17,7 @@ svycoplot               Conditioning plots for survey data
 svyhist                 Survey-weighted histogram
 svysmooth               Smoothers and density estimates
 svycdf                  Cumulative distribution functions
+svykm                   Survival curves
 svyboxplot              Survey-weighted boxplots
 svyby                   Tables of statistics 
 ftable.svystat          Formatted tables of statistics
@@ -25,6 +26,7 @@ ftable.svyby
 cv			extract coefficient of variation
 SE			extract standard error
 deff			extract design effect
+confint                 extract confidence intervals
 svycontrast             linear combinations of estimates
 
                  -----
@@ -78,16 +80,10 @@ as.svydesign2           Convert a old svydesign object to
 * not exported from NAMESPACE
                  -----
 Data:
+election                US election data
 fpc                     Small artificial example
 scd                     Cardiac arrests example
 api                     California Academic Performance Index
 crowd                   Small example from VPLX manual
 mu284                   Two-stage sample from MU284 population
 
-            ----Experimental----
-                 
-nonresponse		create non-response object
-sparseCells		look for sparse cells
-neighbours		find neighbours of a cell
-joinCells		collapse a set of cells together
-weights.nonresponse	extract non-response weights

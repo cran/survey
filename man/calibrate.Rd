@@ -9,9 +9,9 @@
 \alias{calibrate.twophase}
 \alias{grake}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{G-calibration (GREG) estimators}
+\title{Calibration (GREG) estimators}
 \description{
-  G-calibration (GREG) estimators generalise post-stratification and
+  Calibration (or GREG) estimators generalise post-stratification and
   raking by calibrating a sample to the marginal totals of
   variables in a linear regression model.  This function reweights the
   survey design and adds additional information that is used by
@@ -100,7 +100,7 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
   given if the original weights are not constant within levels of
   \code{aggregate.index}.
   
-  In a model with two-phase sampling population totals may be available
+  In a model with two-stage sampling, population totals may be available
   for the PSUs actually sampled, but not for the whole population.  In
   this situation, calibrating within each PSU reduces with second-stage
   contribution to variance. This generalizes to multistage sampling.
@@ -160,11 +160,11 @@ Belgium. Statistics Belgium Working Paper No 3.
 \seealso{ \code{\link{postStratify}}, \code{\link{rake}} for other ways
   to use auxiliary information
   
-  \code{vignette("epi")} for an example of calibration in two-phase designs
+ \code{\link{twophase}} and \code{vignette("epi")} for an example of calibration in two-phase designs
 
-   \code{survey/tests/kalton.R} for examples replicating those in Kalton & Flores-Cervantes (2003)
+ \code{survey/tests/kalton.R} for examples replicating those in Kalton & Flores-Cervantes (2003)
 
-   \code{\link{make.calfun}} for user-defined calibration distances.
+ \code{\link{make.calfun}} for user-defined calibration distances.
 }
 \examples{
 data(api)
@@ -246,7 +246,7 @@ range(weights(dclus1g3d)/weights(dclus1))
 
 
 
-## Ratio estimators
+## Ratio estimators are calibration estimators
 dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
 rstrat<-as.svrepdesign(dstrat)
 

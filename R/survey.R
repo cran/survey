@@ -1077,6 +1077,7 @@ svycoxph.survey.design<-function(formula,design,subset=NULL,...){
     g<-with(list(data=data), eval(g))
     g$call<-match.call()
     g$printcall<-sys.call(-1)
+    g$printcall[[1]]<-as.name(.Generic)
     class(g)<-c("svycoxph", class(g))
     g$survey.design<-design
     

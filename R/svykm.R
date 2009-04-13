@@ -56,12 +56,17 @@ km.stderr<-function(survobj,design){
   time<-survobj[,'time']
   status<-survobj[,'status']
   ## Brute force and ignorance: compute Y and dN as totals, use delta-method
-  y<-outer(time,time,">=")[,weights(design)!=0]
-  dN<-diag(status)[,weights(design)!=0]
-  oo<-order(time[weights(design)!=0], -status[weights(design)!=0])
+  keep<-which((status==1) & (weights(design)!=0))
+  y<-outer(time,time[keep],">=")
+  dN<-diag(status)[,keep]
+  oo<-order(time[keep], -status[keep])
+  okeep<-keep[oo]
   ntimes<-length(oo)
-  
+  ttime<-time[okeep]
+  sstatus<-status[okeep]
+
   totals<-svytotal(cbind(dN[,oo],y[,oo]), design)
+  rm(dN)
   y<-coef(totals)[-(1:ntimes)]
   dNbar<-coef(totals)[1:ntimes]
   
@@ -76,7 +81,7 @@ km.stderr<-function(survobj,design){
   V[1]<-dV[1,1]
   for(i in 2:ntimes) V[i]<-V[i-1]+sum(dV[1:(i-1),i])+sum(dV[i,1:i])
   
-  rval<-list(time=time[weights(design)!=0][oo],surv=exp(-h),varlog=V)
+  rval<-list(time=ttime,surv=exp(-h),varlog=V)
   class(rval)<-"svykm"
   rval
 }
@@ -89,8 +94,12 @@ plot.svykm<-function(x,xlab="time",ylab="Proportion surviving",ylim=c(0,1),ci=NU
   plot(x$time,x$surv,xlab=xlab,ylab=ylab, type="s",ylim=ylim,lty=lty,...)
 
   if (ci){
-    lines(x$time,exp(log(x$surv)-1.96*sqrt(x$varlog)),lty=2,type="s",...)
-    lines(x$time,exp(log(x$surv)+1.96*sqrt(x$varlog)),lty=2,type="s",...)
+    if (is.null(x$varlog))
+      warning("No standard errors available in object")
+    else{
+      lines(x$time,exp(log(x$surv)-1.96*sqrt(x$varlog)),lty=2,type="s",...)
+      lines(x$time,pmin(1,exp(log(x$surv)+1.96*sqrt(x$varlog))),lty=2,type="s",...)
+    }
   }
   invisible(x)
 }
@@ -99,10 +108,14 @@ plot.svykm<-function(x,xlab="time",ylab="Proportion surviving",ylim=c(0,1),ci=NU
 lines.svykm<-function(x,xlab="time",type="s",ci=FALSE,lty=1,...){
   lines(x$time,x$surv, type="s",lty=lty,...)
   if (ci){
-    lines(x$time,exp(log(x$surv)-1.96*sqrt(x$varlog)),lty=2,type="s",...)
-    lines(x$time,exp(log(x$surv)+1.96*sqrt(x$varlog)),lty=2,type="s",...)
+    if (is.null(x$varlog))
+      warning("no standard errors available in object")
+    else {
+      lines(x$time,exp(log(x$surv)-1.96*sqrt(x$varlog)),lty=2,type="s",...)
+      lines(x$time,pmin(1,exp(log(x$surv)+1.96*sqrt(x$varlog))),lty=2,type="s",...)
+    }
   }
- invisible(x)
+  invisible(x)
 }
 
 plot.svykmlist<-function(x, pars=NULL, ci=FALSE,...){
@@ -147,13 +160,30 @@ print.svykmlist<-function(x, digits=3,...){
   invisible(x)
 }
 
-quantile.svykm<-function(x, probs=c(0.75,0.5,0.25),...){
+quantile.svykm<-function(x, probs=c(0.75,0.5,0.25),ci=FALSE,level=0.95,...){
   
   iq<-sapply(probs, function(p) suppressWarnings(min(which(x$surv<=p))))
   qq<-sapply(iq, function(i) if (is.finite(i)) x$time[i] else Inf)
   names(qq)<-probs
+  if (ci){
+    if(is.null(x$varlog)){
+      warning("no confidence interval available.")
+    } else {
+      halfalpha<-(1-level)/2
+      z<-qnorm(halfalpha, lower.tail=FALSE)
+      su<-exp(log(x$surv)+z*sqrt(x$varlog))
+      iu<-sapply(probs, function(p) suppressWarnings(min(which(su<=p))))
+      qu<-sapply(iu, function(i) if (is.finite(i)) x$time[i] else Inf)
+      sl<-exp(log(x$surv)-z*sqrt(x$varlog))
+      il<-sapply(probs, function(p) suppressWarnings(min(which(sl<=p))))
+      ql<-sapply(il, function(i) if (is.finite(i)) x$time[i] else Inf)
+      ci<-cbind(ql,qu)
+      rownames(ci)<-probs
+      colnames(ci)<-format(c(halfalpha,1-halfalpha),3)
+      attr(qq,"ci")<-ci
+    }
+  }
   qq
-
 }
 
 
@@ -163,8 +193,141 @@ confint.svykm<-function(object, parm, level=0.95,...){
   parm<-as.numeric(parm)
   idx<-sapply(parm, function(t) max(which(object$time<=t)))
   z<-qnorm((1-level)/2)
-  ci<-exp(log(object$surv[idx])+outer(sqrt(object$varlog[idx]),c(-z,z)))
+  ci<-exp(log(object$surv[idx])+outer(sqrt(object$varlog[idx]),c(z,-z)))
+  ci[,2]<-pmin(ci[,2],1)
   rownames(ci)<-parm
   colnames(ci)<-format( c((1-level)/2, 1-(1-level)/2),3)
   ci
 }
+
+
+predict.svycoxph<-function(object, newdata, se=FALSE,
+                           type=c("lp", "risk", "expected", "terms","curve"),
+                           ...){
+  
+  type<-match.arg(type)
+  if(type!="curve") return(NextMethod())
+  
+  design<-object$survey.design
+  response<-object$y
+
+  if (!is.null(attr(terms(object), "specials")$strata))
+    stop("Stratified models are not supported yet")
+
+  if (attr(response,"type")=="counting"){
+    time<-object$y[,2]
+    status<-object$y[,'status']
+    entry<-object$y[,1]
+  } else if (attr(response,'type')=="right"){
+    time<-object$y[,"time"]
+    status<-object$y[,"status"]
+    entry<-rep(-Inf,length(time))
+  } else stop("unsupported survival type")
+  if(is.null(object$na.action)){
+    design<-object$survey.design
+  } else {
+    design<-object$survey.design[-object$na.action,]
+  }
+  
+  ff<-delete.response(terms(formula(object)))
+  zmf<-model.frame(ff, newdata)
+  z.pred<-model.matrix(ff, zmf)[,-1,drop=FALSE]
+  
+##
+## The simple case first
+##  
+  risk<-survival:::predict.coxph(object,type="risk",se.fit=FALSE)
+  if(se==FALSE){
+    tt<-c(time,entry)
+    ss<-c(status,rep(0,length(entry)))
+    ee<-c(rep(1,length(status)),rep(-1,length(entry)))
+    oo<-order(tt,-ee,-ss)
+    dN<-ss[oo]
+    w<-rep(weights(design),2)[oo]
+    risks<-rep(risk,2)
+    Y<-rev(cumsum(rev(risks[oo]*w*ee[oo])))
+    keep<-dN>0
+    s<-vector("list",nrow(z.pred))
+    beta<-coef(object)
+    h0<- cumsum( (w*dN/Y)[keep] )
+    for(i in 1:nrow(z.pred)){
+      zi<-z.pred[i,]-object$means
+      s[[i]]<-list(time=time[oo][keep],
+              surv=exp(-h0 * exp(sum(beta*zi))),
+              call=sys.call())
+    class(s[[i]])<-c("svykmcox","svykm")
+    }
+    names(s)<-rownames(newdata)
+    return(s)
+  }
+##
+## The hard case: curves with standard errors
+##
+  if(!inherits(design,"survey.design"))
+    stop("replicate-weight designs not supported yet")
+  
+  keep<-which((status==1) & (weights(design)!=0))
+  y<-outer(time,time[keep],">=")*risk*outer(entry,time[keep],"<=")
+  dN<-diag(status)[,keep]
+  oo<-order(time[keep], -status[keep])
+  okeep<-keep[oo]
+  ntimes<-length(oo)
+  ttime<-time[okeep]
+  sstatus<-status[okeep]
+  totals<-svytotal(cbind(dN[,oo],y[,oo]), design)
+  rm(dN)
+  
+  y<-coef(totals)[-(1:ntimes)]
+  dNbar<-coef(totals)[1:ntimes]
+  vtotals<-vcov(totals)
+  rm(totals)
+  
+  h<-cumsum(dNbar/y)
+  
+  dVn<- vtotals[(1:ntimes),(1:ntimes)]/outer(y,y)
+  dVy <- vtotals[-(1:ntimes),-(1:ntimes)]*outer(dNbar/y^2,dNbar/y^2)
+  dCVny<- -vtotals[(1:ntimes),-(1:ntimes)]*outer(1/y,dNbar/y^2)
+  dV<-dVn+dVy+dCVny+t(dCVny)
+  
+  det<-suppressWarnings(coxph.detail(object))
+  ze<-sweep(as.matrix(det$means)[rep(1:length(det$time), det$nevent),,drop=FALSE],
+            2, object$means)
+  rm(det)
+  
+  dH<-dNbar/y
+  h.ze<-dH*ze
+  varbeta<-vcov(object)
+  
+  Vh<-numeric(ntimes)
+  Vh[1]<-dV[1,1]
+  for(i in 2:ntimes) Vh[i]<-Vh[i-1]+sum(dV[1:(i-1),i])+sum(dV[i,1:i])
+  dVb<-numeric(ntimes)
+  for(i in 1:ntimes) dVb[i]<-crossprod(h.ze[i,],varbeta%*%(h.ze[i,]))
+  Vb<-cumsum(dVb)
+  dCV<-matrix(nrow=ntimes,ncol=NCOL(ze))
+  for(i in 1:ntimes) dCV[i,] <- -varbeta%*%(h.ze[i,])
+  CV<-apply(dCV,2,cumsum)
+  
+  V0<-Vh+Vb
+  s0<-exp(-h)
+  
+  s<-vector("list",nrow(z.pred))
+  for(i in 1:nrow(z.pred)){
+    zi<-z.pred[i,]-object$means
+    riski<-exp(sum(zi*coef(object)))
+    Vz<-crossprod(zi,varbeta%*%zi)*riski^2*h^2
+    CVz<-colSums(t(CV)*zi)*riski^2*h
+    
+    V<-V0*riski^2+Vz+CVz*2
+    s[[i]]<-list(time=ttime,surv=exp(-h*riski), varlog=V)
+    class(s[[i]])<-c("svykm.cox","svykm")
+  }
+  names(s)<-rownames(newdata)
+  scall<-sys.call()
+  scall[[1]]<-as.name(.Generic)
+  attr(s,"call")<-scall
+  class(s)<-c("svykmlist.cox","svykmlist")
+  return(s)
+}
+
+

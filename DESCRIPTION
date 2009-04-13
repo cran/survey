@@ -6,7 +6,7 @@ Description: Summary statistics, generalised linear models, Cox models,
         unequally weighted survey samples. Variances by Taylor series
         linearisation or replicate weights. Post-stratification,
         calibration, and raking. Two-phase designs. Graphics.
-Version: 3.13
+Version: 3.14
 Author: Thomas Lumley
 Maintainer: Thomas Lumley <tlumley@u.washington.edu>
 License: GPL-2 | GPL-3
@@ -14,6 +14,6 @@ Depends: R (>= 2.2.0)
 Suggests: survival, MASS, KernSmooth, hexbin, mitools, lattice,
         RSQLite, RODBC, quantreg, splines
 URL: http://faculty.washington.edu/tlumley/survey/
-Packaged: Thu Mar 26 17:30:05 2009; tlumley
+Packaged: 2009-04-13 20:29:38 UTC; tlumley
 Repository: CRAN
-Date/Publication: 2009-03-27 08:11:15
+Date/Publication: 2009-04-15 07:35:08

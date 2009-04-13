@@ -90,7 +90,6 @@ mean and total can also be obtained with \code{\link{calibrate}}.
 
   data(api)
 
-  glm(api00~ell+meals+mobility, data=apipop)
 
   dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
   dclus2<-svydesign(id=~dnum+snum, weights=~pw, data=apiclus2)

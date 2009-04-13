@@ -1,0 +1,94 @@
+
+R version 2.9.0 beta (2009-04-08 r48309)
+Copyright (C) 2009 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(survey)
+
+Attaching package: 'survey'
+
+
+	The following object(s) are masked from package:graphics :
+
+	 dotchart 
+
+> library(survival)
+Loading required package: splines
+> 
+> pbc2<-rbind(pbc,pbc)
+> pbc2$id<-rep(1:418,2)
+> 
+> dpbc1<-svydesign(id=~1, data=pbc)
+Warning message:
+In svydesign.default(id = ~1, data = pbc) :
+  No weights or probabilities supplied, assuming equal probability
+> dpbc2<-svydesign(id=~id, data=pbc2)
+Warning message:
+In svydesign.default(id = ~id, data = pbc2) :
+  No weights or probabilities supplied, assuming equal probability
+> 
+> s1<-svykm(Surv(time,status>0)~1, subset(dpbc1, bili>6), se=TRUE)
+> s2<-svykm(Surv(time,status>0)~1, subset(dpbc2, bili>6), se=TRUE)
+> 
+> (c1<-confint(s1,(1:5)*365))
+         0.025     0.975
+365  0.6446215 0.8594153
+730  0.5410938 0.7766848
+1095 0.2683127 0.5103356
+1460 0.1444731 0.3722001
+1825 0.1009672 0.3204713
+> (c2<-confint(s2,(1:5)*365))
+         0.025     0.975
+365  0.6446215 0.8594153
+730  0.5410938 0.7766848
+1095 0.2683127 0.5103356
+1460 0.1444731 0.3722001
+1825 0.1009672 0.3204713
+> all.equal(c1, c2)
+[1] TRUE
+> 
+> m1<-svycoxph(Surv(time,status>0)~log(bili), design=dpbc1)
+> m2<-svycoxph(Surv(time,status>0)~log(bili), design=dpbc2)
+> 
+> d<-data.frame(bili=c(5,10))
+> p1<-predict(m1, se=TRUE, newdata=d,type="curve")
+> p2<-predict(m2, se=TRUE, newdata=d,type="curve")
+> 
+> (pc1<-confint(p1[[1]],(1:5)*365))
+         0.025     0.975
+365  0.8475598 0.9194575
+730  0.7503249 0.8397774
+1095 0.5771295 0.6710279
+1460 0.4597188 0.5651130
+1825 0.3480505 0.4727843
+> (pc2<-confint(p2[[1]],(1:5)*365))
+         0.025     0.975
+365  0.8476442 0.9193857
+730  0.7504154 0.8396764
+1095 0.5771613 0.6708448
+1460 0.4596111 0.5648916
+1825 0.3478089 0.4725304
+> all.equal(pc1, pc2)
+[1] "Mean relative difference: 0.0002150753"
+> 
+> (q1<-quantile(p1[[2]]))
+0.75  0.5 0.25 
+ 489  930 1492 
+> (q2<-quantile(p2[[2]]))
+0.75  0.5 0.25 
+ 489  930 1492 
+> all.equal(q1,q2)
+[1] TRUE
+> 

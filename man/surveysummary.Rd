@@ -111,7 +111,11 @@ survey functions.
 \value{
   Objects of class \code{"svystat"} or \code{"svrepstat"},
     which are vectors with a \code{"var"} attribute giving the variance
-    and a \code{"statistic"} attribute giving the name of the statistic.
+    and a \code{"statistic"} attribute giving the name of the
+    statistic.
+
+    These objects have methods for \code{vcov}, \code{SE}, \code{coef},
+    \code{confint}, \code{svycontrast}.
     
 }
 
@@ -127,7 +131,9 @@ survey functions.
   \code{\link{svyciprop}} for more accurate confidence intervals for
   proportions near 0 or 1.
 
-   \code{\link{svyttest}} for comparing two means.
+  \code{\link{svyttest}} for comparing two means.
+
+  \code{\link{svycontrast}} for linear and nonlinear functions of estimates.
 }
 
 \examples{
@@ -136,7 +142,7 @@ survey functions.
 
   ## one-stage cluster sample
   dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
-  summary(dclus1)
+
   svymean(~api00, dclus1, deff=TRUE)
   svymean(~factor(stype),dclus1)
   svymean(~interaction(stype, comp.imp), dclus1)
@@ -145,18 +151,12 @@ survey functions.
   svytotal(~enroll, dclus1, deff=TRUE)
   svyratio(~api.stu, ~enroll, dclus1)
 
-  #stratified sample
-  dstrat<-svydesign(id=~1, strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
-  summary(dstrat)
-  svymean(~api00, dstrat)
-  svyquantile(~api00, dstrat, c(.25,.5,.75))
-  svyvar(~api00, dstrat)
-  svytotal(~enroll, dstrat)
-  svyratio(~api.stu, ~enroll, dstrat)
-  
-  # replicate weights - jackknife (this is slow)
+
+  # replicate weights - jackknife (this is slower)
+  dstrat<-svydesign(id=~1,strata=~stype, weights=~pw,
+        data=apistrat, fpc=~fpc)
   jkstrat<-as.svrepdesign(dstrat)
-  summary(jkstrat)
+
   svymean(~api00, jkstrat)
   svymean(~factor(stype),jkstrat)
   svyvar(~api00,jkstrat)
@@ -168,9 +168,11 @@ survey functions.
   cv(svytotal(~enroll,dstrat))
   cv(svyratio(~api.stu, ~enroll, jkstrat))
 
-  # extracting statistic and variance
+  # extracting information from the results
   coef(svytotal(~enroll,dstrat))
   vcov(svymean(~api00+api99,jkstrat))
+  SE(svymean(~enroll, dstrat))
+  confint(svymean(~api00+api00, dclus1))
 
   # Design effect
   svymean(~api00, dstrat, deff=TRUE)

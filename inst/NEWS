@@ -1,3 +1,14 @@
+3.14   predict.svycoxph() now does fitted survival curves with standard
+       errors for the Cox model. (for Norman Breslow)
+
+       standard errors for svykm use a bit less memory.
+
+       quantile.svykm can do confidence intervals
+
+       added some references on svykm standard errors.
+
+       tidied up some help pages.
+
 3.13   Add standard errors to svykm() (for Norman Breslow)
 
        fix typo in svyquantile(interval.type="betaWald") and add

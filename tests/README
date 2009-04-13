@@ -47,4 +47,8 @@ regpredict.R: ratio and regression estimation of a total.
 
 scoping.R: check that svyglm and svycoxph work inside functions.
 
+survcurve.R: check that svykm and predict.coxph give the same result
+           when a data set is doubled and the two replicates of each
+           observation are treated as a cluster.
+
 twophase.R: separately verifiable examples of twophase studies
