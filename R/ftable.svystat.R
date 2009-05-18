@@ -62,3 +62,8 @@ ftable.svyby <- function (x, ...)
         dimnames = dimnames)
     ftable(rval, row.vars = c(1, length(dim(rval))))
 }
+
+if(FALSE){
+odfTable.svystat <- function(x,...) odfTable(as.data.frame(x),...)
+odfTable.table <- odfTable.matrix
+}

@@ -1,6 +1,7 @@
 \name{twophase}
 \alias{twophase}
 \alias{twophasevar}
+\alias{twophase2var}
 \alias{[.twophase}
 \alias{subset.twophase}
 \alias{print.twophase}
@@ -26,20 +27,25 @@ The internal structure of \code{twophase} objects may change in the future.
 }
 \usage{
 twophase(id, strata = NULL, probs = NULL, weights = NULL, fpc = NULL,
-subset, data)
+subset, data, method=c("full","approx"))
 twophasevar(x,design)
+twophase2var(x,design)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{id}{list of two formulas for sampling unit identifiers}
   \item{strata}{list of two formulas (or \code{NULL}s) for stratum identifies}
   \item{probs}{ list of two formulas (or \code{NULL}s) for sampling probabilities}
-  \item{weights}{list of two formulas (or \code{NULL}s) for sampling weights}
+  \item{weights}{Only for \code{method="approx"}, list of two formulas (or \code{NULL}s) for sampling weights}
   \item{fpc}{list of two formulas (or \code{NULL}s) for finite
     population corrections}
   \item{subset}{formula specifying which observations are selected in
     phase 2}
   \item{data}{Data frame will all data for phase 1 and 2}
+  \item{method}{\code{"full"} requires more memory, but gives unbiased
+    variance estimates for general multistage designs at both phases.
+    \code{"approx"} uses the standard error calculation from
+    version 3.14 and earlier.  }
   \item{x}{probability-weighted estimating functions}
   \item{design}{two-phase design}
 }
@@ -49,47 +55,56 @@ twophasevar(x,design)
   without replacement and all the stratum and sampling unit identifier
   variables are available for the whole first-phase sample it is
   possible to estimate the sampling probabilities/weights and the
-  finite population correction. These would then  be specified as \code{NULL}.
-  
+  finite population correction. These would then  be specified as
+  \code{NULL}.
+
   Two-phase case-control and case-cohort studies in biostatistics will
   typically have simple random sampling with replacement as the first
   stage. Variances given here may differ slightly from those in the
   biostatistics literature where a model-based estimator of the
-  first-stage variance would be used (cf Therneau & Li, 1999)
+  first-stage variance would typically be used.
   
   Variance computations are based on the conditioning argument in
-  Section 9.3 of Sarndal et al, but do not use their formulas. In particular,
-  the phase-1 variance uses a formula that has bias O(1/phase 2 sample size) but
-  is easier to extend to multistage sampling designs. See the \code{tests} 
-  directory for a worked example.
+  Section 9.3 of Sarndal et al. Method \code{"full"} corresponds exactly
+  to the formulas in that reference. Method \code{"approx"} uses less
+  time and memory but is exact only for the important special case where
+  phase 1 is simple random sampling from an infinite population. See the
+  \code{tests} directory for a worked example.
+
+
+  For \code{method="full"}, sampling probabilities must be available for
+  each stage of sampling, within each phase.  For multistage sampling
+  this requires specifying either \code{fpc} or \code{probs} as a
+  formula with a term for each stage of sampling.  If no \code{fpc} or
+  \code{probs} are specified at phase 1 it is treated as simple random
+  sampling from an infinite population, and population totals will not
+  be correctly estimated, but means, quantiles, and regression models
+  will be correct.
   }
-\note{
-  The variance computations were derived under the assumption that the
-  PSUs in the second stage are nested in the ultimate sampling units at
-  the first stage. 
-}
+
 \value{
 
-  \code{twophase} returns an object of class \code{twophase}, whose
-  structure is liable to change without notice. Currently it contains
-  three survey design objects for the full phase 1 sample, the subset of
-  the phase 1 sample that is in phase 2, and the phase 2 sample.
+  \code{twophase} returns an object of class \code{twophase2} (for
+  \code{method="full"}) or \code{twophase}.  The structure of
+  \code{twophase2} objects may change as unnecessary components are removed.
 
-  \code{twophasevar} returns a variance matrix with an attribute
+  \code{twophase2var} and \code{twophasevar} return a variance matrix with an attribute
   containing the separate phase 1 and phase 2 contributions to the variance.
 }
 \references{
 Sarndal CE, Swensson B, Wretman J (1992) "Model Assisted Survey Sampling"
 Springer.
 
-Barlow, WE (1994). Robust variance estimation for the case-cohort design. "Biometrics"
-50: 1064-1072
 
-Breslow NW and Chatterjee N, Design and analysis of two-phase
+Breslow NE and Chatterjee N, Design and analysis of two-phase
 studies with binary outcome applied to Wilms tumour prognosis.  "Applied
 Statistics"  48:457-68, 1999
 
-Therneau TM and Li H., Computing the Cox model for case-cohort designs. "Lifetime Data Analysis"  5:99-112, 1999
+Breslow N, Lumley T, Ballantyne CM, Chambless LE, Kulick M. (2009)
+Improved Horvitz-Thompson estimation of model parameters from two-phase
+stratified samples: applications in epidemiology. Statistics in
+Biosciences. doi 10.1007/s12561-009-9001-6
+
 
 Lin, DY and Ying, Z (1993). Cox regression with incomplete covariate measurements.
 "Journal of the American Statistical Association" 88: 1341-1349.

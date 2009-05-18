@@ -669,7 +669,7 @@ svyvar<-function(x, design, na.rm=FALSE,...){
 svyvar.survey.design<-function(x, design, na.rm=FALSE,...){
     
 	if (inherits(x,"formula"))
-            x<-model.frame(x,design$variables,na.action=na.pass)
+            x<-model.frame(x,model.frame(design),na.action=na.pass)
 	else if(typeof(x) %in% c("expression","symbol"))
             x<-eval(x, design$variables)
         
@@ -1100,6 +1100,8 @@ svycoxph.survey.design<-function(formula,design,subset=NULL,...){
                     postStrata=design$postStrata)
     else if (inherits(design, "twophase"))
       g$var<-twophasevar(dbeta, design)
+    else if(inherits(design, "twophase2"))
+      g$var<-twophase2var(dbeta, design)
     else 
       g$var<-svyCprod(dbeta, design$strata,
                     design$cluster[[1]], design$fpc,design$nPSU,
@@ -1233,10 +1235,10 @@ svy.varcoef<-function(glm.object,design){
     naa<-glm.object$na.action
     ## the design may still have rows with weight zero for missing values
     ## if there are weights or calibration. model.matrix will have removed them
-    if (length(naa) && (NROW(estfun)!=NROW(design$cluster))){
-      if ((length(naa)+NROW(estfun))!=NROW(design$cluster))
+    if (length(naa) && (NROW(estfun)!=nrow(design) )){
+      if ((length(naa)+NROW(estfun))!=nrow(design) )
         stop("length mismatch: this can't happen.")
-      n<-NROW(design$cluster)        
+      n<-nrow(design)     
       inx <- (1:n)[-naa]
       ee <- matrix(0,nrow=n,ncol=NCOL(estfun))
       ee[inx,]<-estfun
@@ -1247,6 +1249,8 @@ svy.varcoef<-function(glm.object,design){
       svyrecvar(estfun%*%Ainv,design$cluster,design$strata,design$fpc,postStrata=design$postStrata)
     else if (inherits(design, "twophase"))
       twophasevar(estfun%*%Ainv, design)
+    else if (inherits(design, "twophase2"))
+      twophase2var(estfun%*%Ainv, design)
     else
       svyCprod(estfun%*%Ainv,design$strata,design$cluster[[1]],design$fpc, design$nPSU,
                   design$certainty,design$postStrata)
@@ -1868,7 +1872,7 @@ predict.svyglm <- function(object, newdata=NULL, total=NULL,
             vv<-drop(rowSums((mm %*% vcov(object)) * mm))
             attr(eta,"var")<-switch(type,
                                     link=vv,
-                                    response=d*(t(vv*d)))
+                                    response=drop(d*(t(vv*d))))
         }
     }
     attr(eta,"statistic")<-type

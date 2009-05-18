@@ -25,17 +25,22 @@ svykm.survey.design<-function(formula, design,se=FALSE, ...){
       groups<-do.call(interaction,x)
     else
       groups<-as.factor(x)
-
+    
     if (se){
-      formula[[3]]<-1
-      s<-lapply(levels(groups), function(g) svykm(formula, subset(design,groups==g),se=TRUE))
+      lhs<-formula
+      lhs[[3]]<-1
+      s<-lapply(levels(groups), function(g) svykm(lhs, subset(design,groups==g),se=TRUE))
     }else{
       s<-lapply(levels(groups), function(g) svykm.fit(y[groups==g],weights(design)[groups==g]))
     }
     names(s)<-levels(groups)
     class(s)<-"svykmlist"
   }
-  attr(s,"call")<-sys.call(-1)
+  call<-match.call()
+  call[[1]]<-as.name(.Generic)
+  attr(s,"call")<-call
+  attr(s, "formula")<-formula
+  attr(s, "na.action")<-drop
   return(s)
 }
 

@@ -1447,6 +1447,10 @@ vcov.svrepstat<-function(object,...){
 
 
 as.data.frame.svrepstat<-function(x,...){
+  if (is.list(x)) {
+    x<-x[[1]]
+    class(x)<-"svrepstat"
+  }
   rval<-data.frame(statistic=coef(x),SE=SE(x))
   names(rval)[1]<-attr(x,"statistic")
   if (!is.null(attr(x,"deff")))

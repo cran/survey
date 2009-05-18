@@ -20,18 +20,25 @@ mu284.1$sub<-rep(c(TRUE,FALSE),c(15,34-15))
 dmu284<-svydesign(id=~id1+id2,fpc=~n1+n2, data=mu284)
 ## first phase cluster sample, second phase stratified within cluster
 (d2mu284<-twophase(id=list(~id1,~id),strata=list(NULL,~id1),
-                   fpc=list(~n1,NULL),data=mu284.1,subset=~sub))
+                   fpc=list(~n1,NULL),data=mu284.1,subset=~sub,method="approx"))
+(d22mu284<-twophase(id=list(~id1,~id),strata=list(NULL,~id1),
+                   fpc=list(~n1,NULL),data=mu284.1,subset=~sub,method="full"))
 summary(d2mu284)
 t1<-svytotal(~y1, dmu284)
 t2<-svytotal(~y1, d2mu284)
+t22<-svytotal(~y1,d22mu284)
 m1<-svymean(~y1, dmu284)
 m2<-svymean(~y1, d2mu284)
+m22<-svymean(~y1, d22mu284)
 all.equal(coef(t1),coef(t2))
+all.equal(coef(t1),coef(t22))
 all.equal(coef(m1),coef(m2))
-all.equal(SE(t1),SE(t2))
-all.equal(SE(t1),SE(t2))
+all.equal(coef(m1),coef(m22))
+all.equal(SE(m1),SE(m2))
+all.equal(SE(m1),SE(m22))
+all.equal(SE(m1),SE(m2))
+all.equal(SE(m1),SE(m22))
 
-if (getRversion() > '2.3.0'){
 ## case-cohort design
 ##this example requires R 2.3.1 or later for cch and data.
 library("survival")
@@ -41,6 +48,12 @@ print(dcchs<-twophase(id=list(~seqno,~seqno), strata=list(NULL,~rel),
                  subset=~I(in.subcohort | rel), data=nwtco))
 cch1<-svycoxph(Surv(edrel,rel)~factor(stage)+factor(histol)+I(age/12),
                design=dcchs)
+dcchs2<-twophase(id=list(~seqno,~seqno), strata=list(NULL,~rel),
+                 subset=~I(in.subcohort | rel), data=nwtco,method="approx")
+cch1.2<-svycoxph(Surv(edrel,rel)~factor(stage)+factor(histol)+I(age/12),
+               design=dcchs)
+all.equal(coef(cch1),coef(cch1.2))
+all.equal(SE(cch1),SE(cch1.2))
 ## Using survival::cch 
 subcoh <- nwtco$in.subcohort
 selccoh <- with(nwtco, rel==1|subcoh==1)
@@ -54,10 +67,11 @@ print(all.equal(as.vector(coef(cch1)),as.vector(coef(cch2))))
 ## cch has smaller variances by a factor of 1.0005 because
 ## there is a (n/(n-1)) in the survey phase1 varianace
 print(all.equal(as.vector(SE(cch1)), as.vector(SE(cch2)),tolerance=0.0006))
-}
+
+
 ## bug report from Takahiro Tsuchiya for version 3.4
-## We do not match Sarndal exactly, because our phase-one
-## estimator has O(1/n.phase.2) bias.
+## We used to not match Sarndal exactly, because our old phase-one
+## estimator had a small bias for finite populations
 rei<-read.table(tmp<-textConnection(
 "  id   N n.a h n.ah n.h   sub  y
 1   1 300  20 1   12   5  TRUE  1
@@ -84,8 +98,11 @@ rei<-read.table(tmp<-textConnection(
 close(tmp)
 
 des.rei <- twophase(id=list(~id,~id), strata=list(NULL,~h),
-                    fpc=list(~N,NULL), subset=~sub, data=rei)
+                    fpc=list(~N,NULL), subset=~sub, data=rei, method="approx")
 tot<- svytotal(~y, des.rei)
+des.rei2 <- twophase(id=list(~id,~id), strata=list(NULL,~h),
+                    fpc=list(~N,NULL), subset=~sub, data=rei)
+tot2<- svytotal(~y, des.rei2)
 
 ## based on Sarndal et al (9.4.14)
 rei$w.ah <- rei$n.ah / rei$n.a
@@ -106,7 +123,11 @@ V
 Vphase1
 Vphase2
 vcov(tot)
+vcov(tot2)
 ## phase 2 identical
 all.equal(Vphase2,drop(attr(vcov(tot),"phases")$phase2))
-## phase 1 differs by 2.6%
+all.equal(Vphase2,drop(attr(vcov(tot2),"phases")$phase2))
+## phase 1 differs by 2.6% for old twophase estimator
 Vphase1/attr(vcov(tot),"phases")$phase1
+all.equal(Vphase1,as.vector(attr(vcov(tot2),"phases")$phase1))
+

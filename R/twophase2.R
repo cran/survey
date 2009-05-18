@@ -1,14 +1,88 @@
 ##
+## Constructing cov(R_i,R_j)/pi^*_ij, or \check{\check{\Delta}}_ij in Sarndal's notation
+## We use this form because it can be sparse and because it is easy to combine
+## multistage and multiphase sampling.
 ##
-twophase<-function(id,strata=NULL, probs=NULL, weights=NULL, fpc=NULL,
-                   subset, data, method=c("full","approx")){
-  method<-match.arg(method)
-  if(method=="full") {
-    if (!is.null(weights)) stop("weights not accepted by method='full'")
-    twophase2(id=id, strata=strata, probs=probs, fpc=fpc,subset=subset,data=data)
+Dcheck_strat<-function(strata, prob){
+    strata<-as.numeric(strata) ## for ave()
+    n<-length(strata)
+    rval<-matrix(0, n,n)
+    sampsize<-ave(strata,strata,FUN=length)
+    strats<-unique(strata)
+    for(strat in strats){
+        these <- strata == strat
+        rval[these,these]<- -(1-prob[these])/(sampsize[these]-1)
+    }
+    diag(rval)<-(1-prob)
+    rval
+}
+
+Dcheck_multi<-function(id,strata,probs){
+   nstage<-NCOL(id)
+   rval<-matrix(0,NROW(id),NROW(id))
+   for(stage in 1:nstage){
+       uid<-!duplicated(id[,stage])
+       idx<-match(id[,stage],id[uid,stage])
+       this_stage<-Dcheck_strat(strata[uid,stage],probs[uid,stage])[idx,idx]
+       rval<- twophaseDcheck(rval, this_stage)
+     }
+   rval
+ }
+
+Dcheck_subset<-function(strata, subset, prob, withreplacement){
+    strata<-as.numeric(strata) ## for ave()
+    N<-length(strata)
+    n<-sum(subset)
+    rval<-matrix(0, n,n)
+    sampsize<-ave(strata,strata,FUN=length)
+    strats<-unique(strata)
+    if (!withreplacement){
+      for(strat in strats){
+        these <- strata == strat
+        ithese<-which(these)
+        rval[these[subset],these[subset]]<- -(1-prob[ithese[subset]])/(sampsize[ithese[subset]]-1)
+      }
+    }
+    diag(rval)<-(1-prob[subset])
+    rval
   }
-                     
-  d1<-svydesign(id=id[[1]],strata=strata[[1]],weights=weights[[1]],
+
+Dcheck_multi_subset<-function(id,strata,subset,probs,withreplacement){
+   nstage<-NCOL(id)
+   n<-sum(subset)
+   rval<-matrix(0,n,n)
+   if (all(probs==1) && withreplacement)
+     return(as(diag(n),"sparseMatrix"))
+   for(stage in 1:nstage){
+       uid<-!duplicated(id[,stage])
+       insubset<-rowsum(as.integer(subset),id[,stage],reorder=FALSE)>0
+       idx<-match(id[subset,stage],id[subset,stage][uid])
+       this_stage<-Dcheck_subset(strata[uid,stage],insubset,probs[uid,stage],withreplacement)[idx,idx]
+       rval<- twophaseDcheck(rval, this_stage)
+     }
+   rval
+ }
+twophaseDcheck<-function(Dcheck1,Dcheck2){
+  as(-Dcheck1*Dcheck2+Dcheck1+Dcheck2,"sparseMatrix")
+}
+
+make_covmat<-function(design1,design2,subset){
+  require("Matrix",quietly=TRUE) || stop("These designs require the Matrix package")
+  withreplacement<-is.null(design1$fpc$popsize)
+  phase1<-Dcheck_multi_subset(design1$cluster, design1$strata, subset, design1$allprob, withreplacement)
+  phase2<-Dcheck_multi(design2$cluster, design2$strata, design2$allprob)
+  dcheck<-twophaseDcheck(phase1,phase2)
+  list(phase1=phase1,phase2=phase2,full=dcheck)
+}
+
+##
+## Based on twophase(), so it computes some stuff that is no longer necessary.
+## Will be pruned in the future.
+##
+twophase2<-function(id,strata=NULL, probs=NULL, fpc=NULL,
+                   subset, data){
+
+  d1<-svydesign(id=id[[1]],strata=strata[[1]],weights=NULL,
                 probs=probs[[1]],fpc=fpc[[1]],data=data)
 
   if(inherits(subset,"formula"))
@@ -19,13 +93,10 @@ twophase<-function(id,strata=NULL, probs=NULL, weights=NULL, fpc=NULL,
 
   if (any(is.na(subset))) stop("missing values in 'subset'")
   
-  d1s<-svydesign(id=id[[1]],strata=strata[[1]],weights=weights[[1]],
+  d1s<-svydesign(id=id[[1]],strata=strata[[1]],weights=NULL,
                 probs=probs[[1]],fpc=fpc[[1]],data=data[subset,])
   d1s$prob<-d1$prob[subset]
   d1s$allprob<-d1$allprob[subset,,drop=FALSE]
-
-  ##if (NCOL(d1s$allprob)>1)
-  ##  stop("Can't handle multistage sampling at phase 1 (yet)")
   
   ## work out phase-two fpc
   if (is.null(fpc[[2]])){
@@ -41,21 +112,21 @@ twophase<-function(id,strata=NULL, probs=NULL, weights=NULL, fpc=NULL,
   } else popsize<-NULL
 
   d2<-svydesign(id=id[[2]], strata=strata[[2]], probs=probs[[2]],
-                weights=weights[[2]], fpc=fpc[[2]], data=data[subset,])
+                weights=NULL, fpc=fpc[[2]], data=data[subset,])
 
   ## ugly hack to get nicer labels
   if(!is.null(fpc[[2]])){
     d2call<-bquote(svydesign(id=.(id[[2]]),strata=.(strata[[2]]), probs=.(probs[[2]]),
-                              weights=.(weights[[2]]), fpc=.(fpc[[2]])))
+                               fpc=.(fpc[[2]])))
   } else{
     d2call<-bquote(svydesign(id=.(id[[2]]),strata=.(strata[[2]]), probs=.(probs[[2]]),
-                              weights=.(weights[[2]]), fpc=`*phase1*`))
+                               fpc=`*phase1*`))
   }
   for(i in names(d2call)[-1])
     d2call[[i]]<-d2call[[i]]
   d2$call<-d2call
   d1call<-bquote(svydesign(id=.(id[[1]]), strata=.(strata[[1]]), probs=.(probs[[1]]),
-                              weights=.(weights[[1]]), fpc=.(fpc[[1]])))
+                               fpc=.(fpc[[1]])))
   for(i in names(d1call)[-1])
     d1call[[i]]<-d1call[[i]]
   d1$call<-d1call
@@ -64,15 +135,17 @@ twophase<-function(id,strata=NULL, probs=NULL, weights=NULL, fpc=NULL,
   ## Add phase 2 fpc and probs if they were computed rather than specified.
   if (!is.null(popsize))
     d2$fpc<-as.fpc(popsize[subset,,drop=FALSE],d2$strata,d2$cluster)
-  if(is.null(probs[[2]]) && is.null(weights[[2]]) && !is.null(d2$fpc$popsize)){
+  if(is.null(probs[[2]]) && !is.null(d2$fpc$popsize)){
     d2$allprob<-1/weights(d2$fpc,final=FALSE)
     d2$prob<-apply(as.data.frame(d2$allprob),1,prod)
   }
   
   d2$variables<-NULL
+  deltacheck<-make_covmat(d1,d2, subset)
+
   rval<-list(phase1=list(full=d1,sample=d1s),
              phase2=d2,
-             subset=subset)
+             subset=subset, dcheck=deltacheck)
   rval$prob<-rval$phase1$sample$prob
 
   ## Are phase 2 PSUs the same as Phase 1 USUs, or smaller?
@@ -95,9 +168,6 @@ twophase<-function(id,strata=NULL, probs=NULL, weights=NULL, fpc=NULL,
       rval$usu<-drop(with(rval$phase1$sample,ave(cluster[,m], strata[,m], FUN=nunique))/rval$phase1$full$fpc$sampsize[rval$subset])
   }
 
-##  if (any(rval$usu<1) && any(duplicated(d1$cluster[,1])))
-##      stop("Phase 1 design must either be element sampling or have all phase 1 sampling units in phase 2")
-  
   if (length(rval$phase1$sample$prob)==length(d2$prob))
     rval$prob<-rval$phase1$sample$prob*d2$prob
   else{
@@ -105,12 +175,12 @@ twophase<-function(id,strata=NULL, probs=NULL, weights=NULL, fpc=NULL,
     rval$prob[subset]<-rval$prob[subset]*d2$prob
   }
   rval$call<-sys.call()
-  class(rval) <- c("twophase","survey.design")
+  class(rval) <- c("twophase2","survey.design")
   rval
 }
 
-print.twophase<-function(x,...){
-  cat("Two-phase design: ")
+print.twophase2<-function(x,...){
+  cat("Two-phase sparse-matrix design:\n ")
   print(x$call)
   cat("Phase 1:\n")
   print(x$phase1$full)
@@ -119,13 +189,13 @@ print.twophase<-function(x,...){
   invisible(x)
 }
 
-summary.twophase<-function(object,...){
-  class(object)<-"summary.twophase"
+summary.twophase2<-function(object,...){
+  class(object)<-"summary.twophase2"
   object
 }
 
-print.summary.twophase<-function(x,...,varnames=TRUE){
-  cat("Two-phase design: ")
+print.summary.twophase2<-function(x,...,varnames=TRUE){
+  cat("Two-phase sparse-matrix design:\n ")
   print(x$call)
    cat("Phase 1:\n")
   print(x$phase1$full,design.summaries=TRUE,varnames=FALSE)
@@ -138,187 +208,73 @@ print.summary.twophase<-function(x,...,varnames=TRUE){
   invisible(x)
 }
 
-twophasevar<-function(x,design){
-  d1 <- design$phase1$sample
-  if (NROW(x)==length(design$usu)){
-      ph2pr<-design$usu
-      if (any(design$prob==Inf))
-          x[is.na(x)]<-0
-  }else{
-      x[is.na(x)]<-0
-      ph2pr<-rep(1,NROW(x))
-      ph2pr[design$subset]<-design$usu
-  }
-  ## compute phase 1 variance
-  vphase1 <- svyrecvar.phase1(x,d1$cluster, d1$strata, d1$fpc,
-                              postStrata=d1$postStrata,
-                              ph2prob=ph2pr,
-                              nPSUfull=design$phase1$full$fpc$sampsize[design$subset,,drop=FALSE])
-  
-  ## is phase 2 sampling whole phase 1 units or subsampling within units?
-  if (design$samescale)
-    u2<-x
-  else
-    u2<-x*sqrt(d1$prob)
 
-  u2[is.na(u2)]<-0
-  ## compute phase 2 variance
-  vphase2 <- with(design, svyrecvar(u2, phase2$cluster, phase2$strata,
-                                  phase2$fpc, postStrata=phase2$postStrata))
-  rval <- vphase1+vphase2
-  attr(rval, "phases")<-list(phase1=vphase1, phase2=vphase2)
+##
+##FIXME:  need to separate phase 1 and phase 2 after calibration on either phase.
+##
+twophase2var<-function(x,design){
+  ## calibration is allowed at phase one or phase two,
+  ## but not for clusters within a phase
+  postStrata2<-design$phase2$postStrata
+  postStrata1<-design$phase1$full$postStrata
+  if (is.null(postStrata1) && is.null(postStrata2)){
+    rval<-htvar.matrix(x,design$dcheck$full)
+    ph2<-htvar.matrix(x,design$dcheck$phase2)
+    attr(rval,"phases")<-list(phase1=rval-ph2,phase2=ph2)
+    return(rval)
+  }
+  if (!is.null(postStrata1)){
+    ##phase 1 calibration
+    ## x is size of phase-2 sample,need to expand to allow calibration.
+    y<-matrix(0,ncol=ncol(x),nrow=length(design$subset))
+    y[design$subset,]<-x
+    for (psvar in postStrata1){
+      if (inherits(psvar, "greg_calibration")) {
+        if (psvar$stage==0){
+          ## G-calibration at population level
+          y<-qr.resid(psvar$qr,y/psvar$w)*psvar$w
+        } else {
+          ## G-calibration within clusters
+          stop("calibration within clusters not allowed for two-phase designs")
+        }
+      } else {
+        ## ordinary post-stratification
+        psw<-attr(psvar, "weights")
+        postStrata<-as.factor(psvar)
+        psmeans<-rowsum(y/psw,psvar,reorder=TRUE)/as.vector(table(factor(psvar)))
+        y<- y-psmeans[match(psvar,sort(unique(psvar))),]*psw
+        x1<-y[design$subset,,drop=FALSE]
+      }
+    }
+  } else x1<-x
+  phase1var<-htvar.matrix(x1,design$dcheck$full)-htvar.matrix(x1,design$dcheck$phase2)
+  if (!is.null(postStrata2)){
+    ##phase 2 calibration
+    for (psvar in postStrata2){
+      if (inherits(psvar, "greg_calibration")) {
+        if (psvar$stage==0){
+          ## G-calibration at population level
+          x2<-qr.resid(psvar$qr,x/psvar$w)*psvar$w
+        } else {
+          ## G-calibration within clusters
+          stop("calibration within clusters not allowed for two-phase designs")
+        }
+      } else {
+        ## ordinary post-stratification
+        psw<-attr(psvar, "weights")
+        postStrata<-as.factor(psvar)
+        psmeans<-rowsum(x/psw,psvar,reorder=TRUE)/as.vector(table(factor(psvar)))
+        x2<- x-psmeans[match(psvar,sort(unique(psvar))),]*psw
+      }
+    }
+  } else x2<-x
+  phase2var<-htvar.matrix(x2,design$dcheck$phase2)
+  rval<-phase1var+phase2var
+  attr(rval,"phases")<-list(phase1=phase1var,phase2=phase2var)
   rval
 }
 
-svyrecvar.phase1<-function(x, clusters,  stratas, fpcs, postStrata=NULL,
-                           lonely.psu=getOption("survey.lonely.psu"),
-                           one.stage=getOption("survey.ultimate.cluster"),
-                           ph2prob, nPSUfull){
-    
-    x<-as.matrix(x)
-    cal<-NULL
-
-    ## FIXME: calibration of phase 1 not yet implemented.
-    ## Remove post-stratum means, which may cut across clusters
-    ## Also center the data using any "g-calibration" models
-    if(!is.null(postStrata)){
-        stop("calibration of phase 1 not yet implemented")
-        for (psvar in postStrata){
-            if (inherits(psvar, "greg_calibration")) {
-                if (psvar$stage==0){
-                    ## G-calibration at population level
-                    x<-qr.resid(psvar$qr,x/psvar$w)*psvar$w
-                } else {
-                    ## G-calibration within clusters
-                    cal<-c(cal, list(psvar))
-                }
-            } else {
-                ## ordinary post-stratification
-                psw<-attr(psvar, "weights")
-                postStrata<-as.factor(psvar)
-                psmeans<-rowsum(x/psw,psvar,reorder=TRUE)/as.vector(table(factor(psvar)))
-                x<- x-psmeans[match(psvar,sort(unique(psvar))),]*psw
-            }
-        }
-    }
-  
-    multistage.phase1(x, clusters,stratas,fpcs$sampsize, fpcs$popsize,
-             lonely.psu=getOption("survey.lonely.psu"),
-             one.stage=one.stage,stage=1,cal=cal,ph2prob=ph2prob,
-                      nPSUfull=nPSUfull)
-}
-
-
-multistage.phase1<-function(x, clusters,  stratas, nPSUs, fpcs,
-                    lonely.psu=getOption("survey.lonely.psu"),
-                     one.stage=FALSE,stage,cal,ph2prob, nPSUfull){
-  
-  n<-NROW(x)
- 
-  
-  v <- onestage.phase1(x,stratas[,1], clusters[,1], nPSUs[,1],
-                fpcs[,1], lonely.psu=lonely.psu,stage=stage,cal=cal,
-                ph2prob=ph2prob, nPSUfull=nPSUfull[,1])
-  
-  if (one.stage!=TRUE && !is.null(fpcs) && NCOL(clusters)>1) {
-    v.sub<-by(1:n, list(as.numeric(clusters[,1])), function(index){
-      ## residuals for G-calibration using population information
-      ## only on clusters at this stage.
-      for(cali in cal){
-        if (cali$stage != stage)
-          next
-        j<-match(clusters[index,1],cali$index)
-        if (length(unique(j))!=1)
-          stop("Internal problem in g-calibration data: stage",stage,
-               ", cluster", j)
-        j<-j[[1]]
-        x[index,]<-qr.resid(cali$qr[[j]], x[index,,drop=FALSE]/cali$w[[j]])*cali$w[[j]]
-      }
-      multistage.phase1(x[index,,drop=FALSE], clusters[index,-1,drop=FALSE],
-                        stratas[index,-1,drop=FALSE], nPSUs[index,-1,drop=FALSE],
-                        fpcs[index,-1,drop=FALSE],
-                        lonely.psu=lonely.psu,one.stage=one.stage-1,
-                        stage=stage+1,cal=cal,ph2prob=ph2prob[index],
-                        nPSUfull=nPSUfull[index,-1,drop=FALSE])*nPSUfull[index[1],1]/fpcs[index[1],1]
-    })
-    
-    for(i in 1:length(v.sub))
-      v<-v+v.sub[[i]]
-  }
-  v
-}
-
-
-onestrat.phase1<-function(x,cluster,nPSU,fpc, lonely.psu,stratum=NULL,
-                          stage=1,cal,ph2prob, nPSUfull){
-  x<-rowsum(x, cluster)
-  ph2prob<-ph2prob[!duplicated(cluster)]
-
-  nsubset<-nrow(x)
-  if (nsubset<nPSU)
-     x<-rbind(x,matrix(0,ncol=ncol(x),nrow=nPSU-nrow(x)))
-
-  ph2prob<-c(ph2prob,rep(1,nPSU-nsubset))
-  xcenter<-colMeans(x*nPSU/nPSUfull)
-
-  x<-x*ph2prob
-
-  
-  if (is.null(fpc))
-      f<-1
-  else
-      f<-ifelse(fpc==Inf, 1, (fpc-nPSUfull)/fpc)
-  
-  if (lonely.psu!="adjust" || nsubset>1 ||
-      (nPSU>1 && !getOption("survey.adjust.domain.lonely")))
-      x<-sweep(x, 2, xcenter, "-")
-  
-  if (nPSU>1)
-      scale<-f*nPSUfull/(nPSUfull-1)
-  else
-      scale<-f
-
-  if (nsubset==1 && nPSU>1){ 
-      warning("Stratum (",stratum,") has only one PSU at stage ",stage)
-      if (lonely.psu=="average" && getOption("survey.adjust.domain.lonely"))
-          scale<-NA
-    }
-  
-  if (nPSU>1){
-      return(crossprod(x/sqrt(ph2prob))*scale)
-  } else if (f<0.0000001) ## certainty PSU
-      return(0*crossprod(x/sqrt(ph2prob)))
-  else {
-      rval<-switch(lonely.psu,
-                   certainty=scale*crossprod(x/sqrt(ph2prob)),
-                   remove=scale*crossprod(x/sqrt(ph2prob)),
-                   adjust=scale*crossprod(x/sqrt(ph2prob)),
-                   average=NA*crossprod(x/sqrt(ph2prob)),
-                   fail= stop("Stratum (",stratum,") has only one PSU at stage ",stage),
-                   stop("Can't handle lonely.psu=",lonely.psu)
-            )
-      rval
-  }
-}
-
-
-onestage.phase1<-function(x, strata, clusters, nPSU, fpc,
-                          lonely.psu=getOption("survey.lonely.psu"),stage=0,
-                          cal,ph2prob, nPSUfull){
-  stratvars<-tapply(1:NROW(x), list(factor(strata)), function(index){
-    onestrat.phase1(x[index,,drop=FALSE], clusters[index],
-                    nPSU[index][1], fpc[index][1],
-                    lonely.psu=lonely.psu,stratum=strata[index][1], stage=stage,cal=cal,
-                    ph2prob=ph2prob[index], nPSUfull=nPSUfull[index][1])
-  })
-  p<-NCOL(x)
-  nstrat<-length(unique(strata))
-  nokstrat<-sum(sapply(stratvars,function(m) !any(is.na(m))))
-  apply(array(unlist(stratvars),c(p,p,length(stratvars))),1:2,sum,na.rm=TRUE)*nstrat/nokstrat
-}
-
-
-svytotal.twophase<-function(x,design, na.rm=FALSE, deff=FALSE,...){
+svytotal.twophase2<-function(x,design, na.rm=FALSE, deff=FALSE,...){
     
     
     if (inherits(x,"formula")){
@@ -367,15 +323,15 @@ svytotal.twophase<-function(x,design, na.rm=FALSE, deff=FALSE,...){
   N<-sum(1/design$prob)
   total <- colSums(x/as.vector(design$prob),na.rm=na.rm)
   class(total)<-"svystat"
-  attr(total, "var")<-v<-twophasevar(x/design$prob,design)
+  attr(total, "var")<-v<-twophase2var(x/design$prob,design)
   attr(total,"statistic")<-"total"
   
   if (is.character(deff) || deff){
     nobs<-NROW(design$cluster)
     if (deff=="replace")
-      vsrs<-svyvar(x,design,na.rm=na.rm)*sum(weights(design)^2)*(N-nobs)/N
+      vsrs<-svyvar(x,design,na.rm=na.rm)*sum(weights(design))^2*(N-nobs)/N
     else
-      vsrs<-svyvar(x,design,na.rm=na.rm)*sum(weights(design)^2)
+      vsrs<-svyvar(x,design,na.rm=na.rm)*sum(weights(design))^2
     attr(total, "deff")<-v/vsrs
   }
   
@@ -383,7 +339,7 @@ svytotal.twophase<-function(x,design, na.rm=FALSE, deff=FALSE,...){
   return(total)
 }
 
-svymean.twophase<-function(x,design, na.rm=FALSE,deff=FALSE,...){
+svymean.twophase2<-function(x,design, na.rm=FALSE,deff=FALSE,...){
   
   if (inherits(x,"formula")){
     ## do the right thing with factors
@@ -424,23 +380,21 @@ svymean.twophase<-function(x,design, na.rm=FALSE,deff=FALSE,...){
   
   if (na.rm){
     nas<-rowSums(is.na(x))
-    design<-design[nas==0,]
-    if(length(nas)>length(design$prob))
-        x<-x[nas==0,,drop=FALSE]
-    else
-        x[nas>0,]<-0
+    if (any(nas>0))
+      design<-design[nas==0,]
+    x[nas>0,]<-0
   }
   
   pweights<-1/design$prob
   psum<-sum(pweights)
   average<-colSums(x*pweights/psum)
   x<-sweep(x,2,average)
-  v<-twophasevar(x*pweights/psum,design)
+  v<-twophase2var(x*pweights/psum,design)
   attr(average,"var")<-v
   attr(average,"statistic")<-"mean"
   class(average)<-"svystat"
   if (is.character(deff) || deff){
-      nobs<-NROW(design$cluster)
+      nobs<-nrow(design)
       if(deff=="replace"){
         vsrs<-svyvar(x,design,na.rm=na.rm)/(nobs)
       } else {
@@ -457,14 +411,14 @@ svymean.twophase<-function(x,design, na.rm=FALSE,deff=FALSE,...){
   return(average)
 }
 
-model.frame.twophase<-function(formula,phase=2,...){
+model.frame.twophase2<-function(formula,phase=2,...){
   if (phase==1)
     formula$phase1$full$variables
   else 
     formula$phase1$sample$variables
 }
 
-svyratio.twophase<-function(numerator=formula, denominator, design, separate=FALSE,na.rm=FALSE,formula,...){
+svyratio.twophase2<-function(numerator=formula, denominator, design, separate=FALSE,na.rm=FALSE,formula,...){
 
     if (separate){
       strats<-sort(unique(design$phase2$strata[,1]))
@@ -513,7 +467,7 @@ svyratio.twophase<-function(numerator=formula, denominator, design, separate=FAL
     for(i in 1:nn){
       for(j in 1:nd){
         r<-(numerator[,i]-rval$ratio[i,j]*denominator[,j])/sum(denominator[,j]/design$prob)
-        vars[i,j]<-twophasevar(r*1/design$prob, design)
+        vars[i,j]<-twophase2var(r*1/design$prob, design)
       }
     }
     colnames(vars)<-names(denominator)
@@ -526,41 +480,36 @@ svyratio.twophase<-function(numerator=formula, denominator, design, separate=FAL
   }
 
 
-"[.twophase"<-function (x,i, ..., drop=TRUE){
+"[.twophase2"<-function (x,i, ..., drop=TRUE){
   if (!missing(i)){ 
-      if (is.calibrated(x$phase1$full) || is.calibrated(x$phase2) || !drop){
-          ## Set weights to zero: no memory saving possible
-          ## There should be an easier way to complement a subscript..
-          if (is.logical(i)){
-              x$prob[!i]<-Inf
-              x$phase2$prob[!i]<-Inf
-          } else if (is.numeric(i) && length(i)){
-              x$prob[-i]<-Inf
-              x$phase2$prob[-i]<-Inf
-          } else {
-              tmp<-x$prob[i,]
-              x$prob<-rep(Inf, length(x$prob))
-              x$prob[i,]<-tmp
-          }
-          index<-is.finite(x$prob)
-          psu<-!duplicated(x$phase2$cluster[index,1])
-          tt<-table(x$phase2$strata[index,1][psu])
-          if(any(tt==1)){
-              warning(sum(tt==1)," strata have only one PSU in this subset.")
-          }
-      } else {
-          ## subset everything.
-          x$prob<-x$prob[i]
-          if (is.logical(i))
-              x$subset[x$subset]<- i
-          else if (is.numeric(i) && length(i))
-              x$subset[which(x$subset)[-i]]<- FALSE
-          else
-              x$subset<-FALSE & x$subset
-          x$usu<-x$usu[i]
-          x$phase1$sample<-x$phase1$sample[i,...,drop=TRUE]
-          x$phase2<-x$phase2[i,...,drop=TRUE]
-        }
+    ## Set weights to zero:  don't try to save memory
+    ## There should be an easier way to complement a subscript..
+    if (is.logical(i) && any(!i)){
+      ## logical indexing: use !
+      x$prob[!i]<-Inf
+      x$phase2$prob[!i]<-Inf
+      x$dcheck<-lapply(x$dcheck, function(m) {m[!i,!i]<-0; m})
+    } else if (is.numeric(i) && length(i)){
+      ## numeric indexing: use -
+      x$prob[-i]<-Inf
+      x$phase2$prob[-i]<-Inf
+      x$dcheck<-lapply(x$dcheck, function(m) {m[-i,-i]<-0;m})
+    } else {
+      ##character indexing: use brute force and ignorance
+      tmp<-x$prob[i,]
+      x$prob<-rep(Inf, length(x$prob))
+      x$prob[i,]<-tmp
+      tmp<-x$phase2$prob[i,]
+      x$phase2$prob<-rep(Inf, length(x$phase2$prob))
+      x$phase2$prob[i,]<-tmp
+      x$dcheck<-lapply(x$dcheck, function(m) {n<-Matrix(ncol(m),ncol(m)); n[i,i]<-m[i,i]})
+    }
+    index<-is.finite(x$prob)
+    psu<-!duplicated(x$phase2$cluster[index,1])
+    tt<-table(x$phase2$strata[index,1][psu])
+    if(any(tt==1)){
+      warning(sum(tt==1)," strata have only one PSU in this subset.")
+    }
   } else {
     x$phase1$full<-x$phase1$full[,...]
     x$phase1$sample<-x$phase1$sample[,...]
@@ -569,16 +518,18 @@ svyratio.twophase<-function(numerator=formula, denominator, design, separate=FAL
   x
 }
 
-dim.twophase<-function(x,...){
+dim.twophase2<-function(x,...){
 	dim(x$phase1$sample$variables)
 }
 
-na.fail.twophase<-function(object,...){
+degf.twophase2<-function(design,...) degf(design$phase2)
+
+na.fail.twophase2<-function(object,...){
 	tmp<-na.fail(object$phase1$sample$variables,...)
 	object
 }
 
-na.omit.twophase<-function(object,...){
+na.omit.twophase2<-function(object,...){
   tmp<-na.omit(object$phase1$sample$variables,...)
   omit<-attr(tmp,"na.action")
   if (length(omit)){
@@ -589,7 +540,7 @@ na.omit.twophase<-function(object,...){
   object
 }
 
-na.exclude.twophase<-function(object,...){
+na.exclude.twophase2<-function(object,...){
 	tmp<-na.exclude(object$phase1$sample$variables,...)
 	exclude<-attr(tmp,"na.action")
 	if (length(exclude)){
@@ -601,7 +552,7 @@ na.exclude.twophase<-function(object,...){
 }
 
 
-update.twophase<-function(object,...){
+update.twophase2<-function(object,...){
 
   dots<-substitute(list(...))[-1]
   newnames<-names(dots)
@@ -615,21 +566,20 @@ update.twophase<-function(object,...){
   object 
 }
 
-subset.twophase<-function(x,subset,...){
-        e <- substitute(subset)
-        r <- eval(e, x$phase1$sample$variables, parent.frame())
-        r <- r & !is.na(r) 
-        x<-x[r,]
-	x$call<-sys.call(-1)
-	x
+subset.twophase2<-function(x,subset,...){
+  e <- substitute(subset)
+  r <- eval(e, x$phase1$sample$variables, parent.frame())
+  r <- r & !is.na(r) 
+  x<-x[r,]
+  x$call<-sys.call(-1)
+  x
 }
 
 
-calibrate.twophase<-function(design, phase=2, formula, population,
+calibrate.twophase2<-function(design, phase=2, formula, population,
                              calfun=c("linear","raking","logit","rrz"),...){
 
     if (phase==1){
-        stop("phase 1 calibration not yet implemented")
         phase1<-calibrate(design$phase1$full,formula, population, ...)
         design$phase1$full<-phase1
         design$phase1$sample<-phase1[design$subset,]
@@ -674,13 +624,12 @@ calibrate.twophase<-function(design, phase=2, formula, population,
 }
 
 
-postStratify.twophase<-function(design, ...) {
+postStratify.twophase2<-function(design, ...) {
 	stop("postStratify not yet implemented for two-phase designs. Use calibrate()")
 }
 
-estWeights<-function(data, formula, ...) UseMethod("estWeights")
                              
-estWeights.twophase<-function(data, formula=NULL, working.model=NULL,...){
+estWeights.twophase2<-function(data, formula=NULL, working.model=NULL,...){
 
   if (!xor(is.null(formula), is.null(working.model)))
     stop("Must specify one of formula, working.model")
@@ -736,37 +685,3 @@ estWeights.twophase<-function(data, formula=NULL, working.model=NULL,...){
 }
 
 
-estfun<-function(model,...) UseMethod("estfun")
-estfun.coxph<-function(model, ...) resid(model,"score")
-estfun.glm<-function(model){
-  xmat<-model.matrix(model)
-  residuals(model,"working")*model$weights*xmat
-}
-estfun.lm<-function(model,...){
-  model.matrix(model)*resid(model)
-}
-
-
-
-
-estWeights.data.frame<-function(data,formula=NULL, working.model=NULL,
-                                subset=NULL, strata=NULL,...){
-
-    if (is.null(subset)){
-        subset<-complete.cases(data)
-        if (all(subset))
-          stop("No missing data.")
-        }
-    
-    if(is.null(strata)){
-        des<-twophase(id=list(~1,~1), subset=subset, data=data)
-    } else{
-        des<-twophase(id=list(~1,~1), subset=subset, data=data,
-                      strata=list(NULL,strata))
-    }
-
-    rval<-estWeights(des,formula=formula,working.model=working.model)
-    rval$call<-sys.call(-1)
-    rval
-    
-}
