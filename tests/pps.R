@@ -17,3 +17,4 @@ dclus2pps<-svydesign(id = ~dnum + snum, fpc = ~I(40/fpc1) + I(pmin(1,5/fpc2)), d
 all.equal(svytotal(~sch.wide,dclus2), svytotal(~sch.wide,dclus2pps))
 all.equal(svymean(~sch.wide,dclus2), svymean(~sch.wide,dclus2pps))
 all.equal(svytotal(~enroll,dclus2), svytotal(~enroll,dclus2pps))
+

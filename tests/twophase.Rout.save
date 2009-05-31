@@ -44,7 +44,9 @@ Attaching package: 'Matrix'
 
 	 rcond 
 
-Two-phase design: twophase(id = list(~id, ~id), data = pbc, subset = ~I(!randomized))
+Two-phase sparse-matrix design:
+ twophase2(id = id, strata = strata, probs = probs, fpc = fpc, 
+    subset = subset, data = data)
 Phase 1:
 Independent Sampling design (with replacement)
 svydesign(id = ~id)
@@ -57,7 +59,7 @@ svydesign(id = ~id, fpc = `*phase1*`)
 > all.equal(as.vector(SE(m)),
 +           with(pbc, sd(bili[!randomized])/sqrt(sum(!randomized))),
 +           tolerance=0.001)
-[1] TRUE
+[1] "Mean relative difference: 0.001198323"
 > 
 > ## two-stage sampling as two-phase
 > data(mu284)
@@ -80,8 +82,9 @@ Stratified Independent Sampling design
 svydesign(id = ~id, strata = ~id1, fpc = `*phase1*`)
 > (d22mu284<-twophase(id=list(~id1,~id),strata=list(NULL,~id1),
 +                    fpc=list(~n1,NULL),data=mu284.1,subset=~sub,method="full"))
-Two-phase design: twophase(id = list(~id1, ~id), strata = list(NULL, ~id1), fpc = list(~n1, 
-    NULL), data = mu284.1, subset = ~sub, method = "full")
+Two-phase sparse-matrix design:
+ twophase2(id = id, strata = strata, probs = probs, fpc = fpc, 
+    subset = subset, data = data)
 Phase 1:
 1 - level Cluster Sampling design
 With (5) clusters.
@@ -133,11 +136,11 @@ Data variables:
 > all.equal(SE(m1),SE(m2))
 [1] TRUE
 > all.equal(SE(m1),SE(m22))
-[1] TRUE
+[1] "names for target but not for current"
 > all.equal(SE(m1),SE(m2))
 [1] TRUE
 > all.equal(SE(m1),SE(m22))
-[1] TRUE
+[1] "names for target but not for current"
 > 
 > ## case-cohort design
 > ##this example requires R 2.3.1 or later for cch and data.
@@ -155,8 +158,9 @@ Attaching package: 'survival'
 > ## unstratified, equivalent to Lin & Ying (1993)
 > print(dcchs<-twophase(id=list(~seqno,~seqno), strata=list(NULL,~rel),
 +                  subset=~I(in.subcohort | rel), data=nwtco))
-Two-phase design: twophase(id = list(~seqno, ~seqno), strata = list(NULL, ~rel), 
-    subset = ~I(in.subcohort | rel), data = nwtco)
+Two-phase sparse-matrix design:
+ twophase2(id = id, strata = strata, probs = probs, fpc = fpc, 
+    subset = subset, data = data)
 Phase 1:
 Independent Sampling design (with replacement)
 svydesign(id = ~seqno)
@@ -259,16 +263,16 @@ attr(,"phases")$phase2
 y 12450
 
 > vcov(tot2)
-         y
-y 35911.05
+         [,1]
+[1,] 36522.63
 attr(,"phases")
 attr(,"phases")$phase1
          [,1]
-[1,] 23461.05
+[1,] 24072.63
 
 attr(,"phases")$phase2
-      y
-y 12450
+      [,1]
+[1,] 12450
 
 > ## phase 2 identical
 > all.equal(Vphase2,drop(attr(vcov(tot),"phases")$phase2))
@@ -280,6 +284,6 @@ y 12450
          [,1]
 [1,] 1.026068
 > all.equal(Vphase1,as.vector(attr(vcov(tot2),"phases")$phase1))
-[1] "Mean relative difference: 0.02540557"
+[1] TRUE
 > 
 > 

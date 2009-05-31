@@ -6,8 +6,9 @@ Description: Summary statistics, generalised linear models, Cox models,
         unequally weighted survey samples. Variances by Taylor series
         linearisation or replicate weights. Post-stratification,
         calibration, and raking. Two-phase designs. Graphics.
-        Predictive margins by direct standardization.
-Version: 3.15
+        Predictive margins by direct standardization. PPS sampling
+        without replacement.
+Version: 3.16
 Author: Thomas Lumley
 Maintainer: Thomas Lumley <tlumley@u.washington.edu>
 License: GPL-2 | GPL-3
@@ -16,6 +17,6 @@ Suggests: survival, MASS, KernSmooth, hexbin, mitools, lattice,
         RSQLite, RODBC, quantreg, splines, Matrix
 Enhances: odfWeave.survey
 URL: http://faculty.washington.edu/tlumley/survey/
-Packaged: 2009-05-18 17:07:23 UTC; tlumley
+Packaged: 2009-05-31 19:46:14 UTC; tlumley
 Repository: CRAN
-Date/Publication: 2009-05-18 17:31:15
+Date/Publication: 2009-06-02 15:43:00

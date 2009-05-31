@@ -12,9 +12,10 @@
 \begin{document}
 \maketitle
 This document explains the computation of variances for totals in
-two-phase designs. Variances for other statistics are computed by the
+two-phase designs before version 3.15, or using \texttt{method=''approx''}. 
+Variances for other statistics are computed by the
 delta-method from the variance of the total of the estimating
-functions.
+functions. 
 
 The variance formulas come from conditioning on the sample selected in
 the first phase 

@@ -1102,10 +1102,12 @@ svycoxph.survey.design<-function(formula,design,subset=NULL,...){
       g$var<-twophasevar(dbeta, design)
     else if(inherits(design, "twophase2"))
       g$var<-twophase2var(dbeta, design)
-    else 
+    else if(inherits(design, "pps"))
+      g$var<-ppsvar(dbeta,design)
+    else
       g$var<-svyCprod(dbeta, design$strata,
-                    design$cluster[[1]], design$fpc,design$nPSU,
-                    design$certainty,design$postStrata)
+                      design$cluster[[1]], design$fpc,design$nPSU,
+                      design$certainty,design$postStrata)
     
     g$wald.test<-coef(g)%*%solve(g$var,coef(g))
     g$ll<-g$loglik
@@ -1251,6 +1253,8 @@ svy.varcoef<-function(glm.object,design){
       twophasevar(estfun%*%Ainv, design)
     else if (inherits(design, "twophase2"))
       twophase2var(estfun%*%Ainv, design)
+    else if (inherits(design, "pps"))
+      ppsvar(estfun%*%Ainv, design)
     else
       svyCprod(estfun%*%Ainv,design$strata,design$cluster[[1]],design$fpc, design$nPSU,
                   design$certainty,design$postStrata)

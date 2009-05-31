@@ -1,11 +1,12 @@
 \name{svydesign}
 \alias{svydesign}
+\alias{svydesign.default}
 \alias{svydesign.imputationList}
 \alias{svydesign.character}
 \alias{na.omit.survey.design}
 \alias{na.exclude.survey.design}
 \alias{na.fail.survey.design}
-%- Also NEED an `\alias' for EACH other topic documented here.
+
 \title{Survey sample analysis.}
 \description{
   Specify a complex survey design.
@@ -13,14 +14,16 @@
 \usage{
 svydesign(ids, probs=NULL, strata = NULL, variables = NULL, fpc=NULL,
 data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,pps=FALSE,...)
+\method{svydesign}{default}(ids, probs=NULL, strata = NULL, variables = NULL, fpc=NULL,
+data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,pps=FALSE,variance=c("HT","YG"),...)
 \method{svydesign}{imputationList}(ids, probs = NULL, strata = NULL, variables = NULL, 
     fpc = NULL, data, nest = FALSE, check.strata = !nest, weights = NULL, pps=FALSE,
-    ...)
+     ...)
 \method{svydesign}{character}(ids, probs = NULL, strata = NULL, variables = NULL, 
     fpc = NULL, data, nest = FALSE, check.strata = !nest, weights = NULL, pps=FALSE,
     dbtype = "SQLite", dbname, ...)
 }
-%- maybe also `usage' for other objects documented here.
+%- maybe also `usage' for other objects documented here.'`
 \arguments{
   \item{ids}{Formula or data frame specifying cluster ids from largest
     level to smallest level, \code{~0} or \code{~1} is a formula for no clusters.}
@@ -38,11 +41,13 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,pps=FALSE,...)
     within strata}
   \item{check.strata}{If \code{TRUE}, check that clusters are nested in
     strata}.
-  \item{pps}{\code{"brewer"} to use Brewer's approximatio for PPS
-    sampling without replacement.  \code{fpc} must then be specified as
-    sampling fractions, not as population sizes}
+  \item{pps}{\code{"brewer"} to use Brewer's approximation for PPS 
+    sampling without replacement. \code{"overton"} to use
+    Overton's approximation. An object of class \code{\link{HR}} to use the Hartley-Rao approximation. An
+    object of class \code{\link{ppsmat}} to use the Horvitz-Thompson estimator.}
   \item{dbtype}{name of database driver to pass to \code{dbDriver}}
   \item{dbname}{name of database (eg file name for SQLite)}
+   \item{variance}{For \code{pps} without replacement, use \code{variance="YG"} for the Yates-Grundy estimator instead of the Horvitz-Thompson estimator}
   \item{\dots}{for future expansion}
 }
 \details{
@@ -71,7 +76,7 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,pps=FALSE,...)
    population that has been sampled. In either case the relevant
    population size is the sampling units.  That is, sampling 100 units
    from a population stratum of size 500 can be specified as 500 or as
-   100/500=0.2.  The exception is when \code{pps="brewer"}, where the
+   100/500=0.2.  The exception is for PPS sampling without replacement, where the
    sampling probability (which will be different for each PSU) must be used.
    
    If population sizes are specified but not sampling probabilities or
@@ -90,7 +95,15 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,pps=FALSE,...)
    subsequent stages.   The variance calculations for
    multistage sampling assume simple or stratified random sampling
    within clusters at each stage except possibly the last.
-   
+
+   For PPS sampling without replacement it is necessary to specify the
+   probabilities for each stage of sampling using the \code{fpc}
+   arguments, and an overall \code{weight} argument should not be
+   given. At the moment, multistage or stratified PPS sampling without
+   replacement is supported only with \code{pps="brewer"}, or by
+   giving the full joint probability matrix using
+   \code{\link{ppsmat}}. [Cluster sampling is supported by all
+   methods, but not subsampling within clusters].  
    
    The \code{dim}, \code{"["}, \code{"[<-"} and na.action methods for
    \code{survey.design} objects operate on the dataframe specified by
@@ -154,6 +167,8 @@ An object of class \code{survey.design}.
   \code{\link{svyrecvar}} and \code{\link{svyCprod}} for details of
   variance estimation
 
+  \code{\link{election}} for examples of PPS sampling without replacement.
+
   \url{http://faculty.washington.edu/tlumley/survey/} for examples of
   database-backed objects.
 }
@@ -181,7 +196,7 @@ nest=TRUE)
 
 ## PPS sampling without replacement
 data(election)
-dpps<- svydesign(id=~1, weights=~wt, fpc=~p, data=election_pps, pps="brewer")
+dpps<- svydesign(id=~1, fpc=~p, data=election_pps, pps="brewer")
 
 ##database example: requires RSQLite
 \dontrun{

@@ -10,9 +10,25 @@ svydesign<-function(ids, probs = NULL, strata = NULL, variables = NULL,
 	}
 
 svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
-                    data=NULL, nest=FALSE, check.strata=!nest,weights=NULL,pps=FALSE,...){
+                    data=NULL, nest=FALSE, check.strata=!nest,weights=NULL,pps=FALSE,
+                            variance=c("HT","YG"),...){
+  variance<-match.arg(variance)
+  if(is.character(pps)){
+    a<-match.arg(pps,c("brewer","overton","other"))
+    if (!(pps %in% c("brewer","other")))
+      return(pps_design(ids=ids,probs=probs, strata=strata,variables=variables, fpc=fpc,
+                 data=data,method=a,call=sys.call(-1),variance=variance,...))
+  } else if (!is.logical(pps)){
+    return(pps_design(ids=ids,probs=probs, strata=strata,variables=variables, fpc=fpc,
+                      data=data,method=pps,call=sys.call(-1),variance=variance,...))
+  }
 
-    ## less memory-hungry version for sparse tables
+  if (!is.character(pps) || pps!="other"){
+    if (variance!="HT")
+      stop("Only variance='HT' supported for this design")
+  }
+  
+  ## less memory-hungry version for sparse tables
     interaction<-function (..., drop = TRUE) {
         args <- list(...)
         narg <- length(args)
@@ -139,12 +155,9 @@ svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
       }
 
     ## PPS: valid choices currently are FALSE and "brewer"
-    if (is.logical(pps) && pps) stop("'pps' must be FALSE or \"brewer\"")
+    if (is.logical(pps) && pps) stop("'pps' must be FALSE or a character string")
     if (is.character(pps)) {
-      if (is.na(pmatch(pps, "brewer")))
-        stop("'pps' must be FALSE or \"brewer\"")
-      else
-        pps<-TRUE
+      pps<-TRUE
     }
     
     ## Finite population correction: specified per observation
@@ -186,7 +199,7 @@ svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
     rval$pps<-pps
     class(rval)<-c("survey.design2","survey.design")
     rval
-  }
+}
 
 onestrat<-function(x,cluster,nPSU,fpc, lonely.psu,stratum=NULL,stage=1,cal=cal){
   

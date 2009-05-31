@@ -5,7 +5,7 @@ twophase<-function(id,strata=NULL, probs=NULL, weights=NULL, fpc=NULL,
   method<-match.arg(method)
   if(method=="full") {
     if (!is.null(weights)) stop("weights not accepted by method='full'")
-    twophase2(id=id, strata=strata, probs=probs, fpc=fpc,subset=subset,data=data)
+    return(twophase2(id=id, strata=strata, probs=probs, fpc=fpc,subset=subset,data=data))
   }
                      
   d1<-svydesign(id=id[[1]],strata=strata[[1]],weights=weights[[1]],

@@ -1,6 +1,6 @@
 
-R version 2.7.2 (2008-08-25)
-Copyright (C) 2008 The R Foundation for Statistical Computing
+R version 2.9.0 beta (2009-04-08 r48309)
+Copyright (C) 2009 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -46,6 +46,20 @@ Attaching package: 'survey'
 > 
 > dccs2<-twophase(id=list(~id,~id),subset=~in.ccs,
 +                 strata=list(NULL,~interaction(instit,rel)),data=nwt.exp)
+Loading required package: lattice
+
+Attaching package: 'Matrix'
+
+
+	The following object(s) are masked from package:stats :
+
+	 xtabs 
+
+
+	The following object(s) are masked from package:base :
+
+	 rcond 
+
 > 
 > dccs8<-twophase(id=list(~id,~id),subset=~in.ccs,
 +                 strata=list(NULL,~interaction(instit,stage,rel)),data=nwt.exp)
@@ -59,19 +73,19 @@ svyglm(rel ~ factor(stage) * factor(histol), family = quasibinomial,
     design = dccs2)
 
 Survey design:
-twophase(id = list(~id, ~id), subset = ~in.ccs, strata = list(NULL, 
-    ~interaction(instit, rel)), data = nwt.exp)
+twophase2(id = id, strata = strata, probs = probs, fpc = fpc, 
+    subset = subset, data = data)
 
 Coefficients:
                                Estimate Std. Error t value Pr(>|t|)    
-(Intercept)                     -2.5701     0.1288 -19.953  < 2e-16 ***
-factor(stage)2                   0.5482     0.1979   2.769 0.005711 ** 
-factor(stage)3                   0.4791     0.2032   2.358 0.018523 *  
+(Intercept)                     -2.5701     0.1288 -19.955  < 2e-16 ***
+factor(stage)2                   0.5482     0.1979   2.769 0.005708 ** 
+factor(stage)3                   0.4791     0.2032   2.359 0.018515 *  
 factor(stage)4                   1.0037     0.2592   3.872 0.000114 ***
-factor(histol)2                  1.3505     0.3108   4.346 1.51e-05 ***
-factor(stage)2:factor(histol)2   0.1152     0.4410   0.261 0.793890    
-factor(stage)3:factor(histol)2   0.5066     0.4242   1.194 0.232579    
-factor(stage)4:factor(histol)2   0.9785     0.6214   1.575 0.115632    
+factor(histol)2                  1.3505     0.3107   4.346 1.51e-05 ***
+factor(stage)2:factor(histol)2   0.1152     0.4410   0.261 0.793876    
+factor(stage)3:factor(histol)2   0.5066     0.4241   1.194 0.232548    
+factor(stage)4:factor(histol)2   0.9785     0.6214   1.575 0.115615    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
@@ -86,19 +100,19 @@ svyglm(rel ~ factor(stage) * factor(histol), family = quasibinomial,
     design = dccs8)
 
 Survey design:
-twophase(id = list(~id, ~id), subset = ~in.ccs, strata = list(NULL, 
-    ~interaction(instit, stage, rel)), data = nwt.exp)
+twophase2(id = id, strata = strata, probs = probs, fpc = fpc, 
+    subset = subset, data = data)
 
 Coefficients:
                                Estimate Std. Error t value Pr(>|t|)    
-(Intercept)                    -2.71604    0.10829 -25.082  < 2e-16 ***
-factor(stage)2                  0.78141    0.14728   5.306 1.35e-07 ***
-factor(stage)3                  0.80093    0.15252   5.251 1.81e-07 ***
-factor(stage)4                  1.07293    0.17819   6.021 2.34e-09 ***
-factor(histol)2                 1.45836    0.31783   4.589 4.97e-06 ***
-factor(stage)2:factor(histol)2 -0.04743    0.43498  -0.109    0.913    
-factor(stage)3:factor(histol)2  0.28064    0.41301   0.680    0.497    
-factor(stage)4:factor(histol)2  0.90983    0.63777   1.427    0.154    
+(Intercept)                    -2.71604    0.10827 -25.085  < 2e-16 ***
+factor(stage)2                  0.78141    0.14726   5.306 1.35e-07 ***
+factor(stage)3                  0.80093    0.15250   5.252 1.80e-07 ***
+factor(stage)4                  1.07293    0.17817   6.022 2.33e-09 ***
+factor(histol)2                 1.45836    0.31780   4.589 4.96e-06 ***
+factor(stage)2:factor(histol)2 -0.04743    0.43495  -0.109    0.913    
+factor(stage)3:factor(histol)2  0.28064    0.41298   0.680    0.497    
+factor(stage)4:factor(histol)2  0.90983    0.63774   1.427    0.154    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
@@ -118,14 +132,14 @@ calibrate(dccs2, phase = 2, formula = ~interaction(instit, stage,
 
 Coefficients:
                                Estimate Std. Error t value Pr(>|t|)    
-(Intercept)                    -2.71604    0.10827 -25.085  < 2e-16 ***
-factor(stage)2                  0.78141    0.14727   5.306 1.35e-07 ***
-factor(stage)3                  0.80093    0.15252   5.251 1.80e-07 ***
-factor(stage)4                  1.07293    0.17806   6.026 2.28e-09 ***
-factor(histol)2                 1.45836    0.31664   4.606 4.58e-06 ***
-factor(stage)2:factor(histol)2 -0.04743    0.43421  -0.109    0.913    
-factor(stage)3:factor(histol)2  0.28064    0.41259   0.680    0.497    
-factor(stage)4:factor(histol)2  0.90983    0.62991   1.444    0.149    
+(Intercept)                    -2.71604    0.10878 -24.968  < 2e-16 ***
+factor(stage)2                  0.78141    0.14729   5.305 1.35e-07 ***
+factor(stage)3                  0.80093    0.15212   5.265 1.68e-07 ***
+factor(stage)4                  1.07293    0.17905   5.993 2.77e-09 ***
+factor(histol)2                 1.45836    0.31757   4.592 4.88e-06 ***
+factor(stage)2:factor(histol)2 -0.04743    0.43432  -0.109    0.913    
+factor(stage)3:factor(histol)2  0.28064    0.41231   0.681    0.496    
+factor(stage)4:factor(histol)2  0.90983    0.63187   1.440    0.150    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
@@ -147,17 +161,27 @@ subset(dccs8, histol == 1)
 
 Coefficients:
                Estimate Std. Error t value Pr(>|t|)    
-(Intercept)     -2.7160     0.1083 -25.082  < 2e-16 ***
-factor(stage)2   0.7814     0.1473   5.306 1.49e-07 ***
-factor(stage)3   0.8009     0.1525   5.251 1.98e-07 ***
-factor(stage)4   1.0729     0.1782   6.021 2.74e-09 ***
+(Intercept)     -2.7160     0.1083 -25.085  < 2e-16 ***
+factor(stage)2   0.7814     0.1473   5.306 1.48e-07 ***
+factor(stage)3   0.8009     0.1525   5.252 1.97e-07 ***
+factor(stage)4   1.0729     0.1782   6.022 2.73e-09 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
-(Dispersion parameter for quasibinomial family taken to be 1.001333)
+(Dispersion parameter for quasibinomial family taken to be 1.000876)
 
-Number of Fisher Scoring iterations: 5
+Number of Fisher Scoring iterations: 4
 
+Warning messages:
+1: In `[.twophase2`(x, r, ) : 1 strata have only one PSU in this subset.
+2: In summary.glm(g) :
+  observations with zero weight not used for calculating dispersion
+3: In summary.glm(glm.object) :
+  observations with zero weight not used for calculating dispersion
+4: In `[.twophase2`(design, nas == 0, ) :
+  1 strata have only one PSU in this subset.
+5: In `[.twophase2`(design, nas == 0, ) :
+  1 strata have only one PSU in this subset.
 > summary(svyglm(rel~factor(stage),
 +                family=quasibinomial,design=subset(gccs8,histol==1)))
 
@@ -170,10 +194,10 @@ subset(gccs8, histol == 1)
 
 Coefficients:
                Estimate Std. Error t value Pr(>|t|)    
-(Intercept)     -2.7160     0.1083 -25.085  < 2e-16 ***
-factor(stage)2   0.7814     0.1473   5.306 1.48e-07 ***
-factor(stage)3   0.8009     0.1525   5.251 1.97e-07 ***
-factor(stage)4   1.0729     0.1781   6.026 2.65e-09 ***
+(Intercept)     -2.7160     0.1082 -25.105  < 2e-16 ***
+factor(stage)2   0.7814     0.1457   5.363 1.10e-07 ***
+factor(stage)3   0.8009     0.1504   5.324 1.34e-07 ***
+factor(stage)4   1.0729     0.1759   6.101 1.70e-09 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 

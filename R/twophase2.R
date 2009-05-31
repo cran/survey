@@ -208,10 +208,6 @@ print.summary.twophase2<-function(x,...,varnames=TRUE){
   invisible(x)
 }
 
-
-##
-##FIXME:  need to separate phase 1 and phase 2 after calibration on either phase.
-##
 twophase2var<-function(x,design){
   ## calibration is allowed at phase one or phase two,
   ## but not for clusters within a phase

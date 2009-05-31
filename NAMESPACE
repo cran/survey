@@ -9,7 +9,7 @@ export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        svycontrast,svyCprod, svyrecvar, grake, svrVar, pchisqsum,
        make.calfun, cal.linear, cal.raking, cal.logit, svycdf, svykappa, svykm,
        svyolr, svycoplot, svyloglin, make.panel.svysmooth, dotchart, subbootweights,
-       svyciprop, svyttest, marginpred,twophasevar,twophase2var)
+       svyciprop, svyttest, marginpred,twophasevar,twophase2var,ppsmat,HR)
 
 S3method(svyloglin,survey.design)
 S3method(svyloglin,svyrep.design)
@@ -57,6 +57,7 @@ S3method(open,ODBCsvydesign)
 S3method(summary,ODBCsvydesign)
 S3method(print, summary.ODBCsvydesign)
 S3method(print, ODBCsvydesign)
+S3method(print,  pps)
 
 S3method(svrepdesign, default)
 S3method(svrepdesign, imputationList)
@@ -66,6 +67,7 @@ S3method(svymean,svyrep.design)
 S3method(svymean,survey.design2)
 S3method(svymean,twophase)
 S3method(svymean, twophase2)
+S3method(svymean, pps)
 S3method(svymean, DBIsvydesign)
 S3method(svymean, ODBCsvydesign)
 
@@ -74,12 +76,14 @@ S3method(svytotal,svyrep.design)
 S3method(svytotal,survey.design2)
 S3method(svytotal,twophase)
 S3method(svytotal, twophase2)
+S3method(svytotal, pps)
 S3method(svytotal, DBIsvydesign)
 S3method(svytotal, ODBCsvydesign)
 
 S3method(svyratio,survey.design)
 S3method(svyratio,svyrep.design)
 S3method(svyratio,survey.design2)
+S3method(svyratio, pps)
 S3method(svyratio,twophase)
 S3method(svyratio,twophase2)
 S3method(svyratio, DBIsvydesign)
@@ -196,6 +200,7 @@ S3method(svycontrast,svycoxph)
 S3method(svycontrast,default)
 
 S3method(image,svyrep.design)
+S3method(image,pps)
 S3method(plot,svysmooth)
 S3method(print,svysmooth)
 S3method(lines,svysmooth)
@@ -287,6 +292,7 @@ S3method(dimnames, repweights_compressed)
 
 S3method(degf, survey.design2)
 S3method(degf, svyrep.design)
+S3method(degf, pps)
 S3method(degf, twophase)
 S3method(degf, twophase2)
 

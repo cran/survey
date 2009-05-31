@@ -1,3 +1,10 @@
+3.16   PPS designs without replacement, based on the weighted covariance of 
+       sample indicators: Horvitz-Thompson and Yates-Grundy estimators, 
+       Overton's approximation, Hartley-Rao approximation, a modified 
+       Hartley-Rao approximation that depends only on sample data. 
+
+3.15-1 The new two-phase designs added in 3.15 are now exported properly.
+
 3.15   Full multistage sampling now possible at both phases of a
        two-phase design, and the standard errors now exactly match
        Sarndal et al.  The underlying algorithms use sparse matrices

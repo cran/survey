@@ -6,9 +6,9 @@ Possible additional developments in no particular order:
 
  - Score-based confidence intervals for glms
 
- - Rao-Scott type tests for glms.
+ - Rao-Scott-type tests for glms.
 
- - More general HT estimator for sampling without replacement
+ [done] More general HT estimator for sampling without replacement
  	- using joint inclusion probabilities
 	- using population first-order inclusion probabilities and Hartley-Rao approximation
 	- using Overton's approximation and sample inclusion probabilities

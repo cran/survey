@@ -187,16 +187,16 @@ Attaching package: 'Matrix'
 > Vphase2
 [1] 26436
 > vcov(tot2)
-         y
-y 55486.04
+         [,1]
+[1,] 70761.47
 attr(,"phases")
 attr(,"phases")$phase1
          [,1]
-[1,] 29050.04
+[1,] 44325.47
 
 attr(,"phases")$phase2
-      y
-y 26436
+      [,1]
+[1,] 26436
 
 > 
 > ## comparing to regression
@@ -205,28 +205,28 @@ y 26436
 > all.equal(coef(reg)[1],coef(mn))
 [1] "Names: 1 string mismatch"
 > all.equal(SE(reg)[1],SE(mn))
-[1] "Names: 1 string mismatch"
+[1] "names for target but not for current"
 > vcov(mn)
-          y
-y 0.3209093
+          [,1]
+[1,] 0.3292258
 attr(,"phases")
 attr(,"phases")$phase1
           [,1]
-[1,] 0.1516099
+[1,] 0.1599264
 
 attr(,"phases")$phase2
-          y
-y 0.1692994
+          [,1]
+[1,] 0.1692994
 
 > vcov(reg)
              (Intercept) I(y < 4)TRUE
-(Intercept)    0.3209093   -0.3209093
-I(y < 4)TRUE  -0.3209093    0.5739145
+(Intercept)    0.3292258   -0.3292258
+I(y < 4)TRUE  -0.3292258    0.5901907
 attr(,"phases")
 attr(,"phases")$phase1
-           [,1]       [,2]
-[1,]  0.1516099 -0.1516099
-[2,] -0.1516099  0.2425781
+             (Intercept) I(y < 4)TRUE
+(Intercept)    0.1599264   -0.1599264
+I(y < 4)TRUE  -0.1599264    0.2588542
 
 attr(,"phases")$phase2
              (Intercept) I(y < 4)TRUE
