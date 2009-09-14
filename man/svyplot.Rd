@@ -14,7 +14,7 @@ svyplot(formula, design,...)
 \method{svyplot}{default}(formula, design, style = c("bubble", "hex", "grayhex","subsample","transparent"),
 sample.size = 500, subset = NULL, legend = 1, inches = 0.05,
 amount=NULL, basecol="black",
-alpha=c(0, 0.8),...)
+alpha=c(0, 0.8),xbins=30,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -31,6 +31,7 @@ alpha=c(0, 0.8),...)
   \item{basecol}{base color for transparent plots, or a function to
     compute the color (see below)}
   \item{alpha}{minimum and maximum opacity for transparent plots}
+\item{xbins}{Number of (x-axis) bins for hexagonal binning}
   \item{\dots}{Passed to \code{plot} methods}
 }
 \details{

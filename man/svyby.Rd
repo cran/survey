@@ -4,6 +4,7 @@
 \alias{SE.svyby}
 \alias{deff.svyby}
 \alias{coef.svyby}
+\alias{unwtd.count}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Survey statistics on subsets}
 \description{
@@ -13,14 +14,15 @@ Compute survey statistics on subsets of a survey defined by factors.
 svyby(formula, by ,design,...)
 \method{svyby}{default}(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE,
 keep.names = TRUE,verbose=FALSE, vartype=c("se","ci","ci","cv","cvpct","var"),
- drop.empty.groups=TRUE, covmat=FALSE, return.replicates=FALSE)
+ drop.empty.groups=TRUE, covmat=FALSE, return.replicates=FALSE, multicore=getOption("survey.multicore"))
 \method{SE}{svyby}(object,...)
 \method{deff}{svyby}(object,...)
 \method{coef}{svyby}(object,...)
+unwtd.count(x, design, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{formula}{A formula specifying the variables to pass to
+  \item{formula,x}{A formula specifying the variables to pass to
     \code{FUN} (or a matrix, data frame, or vector)}
   \item{by}{A formula specifying factors that define subsets, or a list
     of factors.}
@@ -44,17 +46,31 @@ keep.names = TRUE,verbose=FALSE, vartype=c("se","ci","ci","cv","cvpct","var"),
   designs). Allows \code{\link{svycontrast}} to be used on output.}
 \item{return.replicates}{Only for replicate-weight designs. If
   \code{TRUE}, return all the replicates as an attribute of the result}
+\item{multicore}{Use \code{multicore} package to distribute subsets over
+   multiple processors?}
 \item{object}{An object of class \code{"svyby"}}
 }
 
 \value{
-  An object of class \code{"svyby"}: a data frame showing the factors and the results of \code{FUN}
+  An object of class \code{"svyby"}: a data frame showing the factors and the results of \code{FUN}.
+
+For \code{unwtd.count}, the unweighted number of non-missing observations in the data matrix specified by \code{x} for the design. 
 }
 \details{
 The variance type "ci" asks for confidence intervals, which are produced
   by \code{confint}. In some cases additional options to \code{FUN} will
   be needed to produce confidence intervals, for example,
   \code{svyquantile} needs \code{ci=TRUE}
+
+  \code{unwtd.count} is designed to be passed to \code{svyby} to report
+  the number of non-missing observations in each subset. Observations
+  with exactly zero weight will also be counted as missing, since that's
+  how subsets are implemented for some designs.
+
+  Parallel processing with \code{multicore=TRUE} is useful only for
+  fairly large problems and on computers with sufficient memory. The
+  \code{multicore} package is incompatible with some GUIs, although the
+  Mac Aqua GUI appears to be safe. 
 
   }
 
@@ -76,6 +92,8 @@ svyby(~api99, ~stype, dclus1, svyquantile, quantiles=0.5, keep.var=FALSE)
 svyby(~api99, list(school.type=apiclus1$stype), dclus1, svymean)
 svyby(~api99+api00, ~stype, dclus1, svymean, deff=TRUE,vartype="ci")
 svyby(~api99+api00, ~stype+sch.wide, dclus1, svymean, keep.var=FALSE)
+## report raw number of observations
+svyby(~api99+api00, ~stype+sch.wide, dclus1, unwtd.count, keep.var=FALSE)
 
 rclus1<-as.svrepdesign(dclus1)
 
@@ -84,6 +102,8 @@ svyby(~api99, ~stype, rclus1, svyquantile, quantiles=0.5)
 svyby(~api99, list(school.type=apiclus1$stype), rclus1, svymean, vartype="cv")
 svyby(~enroll,~stype, rclus1,svytotal, deff=TRUE)
 svyby(~api99+api00, ~stype+sch.wide, rclus1, svymean, keep.var=FALSE)
+##report raw number of observations
+svyby(~api99+api00, ~stype+sch.wide, rclus1, unwtd.count, keep.var=FALSE)
 
 ## comparing subgroups using covmat=TRUE
 mns<-svyby(~api99, ~stype, rclus1, svymean,covmat=TRUE)

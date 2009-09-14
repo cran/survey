@@ -1,6 +1,6 @@
 
-R version 2.6.0 Under development (unstable) (2007-06-27 r42086)
-Copyright (C) 2007 The R Foundation for Statistical Computing
+R version 2.9.0 beta (2009-04-08 r48309)
+Copyright (C) 2009 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -16,6 +16,14 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > library(survey)
+
+Attaching package: 'survey'
+
+
+	The following object(s) are masked from package:graphics :
+
+	 dotchart 
+
 > 
 > ab<-expand.grid(a=factor(1:4),b=factor(1:3))
 > 
@@ -29,7 +37,7 @@ Type 'q()' to quit R.
 > 
 > dkalton<-svydesign(id=~1,data=kaltonsample)
 Warning message:
-In svydesign(id = ~1, data = kaltonsample) :
+In svydesign.default(id = ~1, data = kaltonsample) :
   No weights or probabilities supplied, assuming equal probability
 > 
 > dps<-postStratify(dkalton,~a+b,xtabs(~a+b,kaltonpop))

@@ -5,6 +5,7 @@
 \alias{survey.adjust.domain.lonely}
 \alias{survey.want.obsolete}
 \alias{survey.drop.replicates}
+\alias{survey.multicore}
 \title{Options for the survey package}
 \description{
   This help page documents the options that control the behaviour of
@@ -55,6 +56,17 @@
     of the fact that these strata do not contribute to the variance.
     The only reason ever to use \code{FALSE} is if there is a bug in
     the code for these optimizations.
+
+    The fifth option controls the use of multiple processors with the
+    \code{multicore} package. This option should not affect the values
+    computed by any of the survey functions.  If \code{TRUE}, all
+    functions that are able to use multiple processors will do so by
+    default. Using multiple processors may speed up calculations, but
+    need not, especially if the computer is short on memory. The best
+    strategy is probably to experiment with explicitly requesting
+    \code{multicore=TRUE} in functions that support it, to see if there
+    is an increase in speed before setting the global option. 
+    
   }
   
   \keyword{survey}

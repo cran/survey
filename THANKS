@@ -3,6 +3,7 @@ requests from users, including:
   Daniel Almirall
   Guiseppe Antonaci
   Norman Breslow
+  Arthur Burke
   Ron Burns
   Stefano Calza
   Shelby Chartkoff
@@ -39,5 +40,6 @@ grant to the University of Auckland.
 
 Patrick Aboyoun did the S-PLUS port of version 3.6-8
 
-The svyolr() code is largely ripped from the MASS package of Venables & Ripley.
+The svyolr() code is largely ripped from the MASS package of Venables & Ripley, and
+parts of the code for svycoxph() are modified from Therneau's survival package.
 

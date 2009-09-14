@@ -10,7 +10,7 @@ for \code{MIcombine}. The analysis may be specified as an expression or
 as a function.
 }
 \usage{
-\method{with}{svyimputationList}(data, expr, fun, ...)
+\method{with}{svyimputationList}(data, expr, fun, ...,multicore=getOption("survey.multicore"))
 \method{subset}{svyimputationList}(x, subset,...,all=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -19,8 +19,9 @@ as a function.
   \item{expr}{An expression giving a survey analysis}
   \item{fun}{A function taking a survey design object as its argument }
   \item{\dots}{for future expansion }
- \item{subset}{An logical expression specifying the subset}
-\item{all}{If \code{TRUE} the subset is those where the expression is \code{TRUE} 
+  \item{multicore}{Use \code{multicore} package to distribute imputed data sets over multiple processors?}
+  \item{subset}{An logical expression specifying the subset}
+  \item{all}{If \code{TRUE} the subset is those where the expression is \code{TRUE} 
   for all imputations, otherwise it is those where the expression is \code{TRUE} for
   any imputation.}
 }

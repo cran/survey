@@ -136,8 +136,8 @@ The appropriate database interface package must already be loaded (eg
 \code{RSQLite} for SQLite, \code{RODBC} for ODBC).  The survey design
 object will contain only the design meta-data, and actual variables will
 be loaded from the database as needed.  Use
-\code{\link[dest=close.DBIsvydesign]{close}} to close the database connection and
-\code{\link[dest=open.DBIsvydesign]{open}} to reopen the connection, eg, after
+\code{\link[=close.DBIsvydesign]{close}} to close the database connection and
+\code{\link[=open.DBIsvydesign]{open}} to reopen the connection, eg, after
 loading a saved object.
 
 The database interface does not attempt to modify the underlying

@@ -6,13 +6,14 @@
 \title{Proportional odds and related models }
 \description{
   Fits cumulative link models: proportional odds, probit, complementary
-  log-log, and cauchit. 
+  log-log, and cauchit.
 }
 \usage{
 svyolr(formula, design, ...)
 \method{svyolr}{survey.design2}(formula, design, start, ..., na.action = na.omit, method = c("logistic", 
     "probit", "cloglog", "cauchit"))
-\method{svyolr}{svyrep.design}(formula,design,...,return.replicates=FALSE)
+\method{svyolr}{svyrep.design}(formula,design,...,return.replicates=FALSE, 
+    multicore=getOption("survey.multicore"))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -22,6 +23,8 @@ svyolr(formula, design, ...)
   \item{\dots}{dots}
   \item{start}{Optional starting values for optimization}
   \item{na.action}{handling of missing values}
+  \item{multicore}{Use \code{multicore} package to distribute computation of replicates across multiple
+    processors?}			   
   \item{method}{Link function}
   \item{return.replicates}{return the individual replicate-weight estimates}
 }

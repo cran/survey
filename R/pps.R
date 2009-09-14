@@ -448,21 +448,21 @@ svyratio.pps<-function(numerator=formula, denominator, design, separate=FALSE,na
     if (is.logical(i) && any(!i)){
       ## logical indexing: use !
       x$prob[!i]<-Inf
-      x$dcheck<-lapply(x$dcheck, function(m) {m[!i,!i]<-0; m})
+      x$dcheck<-lapply(x$dcheck, function(m) {m$dcheck[!i,!i]<-0; m})
     } else if (is.numeric(i) && length(i)){
       ## numeric indexing: use -
       x$prob[-i]<-Inf
-      x$dcheck<-lapply(x$dcheck, function(m) {m[-i,-i]<-0;m})
+      x$dcheck<-lapply(x$dcheck, function(m) {m$dcheck[-i,-i]<-0;m})
     } else {
       ##character indexing: use brute force and ignorance
       tmp<-x$prob[i,]
       x$prob<-rep(Inf, length(x$prob))
       x$prob[i,]<-tmp
-      x$dcheck<-lapply(x$dcheck, function(m) {n<-Matrix(ncol(m),ncol(m)); n[i,i]<-m[i,i]})
+      x$dcheck<-lapply(x$dcheck, function(m) {n<-Matrix(ncol(m$dcheck),ncol(m$dcheck)); n[i,i]<-m$dcheck[i,i]; m$dcheck<-n;m})
     }
     index<-is.finite(x$prob)
-    psu<-!duplicated(x$phase2$cluster[index,1])
-    tt<-table(x$phase2$strata[index,1][psu])
+    psu<-!duplicated(x$cluster[index,1])
+    tt<-table(x$strata[index,1][psu])
     if(any(tt==1)){
       warning(sum(tt==1)," strata have only one PSU in this subset.")
     }

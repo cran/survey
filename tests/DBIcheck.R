@@ -3,6 +3,7 @@ library(survey)
 library(RSQLite)
 
 data(api)
+apiclus1$api_stu<-apiclus1$api.stu
 dclus1<-svydesign(id=~dnum, weights=~pw, fpc=~fpc,data=apiclus1)
 dbclus1<-svydesign(id=~dnum, weights=~pw, fpc=~fpc,
 data="apiclus1",dbtype="SQLite", dbname=system.file("api.db",package="survey"))
@@ -12,7 +13,7 @@ m.db<-svymean(~api00+stype, dbclus1)
 all.equal(coef(m),coef(m.db))
 all.equal(vcov(m), vcov(m.db))
 
-r<-svyratio(~api.stu, ~enroll, design=dclus1)
+r<-svyratio(~api_stu, ~enroll, design=dclus1)
 r.db<-svyratio(~api_stu, ~enroll, design=dbclus1)
 all.equal(coef(r), coef(r.db))
 all.equal(SE(r), SE(r.db))

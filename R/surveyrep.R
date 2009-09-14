@@ -800,8 +800,11 @@ svyvar.svyrep.design<-svrepvar<-function(x, design, na.rm=FALSE, rho=NULL,
   
   if (na.rm){
     nas<-rowSums(is.na(x))
-    design<-design[nas==0,]
-    x[is.na(x)]<-0
+    if(any(nas>0)){
+      design<-design[nas==0,]
+      x<-x[nas==0,,drop=FALSE]
+      wts<-wts[nas==0,,drop=FALSE]
+    }
   }
   
   if (design$combined.weights)
@@ -1030,7 +1033,7 @@ svytotal.svyrep.design<-svreptotal<-function(x,design, na.rm=FALSE, rho=NULL,
    v <- svrVar(repmeans, scale, rscales)
  }
 attr(rval,"var") <- v
-attr(rval, "statistic")<-"mean"
+attr(rval, "statistic")<-"total"
 if (return.replicates)
   rval<-list(mean=rval, replicates=repmeans)
 
@@ -1042,12 +1045,15 @@ rval
 
 
 
-svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replicates=FALSE,na.action){
+svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replicates=FALSE,na.action,
+                                 multicore=getOption("survey.multicore")){
   require(survival)
   subset<-substitute(subset)
   subset<-eval(subset, design$variables, parent.frame())
   if (!is.null(subset))
     design<-design[subset,]
+  if (multicore && !require(multicore,quietly=TRUE))
+    multicore<-FALSE
   
   data<-design$variables
   
@@ -1104,14 +1110,23 @@ svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replica
 ##    .survey.prob.weights<-as.vector(wts[,i])*pw1+EPSILON
 ##    betas[i,]<-with(data,coef(eval(g)))
 ##  }
-  for(i in 1:ncol(wts)){
-    betas[i,]<-fitter(full$x, full$y, full$strata, full$offset,
-                      coef(full), coxph.control(),
-                      as.vector(wts[,i])*pw1+EPSILON,
-                      full$method,  names(full$resid))$coef
-
+  if (multicore){
+    betas<-do.call(rbind, mclapply(1:ncol(wts), function(i){
+      multicore:::closeAll()
+      fitter(full$x, full$y, full$strata, full$offset,
+             coef(full), coxph.control(),
+             as.vector(wts[,i])*pw1+EPSILON,
+             full$method,  names(full$resid))$coef
+    }))
+  }else{
+    for(i in 1:ncol(wts)){
+      betas[i,]<-fitter(full$x, full$y, full$strata, full$offset,
+                        coef(full), coxph.control(),
+                        as.vector(wts[,i])*pw1+EPSILON,
+                        full$method,  names(full$resid))$coef
+      
+    }
   }
-
   
   if (length(nas))
     design<-design[-nas,]
@@ -1137,18 +1152,22 @@ svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replica
 }
 
 svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL, ...,
-                                         rho=NULL, return.replicates=FALSE, na.action){
+                                         rho=NULL, return.replicates=FALSE, na.action,
+                                         multicore=getOption("survey.multicore")){
 
   if (!exists(".Generic",inherit=FALSE))
     .Deprecated("svyglm")
   
-      subset<-substitute(subset)
-      subset<-eval(subset, design$variables, parent.frame())
-      if (!is.null(subset))
-        design<-design[subset,]
-      
-      data<-design$variables
+  subset<-substitute(subset)
+  subset<-eval(subset, design$variables, parent.frame())
+  if (!is.null(subset))
+    design<-design[subset,]
 
+  if(multicore && !require("multicore",quietly=TRUE))
+    multicore<-FALSE
+  
+  data<-design$variables
+  
 
       g<-match.call()
       g$design<-NULL
@@ -1201,15 +1220,27 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL, ...,
           incpt<-as.logical(attr(terms(full),"intercept"))
           fam<-full$family
           contrl<-full$control
-          for(i in 1:ncol(wts)){
+          if (multicore){
+            betas<-do.call(rbind,mclapply(1:ncol(wts), function(i){
+              multicore:::closeAll()
+              wi<-as.vector(wts[,i])*pw1
+              glm.fit(XX, YY, weights = wi/sum(wi),
+                      start =beta0,
+                      offset = offs,
+                      family = fam, control = contrl,
+                      intercept = incpt)$coefficients
+              
+            }))
+          } else {
+            for(i in 1:ncol(wts)){
               wi<-as.vector(wts[,i])*pw1
               betas[i,]<-glm.fit(XX, YY, weights = wi/sum(wi),
                                  start =beta0,
                                  offset = offs,
                                  family = fam, control = contrl,
                                  intercept = incpt)$coefficients
+            }
           }
-          
           v<-svrVar(betas,scale, rscales)
   }
 

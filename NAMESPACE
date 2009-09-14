@@ -9,7 +9,7 @@ export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        svycontrast,svyCprod, svyrecvar, grake, svrVar, pchisqsum,
        make.calfun, cal.linear, cal.raking, cal.logit, svycdf, svykappa, svykm,
        svyolr, svycoplot, svyloglin, make.panel.svysmooth, dotchart, subbootweights,
-       svyciprop, svyttest, marginpred,twophasevar,twophase2var,ppsmat,HR)
+       svyciprop, svyttest, marginpred,twophasevar,twophase2var,ppsmat,HR,unwtd.count)
 
 S3method(svyloglin,survey.design)
 S3method(svyloglin,svyrep.design)
@@ -250,6 +250,7 @@ S3method(summary,svytable)
 S3method(print,summary.survey.design)
 S3method(print,summary.survey.design2)
 S3method(print,summary.twophase)
+S3method(print,summary.twophase2)
 S3method(print,summary.svyrep.design)
 S3method(print,summary.svyglm)
 S3method(print,summary.svytable)
@@ -258,6 +259,7 @@ S3method(plot,svycdf)
 S3method(print, nonresponse)
 S3method(print, nonresponseSubset)
 S3method(print, regTermTest)
+S3method(print, regTermTestLRT)
 S3method(print, svrepstat)
 S3method(print, svystat)
 S3method(print, survey.design)

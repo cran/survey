@@ -1,6 +1,6 @@
 
-R : Copyright 2006, The R Foundation for Statistical Computing
-Version 2.3.0 alpha (2006-04-04 r37646)
+R version 2.9.0 beta (2009-04-08 r48309)
+Copyright (C) 2009 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -19,17 +19,24 @@ Type 'q()' to quit R.
 > ## Check that multistage samples still work
 > ##
 > library(survey)
+
+Attaching package: 'survey'
+
+
+	The following object(s) are masked from package:graphics :
+
+	 dotchart 
+
 > example(mu284)
 
 mu284> data(mu284)
 
-mu284> (dmu284 <- svydesign(id = ~id1 + id2, fpc = ~n1 + 
-    n2, data = mu284))
+mu284> (dmu284<-svydesign(id=~id1+id2,fpc=~n1+n2, data=mu284))
 2 - level Cluster Sampling design
 With (5, 15) clusters.
 svydesign(id = ~id1 + id2, fpc = ~n1 + n2, data = mu284)
 
-mu284> (ytotal <- svytotal(~y1, dmu284))
+mu284> (ytotal<-svytotal(~y1, dmu284))
    total     SE
 y1 15080 2274.3
 

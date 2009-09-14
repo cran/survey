@@ -7,7 +7,7 @@ dimnames.twophase<-function(x) dimnames(x$phase1$sample$variables)
 
 oldsvydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
                     data=NULL, nest=FALSE, check.strata=!nest,weights=NULL){
-
+ 
     .Deprecated("svydesign")
   
     ## less memory-hungry version for sparse tables
@@ -1076,6 +1076,7 @@ svycoxph.survey.design<-function(formula,design,subset=NULL,...){
         stop("all variables must be in design= argument")
     g<-with(list(data=data), eval(g))
     g$call<-match.call()
+    g$call[[1]]<-as.name(.Generic)
     g$printcall<-sys.call(-1)
     g$printcall[[1]]<-as.name(.Generic)
     class(g)<-c("svycoxph", class(g))
@@ -1140,7 +1141,42 @@ model.frame.svycoxph<-function(formula,...){
     with(list(data=data), eval(f))
 }
 
-
+model.matrix.svycoxph<-function (object, data = NULL, contrast.arg = object$contrasts, 
+    ...) 
+{
+    if (!is.null(object[["x"]])) 
+        object[["x"]]
+    else {
+        if (is.null(data)) 
+            data <- model.frame(object, ...)
+        else data <- model.frame(object, data = data, ...)
+        Terms <- object$terms
+        attr(Terms, "intercept") <- 1
+        strats <- attr(Terms, "specials")$strata
+        cluster <- attr(Terms, "specials")$cluster
+        dropx <- NULL
+        if (length(cluster)) {
+            tempc <- untangle.specials(Terms, "cluster", 1:10)
+            ord <- attr(Terms, "order")[tempc$terms]
+            if (any(ord > 1)) 
+                stop("Cluster can not be used in an interaction")
+            dropx <- tempc$terms
+        }
+        if (length(strats)) {
+            temp <- untangle.specials(Terms, "strata", 1)
+            dropx <- c(dropx, temp$terms)
+        }
+        if (length(dropx)) {
+            newTerms <- Terms[-dropx]
+            X <- model.matrix(newTerms, data, contrasts = contrast.arg)
+        }
+        else {
+            newTerms <- Terms
+            X <- model.matrix(Terms, data, contrasts = contrast.arg)
+        }
+        X
+    }
+}
 
 print.svycoxph<-function(x,...){
     print(x$survey.design, varnames=FALSE, design.summaries=FALSE,...)
@@ -1784,6 +1820,8 @@ model.frame.svyrep.design<-function(formula,...){
     options(survey.adjust.domain.lonely=FALSE)
   if (is.null(getOption("survey.drop.replicates")))
       options(survey.drop.replicates=TRUE)
+  if (is.null(getOption("survey.multicore")))
+    options(survey.multicore=FALSE)
 }
 
 

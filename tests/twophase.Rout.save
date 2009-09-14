@@ -115,8 +115,8 @@ obs         3  3  3  3  3
 design.PSU  3  3  3  3  3
 actual.PSU  3  3  3  3  3
 Population stratum sizes (PSUs): 
-19 45 47 50 31 
- 5  8  5  9  7 
+19 31 45 47 50 
+ 5  7  8  5  9 
 Data variables:
 [1] "id1" "n1"  "id2" "y1"  "n2"  "id"  "sub"
 > t1<-svytotal(~y1, dmu284)

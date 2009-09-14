@@ -1,6 +1,6 @@
 
-R version 2.7.0 Under development (unstable) (2007-09-25 r42975)
-Copyright (C) 2007 The R Foundation for Statistical Computing
+R version 2.9.0 beta (2009-04-08 r48309)
+Copyright (C) 2009 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -16,6 +16,14 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > library(survey)
+
+Attaching package: 'survey'
+
+
+	The following object(s) are masked from package:graphics :
+
+	 dotchart 
+
 > 
 > data(api)
 > dclus1 <- svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
@@ -31,7 +39,7 @@ Type 'q()' to quit R.
         mean     SE
 api00 641.23 26.873
 > svytotal(~enroll, rclus1r)
-          mean     SE
+         total     SE
 enroll 3647300 463511
 > 
 > ff<-~stype+sch.wide
@@ -43,7 +51,7 @@ Loading required package: MASS
         mean     SE
 api00 641.23 26.874
 > svytotal(~enroll,rclus1g)
-          mean     SE
+         total     SE
 enroll 3647280 463582
 > 
 > summary(weights(rclus1g)/weights(rclus1r))

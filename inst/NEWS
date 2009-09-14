@@ -1,3 +1,38 @@
+3.17   Under Linux, Mac OS, and most Unix systems, multiple processors can be
+       used for the subgroups in svyby(), the imputed data sets in with.svyimputationList
+       and with.DBsvyimputationList, and the replicate weights in svyglm.svyrep.design
+       and svyolr.svyrep.design.  This requires the 'multicore' package and the 
+       argument multicore=TRUE to the functions (in the absence of the multicore
+       package, the multicore=TRUE option is just ignored).
+
+       svyvar.svyrep.design handled NA values incorrectly (Arthur Burke)
+
+       print.summary.twophase2 wasn't exported, so summary(twophase.object) 
+       gave Too Much Information  (Norman Breslow)
+
+       svytotal.svyrep.design labelled the statistic it computed as 'mean',
+       although it really was the correct total. (Arthur Burke)
+
+       detection of PSUs not nested in strata was incorrect in some cases.
+
+       added xbins= option to svyplot for hexbin styles (for Bryan Shepherd)
+
+       print() method now has strata in a more predictable order (for Norman Breslow)
+
+       regTermTest(,method="LRT") now does Rao-Scott-type tests based on the estimated 
+       loglikelihood ratio, for generalized linear models and the Cox model. Similarly,
+       confint.svyglm(,method="likelihood") does confidence intervals based on the 
+       Rao-Scott-type likelihood ratio test.
+
+       Updated marginpred() to work with survival 2.35-7
+
+       Documentation fixes revealed by the new R pre-2.10 help parser
+
+       Added unwtd.count() to count the raw number of non-missing observations.
+
+       The new PPS designs now work with subset().
+
+
 3.16   PPS designs without replacement, based on the weighted covariance of 
        sample indicators: Horvitz-Thompson and Yates-Grundy estimators, 
        Overton's approximation, Hartley-Rao approximation, a modified 

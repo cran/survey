@@ -29,17 +29,17 @@ Two unbiased estimators of the variance of the total of $x$ are the Horvitz--Tho
 $$\hat V_{HT}= \sum_{i,j=1}^n \check{\Delta}\check{x}_i\check{x}_j$$
 and the Yates--Grundy(--Sen) estimator
 $$\hat V_{YG}= \frac{1}{2}\sum_{i,j=1}^n \check{\Delta}(\check{x}_i-\check{x}_j)^2$$
-The Yates--Grundy estimator appears to be preferred.
+The Yates--Grundy estimator appears to be preferred in most comparisons. It is always non-negative (up to rounding error, at least).
 
-In practice, $\pi_{ij}$ may not be available and various approximations have been proposed.  The (truncated) Hartley--Rao approximation is
+In principle, $\pi_{ij}$ might not be available and various approximations have been proposed.  The (truncated) Hartley--Rao approximation is
 $$\check{\Delta}_{ij}=1-\frac{n-\pi_i-\pi_j+\sum_{k=1}^N\pi^2_k/n}{n-1}$$
 which requires knowing $\pi_i$ for all units in the population.  The population sum can be estimated from the sample, giving a further approximation
 $$\check{\Delta}_{ij}=1-\frac{n-\pi_i-\pi_j+\sum_{k=1}^n\pi_k/n}{n-1}.$$
-that requires only the sample $\pi_i$.
-
-Overton's approximation (REF) is
+that requires only the sample $\pi_i$. Overton's approximation  is
 $$\check{\Delta}_{ij}=1-\frac{n-(\pi_i+\pi_j)/2}{n-1}$$
 which also requires only the sample $\pi_i$.
+
+In practice, given modern computing power, $\pi_{ij}$ should be available either explicitly or by simulation, so the Hartley--Rao and Overton approximations are not particularly useful.
 
 \subsection{Using the PPS estimators}
 At the moment, only Brewer's approximation can be used as a component of multistage sampling, though for any sampling design it is possible to work out the joint sampling probabilities and use the other approaches.  The other approaches can be used for cluster sampling or for sampling of individual units.  This is likely to change in the future.

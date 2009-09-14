@@ -4,15 +4,15 @@
 \addtolength{\textheight}{0.75in}
 \addtolength{\oddsidemargin}{-0.5in}
 \addtolength{\textwidth}{1in}
-%\VignetteIndexEntry{Some details on two-phase variances}
+%\VignetteIndexEntry{Obsolete formulas for two-phase variances}
 \usepackage{Sweave}
 \author{Thomas Lumley}
-\title{Some details on two-phase variances}
+\title{Obsolete formulas for two-phase variances}
 
 \begin{document}
 \maketitle
 This document explains the computation of variances for totals in
-two-phase designs before version 3.15, or using \texttt{method=''approx''}. 
+two-phase designs before version 3.15, or using \texttt{method=''approx''}.  Since version 3.15 the variances are computed directly using a sparse-matrix representation of the covariance of sampling indicators, and agree exactly with the formulas in Section 9.3 of S\"arndal, Swensson, and Wretman. 
 Variances for other statistics are computed by the
 delta-method from the variance of the total of the estimating
 functions. 

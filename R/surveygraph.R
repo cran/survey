@@ -14,7 +14,7 @@ svyplot.default<-function(formula,
                   design,
                   style=c("bubble","hex","grayhex","subsample","transparent"),
                   sample.size=500, subset=NULL,legend=1,inches=0.05,
-                  amount=NULL,basecol="black",alpha=c(0,0.8), ...){
+                  amount=NULL,basecol="black",alpha=c(0,0.8), xbins=30, ...){
   
   style<-match.arg(style)
   if (style %in% c("hex","grayhex") && !require(hexbin)){
@@ -39,7 +39,7 @@ svyplot.default<-function(formula,
          hex={
            if (exists("hcell")) {
              ## old version of hexbin
-             rval<-hexbin(X,Y)
+             rval<-hexbin(X,Y,xbins=xbins)
              cell<-hcell(X,Y)$cell
              rval$cnt<-tapply(W,cell,sum)
            rval$xcm<-tapply(1:length(X), cell,
@@ -49,7 +49,7 @@ svyplot.default<-function(formula,
              plot(rval,legend=legend,style="centroids",...)
            } else {
              ## new version
-             rval<-hexbin(X,Y,ID=TRUE)
+             rval<-hexbin(X,Y,ID=TRUE,xbins=xbins)
              cell<-rval@cID
              rval@count<-as.vector(tapply(W,cell,sum))
              rval@xcm<-as.vector(tapply(1:length(X), cell,
@@ -63,13 +63,13 @@ svyplot.default<-function(formula,
          grayhex={
            if (exists("hcell")) {
              ## old version of hexbin
-             rval<-hexbin(X,Y)
+             rval<-hexbin(X,Y,xbins=xbins)
              cell<-hcell(X,Y)$cell
              rval$cnt<-tapply(W,cell,sum)
              plot(rval, legend=legend,...)
            } else {
              ## new version
-             rval<-hexbin(X,Y,ID=TRUE)
+             rval<-hexbin(X,Y,ID=TRUE,xbins=xbins)
              cell<-rval@cID
              rval@count<-as.vector(tapply(W,cell,sum))
              gplot.hexbin(rval, legend=legend,...)

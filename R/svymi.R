@@ -125,16 +125,28 @@ subset.svyDBimputationList<-function(x, subset,...,all=FALSE){
     x
   }
 
-with.svyimputationList<-function (data, expr, fun, ...) {
+with.svyimputationList<-function (data, expr, fun, ..., multicore=getOption("survey.multicore")) {
     pf <- parent.frame()
+    if (multicore && !require("multicore",quietly=TRUE))
+      multicore<-FALSE
     if (!is.null(match.call()$expr)) {
         expr <- substitute(expr)
         expr$design<-as.name(".design")
-        results <- lapply(data$designs,
+        if (multicore){
+        results <- mclapply(data$designs,
                           function(.design) {
                             eval(expr, list(.design=.design),enclos=pf)
                           }
                           )
+      } else{
+        results <- lapply(data$designs,
+                          function(.design) {
+                            multicore:::closeAll()
+                            eval(expr, list(.design=.design),enclos=pf)
+                          }
+                          )
+        
+      }
       }
     else {
       results <- lapply(data$designs, fun, ...)
@@ -150,11 +162,28 @@ with.svyimputationList<-function (data, expr, fun, ...) {
   }
 
 
-with.svyDBimputationList<-function (data, expr,  ...) {
+with.svyDBimputationList<-function (data, expr,  ..., multicore=getOption("survey.multicore")) {
     pf <- parent.frame()
     if (!is.null(match.call()$expr)) {
       expr <- substitute(expr)
       expr$design<-as.name(".design")
+      if (multicore && !require("multicore")) multicore <-FALSE
+      if (multicore){
+        results<-mclapply(data$imputations,
+                          function(tablename) {
+                            multicore:::closeAll()
+                            close(data)
+                            .design<-data$design
+                            db<-data$db
+                            db$tablename<-tablename
+                            .design$db<-db
+                            .design<-open(.design)
+                            rval<-eval(expr, list(.design=.design),enclos=pf)
+                            close(.design)
+                            rval
+                          }
+                          )
+      } else {
       results <- lapply(data$imputations,
                         function(tablename) {
                           .design<-data$design
@@ -164,6 +193,7 @@ with.svyDBimputationList<-function (data, expr,  ...) {
                           eval(expr, list(.design=.design),enclos=pf)
                         }
                         )
+    }
     }
     attr(results, "call") <- sys.call(-1)
     results

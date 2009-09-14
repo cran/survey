@@ -18,7 +18,7 @@ with inverse-probability weighting and design-based standard errors.
 \usage{
 \method{svyglm}{survey.design}(formula, design, subset=NULL, ...)
 \method{svyglm}{svyrep.design}(formula, design, subset=NULL, ..., rho=NULL,
-return.replicates=FALSE, na.action)
+return.replicates=FALSE, na.action,multicore=getOption("survey.multicore"))
 \method{summary}{svyglm}(object, correlation = FALSE, df.resid=NULL,
 ...)
 \method{predict}{svyglm}(object,newdata=NULL,total=NULL,
@@ -39,6 +39,8 @@ return.replicates=FALSE, na.action)
   \item{object}{A \code{svyglm} object}
   \item{correlation}{Include the correlation matrix of parameters?}
   \item{na.action}{Handling of NAs}
+  \item{multicore}{Use the \code{multicore} package to distribute
+    replicates across processors?}	      
   \item{df.resid}{Optional denominator degrees of freedom for Wald
     tests}
   \item{newdata}{new data frame for prediction}
@@ -58,6 +60,10 @@ computed by \code{\link{degf}} and the residual df computed by
 subtraction.  It's not that these are particularly good approximations
 in a regression model but they are relatively standard. To get tests
 based on a Normal distribution use \code{df.resid=Inf}.
+
+Parallel processing with \code{multicore=TRUE} is helpful only for
+fairly large data sets and on computers with sufficient memory. It may
+be incompatible with GUIs, although the Mac Aqua GUI appears to be safe.
 
 \code{predict} gives fitted values and sampling variability for specific new
 values of covariates.  When \code{newdata} are the population mean it

@@ -10,7 +10,7 @@ svy.varcoef(glm.object, design)
 }
 \arguments{
   \item{glm.object}{A \code{\link{glm}} object}
-  \item{design}{A \code{\survey.design} object }
+  \item{design}{A \code{survey.design} object }
 }
 \value{
  A variance matrix
@@ -20,8 +20,6 @@ svy.varcoef(glm.object, design)
 
 \seealso{\code{\link{svyglm}},\code{\link{svydesign}}, \code{\link{svyCprod}} }
 
-\examples{
 
-}
 \keyword{regression}% at least one, from doc/KEYWORDS
 \keyword{survey}% __ONLY ONE__ keyword per line

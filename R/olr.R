@@ -1,20 +1,33 @@
 svyolr<-function(formula, design,...) UseMethod("svyolr",design)
 
-svyolr.svyrep.design<-function(formula,design,...,return.replicates=FALSE){
+svyolr.svyrep.design<-function(formula,design,...,return.replicates=FALSE,
+                               multicore=getOption("survey.multicore")){
  	require(MASS)
  	environment(formula)<-environment()
  	df<-model.frame(design)
  	pwt<-weights(design,"sampling")
-   
+        if (multicore && !require("multicore", quietly=TRUE))
+          multicore <- FALSE
+        
  	rval<-suppressWarnings(polr(formula,data=df,...,Hess=FALSE,model=FALSE,
- 		weights=pwt))
+                                    weights=pwt))
  	start<-c(rval$coefficients,rval$zeta)
  	rw<-weights(design,"analysis")
- 	betas<-apply(rw,2,function(w) {
- 		environment(formula)<-environment()
- 		m<-polr(formula,data=df,Hess=FALSE, start=start, model=FALSE, weights=w)
- 		c(m$coefficients, m$zeta)
- 		})
+        if (multicore){
+          betas<-do.call(cbind,mclapply(1:ncol(rw), function(i){
+            multicore:::closeAll()
+            w<-rw[,i]
+            environment(formula)<-environment()
+            m<-polr(formula,data=df,Hess=FALSE, start=start, model=FALSE, weights=w)
+            c(m$coefficients, m$zeta)
+          }))
+        } else {
+          betas<-apply(rw,2,function(w) {
+            environment(formula)<-environment()
+            m<-polr(formula,data=df,Hess=FALSE, start=start, model=FALSE, weights=w)
+            c(m$coefficients, m$zeta)
+          })
+        }
  	rval$var<-svrVar(t(betas),design$scale,design$rscales)
  	class(rval)<-"svyolr"
  	rval$call<-sys.call()

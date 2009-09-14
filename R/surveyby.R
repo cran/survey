@@ -5,8 +5,9 @@ svyby<-function(formula, by, design,...) UseMethod("svyby",design)
 
 
 svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
-                keep.names=TRUE,verbose=FALSE,vartype=c("se","ci","ci","cv","cvpct","var"),
-                drop.empty.groups=TRUE, covmat=FALSE, return.replicates=FALSE){
+                        keep.names=TRUE,verbose=FALSE,vartype=c("se","ci","ci","cv","cvpct","var"),
+                        drop.empty.groups=TRUE, covmat=FALSE, return.replicates=FALSE,
+                        multicore=getOption("survey.multicore")){
 
   if (inherits(by, "formula"))
     byfactors<-model.frame(by, model.frame(design), na.action=na.pass)
@@ -17,6 +18,9 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
     if (!inherits(design,"svyrep.design"))
       stop("covmat=TRUE not implemented for this design type")
   }
+
+  if (multicore && !require("multicore",quietly=TRUE))
+    multicore<-FALSE
 
   ## all combinations that actually occur in this design
   byfactor<-do.call("interaction", byfactors)
@@ -59,9 +63,10 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
 
       ## In dire need of refactoring (or rewriting)
       ## but it seems to work.
-      results<-lapply(uniques,
+      results<-(if (multicore) mclapply else lapply)(uniques,
                       function(i){
-                        if(verbose) print(as.character(byfactor[i]))
+                        if (multicore) multicore:::closeAll()
+                        if(verbose && !multicore) print(as.character(byfactor[i]))
                         if (inherits(formula,"formula"))
                           data<-formula
                         else

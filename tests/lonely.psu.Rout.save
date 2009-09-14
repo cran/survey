@@ -1,6 +1,6 @@
 
-R version 2.7.2 (2008-08-25)
-Copyright (C) 2008 The R Foundation for Statistical Computing
+R version 2.9.0 beta (2009-04-08 r48309)
+Copyright (C) 2009 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -101,8 +101,8 @@ obs        13  34   4  13  16   2   1   4  12  21   9  11  37   2   4
 design.PSU 13  34   4  13  16   2   1   4  12  21   9  11  37   2   4
 actual.PSU 13  34   4  13  16   2   1   4  12  21   9  11  37   2   4
 Population stratum sizes (PSUs): 
- 637  437  778  197  406  815  178  255  568  135  510  716   61  413  448 
-1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000    1 1000 
+ 135  178  197  255  406  413  437  448  510  568   61  637  716  778  815 
+1000 1000 1000 1000 1000    1 1000 1000 1000 1000 1000 1000 1000 1000 1000 
 Data variables:
  [1] "cds"      "stype"    "name"     "sname"    "snum"     "dname"   
  [7] "dnum"     "cname"    "cnum"     "flag"     "pcttest"  "api00"   
@@ -150,7 +150,7 @@ api00 644.17 5.7501
 > 
 > rs<-as.svrepdesign(ds)
 > svytotal(~api00,rs)
-         mean    SE
+        total    SE
 api00 3989986 35616
 > SE(svytotal(~api00,subset(rs, dnum==413)))==0
 [1] TRUE

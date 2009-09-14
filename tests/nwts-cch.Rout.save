@@ -57,8 +57,8 @@ Attaching package: 'Matrix'
 > 
 > svycoxph(Surv(edrel, rel)~factor(stage)+factor(histol)+I(age/12), design=d_BorganII)
 Call:
-svycoxph.survey.design(formula = Surv(edrel, rel) ~ factor(stage) + 
-    factor(histol) + I(age/12), design = d_BorganII)
+svycoxph(formula = Surv(edrel, rel) ~ factor(stage) + factor(histol) + 
+    I(age/12), design = d_BorganII)
 
 
                   coef exp(coef) se(coef)      z       p
@@ -83,8 +83,8 @@ Likelihood ratio test=  on 5 df, p=  n= 1062
 > 
 > svycoxph(Surv(edrel, rel)~factor(stage)+factor(histol)+I(age/12), design=d_BorganIIps)
 Call:
-svycoxph.survey.design(formula = Surv(edrel, rel) ~ factor(stage) + 
-    factor(histol) + I(age/12), design = d_BorganIIps)
+svycoxph(formula = Surv(edrel, rel) ~ factor(stage) + factor(histol) + 
+    I(age/12), design = d_BorganIIps)
 
 
                   coef exp(coef) se(coef)      z       p

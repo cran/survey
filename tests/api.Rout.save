@@ -1,6 +1,6 @@
 
-R version 2.6.0 Under development (unstable) (2007-06-27 r42086)
-Copyright (C) 2007 The R Foundation for Statistical Computing
+R version 2.9.0 beta (2009-04-08 r48309)
+Copyright (C) 2009 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -16,6 +16,14 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > library(survey)
+
+Attaching package: 'survey'
+
+
+	The following object(s) are masked from package:graphics :
+
+	 dotchart 
+
 > example(api)
 
 api> library(survey)
@@ -44,8 +52,8 @@ obs        100 50 50
 design.PSU 100 50 50
 actual.PSU 100 50 50
 Population stratum sizes (PSUs): 
-   E    M    H 
-4421 1018  755 
+   E    H    M 
+4421  755 1018 
 Data variables:
  [1] "cds"      "stype"    "name"     "sname"    "snum"     "dname"   
  [7] "dnum"     "cname"    "cnum"     "flag"     "pcttest"  "api00"   
@@ -166,7 +174,7 @@ api> svymean(~api00, rclus1)
 api00 644.17 26.329
 
 api> svytotal(~enroll, rclus1, na.rm=TRUE)
-          mean     SE
+         total     SE
 enroll 3404940 932235
 
 api> # post-stratify on school type
@@ -218,7 +226,7 @@ api> svymean(~api00, rclus1p)
 api00 642.31 26.934
 
 api> svytotal(~enroll, rclus1p, na.rm=TRUE)
-          mean     SE
+         total     SE
 enroll 3680893 473431
 > 
 > 

@@ -142,7 +142,7 @@ svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
      if (check.strata && nest)
       warning("No point in check.strata=TRUE if nest=TRUE")
     if(check.strata && !is.null(strata) && NCOL(ids)){
-       sc<-rowSums(table(ids[,1],strata[,1])>0)
+       sc<-(rowSums(table(ids[,1],strata[,1]))>0)
        if(any(sc>1)) stop("Clusters not nested in strata at top level; you may want nest=TRUE.")
     }
 
@@ -253,9 +253,9 @@ onestrat<-function(x,cluster,nPSU,fpc, lonely.psu,stratum=NULL,stage=1,cal=cal){
 
 
 onestage<-function(x, strata, clusters, nPSU, fpc, lonely.psu=getOption("survey.lonely.psu"),stage=0, cal){
-  stratvars<-tapply(1:NROW(x), list(factor(strata)), function(index){
-    onestrat(x[index,,drop=FALSE], clusters[index],
-             nPSU[index][1], fpc[index], ##fpc[index][1], to allow pps(brewer)
+  stratvars<- tapply(1:NROW(x), list(factor(strata)), function(index){
+             onestrat(x[index,,drop=FALSE], clusters[index],
+             nPSU[index][1], fpc[index], ##changed from fpc[index][1], to allow pps(brewer)
              lonely.psu=lonely.psu,stratum=strata[index][1], stage=stage,cal=cal)
   })
   p<-NCOL(x)
@@ -468,6 +468,7 @@ print.survey.design2<-function(x,varnames=FALSE,design.summaries=FALSE,...){
         s<-!duplicated(x$strata[,1])
         a<-x$fpc$popsize[s,1]
         names(a)<-x$strata[s,1]
+        a<-a[order(names(a))]
         print(a)
       } else {
         cat("Population size (PSUs):",x$fpc$popsize[1,1],"\n")
@@ -805,4 +806,3 @@ svyratio.survey.design2<-function(numerator=formula, denominator, design, separa
     rval
     
   }
-

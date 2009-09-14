@@ -1,5 +1,11 @@
-regTermTest<-function(model,test.terms, null=NULL,df=Inf){
+##not exported, used by method="LRT"
+deviance.svycoxph<-function(object,...) 2 * (object$ll[1] - object$ll[2])
+deviance.coxph<-function(object,...) 2 * (object$loglik[1] - object$loglik[2])
 
+regTermTest<-function(model, test.terms, null=NULL, df=Inf, method=c("Wald","LRT")){
+
+  method<-match.arg(method)
+  
   canonicalOrder<-function(term){
     tt<-strsplit(term,":")
     tt<-lapply(tt,sort)
@@ -20,9 +26,39 @@ regTermTest<-function(model,test.terms, null=NULL,df=Inf){
   
   beta<-coef(model)[index]
 
-  if (!is.null(NULL))
+  if (!is.null(null))
     beta<-beta-null
   V<-vcov(model)[index,index]
+
+  if (method=="LRT"){
+    if (inherits(model,"svyglm"))
+      V0<-model$naive.cov
+    else if (inherits(model, "svycoxph"))
+      V0<-model$inv.info
+    else if (inherits(model,"lm"))
+      V0<-vcov(model)
+    else if (inherits(model,"coxph")){
+      if (is.null(model$naive.var))
+        V0<-model$var
+      else
+        V0<-model$naive.var
+    }
+    else stop("method='LRT' not supported for this model")
+    V0<-V0[index,index]
+    test.formula<-make.formula(test.terms)[[2]]
+    if (!("formula") %in% names(model$call))
+      names(model$call)[[2]]<-"formula"
+    
+    model0<-eval(bquote(update(model, .~.-(.(test.formula)))))
+    chisq<-deviance(model0)-deviance(model)
+    misspec<-eigen(solve(V0)%*%V, only.values=TRUE)$values
+    p<-pchisqsum(chisq,1,misspec,method="saddlepoint",lower=FALSE)
+    rval<-list(call=sys.call(),mcall=model$call,chisq=chisq,
+               df=length(index),test.terms=test.terms, 
+               p=p,lambda=misspec)
+    class(rval)<-"regTermTestLRT"
+    return(rval)
+  }
   
   if (is.null(df)){
     if (inherits(model,"svyglm"))
@@ -66,7 +102,19 @@ print.regTermTest<-function(x,...){
     cat("Chisq = ",x$chisq," on ",x$df," df: p=",format.pval(x$p),"\n")
   else
     cat("F = ",x$Ftest," on ",x$df," and ",x$ddf," df: p=",format.pval(x$p),"\n")
-  invisible(NULL)
+  invisible(x)
+}
+
+print.regTermTestLRT<-function(x,...){
+  cat("Working (Rao-Scott) LRT for ")
+  cat(x$test.terms)
+  cat("\n in ")
+  print(x$mcall)
+  chisq<-x$chisq/mean(x$lambda)
+  cat("Working LR = ",chisq, 'p=',format.pval(x$p),"\n")
+  if (length(x$lambda)>1)
+    cat("(scale factors: ",signif(x$lambda/mean(x$lambda),2),")\n")
+  invisible(x)
 }
 
 svycontrast<-function(stat, contrasts,...) UseMethod("svycontrast")
