@@ -1,3 +1,10 @@
+
+3.18   Changed the default to combined.weights=TRUE in svrepdesign()
+       
+       Fixed bug in multiple imputation analysis with multicore package.
+
+       The check for PSUs properly nested in strata had some false negatives.
+
 3.17   Under Linux, Mac OS, and most Unix systems, multiple processors can be
        used for the subgroups in svyby(), the imputed data sets in with.svyimputationList
        and with.DBsvyimputationList, and the replicate weights in svyglm.svyrep.design

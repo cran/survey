@@ -142,7 +142,7 @@ svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
      if (check.strata && nest)
       warning("No point in check.strata=TRUE if nest=TRUE")
     if(check.strata && !is.null(strata) && NCOL(ids)){
-       sc<-(rowSums(table(ids[,1],strata[,1]))>0)
+       sc<-(rowSums(table(ids[,1],strata[,1])>0))
        if(any(sc>1)) stop("Clusters not nested in strata at top level; you may want nest=TRUE.")
     }
 

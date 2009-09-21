@@ -129,25 +129,26 @@ with.svyimputationList<-function (data, expr, fun, ..., multicore=getOption("sur
     pf <- parent.frame()
     if (multicore && !require("multicore",quietly=TRUE))
       multicore<-FALSE
+
     if (!is.null(match.call()$expr)) {
-        expr <- substitute(expr)
-        expr$design<-as.name(".design")
-        if (multicore){
+      expr <- substitute(expr)
+      expr$design<-as.name(".design")
+      if (multicore){
         results <- mclapply(data$designs,
-                          function(.design) {
+                            function(.design) {
+                            multicore:::closeAll()
                             eval(expr, list(.design=.design),enclos=pf)
                           }
-                          )
+                            )
       } else{
         results <- lapply(data$designs,
                           function(.design) {
-                            multicore:::closeAll()
                             eval(expr, list(.design=.design),enclos=pf)
                           }
                           )
         
       }
-      }
+    }
     else {
       results <- lapply(data$designs, fun, ...)
     }

@@ -420,7 +420,7 @@ svrepdesign<-function(variables, repweights, weights,data=NULL,...) UseMethod("s
 
 svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
                       data=NULL,type=c("BRR","Fay","JK1", "JKn","bootstrap","other"),
-                      combined.weights=FALSE, rho=NULL, bootstrap.average=NULL,
+                      combined.weights=TRUE, rho=NULL, bootstrap.average=NULL,
                       scale=NULL,rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),...)
 {
   

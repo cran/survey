@@ -19,7 +19,7 @@ data structure for such a survey.
 svrepdesign(variables , repweights , weights, data,...)
 \method{svrepdesign}{default}(variables = NULL, repweights = NULL, weights = NULL, data =
 NULL, type = c("BRR", "Fay", "JK1","JKn","bootstrap","other"),
-combined.weights=FALSE, rho = NULL, bootstrap.average=NULL,
+combined.weights=TRUE, rho = NULL, bootstrap.average=NULL,
 scale=NULL, rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),...)
 \method{svrepdesign}{imputationList}(variables=NULL, repweights,weights,data,...)
 \method{image}{svyrep.design}(x, ..., col=grey(seq(.5,1,length=30)), type.=c("rep","total"))
@@ -107,7 +107,7 @@ data(scd)
 # use BRR replicate weights from Levy and Lemeshow
 repweights<-2*cbind(c(1,0,1,0,1,0), c(1,0,0,1,0,1), c(0,1,1,0,0,1),
 c(0,1,0,1,1,0))
-scdrep<-svrepdesign(data=scd, type="BRR", repweights=repweights)
+scdrep<-svrepdesign(data=scd, type="BRR", repweights=repweights, combined.weights=FALSE)
 svyratio(~alive, ~arrests, scdrep)
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

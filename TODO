@@ -6,13 +6,13 @@ Possible additional developments in no particular order:
 
  - Score-based confidence intervals for glms
 
- - Rao-Scott-type tests for glms.
+ [mostly done] Rao-Scott-type tests for glms.
 
  [done] More general HT estimator for sampling without replacement
  	- using joint inclusion probabilities
 	- using population first-order inclusion probabilities and Hartley-Rao approximation
 	- using Overton's approximation and sample inclusion probabilities
-        [done] using Berger's approximation and sample inclusion probabilities.
+        - using Berger's approximation and sample inclusion probabilities.
 
  - GEE. 
 
@@ -27,8 +27,10 @@ Possible additional developments in no particular order:
  - Replicate weights for two-phase designs and for multistage designs
    with large sampling fraction (Fukuoka's BBE)
 
- - parallel processing for replicate weights, svyby(), svyrecvar()?
+ [experimental] parallel processing for replicate weights, svyby(), svyrecvar()?
 
  - Gini index and other summaries of concentration and inequality.
 
  - Krista Giles' respondent-driven sampling estimators
+
+ - database-backed designs for replicate weights.

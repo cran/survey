@@ -1,14 +1,14 @@
 svydesign               Specify a survey design
-twophase                Two-phase designs
+twophase                Specify two-phase designs
+svrepdesign             Specify replication-weight designs
+as.svrepdesign          Compute replication weights for a design
+svydesign.imputationList  Designs for multiply-imputed data.
 subset.survey.design    Subset of survey
 update.survey.design    Add variables to a survey design
 postStratify            Post-stratify a survey design
 rake                    Rake a survey design
 calibrate		Calibration and generalised raking
 estWeight               Estimated weights for two-phase designs
-svrepdesign             Replication-weight designs
-as.svrepdesign          Compute replication weights for a design
-svydesign.imputationList  Designs for multiply-imputed data.
 
                  -----
 
@@ -42,6 +42,8 @@ svyvar
 svyratio
 svytable                Contingency tables
 svychisq                Tests for two-way tables
+regTermTest             Tests in regression models
+marginpred              Predictive margins by direct standardization
 svykappa                Cohen's kappa for inter-rater agreement
 svymle                  Maximum pseudolikelihood estimation in complex
                         surveys
