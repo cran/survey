@@ -3,6 +3,9 @@
 print.ODBCsvydesign<-function(x,...){
   cat("ODBC-backed ")
   NextMethod()
+   if (!checkConnection(x$db$connection, error=FALSE))
+    cat("<ODBC Connection closed>\n")
+  invisible(x)
 }
 
 summary.ODBCsvydesign<-function(object,...){

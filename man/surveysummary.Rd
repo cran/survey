@@ -89,6 +89,12 @@ The \code{svytotal} and \code{svreptotal} functions estimate a
 population total.  Use \code{predict} on \code{\link{svyratio}} and
 \code{\link{svyglm}}, to get ratio or regression estimates of totals.
 
+\code{svyvar} estimates the population variance. The object returned
+includes the full matrix of estimated population variances and
+covariances, but by default only the diagonal elements are printed. To
+display the whole matrix use \code{as.matrix(v)} or \code{print(v,
+covariance=TRUE)}.
+
 The design effect compares the variance of a mean or total to the
 variance from a study of the same size using simple random sampling
 without replacement. Note that the design effect will be incorrect if
@@ -147,9 +153,13 @@ survey functions.
   svymean(~factor(stype),dclus1)
   svymean(~interaction(stype, comp.imp), dclus1)
   svyquantile(~api00, dclus1, c(.25,.5,.75))
-  svyvar(~api00, dclus1)
   svytotal(~enroll, dclus1, deff=TRUE)
   svyratio(~api.stu, ~enroll, dclus1)
+
+  v<-svyvar(~api00+api99, dclus1)
+  v
+  print(v, cov=TRUE)
+  as.matrix(v)
 
 
   # replicate weights - jackknife (this is slower)
@@ -159,7 +169,8 @@ survey functions.
 
   svymean(~api00, jkstrat)
   svymean(~factor(stype),jkstrat)
-  svyvar(~api00,jkstrat)
+  svyvar(~api00+api99,jkstrat)
+
   svyquantile(~api00, jkstrat, c(.25,.5,.75))
   svytotal(~enroll, jkstrat)
   svyratio(~api.stu, ~enroll, jkstrat)

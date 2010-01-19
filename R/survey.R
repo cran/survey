@@ -687,17 +687,39 @@ svyvar.survey.design<-function(x, design, na.rm=FALSE,...){
 	b<-x[,rep(1:p,each=p)]
         ## Kish uses the n-1 divisor, so it affects design effects
 	v<-svymean(a*b*n/(n-1),design, na.rm=na.rm)
-	v<-matrix(v,ncol=p)
-        attr(v,"statistic")<-"variance"
-        v
+	vv<-matrix(v,ncol=p)
+        dimnames(vv)<-list(names(xbar),names(xbar))
+        attr(vv,"var")<-attr(v,"var")
+        attr(vv,"statistic")<-"variance"
+        class(vv)<-c("svyvar","svystat")
+        vv
     }
+
+print.svyvar<-function (x,  covariance=FALSE, ...) 
+{
+    if(!is.matrix(x)) NextMethod()
+    
+    vv <- attr(x, "var")
+    if (covariance){
+      nms<-outer(rownames(x),colnames(x),paste,sep=":")
+      m<-cbind(as.vector(x), sqrt(diag(vv)))
+      rownames(m)<-nms
+    } else{
+      ii<-(1:sqrt(length(x)))^2
+      m<-cbind(x[ii], sqrt(diag(vv))[ii])
+    }
+    colnames(m) <- c(attr(x, "statistic"), "SE")
+    printCoefmat(m)
+}
+
+as.matrix.svyvar<-function(x,...) unclass(x)
 
 svyquantile<-function(x,design,quantiles,...) UseMethod("svyquantile", design)
 
 svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
                                     ci=FALSE, method="linear",f=1,
                                     interval.type=c("Wald","score","betaWald"),
-                                    na.rm=FALSE,se=ci, ties=c("discrete","rounded"), ...){
+                                    na.rm=FALSE,se=ci, ties=c("discrete","rounded"), df=Inf,...){
     if (inherits(x,"formula"))
       x<-model.frame(x ,model.frame(design), na.action=na.pass)
     else if(typeof(x) %in% c("expression","symbol"))
@@ -713,6 +735,15 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
       }
 
     w<-weights(design)
+
+    if (is.null(df)){
+      qcrit<-function(p, lower.tail=TRUE) qt(p, df=degf(design), lower.tail=lower.tail)
+    } else if(df==Inf){
+      qcrit <- function(p,lower.tail=TRUE) qnorm(p,lower.tail=lower.tail)
+    } else {
+      qcrit <- function(p,lower.tail=TRUE) qt(p,df=df,lower.tail=lower.tail)
+    }
+
     
     computeQuantiles<-function(xx,p=quantiles){
       oo<-order(xx)
@@ -747,15 +778,15 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
       upper<-max(xx)-iqr/100
       tol<-1/(100*sqrt(nrow(design)))
       c(uniroot(scoretest,interval=c(lower,upper),
-                qlimit=qnorm(alpha/2,lower.tail=FALSE),tol=tol)$root,
+                qlimit=qcrit(alpha/2,lower.tail=FALSE),tol=tol)$root,
         uniroot(scoretest,interval=c(lower,upper),
-                qlimit=qnorm(alpha/2,lower.tail=TRUE),tol=tol)$root)
+                qlimit=qcrit(alpha/2,lower.tail=TRUE),tol=tol)$root)
     }
     
     computePCI<-function(se,alpha,p){
       if (interval.type=="Wald"){
-        p.up<-p+qnorm(alpha/2,lower.tail=FALSE)*se
-        p.low<-p+qnorm(alpha/2,lower.tail=TRUE)*se
+        p.up<-p+qcrit(alpha/2,lower.tail=FALSE)*se
+        p.low<-p+qcrit(alpha/2,lower.tail=TRUE)*se
         c(p.low,p.up)
       } else if (interval.type=="betaWald"){
         n.eff <- (p*(1-p))/(se^2)
@@ -832,9 +863,9 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
       rval<-list(quantiles=rval)
     
     if (is.null(dim(x)))
-        ses<-(cis[2,]-cis[1,])/(2*qnorm(alpha/2,lower.tail=FALSE))
+        ses<-(cis[2,]-cis[1,])/(2*qcrit(alpha/2,lower.tail=FALSE))
     else
-        ses<-(cis[2,,]-cis[1,,])/(2*qnorm(alpha/2,lower.tail=FALSE))
+        ses<-(cis[2,,]-cis[1,,])/(2*qcrit(alpha/2,lower.tail=FALSE))
     attr(rval,"SE")<-ses
     class(rval)<-"svyquantile"
     rval

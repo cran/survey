@@ -1,7 +1,7 @@
 ##
 ##
 twophase<-function(id,strata=NULL, probs=NULL, weights=NULL, fpc=NULL,
-                   subset, data, method=c("full","approx")){
+                   subset, data, method=c("full","approx","simple")){
   method<-match.arg(method)
   if(method=="full") {
     if (!is.null(weights)) stop("weights not accepted by method='full'")

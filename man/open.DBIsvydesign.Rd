@@ -38,8 +38,15 @@ library(RSQLite)
 dbclus1<-svydesign(id=~dnum, weights=~pw, fpc=~fpc,
 data="apiclus1",dbtype="SQLite",
 dbname=system.file("api.db",package="survey"))
+
+dbclus1
 close(dbclus1)
+dbclus1
+try(svymean(~api00, dbclus1))
+
 dbclus1<-open(dbclus1)
+open(dbclus1)
+svymean(~api00, dbclus1)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

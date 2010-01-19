@@ -1,5 +1,5 @@
 
-R version 2.9.0 beta (2009-04-08 r48309)
+R version 2.9.2 (2009-08-24)
 Copyright (C) 2009 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
@@ -30,6 +30,7 @@ Loading required package: DBI
 > 
 > data(api)
 > apiclus1$api_stu<-apiclus1$api.stu
+> apiclus1$comp_imp<-apiclus1$comp.imp
 > dclus1<-svydesign(id=~dnum, weights=~pw, fpc=~fpc,data=apiclus1)
 > dbclus1<-svydesign(id=~dnum, weights=~pw, fpc=~fpc,
 + data="apiclus1",dbtype="SQLite", dbname=system.file("api.db",package="survey"))
@@ -80,6 +81,37 @@ Loading required package: DBI
 +           nrow(subset(dbclus1,stype=="E")))
 [1] TRUE
 > 
+> ## replicate weights
+> rclus1<-as.svrepdesign(dclus1)
+> db_rclus1<-svrepdesign(weights=~pw, repweights="wt[1-9]+", type="JK1", scale=(1-15/757)*14/15,
++ data="apiclus1rep",dbtype="SQLite", dbname=system.file("api.db",package="survey"))
+> m<-svymean(~api00+api99,rclus1)
+> m.db<-svymean(~api00+api99,db_rclus1)
+> all.equal(m,m.db)
+[1] TRUE
 > 
+> summary(db_rclus1)
+DB-backed replicate weight design
+Call: svrepdesign(weights = ~pw, repweights = "wt[1-9]+", type = "JK1", 
+    scale = (1 - 15/757) * 14/15, data = "apiclus1rep", dbtype = "SQLite", 
+    dbname = system.file("api.db", package = "survey"))
+Unstratified cluster jacknife (JK1) with 15 replicates.
+Variables: 
+ [1] "row_names"   "cds"         "stype"       "name"        "sname"      
+ [6] "snum"        "dname"       "dnum"        "cname"       "cnum"       
+[11] "flag"        "pcttest"     "api00"       "api99"       "target"     
+[16] "growth"      "sch_wide"    "comp_imp"    "both"        "awards"     
+[21] "meals"       "ell"         "yr_rnd"      "mobility"    "acs_k3"     
+[26] "acs_46"      "acs_core"    "pct_resp"    "not_hsg"     "hsg"        
+[31] "some_col"    "col_grad"    "grad_sch"    "avg_ed"      "full__1"    
+[36] "emer"        "enroll"      "api_stu"     "fpc"         "pw"         
+[41] "row_names:1" "wt1"         "wt2"         "wt3"         "wt4"        
+[46] "wt5"         "wt6"         "wt7"         "wt8"         "wt9"        
+[51] "wt10"        "wt11"        "wt12"        "wt13"        "wt14"       
+[56] "wt15"       
 > 
+> s<-svymean(~api00, subset(rclus1, comp_imp=="Yes"))
+> s.db<-svymean(~api00, subset(db_rclus1, comp_imp=="Yes"))
+> all.equal(s,s.db)
+[1] TRUE
 > 

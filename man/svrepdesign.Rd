@@ -2,6 +2,7 @@
 \alias{svrepdesign}
 \alias{svrepdesign.default}
 \alias{svrepdesign.imputationList}
+\alias{svrepdesign.character}
 \alias{[.svyrep.design}
 \alias{image.svyrep.design}
 \alias{print.svyrep.design}
@@ -23,13 +24,17 @@ combined.weights=TRUE, rho = NULL, bootstrap.average=NULL,
 scale=NULL, rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),...)
 \method{svrepdesign}{imputationList}(variables=NULL, repweights,weights,data,...)
 \method{image}{svyrep.design}(x, ..., col=grey(seq(.5,1,length=30)), type.=c("rep","total"))
+\method{svrepdesign}{character}(variables=NULL,repweights=NULL, weights=NULL,data=NULL,
+type=c("BRR","Fay","JK1", "JKn","bootstrap","other"),combined.weights=TRUE, rho=NULL, 
+bootstrap.average=NULL, scale=NULL,rscales=NULL,fpc=NULL,
+fpctype=c("fraction","correction"), dbtype="SQLite", dbname,...) 
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
   \item{variables}{formula or data frame specifying variables to include in the design (default is all) }
-  \item{repweights}{formula or data frame specifying replication weights }
+  \item{repweights}{formula or data frame specifying replication weights, or character string specifying a regular expression that matches the names of the replication weight variables }
   \item{weights}{sampling weights }
-  \item{data}{data frame to look up variables in formulas}
+  \item{data}{data frame to look up variables in formulas, or character string giving name of database table}
   \item{type}{Type of replication weights}
   \item{combined.weights}{\code{TRUE} if the \code{repweights} already
     include the sampling weights}
@@ -39,6 +44,8 @@ scale=NULL, rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),...)
   \item{scale, rscales}{Scaling constant for variance, see Details
 below}
 \item{fpc,fpctype}{Finite population correction information}
+\item{dbname}{name of database, passed to \code{DBI::dbConnect()}}
+\item{dbtype}{Database driver: see Details}
 \item{x}{survey design with replicate weights}
 \item{...}{Other arguments to \code{\link{image}}}
 \item{col}{Colors}
@@ -75,6 +82,35 @@ below}
   \code{fpctype="fraction"} and to specify the correction directly use
   \code{fpctype="correction"}
 
+\code{repweights} may be a character string giving a regular expression
+ for the replicate weight variables. For example, in the
+California Health Interview Survey public-use data, the sampling weights are
+\code{"rakedw0"} and the replicate weights are \code{"rakedw1"} to
+\code{"rakedw80"}.  The regular expression \code{"rakedw[1-9]"}
+matches the replicate weight variables (and not the sampling weight
+variable).
+
+\code{data} may be a character string giving the name of a table or view
+in a relational database that can be accessed through the \code{DBI} or \code{ODBC}
+interfaces. For DBI interfaces \code{dbtype} should be the name of the database
+driver and \code{dbname} should be the name by which the driver identifies
+the specific database (eg file name for SQLite). For ODBC databases
+\code{dbtype} should be \code{"ODBC"} and \code{dbname} should be the
+registed DSN for the database. On the Windows GUI, \code{dbname=""} will
+produce a dialog box for interactive selection. 
+
+The appropriate database interface package must already be loaded (eg
+\code{RSQLite} for SQLite, \code{RODBC} for ODBC).  The survey design
+object will contain the replicate weights, but actual variables will
+be loaded from the database only as needed.  Use
+\code{\link[=close.DBIsvydesign]{close}} to close the database connection and
+\code{\link[=open.DBIsvydesign]{open}} to reopen the connection, eg, after
+loading a saved object.
+
+The database interface does not attempt to modify the underlying
+database and so can be used with read-only permissions on the database.
+ 
+
   To generate your own replicate weights either use
   \code{\link{as.svrepdesign}} on a \code{survey.design} object, or see
   \code{\link{brrweights}}, \code{\link{bootweights}},
@@ -109,6 +145,27 @@ repweights<-2*cbind(c(1,0,1,0,1,0), c(1,0,0,1,0,1), c(0,1,1,0,0,1),
 c(0,1,0,1,1,0))
 scdrep<-svrepdesign(data=scd, type="BRR", repweights=repweights, combined.weights=FALSE)
 svyratio(~alive, ~arrests, scdrep)
+
+\dontrun{
+## Needs RSQLite
+library(RSQLite)
+db_rclus1<-svrepdesign(weights=~pw, repweights="wt[1-9]+", type="JK1", scale=(1-15/757)*14/15,
+data="apiclus1rep",dbtype="SQLite", dbname=system.file("api.db",package="survey"))
+svymean(~api00+api99,db_rclus1)
+
+summary(db_rclus1)
+
+## closing and re-opening a connection
+close(db_rclus1)
+db_rclus1
+try(svymean(~api00+api99,db_rclus1))
+db_rclus1<-open(db_rclus1)
+svymean(~api00+api99,db_rclus1)
+
+
+
+}
+
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
 

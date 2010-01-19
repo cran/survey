@@ -38,11 +38,29 @@ updatesOutfilter<-function(df, varlist,history, updates){
   df[, names(df) %in% varlist,drop=FALSE]
 }
 
+checkConnection<-function(dbconnection, error=TRUE){
+ if (is(dbconnection,"DBIConnection")) {
+    if (!isIdCurrent(dbconnection))
+      if (error)
+        stop("Database connection is closed")
+      else
+        return(FALSE)
+  } else{## RODBC
+    if (!RODBC:::odbcValidChannel(dbconnection))
+      if (error)
+      stop("ODBC connection is closed")
+    else
+      return(FALSE)
+  }
+ invisible(TRUE)
+}
 
-
-getvars<-function (formula, dbconnection, tables, db.only = TRUE, updates=NULL) 
+getvars<-function (formula, dbconnection, tables, db.only = TRUE, updates=NULL, subset=NULL) 
 {
-    if (is.null(formula)) 
+
+ checkConnection(dbconnection)
+  
+  if (is.null(formula)) 
         return(NULL)
     
     if (inherits(formula, "formula")) {
@@ -73,14 +91,16 @@ getvars<-function (formula, dbconnection, tables, db.only = TRUE, updates=NULL)
     else ##ODBC
       df<-sqlQuery(dbconnection, query)
 
+    if (!is.null(subset)) df<-df[subset,,drop=FALSE]
+
     df<-updatesOutfilter(df, var0, infilter$history, updates)
 
     is.string <- sapply(df, is.character)
     if (any(is.string)) {
         for (i in which(is.string)) df[[i]] <- as.factor(df[[i]])
     }
-    df
-}
+   df
+  }
 
 
 update.DBIsvydesign<-function(object, ...){

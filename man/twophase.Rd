@@ -23,11 +23,10 @@ subsample taken from the sample, typically stratified by variables not
 known for the whole population.  The second phase can use any design 
 supported for single-phase sampling. The first phase must currently
 be one-stage element  or cluster sampling
-The internal structure of \code{twophase} objects may change in the future.
 }
 \usage{
 twophase(id, strata = NULL, probs = NULL, weights = NULL, fpc = NULL,
-subset, data, method=c("full","approx"))
+subset, data, method=c("full","approx","simple"))
 twophasevar(x,design)
 twophase2var(x,design)
 }
@@ -42,10 +41,12 @@ twophase2var(x,design)
   \item{subset}{formula specifying which observations are selected in
     phase 2}
   \item{data}{Data frame will all data for phase 1 and 2}
-  \item{method}{\code{"full"} requires more memory, but gives unbiased
+  \item{method}{\code{"full"} requires (much) more memory, but gives unbiased
     variance estimates for general multistage designs at both phases.
-    \code{"approx"} uses the standard error calculation from
-    version 3.14 and earlier.  }
+    \code{"simple"} or \code{"approx"} uses the standard error calculation from
+    version 3.14 and earlier,  which uses much less memory and is correct for designs with simple
+    random sampling at phase one and stratified random sampling at phase two.
+  }
   \item{x}{probability-weighted estimating functions}
   \item{design}{two-phase design}
 }
@@ -66,10 +67,14 @@ twophase2var(x,design)
   
   Variance computations are based on the conditioning argument in
   Section 9.3 of Sarndal et al. Method \code{"full"} corresponds exactly
-  to the formulas in that reference. Method \code{"approx"} uses less
-  time and memory but is exact only for the important special case where
-  phase 1 is simple random sampling from an infinite population. See the
-  \code{tests} directory for a worked example.
+  to the formulas in that reference. Method \code{"simple"} or
+  \code{"approx"} (the two are the same) uses less time and memory but
+  is exact only for some special cases. The most important special case
+  is the two-phase epidemiologic designs where phase 1 is simple random
+  sampling from an infinite population and phase 2 is stratified random
+  sampling.  See the \code{tests} directory for a worked example. The
+  only disadvantage of method="simple" in these cases is that
+  standardization of margins (\code{\link{marginpred}}) is not available.
 
 
   For \code{method="full"}, sampling probabilities must be available for
@@ -180,6 +185,13 @@ Lin, DY and Ying, Z (1993). Cox regression with incomplete covariate measurement
  ## For this saturated model calibration is equivalent to estimating weights.
  pccs8<-calibrate(dccs2, phase=2,formula=~interaction(rel,stage,instit), calfun="rrz")
  summary(svyglm(rel~factor(stage)*factor(histol),design=pccs8,family=quasibinomial()))
+
+ ## Since sampling is SRS at phase 1 and stratified RS at phase 2, we
+ ## can use method="simple" to save memory.
+ dccs8_simple<-twophase(id=list(~seqno,~seqno),strata=list(NULL,~interaction(rel,stage,instit)),
+    data=nwtco, subset=~incc2,method="simple")
+ summary(svyglm(rel~factor(stage)*factor(histol),design=dccs8_simple,family=quasibinomial()))
+
 
 
 }

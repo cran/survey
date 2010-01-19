@@ -114,8 +114,7 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
   
   For unbounded linear calibration only, the variance in the calibration
   model may depend on covariates.  If \code{variance=NULL} the
-  calibration model has constant variance. The model must explicitly or
-  implicitly contain an intercept. If \code{variance} is not \code{NULL}
+  calibration model has constant variance.  If \code{variance} is not \code{NULL}
   it specifies a linear combination of the columns of the model matrix
   and the calibration variance is proportional to that linear
   combination.
@@ -127,7 +126,11 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
   to have no observations at some level.
 
   In a two-phase design, \code{population} may be omitted when
-  \code{phase=2}, to specify calibration to the phase-one sample.
+  \code{phase=2}, to specify calibration to the phase-one sample. If the
+  two-phase design object was constructed using the more memory-efficient
+  \code{method="approx"} argument to \code{\link{twophase}}, calibration of the first
+  phase of sampling to the population is not supported.
+
 
 }
 \value{

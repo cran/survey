@@ -4,6 +4,7 @@ library(RSQLite)
 
 data(api)
 apiclus1$api_stu<-apiclus1$api.stu
+apiclus1$comp_imp<-apiclus1$comp.imp
 dclus1<-svydesign(id=~dnum, weights=~pw, fpc=~fpc,data=apiclus1)
 dbclus1<-svydesign(id=~dnum, weights=~pw, fpc=~fpc,
 data="apiclus1",dbtype="SQLite", dbname=system.file("api.db",package="survey"))
@@ -42,5 +43,16 @@ all.equal(nrow(dclus1),nrow(dbclus1))
 all.equal(nrow(subset(dclus1,stype=="E")),
           nrow(subset(dbclus1,stype=="E")))
 
+## replicate weights
+rclus1<-as.svrepdesign(dclus1)
+db_rclus1<-svrepdesign(weights=~pw, repweights="wt[1-9]+", type="JK1", scale=(1-15/757)*14/15,
+data="apiclus1rep",dbtype="SQLite", dbname=system.file("api.db",package="survey"))
+m<-svymean(~api00+api99,rclus1)
+m.db<-svymean(~api00+api99,db_rclus1)
+all.equal(m,m.db)
 
+summary(db_rclus1)
 
+s<-svymean(~api00, subset(rclus1, comp_imp=="Yes"))
+s.db<-svymean(~api00, subset(db_rclus1, comp_imp=="Yes"))
+all.equal(s,s.db)

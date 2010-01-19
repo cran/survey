@@ -50,8 +50,10 @@ regcalibrate.survey.design2<-function(design, formula, population,
       warning("Sample and population totals have different names.")
 
     tqr<-qr(mm*whalf/sqrt(sigma2))
-    if (is.null(lambda) && !all(abs(qr.resid(tqr,whalf*sigma2)/sigma2) <1e-5))
-      warning("Calibration models with constant variance must have an intercept")
+
+    ## not needed
+    ##if (is.null(lambda) && !all(abs(qr.resid(tqr,whalf*sigma2)/sigma2) <1e-5))
+    ##  warning("Calibration models with constant variance must have an intercept")
 
     g<-rep(1,NROW(mm))
 
@@ -104,8 +106,10 @@ regcalibrate.survey.design2<-function(design, formula, population,
     cwhalf<-sqrt(weights(design)/stageweights)
     dwhalf<-sqrt(weights(design))
     tqr<-qr(mm)
-    if (is.null(lambda) && !all(abs(qr.resid(tqr,sigma2)) <1e-3))
-      stop("Calibration models with constant variance must have an intercept")
+
+    ## not needed
+    ## if (is.null(lambda) && !all(abs(qr.resid(tqr,sigma2)) <1e-3))
+    ##  stop("Calibration models with constant variance must have an intercept")
  
     for (i in 1:length(clusters)){ 
       cluster<-clusters[[i]]

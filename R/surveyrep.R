@@ -450,6 +450,11 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
     repweights<-na.fail(repweights)
   }
 
+  if(is.character(repweights)){##regular expression
+    wtcols<-grep(repweights,names(data))
+    repweights<-data[,wtcols]
+  }
+  
   if (is.null(repweights))
     stop("You must provide replication weights")
   
@@ -547,7 +552,7 @@ print.summary.svyrep.design<-function(x,...){
   class(x)<-class(x)[-1]
   print(x)
   cat("Variables: \n")
-  print(names(x$variables)) 
+  print(colnames(x)) 
 }
 
 
@@ -628,7 +633,6 @@ svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="li
   if (!exists(".Generic",inherits=FALSE))
     .Deprecated("svyquantile")
 
-  
   ties<-match.arg(ties)
   interval<-match.arg(interval.type)
   if (design$type %in% c("JK1","JKn") && interval=="quantile")
@@ -1171,7 +1175,7 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL, ...,
 
       g<-match.call()
       g$design<-NULL
-      g$var<-g$rho<-g$return.replicates<-NULL
+      g$var<-g$rho<-g$return.replicates<-g$multicore<-NULL
       g$weights<-quote(.survey.prob.weights)
       g[[1]]<-quote(glm)      
       g$model<-TRUE

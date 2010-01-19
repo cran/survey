@@ -203,8 +203,8 @@ dpps<- svydesign(id=~1, fpc=~p, data=election_pps, pps="brewer")
 library(RSQLite)
 dbclus1<-svydesign(id=~dnum, weights=~pw, fpc=~fpc,
 data="apiclus1",dbtype="SQLite", dbname=system.file("api.db",package="survey"))
-}
 
+}
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
 \keyword{univar}% __ONLY ONE__ keyword per line

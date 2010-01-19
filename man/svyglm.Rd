@@ -55,6 +55,12 @@ There is no \code{anova} method for \code{svyglm} as the models are not
 fitted by maximum likelihood. The function \code{\link{regTermTest}} may
 be useful for testing sets of regression terms.
 
+For binomial and Poisson families use \code{family=quasibinomial()}
+and \code{family=quasipoisson()} to avoid a warning about non-integer
+numbers of successes.  The `quasi' versions of the family objects give
+the same point estimates and standard errors and do not give the
+warning.
+
 If \code{df.resid} is not specified the df for the null model is
 computed by \code{\link{degf}} and the residual df computed by
 subtraction.  It's not that these are particularly good approximations

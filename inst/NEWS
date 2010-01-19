@@ -1,9 +1,34 @@
+3.19   svrepdesign() can specify replicate-weight columns with a regular expression
+
+       svrepdesign() can produce database-backed designs
+
+       svyquantile() has a df argument to use a t distribution in
+        Woodruff's method (for Wade Davis)
+
+       calibrate() doesn't require an intercept in the calibration model (for Richard Valliant)
+
+       regTermTest() and model.frame() work with svyolr() (for Michael Donohue)
+
+       better printing of svyvar() output (for Brad Fulton)
+
+       twophase() documents more clearly that method="simple" is preferred for standard epi
+       designs where it works.
+
+       better error messages when a database-backed design has a closed connection
+
+
+3.18-1 documented the need to use quasibinomial/quasipoisson in svyglm
+
+       improved the description of confidence intervals and standard errors for
+       svyquantile.
+ 
 
 3.18   Changed the default to combined.weights=TRUE in svrepdesign()
        
        Fixed bug in multiple imputation analysis with multicore package.
 
        The check for PSUs properly nested in strata had some false negatives.
+
 
 3.17   Under Linux, Mac OS, and most Unix systems, multiple processors can be
        used for the subgroups in svyby(), the imputed data sets in with.svyimputationList
@@ -178,6 +203,7 @@
 
        logit and raking calibration could run into NaN problems with
        impossible bounds.  Step-halving seems to fix the problem.
+
 
 3.10   update() methods for database-backed designs.
 
