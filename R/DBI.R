@@ -361,7 +361,7 @@ svrepdesign.character<-function (variables=NULL,repweights=NULL, weights=NULL,
     
   rval<-svrepdesign(variables=variables,repweights=repweights, weights=weights, type=type,
                     data=design.data,
-                    combined.weights=TRUE, rho=rho, bootstrap.average=NULL,
+                    combined.weights=combined.weights, rho=rho, bootstrap.average=NULL,
                     scale=scale,rscales=rscales,fpc=fpc, fpctype=c("fraction","correction"))
   
   rval$db<-list(dbname=dbname, tablename=data, connection=dbconn, dbtype=dbtype)

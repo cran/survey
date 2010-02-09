@@ -46,7 +46,7 @@ all.equal(nrow(subset(dclus1,stype=="E")),
 ## replicate weights
 rclus1<-as.svrepdesign(dclus1)
 db_rclus1<-svrepdesign(weights=~pw, repweights="wt[1-9]+", type="JK1", scale=(1-15/757)*14/15,
-data="apiclus1rep",dbtype="SQLite", dbname=system.file("api.db",package="survey"))
+data="apiclus1rep",dbtype="SQLite", dbname=system.file("api.db",package="survey"),combined.weights=FALSE)
 m<-svymean(~api00+api99,rclus1)
 m.db<-svymean(~api00+api99,db_rclus1)
 all.equal(m,m.db)

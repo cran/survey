@@ -7,16 +7,17 @@ Description: Summary statistics, generalised linear models, cumulative
         by Taylor series linearisation or replicate weights.
         Post-stratification, calibration, and raking. Two-phase
         subsampling designs. Graphics. Predictive margins by direct
-        standardization. PPS sampling without replacement.
-Version: 3.19
+        standardization. PPS sampling without replacement. Principal
+        components, factor analysis.
+Version: 3.20
 Author: Thomas Lumley
 Maintainer: Thomas Lumley <tlumley@u.washington.edu>
 License: GPL-2 | GPL-3
 Depends: R (>= 2.2.0)
 Suggests: survival, MASS, KernSmooth, hexbin, mitools, lattice,
-        RSQLite, RODBC, quantreg, splines, Matrix, multicore
+        RSQLite, RODBC, quantreg, splines, Matrix, multicore, sem
 Enhances: odfWeave.survey
 URL: http://faculty.washington.edu/tlumley/survey/
-Packaged: 2010-01-19 17:51:10 UTC; tlumley
+Packaged: 2010-02-09 18:47:31 UTC; tlumley
 Repository: CRAN
-Date/Publication: 2010-01-20 08:00:10
+Date/Publication: 2010-02-09 20:30:02

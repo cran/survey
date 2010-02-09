@@ -73,6 +73,14 @@ svyciprop(~I(ell==0), dclus1, method="as")
 svyciprop(~I(ell==0), dclus1, method="be")
 svyciprop(~I(ell==0), dclus1, method="me")
 
+rclus1<-as.svrepdesign(dclus1)
+svyciprop(~I(emer==0), rclus1, method="li")
+svyciprop(~I(emer==0), rclus1, method="lo")
+svyciprop(~I(emer==0), rclus1, method="as")
+svyciprop(~I(emer==0), rclus1, method="be")
+svyciprop(~I(emer==0), rclus1, method="me")
+
+
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

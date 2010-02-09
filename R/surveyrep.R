@@ -470,7 +470,13 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
     weights<-rep(1,NROW(repweights))
   }
 
-    
+  repwtmn<-mean(apply(repweights,2,mean))
+  wtmn<-mean(weights)
+  probably.combined.weights<-(repwtmn>5) & (wtmn/repwtmn<5)
+  probably.not.combined.weights<-(repwtmn<5) & (wtmn/repwtmn>5)
+  if (combined.weights & probably.not.combined.weights) warning(paste("Data do not look like combined weights: mean replication weight is", repwtmn," and mean sampling weight is",wtmn))
+  if (!combined.weights & probably.combined.weights) warning(paste("Data look like combined weights: mean replication weight is", repwtmn," and mean sampling weight is",wtmn))
+  
   if (type == "BRR")
     scale<-1/ncol(repweights)
   if (type=="Fay")
@@ -489,7 +495,11 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
     if(!combined.weights){
       warning("scale (n-1)/n not provided: guessing from weights")
       scale<-1/max(repweights[,1])
-    } else stop("Must provide scale (n-1)/n for combined JK1 weights")
+    } else {
+      probably.n = ncol(repweights)
+      scale<- (probably.n-1)/probably.n
+      warning("scale (n-1)/n not provided: guessing n=number of replicates")
+    }
   }
 
   if (type =="JKn" && is.null(rscales))
@@ -1088,9 +1098,9 @@ svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replica
   
   if (!design$combined.weights){
     pw1<-pwts
-    rwt<-pw1/sum(pw1)
+    rwt<-pw1/mean(pw1)
   } else{
-    rwt<-1/sum(as.vector(wts[,1]))
+    rwt<-1/mean(as.vector(wts[,1]))
     pw1<-rwt
   }
   
@@ -1193,7 +1203,9 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL, ...,
 	stop("all variables must be in design= argument")
       .survey.prob.weights<-pwts
       full<-with(data,eval(g))
-
+  
+      full$naive.cov<-summary(full)$cov.unscaled
+  
       nas<-attr(full$model, "na.action")
 
       if(getOption("survey.drop.replicates") && !is.null(design$selfrep) && all(design$selfrep)){
@@ -1248,7 +1260,6 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL, ...,
           v<-svrVar(betas,scale, rscales)
   }
 
-  full$model<-NULL
   full$x<-NULL
   full$df.residual<-degf(design)+1-length(coef(full)[!is.na(coef(full))])
   
@@ -1476,8 +1487,11 @@ coef.svrepstat<-function(object,...){
 }
 
 vcov.svrepstat<-function(object,...){
+  nms<-names(coef(object))
   if(is.list(object)) object<-object[[1]]
-  as.matrix(attr(object,"var"))
+  v<-as.matrix(attr(object,"var"))
+  dimnames(v)<-list(nms,nms)
+  v
 }
 
 

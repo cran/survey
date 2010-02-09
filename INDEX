@@ -47,6 +47,8 @@ marginpred              Predictive margins by direct standardization
 svykappa                Cohen's kappa for inter-rater agreement
 svymle                  Maximum pseudolikelihood estimation in complex
                         surveys
+svyprcomp               Principal component analysis and biplots
+svyfactanal             Weighted maximum likelihood factor analysis
 
                  -----
 

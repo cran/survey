@@ -1,3 +1,19 @@
+3.20   in svycoxph() modify the rescaling of weights to avoid very small weights 
+       because of convergence problem in coxph() with counting-process data (for Tapan Mehta)
+
+       added some multivariate statistics: 
+           svyprcomp(): principal components, svyfactanal(): factor analysis.
+
+       added heuristic check that combined.weights= has been specified correctly.
+
+       confint.default wouldn't give CIs for multiple parameters with replicate weights, because
+       the vcov matrix didn't have variable names. (Art Burke)
+
+       More of the svyciprop() methods now work for replicate-weight designs.
+
+       The book of the package is now available! (see http://faculty.washington.edu/tlumley/svybook)
+
+
 3.19   svrepdesign() can specify replicate-weight columns with a regular expression
 
        svrepdesign() can produce database-backed designs

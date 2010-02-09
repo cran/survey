@@ -23,11 +23,12 @@ NULL, type = c("BRR", "Fay", "JK1","JKn","bootstrap","other"),
 combined.weights=TRUE, rho = NULL, bootstrap.average=NULL,
 scale=NULL, rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),...)
 \method{svrepdesign}{imputationList}(variables=NULL, repweights,weights,data,...)
-\method{image}{svyrep.design}(x, ..., col=grey(seq(.5,1,length=30)), type.=c("rep","total"))
 \method{svrepdesign}{character}(variables=NULL,repweights=NULL, weights=NULL,data=NULL,
 type=c("BRR","Fay","JK1", "JKn","bootstrap","other"),combined.weights=TRUE, rho=NULL, 
 bootstrap.average=NULL, scale=NULL,rscales=NULL,fpc=NULL,
 fpctype=c("fraction","correction"), dbtype="SQLite", dbname,...) 
+
+\method{image}{svyrep.design}(x, ..., col=grey(seq(.5,1,length=30)), type.=c("rep","total"))
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -37,7 +38,7 @@ fpctype=c("fraction","correction"), dbtype="SQLite", dbname,...)
   \item{data}{data frame to look up variables in formulas, or character string giving name of database table}
   \item{type}{Type of replication weights}
   \item{combined.weights}{\code{TRUE} if the \code{repweights} already
-    include the sampling weights}
+    include the sampling weights. This is usually the case.}
   \item{rho}{Shrinkage factor for weights in Fay's method}
   \item{bootstrap.average}{For \code{type="bootstrap"}, if the bootstrap
     weights have been averaged, gives the number of iterations averaged over}

@@ -1102,7 +1102,7 @@ svycoxph.survey.design<-function(formula,design,subset=NULL,...){
     g$model <- TRUE
     
     ##need to rescale weights for stability
-    data$.survey.prob.weights<-(1/design$prob)/sum(1/design$prob)
+    data$.survey.prob.weights<-(1/design$prob)/mean(1/design$prob)
     if (!all(all.vars(formula) %in% names(data))) 
         stop("all variables must be in design= argument")
     g<-with(list(data=data), eval(g))
@@ -1292,7 +1292,11 @@ coef.svyglm<-function(object,...,na.rm=TRUE) {
     beta[object$qr$pivot[1:object$rank]]
 }
 
-vcov.svyglm<-function(object,...)  object$cov.unscaled
+vcov.svyglm<-function(object,...) {
+  v<-object$cov.unscaled
+  dimnames(v)<-list(names(coef(object)),names(coef(object)))
+  v
+}
 
 
 svy.varcoef<-function(glm.object,design){
