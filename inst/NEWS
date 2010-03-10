@@ -1,3 +1,11 @@
+3.21   added trimWeights() to trim weights, and trim= option to calibrate
+       (for Richard Valliant)
+
+       clearer documentation that svyquantile() needs ci=TRUE or keep.var=FALSE
+       to work with svyby()
+
+       added a simple random sample to data(api) as promised in book (Djalma Pessoa)
+
 3.20   in svycoxph() modify the rescaling of weights to avoid very small weights 
        because of convergence problem in coxph() with counting-process data (for Tapan Mehta)
 

@@ -26,7 +26,7 @@ Compute quantiles for data from complex surveys.
   \item{quantiles}{Quantiles to estimate}
   \item{method}{see \code{\link{approxfun}}}
   \item{f}{see \code{\link{approxfun}}}
-  \item{ci}{Compute a confidence interval (relatively slow)?}
+  \item{ci}{Compute a confidence interval? (relatively slow; needed for \code{\link{svyby}})}
   \item{se}{Compute standard errors from the confidence interval length?}
   \item{alpha}{Level for confidence interval}
   \item{interval.type}{See Details below}

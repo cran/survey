@@ -60,7 +60,7 @@ For \code{unwtd.count}, the unweighted number of non-missing observations in the
 The variance type "ci" asks for confidence intervals, which are produced
   by \code{confint}. In some cases additional options to \code{FUN} will
   be needed to produce confidence intervals, for example,
-  \code{svyquantile} needs \code{ci=TRUE}
+  \code{svyquantile} needs \code{ci=TRUE} or \code{keep.var=FALSE}.
 
   \code{unwtd.count} is designed to be passed to \code{svyby} to report
   the number of non-missing observations in each subset. Observations

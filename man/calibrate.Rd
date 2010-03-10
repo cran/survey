@@ -11,7 +11,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Calibration (GREG) estimators}
 \description{
-  Calibration (or GREG) estimators generalise post-stratification and
+  Calibration, generalized raking, or GREG estimators generalise post-stratification and
   raking by calibrating a sample to the marginal totals of
   variables in a linear regression model.  This function reweights the
   survey design and adds additional information that is used by
@@ -22,11 +22,11 @@ calibrate(design,...)
 \method{calibrate}{survey.design2}(design, formula, population,
        aggregate.stage=NULL, stage=0, variance=NULL,
        bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
-       maxit=50,epsilon=1e-7,verbose=FALSE,force=FALSE,...)
+       maxit=50,epsilon=1e-7,verbose=FALSE,force=FALSE,trim=NULL,...)
 \method{calibrate}{svyrep.design}(design, formula, population,compress=NA,
        aggregate.index=NULL, variance=NULL, bounds=c(-Inf,Inf),
        calfun=c("linear","raking","logit"),
-       maxit=50, epsilon=1e-7, verbose=FALSE,force=FALSE, ...)
+       maxit=50, epsilon=1e-7, verbose=FALSE,force=FALSE,trim=NULL, ...)
 \method{calibrate}{twophase}(design, phase=2,formula, population,
        calfun=c("linear","raking","logit","rrz"),...)
 grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
@@ -49,6 +49,7 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
     constant within levels of this variable}
   \item{bounds}{Bounds for the calibration weights, optional
     except for \code{calfun="logit"}}
+  \item{trim}{Weights outside this range will be trimmed to these bounds.}
   \item{...}{options for other methods}
   \item{calfun}{Calibration function: see below}
   \item{maxit}{Number of iterations}
@@ -83,6 +84,18 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
   still be returned (useful for examining why it failed). A failure in
   calibrating a set of replicate weights when the sampling weights were
   successfully calibrated will give only a warning, not an error.
+  
+  When calibration to the desired set of bounds is not possible, another option is
+  to trim weights. To do this set \code{bounds} to a looser set of bounds
+  for which calibration is achievable and set \code{trim} to the tighter
+  bounds. Weights outside the bounds will be trimmed to the bounds, and
+  the excess weight distributed over other observations in proportion to
+  their sampling weight (and so this may put some other observations
+  slightly over the trimming bounds). The projection matrix used in computing
+  standard errors is based on the feasible bounds specified by the
+  \code{bounds} argument.  See also \code{\link{trimWeights}},
+  which trims the final weights in a design object rather than the
+  calibration adjustments.
 
   
   For two-phase designs \code{calfun="rrz"} estimates the sampling
@@ -168,6 +181,8 @@ Belgium. Statistics Belgium Working Paper No 3.
  \code{survey/tests/kalton.R} for examples replicating those in Kalton & Flores-Cervantes (2003)
 
  \code{\link{make.calfun}} for user-defined calibration distances.
+
+ \code{\link{trimWeights}} to trim final weights rather than calibration adjustments.
 }
 \examples{
 data(api)
@@ -222,37 +237,43 @@ svymean(~api00, rclus1agg3)
 svytotal(~enroll, rclus1agg3)
 svytotal(~stype, rclus1agg3)
 
-image(rclus1agg3)
 
 ###
 ## Bounded weights
 range(weights(dclus1g3)/weights(dclus1))
-(dclus1g3b <- calibrate(dclus1, ~stype+api99, c(pop.totals, api99=3914069),bounds=c(0.6,1.6)))
+dclus1g3b <- calibrate(dclus1, ~stype+api99, c(pop.totals, api99=3914069),bounds=c(0.6,1.6))
 range(weights(dclus1g3b)/weights(dclus1))
 
 svymean(~api00, dclus1g3b)
 svytotal(~enroll, dclus1g3b)
 svytotal(~stype, dclus1g3b)
 
-## generalised raking
-(dclus1g3c <- calibrate(dclus1, ~stype+api99, c(pop.totals,
-    api99=3914069), calfun="raking"))
-range(weights(dclus1g3c)/weights(dclus1))
+## trimming
+dclus1tr <- calibrate(dclus1, ~stype+api99, c(pop.totals, api99=3914069),bounds=c(0.5,2), trim=c(2/3,3/2))
+svymean(~api00+api99+enroll, dclus1tr)
+svytotal(~stype,dclus1tr)
+range(weights(dclus1tr)/weights(dclus1))
 
-(dclus1g3c <- calibrate(dclus1, ~stype+api99, c(pop.totals,
-    api99=3914069), calfun=cal.raking))
+rclus1tr <- calibrate(rclus1, ~stype+api99, c(pop.totals, api99=3914069),bounds=c(0.5,2), trim=c(2/3,3/2))
+svymean(~api00+api99+enroll, rclus1tr)
+svytotal(~stype,rclus1tr)
+
+
+
+
+## generalised raking
+dclus1g3c <- calibrate(dclus1, ~stype+api99, c(pop.totals,
+    api99=3914069), calfun="raking")
 range(weights(dclus1g3c)/weights(dclus1))
 
 (dclus1g3d <- calibrate(dclus1, ~stype+api99, c(pop.totals,
-    api99=3914069), calfun="logit",bounds=c(0.5,2.5)))
+    api99=3914069), calfun=cal.logit, bounds=c(0.5,2.5)))
 range(weights(dclus1g3d)/weights(dclus1))
 
 
 
 ## Ratio estimators are calibration estimators
 dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
-rstrat<-as.svrepdesign(dstrat)
-
 svytotal(~api.stu,dstrat)
 
 common<-svyratio(~api.stu, ~enroll, dstrat, separate=FALSE)
@@ -262,8 +283,6 @@ pop<-3811472
 ## equivalent to (common) ratio estimator
 dstratg1<-calibrate(dstrat,~enroll-1, pop, variance=1)
 svytotal(~api.stu, dstratg1)
-rstratg1<-calibrate(rstrat,~enroll-1, pop, variance=1)
-svytotal(~api.stu, rstratg1)
 
 
 }

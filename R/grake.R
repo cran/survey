@@ -16,7 +16,7 @@ calibrate<-function(design, ...) UseMethod("calibrate")
 calibrate.survey.design2<-function(design, formula, population,
                                     aggregate.stage=NULL, stage=0, variance=NULL,
                                     bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
-                                    maxit=50, epsilon=1e-7, verbose=FALSE, force=FALSE,
+                                    maxit=50, epsilon=1e-7, verbose=FALSE, force=FALSE, trim=NULL,
                                     ...){
   if (is.character(calfun)) calfun<-match.arg(calfun)
   if (is.character(calfun) && calfun=="linear" && (bounds==c(-Inf,Inf))){
@@ -79,7 +79,21 @@ calibrate.survey.design2<-function(design, formula, population,
   g<-grake(mm,ww,calfun, bounds=bounds,population=population,
            verbose=verbose,epsilon=epsilon,maxit=maxit)
 
-  if (!force && !is.null(attr(g,"failed"))) stop("Calibration failed")
+  if(!is.null(trim)) {
+      gnew<-pmax(trim[1], pmin(g, trim[2]))
+      outside<-g<trim[1] | g>trim[2]
+      if (any(outside)){
+        trimmings<-(g-gnew)*ww
+        gnew[!outside]<-gnew[!outside]+sum(trimmings)/sum(ww[!outside])
+        g<-gnew
+        attr(g,"failed")<-NULL
+        message(paste(sum(outside),"weights were trimmed"))
+      }
+    }
+  if (!is.null(attr(g,"failed"))){
+    if (!force) stop("Calibration failed")
+  }
+  
   design$prob<-design$prob/g
   
   caldata <- list(qr=tqr, w=g*whalf, stage=0, index=NULL)
@@ -96,7 +110,7 @@ calibrate.survey.design2<-function(design, formula, population,
 calibrate.svyrep.design<-function(design, formula, population,compress=NA,
                                    aggregate.index=NULL, variance=NULL,
                                    bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
-                                   maxit=50, epsilon=1e-7, verbose=FALSE,force=FALSE,
+                                   maxit=50, epsilon=1e-7, verbose=FALSE,force=FALSE, trim=NULL,
                                    ...){
   if (is.character(calfun)) calfun<-match.arg(calfun)
   if (is.character(calfun) && calfun=="linear" && (bounds==c(-Inf,Inf))){
@@ -164,6 +178,17 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
   gtotal <- grake(mm,ww,calfun,bounds=bounds,population=population,
                   verbose=verbose, epsilon=epsilon, maxit=maxit)
 
+  if(!is.null(trim)) {
+      gnew<-pmax(trim[1], pmin(gtotal, trim[2]))
+      outside<-gtotal<trim[1] | gtotal>trim[2]
+      if (any(outside)){
+        trimmings<-(gtotal-gnew)*ww
+        gnew[!outside]<-gnew[!outside]+sum(trimmings)/sum(ww[!outside])
+        gtotal<-gnew
+        attr(gtotal,"failed")<-NULL
+        message(paste(sum(outside),"weights were trimmed"))
+      }
+    }
   if (!force && !is.null(attr(gtotal,"failed"))) stop("Calibration failed")
 
   design$pweights<-design$pweights*gtotal
@@ -173,6 +198,16 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
     if(verbose) cat("replicate = ",i,"\n")
     g<-grake(mm, wwi, calfun, eta=rep(0,NCOL(mm)), bounds=bounds, population=population,
              epsilon=epsilon, verbose=verbose, maxit=maxit)
+    
+    if(length(trim)==2){
+      outside<-(g<trim[1]) | (g>trim[2])
+      if (any(outside)) {
+        gnew<-pmax(trim[1],pmin(g,trim[2]))
+        trimmings<-(g-gnew)*wwi
+        gnew[!outside]<-gnew[!outside]+sum(trimmings)/sum(wwi[!outside])
+        g<-gnew
+      }}
+
     repwt[,i]<-as.vector(design$repweights[,i])*g
   }
 
@@ -265,4 +300,49 @@ grake<-function(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verb
 
   attr(g,"eta")<-eta
   g
+}
+
+
+trimWeights<-function(design, upper=Inf,lower=-Inf, ...){
+  UseMethod("trimWeights")
+}
+
+
+trimWeights.survey.design2<-function(design, upper=Inf, lower= -Inf, strict=FALSE,...){
+  pw<-weights(design,"sampling")
+  outside<-pw<lower | pw>upper
+  if (!any(outside)) return(design)
+  pwnew<-pmax(lower,pmin(pw, upper))
+  trimmings<-pw-pwnew
+  pw[!outside]<-pw[!outside]+sum(trimmings)/sum(!outside)
+  design$prob<-1/pw
+  if (strict) ## ensure that the trimmings don't push anything outside the limits
+    trimWeights(design, upper,lower, strict=TRUE)
+  else 
+    design
+}
+
+trimWeights.svyrep.design<-function(design, upper=Inf, lower= -Inf, compress=FALSE,...){
+  pw<-weights(design,"sampling")
+  outside<-pw<lower | pw>upper
+  if (any(outside)) {
+    pwnew<-pmax(lower,pmin(pw, upper))
+    trimmings<-pw-pwnew
+    pw[!outside]<-pw[!outside]+sum(trimmings)/sum(!outside)
+    design$prob<-1/pw
+  }
+  rw<-weights(design, "analysis")
+  outside<-rw<lower | rw>upper
+  if (any(outside)) {
+    rwnew<-pmax(lower,pmin(rw, upper))
+    trimmings<-rw-rwnew
+    rw<-pw[!outside]+t(t(!outside)+colSums(trimmings)/colSums(!outside))
+    if (compress)
+      design$repweights<-compressWeights(rw)
+    else
+      design$repweights<-rw
+    design$combined.weights<-TRUE
+  }
+  
+  design
 }

@@ -732,7 +732,7 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
           x<-x[nas==0,,drop=FALSE]
         else
           x[nas>0,]<-0
-      }
+      } 
 
     w<-weights(design)
 

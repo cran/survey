@@ -4,6 +4,7 @@
 \alias{apiclus1}
 \alias{apiclus2}
 \alias{apistrat}
+\alias{apisrs}
 \docType{data}
 \title{Student performance in California schools}
 \description{
@@ -62,7 +63,7 @@ data(api)
   corrections to variance.
 }
 \details{
-  \code{apipop} is the entire population,
+  \code{apipop} is the entire population, \code{apisrs} is a simple random sample,
  \code{apiclus1} is a cluster sample of school districts, \code{apistrat} is
   a sample stratified by \code{stype}, and \code{apiclus2} is a two-stage
   cluster sample of schools within districts.  The sampling weights in

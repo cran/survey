@@ -9,6 +9,7 @@ postStratify            Post-stratify a survey design
 rake                    Rake a survey design
 calibrate		Calibration and generalised raking
 estWeight               Estimated weights for two-phase designs
+trimWeights             Trim sampling weights.
 
                  -----
 
@@ -34,6 +35,7 @@ svycontrast             linear combinations of estimates
 svycoxph                Survey-weighted Cox models
 svyglm                  Survey-weighted generalised linear models.
 svyolr                  Ordinal logistic regression
+regTermTest             Test sets of terms in a regression model
 svyloglin               Loglinear models
 svyquantile             Summary statistics for sample surveys
 svytotal
@@ -45,8 +47,7 @@ svychisq                Tests for two-way tables
 regTermTest             Tests in regression models
 marginpred              Predictive margins by direct standardization
 svykappa                Cohen's kappa for inter-rater agreement
-svymle                  Maximum pseudolikelihood estimation in complex
-                        surveys
+svymle                  Maximum pseudolikelihood estimation in complex surveys
 svyprcomp               Principal component analysis and biplots
 svyfactanal             Weighted maximum likelihood factor analysis
 
@@ -73,7 +74,6 @@ jk1weights              create replication weights
 jknweights              create replication weights
 bootweights             create replication weights
 brrweights              create replication weights
-regTermTest             Test sets of terms in a regression model
 grake                  Computations for generalised raking
 *regcalibrate           Computations for regression calibration
 degf                    Degrees of freedom for replication weights
