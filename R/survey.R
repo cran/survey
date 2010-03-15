@@ -705,8 +705,8 @@ print.svyvar<-function (x,  covariance=FALSE, ...)
       m<-cbind(as.vector(x), sqrt(diag(vv)))
       rownames(m)<-nms
     } else{
-      ii<-(1:sqrt(length(x)))^2
-      m<-cbind(x[ii], sqrt(diag(vv))[ii])
+      ii <- which(diag(sqrt(length(x)))>0)
+      m <- cbind(x[ii], sqrt(diag(vv))[ii])
     }
     colnames(m) <- c(attr(x, "statistic"), "SE")
     printCoefmat(m)
@@ -732,7 +732,8 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
           x<-x[nas==0,,drop=FALSE]
         else
           x[nas>0,]<-0
-      } 
+      }
+   
 
     w<-weights(design)
 
@@ -746,6 +747,7 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
 
     
     computeQuantiles<-function(xx,p=quantiles){
+      if (any(is.na(x))) return(NA*p)
       oo<-order(xx)
       cum.w<-cumsum(w[oo])/sum(w)
       cdf<-approxfun(cum.w,xx[oo],method=method,f=f,
@@ -754,6 +756,7 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
     }
     
     computeQuantilesRounded<-function(xx,p=quantiles){
+      if (any(is.na(xx))) return(NA*p)
       ww<-rowsum(w,xx,reorder=TRUE)
       xx<-sort(unique(xx))
       cum.w <- cumsum(ww)/sum(ww)
@@ -765,7 +768,8 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
     
     
     computeScoreCI<-function(xx,p){
-      
+      if (any(is.na(xx))) return(c(NA,NA))
+   
       U<-function(theta){ ((xx>theta)-(1-p))}
         
       scoretest<-function(theta,qlimit){
@@ -799,6 +803,7 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
     }
     
     computeWaldCI<-function(xx,p){
+      if (any(is.na(xx))) return(c(NA,NA))
       theta0<-computeQuantiles(xx,p)
       U<- ((xx>theta0)-(1-p))
       wtest<-svymean(U,design)
@@ -813,6 +818,7 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
     }
     
     computeWaldCIRounded<-function(xx,p){
+      if(any(is.na(xx))) return(c(NA,NA))
         theta0<-computeQuantilesRounded(xx,p)
         U<- ((xx>theta0)-(1-p))
         ww<-rowsum(w,xx, reorder=TRUE)
@@ -1566,7 +1572,7 @@ svymle<-function(loglike, gradient=NULL, design, formulas,
       ff<-function(theta){
           rval<- -objectivefn(theta)
           if (is.na(rval)) rval<- -Inf
-          attr(rval,"grad")<- -grad(theta)
+          attr(rval,"gradient")<- -grad(theta)
           rval
       }
       rval<-nlm(ff, theta0,hessian=TRUE)
