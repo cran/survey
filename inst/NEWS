@@ -1,3 +1,5 @@
+3.21-2 Rao & Wu bootstrap wasn't sampling n-1 PSUs (Richard Valliant)
+
 3.21-1 bug in printing variances for three or more variables (Corey Sparks)
 
        svyquantile() reliably returns NA for NAs in data when na.rm=FALSE.

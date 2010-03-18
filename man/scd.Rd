@@ -33,6 +33,8 @@ nest=TRUE)
 
 # convert to BRR replicate weights
 scd2brr <- as.svrepdesign(scdnofpc, type="BRR")
+# or to Rao-Wu bootstrap
+scd2boot <- as.svrepdesign(scdnofpc, type="subboot")
 
 # use BRR replicate weights from Levy and Lemeshow
 repweights<-2*cbind(c(1,0,1,0,1,0), c(1,0,0,1,0,1), c(0,1,1,0,0,1),
@@ -43,6 +45,7 @@ scdrep<-svrepdesign(data=scd, type="BRR", repweights=repweights)
 svyratio(~alive, ~arrests, design=scddes)
 svyratio(~alive, ~arrests, design=scdnofpc)
 svyratio(~alive, ~arrests, design=scd2brr)
+svyratio(~alive, ~arrests, design=scd2boot)
 svyratio(~alive, ~arrests, design=scdrep)
 
 # or a logistic regression

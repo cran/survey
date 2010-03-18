@@ -1,9 +1,10 @@
 
 subbootstratum<-function(psu,replicates){
  upsu<-sample(unique(psu))
+ n<-length(upsu)
  replicate(replicates,
            table(factor(sample(upsu, length(upsu)-1,replace=TRUE),
-                        levels=unique(psu))))
+                        levels=unique(psu))))*n/(n-1)
 }
 
 bootstratum<-function(psu, popsize, replicates){
@@ -86,7 +87,7 @@ subbootweights<-function(strata, psu, replicates=50,
     this.stratum<-ustrata==s
     npsu<-length(unique(upsu[this.stratum]))
 
-    weights[this.stratum,]<-bootstratum(upsu[this.stratum],NULL,replicates)
+    weights[this.stratum,]<-subbootstratum(upsu[this.stratum],replicates)
     
   }
 
