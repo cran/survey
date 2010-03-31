@@ -642,7 +642,7 @@ svytotal.survey.design2<-function(x,design, na.rm=FALSE, deff=FALSE,...){
     attr(total,"statistic")<-"total"
 
     if (is.character(deff) || deff){
-      nobs<-NROW(design$cluster)
+      nobs<-sum(weights(design)!=0)
       if (deff=="replace")
         vsrs<-svyvar(x,design,na.rm=na.rm)*sum(weights(design))^2/nobs
       else
@@ -708,7 +708,7 @@ svymean.survey.design2<-function(x,design, na.rm=FALSE,deff=FALSE,...){
   attr(average,"statistic")<-"mean"
   class(average)<-"svystat"
   if (is.character(deff) || deff){
-      nobs<-NROW(design$cluster)
+      nobs<-sum(weights(design)!=0)
       if(deff=="replace"){
         vsrs<-svyvar(x,design,na.rm=na.rm)/(nobs)
       } else {
@@ -725,7 +725,7 @@ svymean.survey.design2<-function(x,design, na.rm=FALSE,deff=FALSE,...){
   return(average)
 }
 
-svyratio.survey.design2<-function(numerator=formula, denominator, design, separate=FALSE,na.rm=FALSE,formula,covmat=FALSE,...){
+svyratio.survey.design2<-function(numerator=formula, denominator, design, separate=FALSE,na.rm=FALSE,formula,covmat=FALSE,deff=FALSE,...){
 
     if (separate){
       strats<-sort(unique(design$strata[,1]))
@@ -779,13 +779,19 @@ svyratio.survey.design2<-function(numerator=formula, denominator, design, separa
     allstats<-svytotal(all,design) 
     rval<-list(ratio=outer(allstats[1:nn],allstats[nn+1:nd],"/"))
 
-
+    
     vars<-matrix(ncol=nd,nrow=nn)
+
+    if (deff) deffs<-matrix(ncol=nd,nrow=nn)
+    
     for(i in 1:nn){
       for(j in 1:nd){
         r<-(numerator[,i]-rval$ratio[i,j]*denominator[,j])/sum(denominator[,j]/design$prob)
         vars[i,j]<-svyrecvar(r*1/design$prob, design$cluster, design$strata, design$fpc,
                             postStrata=design$postStrata)
+        if (deff){
+          deffs[i,j]<-deff(svytotal(r,design,deff=TRUE))
+        }
       }
     }
     if (covmat){
@@ -801,6 +807,7 @@ svyratio.survey.design2<-function(numerator=formula, denominator, design, separa
     colnames(vars)<-colnames(denominator)
     rownames(vars)<-colnames(numerator)
     rval$var<-vars
+    if (deff) attr(rval,"deff")<-deffs
     attr(rval,"call")<-sys.call()
     class(rval)<-"svyratio"
     rval

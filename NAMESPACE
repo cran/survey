@@ -10,7 +10,7 @@ export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        make.calfun, cal.linear, cal.raking, cal.logit, svycdf, svykappa, svykm,
        svyolr, svycoplot, svyloglin, make.panel.svysmooth, dotchart, subbootweights,
        svyciprop, svyttest, marginpred, twophasevar, twophase2var, ppsmat, HR, unwtd.count,
-       svyfactanal, svyprcomp, trimWeights)
+       svyfactanal, svyprcomp, trimWeights,stratsample)
 
 S3method(svyloglin,survey.design)
 S3method(svyloglin,svyrep.design)

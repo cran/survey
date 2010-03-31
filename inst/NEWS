@@ -1,3 +1,12 @@
+3.22   added stratsample() to take stratified samples.
+
+       fixed bug in design effects for subsets of calibrated or database-based surveys
+ 
+       changed scaling in biplot.svyprcomp so area is proportional to 
+       weight, rather than height proportional to weight.
+
+3.21-3   svyratio() can now estimate design effects (for Scott Kostyshak)
+
 3.21-2 Rao & Wu bootstrap wasn't sampling n-1 PSUs (Richard Valliant)
 
 3.21-1 bug in printing variances for three or more variables (Corey Sparks)

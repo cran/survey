@@ -14,7 +14,7 @@ Possible additional developments in no particular order:
 	- using Overton's approximation and sample inclusion probabilities
         - using Berger's approximation and sample inclusion probabilities.
 
- - GEE. 
+ - GEE (you can do the independence working model just as another level of clustering).
 
  - an interface to the Auckland semiparametric approach to two-phase designs.
 
@@ -39,7 +39,7 @@ Possible additional developments in no particular order:
 
  - Gini index and other summaries of concentration and inequality.
 
- - Krista Giles' respondent-driven sampling estimators
+ - Krista Giles' respondent-driven sampling estimators?
 
  [done] database-backed designs for replicate weights.
 

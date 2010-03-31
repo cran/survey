@@ -1331,7 +1331,7 @@ print.summary.svyglm<-function (x, digits = max(3, getOption("digits") - 3),
 
 svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, design,
                                              na.rm=FALSE,formula,covmat=FALSE,
-                                             return.replicates=FALSE,...){
+                                             return.replicates=FALSE,deff=FALSE,...){
 
   if (!exists(".Generic"))
     .Deprecated("svyratio")
@@ -1367,10 +1367,13 @@ svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, desi
     vars<-matrix(0,nrow=nn,ncol=nd)
   }else {
     vars<-matrix(nrow=nn,ncol=nd)
+    if (deff) deffs<-matrix(nrow=nn,ncol=nd)
     for(i in 1:nn){
       for(j in 1:nd){
         vars[i,j]<-svrVar(allstats$replicates[,i]/allstats$replicates[,nn+j],
                           design$scale, design$rscales)
+        if (deff)
+          deffs[i,j]<-deff(svytotal(numerator[,i]-rval[i,j]*denominator[,j],design))
       }
     }
   }
@@ -1389,6 +1392,7 @@ svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, desi
 
   rval$var<-vars
   attr(rval,"call")<-sys.call()
+  if (deff) attr(rval,"deff")<-deffs
   class(rval)<-"svyratio"
   rval
 }

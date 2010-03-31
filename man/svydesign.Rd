@@ -117,7 +117,7 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,pps=FALSE,variance
 The \code{model.frame} method extracts the observed data.
 
 
- If the strata with one only PSU are not self-representing (or they are,
+ If the strata with only one PSU are not self-representing (or they are,
 but \code{svydesign} cannot tell based on \code{fpc}) then the handling
 of these strata for variance computation is determined by
 \code{options("survey.lonely.psu")}.  See \code{\link{svyCprod}} for

@@ -18,9 +18,9 @@ survey samples. Estimating domain (subpopulation) means can be done more easily 
 }
 \usage{
 \method{svyratio}{survey.design2}(numerator=formula, denominator,
-   design,separate=FALSE, na.rm=FALSE,formula, covmat=FALSE,...)
+   design,separate=FALSE, na.rm=FALSE,formula, covmat=FALSE,deff=FALSE,...)
 \method{svyratio}{svyrep.design}(numerator=formula, denominator, design,
-   na.rm=FALSE,formula, covmat=FALSE,return.replicates=FALSE, ...)
+   na.rm=FALSE,formula, covmat=FALSE,return.replicates=FALSE,deff=FALSE, ...)
 \method{svyratio}{twophase}(numerator=formula, denominator, design,
     separate=FALSE, na.rm=FALSE,formula,...)
 \method{predict}{svyratio}(object, total, se=TRUE,...)
@@ -43,6 +43,7 @@ survey samples. Estimating domain (subpopulation) means can be done more easily 
   \item{na.rm}{Remove missing values?}
   \item{covmat}{Compute the full variance-covariance matrix of the
     ratios}
+\item{deff}{Compute design effects}
   \item{return.replicates}{Return replicate estimates of ratios}
   \item{drop}{Return a vector rather than a matrix}
   \item{...}{Other unused arguments for other methods}

@@ -45,7 +45,7 @@ unwtd.count(x, design, ...)
   different subsets (currently only for replicate-weight
   designs). Allows \code{\link{svycontrast}} to be used on output.}
 \item{return.replicates}{Only for replicate-weight designs. If
-  \code{TRUE}, return all the replicates as an attribute of the result}
+  \code{TRUE}, return all the replicates as the "replicates" attribute of the result}
 \item{multicore}{Use \code{multicore} package to distribute subsets over
    multiple processors?}
 \item{object}{An object of class \code{"svyby"}}

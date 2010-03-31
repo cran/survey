@@ -12,22 +12,6 @@ svyfactanal<-function(formula, design, factors,n=c("none", "sample","degf","effe
 }
 
 
-svysem<-function(formula, design, model, n=c("effective","sample","degf","min.effective"),...){
-  if (!require("sem")) stop("Requires 'sem' package")
-  if (is.character(model))
-    model<-
-   v<-svyvar(formula,design)
-   n<-match.arg(n)
-   s2<-diag(v)
-   ses2<-diag(matrix(SE(v),length(s2),length(s2)))
-   neff<-2*(s2/ses2)^2
-   n<-switch(n, sample=nrow(design)-1, degf=degf(design), effective=1/mean(1/neff),min.effective=min(neff))+1
-   
-   f<-sem::sem(model, S=v,N=n,...)
-   f$call<-sys.call()
-   f
-}
-
 svyprcomp<-function (formula, design, center = TRUE, scale. = FALSE, tol = NULL, scores=FALSE,
     ...) 
 {
@@ -126,7 +110,7 @@ biplot.svyprcomp<-function(x, cols=c("black","darkred"),xlabs=NULL,weight=c("tra
      rgbcol<-col2rgb(rep(cols[1],length=length(w)))
      xcols<-rgb(rgbcol[1,],rgbcol[2,],rgbcol[3,],alpha=pmax(1,255*w*max.alpha/max(w)), max=255)
    } else if (weight=="scaled"){
-     xcexs<-par("cex")*pmax(0.2, max.cex*w/max(w))
+     xcexs<-par("cex")*pmax(0.2, max.cex*sqrt(w/max(w)))
      rgbcol<-col2rgb(cols[1])
      xcols<-rgb(rgbcol[1,],rgbcol[2,],rgbcol[3,],alpha=max.alpha*255, max=255)
    } else if (weight=="none"){

@@ -104,6 +104,13 @@ comparing to simple random sampling with replacement, which does not
 have this requirement, use \code{deff="replace"}. This with-replacement
 design effect is the square of Kish's "deft".
 
+The design effect for a subset of a design conditions on the size of
+the subset. That is, it compares the variance of the estimate to the
+variance of an estimate based on a simple random sample of the same
+size as the subset, taken from the subpopulation. So, for example,
+under stratified random sampling the design effect in a subset
+consisting of a single stratum will be 1.0.
+
 
 The \code{cv} function computes the coefficient of variation of a
 statistic such as ratio, mean or total. The default method is for any

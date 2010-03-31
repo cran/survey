@@ -59,8 +59,11 @@ withReplicates          Replicate variances for arbitrary statistics
 hadamard                Hadamard matrices
 is.hadamard
 paley                   Paley-type Hadamard matrices
-                 -----
+                 ----
 
+stratsample             Take a stratified sample
+                 ----
+ 
 Utility functions:
 make.calfun            Define calibration metrics
 cal.linear
