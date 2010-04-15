@@ -392,6 +392,11 @@ S3method(close, svyDBimputationList)
 S3method(open, svyDBimputationList)
 S3method(subset, svyDBimputationList)
 
+S3method(confint,svystat)
+S3method(confint,svrepstat)
+S3method(confint, svyratio)
+S3method(confint, svyby)
+
 S3method(`[`, survey.design)
 S3method(`[`, survey.design2)
 S3method(`[`, svyrep.design)

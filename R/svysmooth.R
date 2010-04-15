@@ -1,5 +1,5 @@
-svysmooth<-function(formula,design,method=c("locpoly","quantreg"),bandwidth,quantile,df,...) UseMethod("svysmooth", design)
-svysmooth.default<-function(formula, design,method=c("locpoly","quantreg"),bandwidth,quantile,df=4,...){
+svysmooth<-function(formula,design,method=c("locpoly","quantreg"),bandwidth=NULL,quantile,df,...) UseMethod("svysmooth", design)
+svysmooth.default<-function(formula, design,method=c("locpoly","quantreg"),bandwidth=NULL,quantile,df=4,...){
   switch(match.arg(method),
          locpoly=svylocpoly(formula,design,bandwidth=bandwidth,...),
          quantreg=svyrqss(formula,design,quantile=quantile,df=df,...)
@@ -55,7 +55,7 @@ svyrqss<-function(formula,design,quantile=0.5,df=4,...){
 }
   
 svylocpoly<-function(formula, design, ngrid=401, xlim=NULL,
-                     ylim=NULL, bandwidth,...){
+                     ylim=NULL, bandwidth=NULL,...){
   require("KernSmooth") || stop("needs KernSmooth package")
 
   mf<-model.frame(formula,model.frame(design))
@@ -64,8 +64,7 @@ svylocpoly<-function(formula, design, ngrid=401, xlim=NULL,
     mm<-mm[,-1,drop=FALSE]
 
   naa<-attr(mf,"na.action")
-  
-  bandwidth<-rep(bandwidth, length=ncol(mm))
+
 
   if (length(formula)==3){
     Y<-model.response(mf)
@@ -78,6 +77,16 @@ svylocpoly<-function(formula, design, ngrid=401, xlim=NULL,
   }
   if (!is.matrix(xlim))
     xlim<-matrix(xlim,nrow=2)
+
+
+  if (is.null(bandwidth)){
+    bandwidth<-numeric(ncol(mm))
+    for(i in 1:ncol(mm)){
+      bandwidth[i]<-if(density) dpik(mm[,i],gridsize=ngrid) else dpill(mm[,i],Y,gridsize=ngrid)
+    }
+  } else {
+    bandwidth<-rep(bandwidth, length=ncol(mm))
+  }
   
   w<-weights(design,type="sampling")
   if (length(naa)) w<-w[-naa]

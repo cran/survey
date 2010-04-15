@@ -1,6 +1,19 @@
+3.22-1 added df= argument to confint() methods for svystat,
+       svyrepstat, svyby, svyratio (for Richard Valliant)
+
+       added na.rm.by= argument to svyby(), to drop groups defined by
+       missing values of by= variables.
+
+       confint.svyby() uses SE(), not vcov(), so undefined values in replicates
+       are handled on a per-group basis.
+
+       svysmooth(,method="locpoly") now has automatic bandwidth choice, and
+       make.panel.svysmooth() will use this choice by default.
+
 3.22   added stratsample() to take stratified samples.
 
-       fixed bug in design effects for subsets of calibrated or database-based surveys
+       fixed bug in design effects for subsets of calibrated or 
+       database-based surveys
  
        changed scaling in biplot.svyprcomp so area is proportional to 
        weight, rather than height proportional to weight.

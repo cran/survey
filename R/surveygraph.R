@@ -1,6 +1,6 @@
 make.panel.svysmooth<-function(design,bandwidth=NULL){
-  function(x,y,span=2/3,col.smooth="red",col=par("col"),bg=NA,pch=par("pch"),cex=1,...){
-    if(is.null(bandwidth))
+  function(x,y,span=NULL,col.smooth="red",col=par("col"),bg=NA,pch=par("pch"),cex=1,...){
+    if(!is.null(span))
       bandwidth<-range(x)*span/3
     s<-svysmooth(y~x,design=design,bandwidth=bandwidth)
     points(x,y,pch=pch,bg=bg,col=col)

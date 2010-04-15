@@ -24,6 +24,8 @@
 \alias{cv}
 \alias{deff}
 \alias{deff.default}
+\alias{confint.svystat}
+\alias{confint.svrepstat}
 \alias{make.formula}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Summary statistics for sample surveys}
@@ -46,6 +48,8 @@ Compute means, variances, ratios and totals for data from complex surveys.
 \method{coef}{svrepstat}(object,...)
 \method{vcov}{svystat}(object,...)
 \method{vcov}{svrepstat}(object,...)
+\method{confint}{svystat}(object,  parm, level = 0.95,df =Inf,...)
+\method{confint}{svrepstat}(object,  parm, level = 0.95,df =Inf,...)
 cv(object,...)
 deff(object, quietly=FALSE,...)
 make.formula(names)
@@ -62,7 +66,14 @@ make.formula(names)
   \item{quietly}{Don't warn when there is no design effect computed}
   \item{estimate.only}{Don't compute standard errors (useful when
     \code{svyvar} is used to estimate the design effect)}
-  \item{...}{additional arguments to \code{cv} methods,not currently
+  \item{parm}{a specification of which parameters are to be given
+    confidence intervals, either a vector of numbers or a vector of
+    names. If missing, all parameters are considered.}
+  \item{level}{the confidence level required.}
+  \item{df}{degrees of freedom for t-distribution in confidence
+    interval, use \code{degf(design)} for number of PSUs minus number of
+  strata}
+  \item{...}{additional arguments to  methods,not currently
     used}
   \item{names}{vector of character strings}
 }
@@ -137,6 +148,8 @@ survey functions.
 \seealso{ \code{\link{svydesign}}, \code{\link{as.svrepdesign}},
   \code{\link{svrepdesign}} for constructing design objects.
 
+  \code{\link{degf}} to extract degrees of freedom from a design.
+
   \code{\link{svyquantile}}  for quantiles
   
   \code{\link{ftable.svystat}} for more attractive tables
@@ -191,6 +204,7 @@ survey functions.
   vcov(svymean(~api00+api99,jkstrat))
   SE(svymean(~enroll, dstrat))
   confint(svymean(~api00+api00, dclus1))
+  confint(svymean(~api00+api00, dclus1), df=degf(dclus1))
 
   # Design effect
   svymean(~api00, dstrat, deff=TRUE)

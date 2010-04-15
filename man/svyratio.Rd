@@ -10,6 +10,7 @@
 \alias{SE.svyratio}
 \alias{predict.svyratio}
 \alias{predict.svyratio_separate}
+\alias{confint.svyratio}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Ratio estimation}
 \description{
@@ -27,6 +28,7 @@ survey samples. Estimating domain (subpopulation) means can be done more easily 
 \method{predict}{svyratio_separate}(object, total, se=TRUE,...)
 \method{SE}{svyratio}(object,...,drop=TRUE)
 \method{coef}{svyratio}(object,...,drop=TRUE)
+\method{confint}{svyratio}(object,  parm, level = 0.95,df =Inf,...)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -46,7 +48,13 @@ survey samples. Estimating domain (subpopulation) means can be done more easily 
 \item{deff}{Compute design effects}
   \item{return.replicates}{Return replicate estimates of ratios}
   \item{drop}{Return a vector rather than a matrix}
-  \item{...}{Other unused arguments for other methods}
+  \item{parm}{a specification of which parameters are to be given
+    confidence intervals, either a vector of numbers or a vector of
+    names. If missing, all parameters are considered.}
+  \item{level}{the confidence level required.}
+  \item{df}{degrees of freedom for t-distribution in confidence
+    interval, use \code{degf(design)} for number of PSUs minus number of
+  strata}  \item{...}{Other unused arguments for other methods}
 }
 \details{
   The separate ratio estimate of a total is the sum of ratio estimates
@@ -55,7 +63,7 @@ survey samples. Estimating domain (subpopulation) means can be done more easily 
   names will be matched. If they do not have names it is important that
   the sample totals are supplied in the correct order, the same order
   as shown in the output of \code{summary(design)}.
-
+  
   When \code{design} is a two-phase design, stratification will be on
   the second phase.
 }

@@ -4,6 +4,7 @@
 \alias{SE.svyby}
 \alias{deff.svyby}
 \alias{coef.svyby}
+\alias{confint.svyby}
 \alias{unwtd.count}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Survey statistics on subsets}
@@ -14,10 +15,12 @@ Compute survey statistics on subsets of a survey defined by factors.
 svyby(formula, by ,design,...)
 \method{svyby}{default}(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE,
 keep.names = TRUE,verbose=FALSE, vartype=c("se","ci","ci","cv","cvpct","var"),
- drop.empty.groups=TRUE, covmat=FALSE, return.replicates=FALSE, multicore=getOption("survey.multicore"))
+ drop.empty.groups=TRUE, covmat=FALSE, return.replicates=FALSE, na.rm.by=FALSE,
+ multicore=getOption("survey.multicore"))
 \method{SE}{svyby}(object,...)
 \method{deff}{svyby}(object,...)
 \method{coef}{svyby}(object,...)
+\method{confint}{svyby}(object,  parm, level = 0.95,df =Inf,...)
 unwtd.count(x, design, ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -41,6 +44,7 @@ unwtd.count(x, design, ...)
   variation,  percent coefficient of variation, or variance}
 \item{drop.empty.groups}{If \code{FALSE}, report \code{NA} for empty
   groups, if \code{TRUE} drop them from the output}
+\item{na.rm.by}{If true, omit groups defined by \code{NA} values of the \code{by} variables}.
 \item{covmat}{If \code{TRUE}, compute covariances between estimates for
   different subsets (currently only for replicate-weight
   designs). Allows \code{\link{svycontrast}} to be used on output.}
@@ -48,6 +52,13 @@ unwtd.count(x, design, ...)
   \code{TRUE}, return all the replicates as the "replicates" attribute of the result}
 \item{multicore}{Use \code{multicore} package to distribute subsets over
    multiple processors?}
+  \item{parm}{a specification of which parameters are to be given
+    confidence intervals, either a vector of numbers or a vector of
+    names. If missing, all parameters are considered.}
+  \item{level}{the confidence level required.}
+  \item{df}{degrees of freedom for t-distribution in confidence
+    interval, use \code{degf(design)} for number of PSUs minus number of
+  strata}
 \item{object}{An object of class \code{"svyby"}}
 }
 
@@ -119,6 +130,7 @@ deff(a)
 SE(a)
 cv(a)
 coef(a)
+confint(a, df=degf(rclus1))
 
 ## ratio estimates
 svyby(~api.stu, by=~stype, denominator=~enroll, design=dclus1, svyratio)
