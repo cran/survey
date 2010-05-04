@@ -2,7 +2,7 @@
 deviance.svycoxph<-function(object,...) 2 * (object$ll[1] - object$ll[2])
 deviance.coxph<-function(object,...) 2 * (object$loglik[1] - object$loglik[2])
 
-regTermTest<-function(model, test.terms, null=NULL, df=Inf, method=c("Wald","LRT")){
+regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","LRT")){
 
   method<-match.arg(method)
   

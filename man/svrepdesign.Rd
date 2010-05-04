@@ -151,7 +151,7 @@ svyratio(~alive, ~arrests, scdrep)
 ## Needs RSQLite
 library(RSQLite)
 db_rclus1<-svrepdesign(weights=~pw, repweights="wt[1-9]+", type="JK1", scale=(1-15/757)*14/15,
-data="apiclus1rep",dbtype="SQLite", dbname=system.file("api.db",package="survey"))
+data="apiclus1rep",dbtype="SQLite", dbname=system.file("api.db",package="survey"), combined=FALSE)
 svymean(~api00+api99,db_rclus1)
 
 summary(db_rclus1)

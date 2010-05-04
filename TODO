@@ -8,6 +8,8 @@ Possible additional developments in no particular order:
 
  [mostly done] Rao-Scott-type tests for glms.
 
+- better choice of denominator df for tests
+
  [done] More general HT estimator for sampling without replacement
  	- using joint inclusion probabilities
 	- using population first-order inclusion probabilities and Hartley-Rao approximation

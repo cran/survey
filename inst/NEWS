@@ -1,3 +1,7 @@
+3.22-2 bug in the na.rm.by= argument to svyby() (Trevor Thompson)
+
+      regTermTest() now does F tests by default (for Chris Wild)
+
 3.22-1 added df= argument to confint() methods for svystat,
        svyrepstat, svyby, svyratio (for Richard Valliant)
 

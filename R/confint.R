@@ -26,7 +26,7 @@ tconfint<-function (object, parm, level = 0.95, df=Inf)
     fac <- qt(a, df=df)
     ci <- array(NA, dim = c(length(parm), 2L), dimnames = list(parm, 
         pct))
-    ses <- SE(object)[parm %in% pnames]
+    ses <- unlist(SE(object))[parm %in% pnames]
     ci[] <- cf[parm] + ses %o% fac
     ci
 }

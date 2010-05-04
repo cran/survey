@@ -3,9 +3,8 @@
 ##
 svyby<-function(formula, by, design,...) UseMethod("svyby",design)
 
-
 svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
-                        keep.names=TRUE,verbose=FALSE,vartype=c("se","ci","ci","cv","cvpct","var"),
+                        keep.names=TRUE, verbose=FALSE, vartype=c("se","ci","ci","cv","cvpct","var"),
                         drop.empty.groups=TRUE, covmat=FALSE, return.replicates=FALSE, na.rm.by=FALSE,
                         multicore=getOption("survey.multicore")){
 
@@ -25,7 +24,7 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
   ## all combinations that actually occur in this design
   byfactor<-do.call("interaction", byfactors)
   dropped<- weights(design,"sampling")==0
-  if (na.rm.by) dropped<-dropped | apply(byfactors, 2, function(x) any(is.na(x)))
+  if (na.rm.by) dropped<-dropped | apply(byfactors, 1, function(x) any(is.na(x)))
   uniquelevels<-unique(byfactor[!dropped])
   uniques <- match(uniquelevels, byfactor)
 

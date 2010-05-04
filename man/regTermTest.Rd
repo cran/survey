@@ -11,7 +11,7 @@
   when not fitting by maximum likelihood.  The Wald tests use a chisquared or F distribution, the LRT uses a linear combination of chisquared distributions as in \code{\link{pchisqsum}}.
 }
 \usage{
-regTermTest(model, test.terms, null=NULL,df=Inf, method=c("Wald","LRT"))
+regTermTest(model, test.terms, null=NULL,df=NULL, method=c("Wald","LRT"))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

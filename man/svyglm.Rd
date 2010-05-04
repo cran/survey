@@ -63,9 +63,11 @@ warning.
 
 If \code{df.resid} is not specified the df for the null model is
 computed by \code{\link{degf}} and the residual df computed by
-subtraction.  It's not that these are particularly good approximations
-in a regression model but they are relatively standard. To get tests
-based on a Normal distribution use \code{df.resid=Inf}.
+subtraction.  This is recommended by Korn and Graubard and is correct
+for PSU-level covariates but is potentially very conservative for
+individual-level covariates. To get tests based on a Normal distribution
+use \code{df.resid=Inf}, and to use number of PSUs-number of strata,
+specify \code{df.resid=degf(design)}.
 
 Parallel processing with \code{multicore=TRUE} is helpful only for
 fairly large data sets and on computers with sufficient memory. It may
