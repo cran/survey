@@ -314,8 +314,10 @@ trimWeights.survey.design2<-function(design, upper=Inf, lower= -Inf, strict=FALS
   if (!any(outside)) return(design)
   pwnew<-pmax(lower,pmin(pw, upper))
   trimmings<-pw-pwnew
-  pw[!outside]<-pw[!outside]+sum(trimmings)/sum(!outside)
-  design$prob<-1/pw
+  pwnew[!outside]<-pwnew[!outside]+sum(trimmings)/sum(!outside)
+  design$prob<-1/pwnew
+  design$call<-sys.call()
+  design$call[[1]]<-as.name(.Generic)
   if (strict) ## ensure that the trimmings don't push anything outside the limits
     trimWeights(design, upper,lower, strict=TRUE)
   else 
@@ -328,7 +330,7 @@ trimWeights.svyrep.design<-function(design, upper=Inf, lower= -Inf, compress=FAL
   if (any(outside)) {
     pwnew<-pmax(lower,pmin(pw, upper))
     trimmings<-pw-pwnew
-    pw[!outside]<-pw[!outside]+sum(trimmings)/sum(!outside)
+    pwnew[!outside]<-pwnew[!outside]+sum(trimmings)/sum(!outside)
     design$prob<-1/pw
   }
   rw<-weights(design, "analysis")
@@ -336,11 +338,11 @@ trimWeights.svyrep.design<-function(design, upper=Inf, lower= -Inf, compress=FAL
   if (any(outside)) {
     rwnew<-pmax(lower,pmin(rw, upper))
     trimmings<-rw-rwnew
-    rw<-pw[!outside]+t(t(!outside)+colSums(trimmings)/colSums(!outside))
+    rwnew<-rwnew[!outside]+t(t(!outside)+colSums(trimmings)/colSums(!outside))
     if (compress)
-      design$repweights<-compressWeights(rw)
+      design$repweights<-compressWeights(rwnew)
     else
-      design$repweights<-rw
+      design$repweights<-rwnew
     design$combined.weights<-TRUE
   }
   

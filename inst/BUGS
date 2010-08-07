@@ -4,3 +4,4 @@ Known bug:
    finite population correction. This matters only
    when the sampling fraction is very close to one
 
+2. svydesign should check that `weights` is the right length

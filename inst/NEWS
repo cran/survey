@@ -1,3 +1,6 @@
+3.22-3 bug in trimWeights (Richard Valliant), also add warning for
+       attempts to trim past the mean weight.
+
 3.22-2 bug in the na.rm.by= argument to svyby() (Trevor Thompson)
 
       regTermTest() now does F tests by default (for Chris Wild)
