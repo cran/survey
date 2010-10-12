@@ -1676,7 +1676,9 @@ postStratify.svyrep.design<-function(design, strata, population,
 
   if (inherits(population,"table"))
     population<-as.data.frame(population)
-  else if (!is.data.frame(population))
+  else if (is.data.frame(population))
+    population$Freq <- as.vector(population$Freq)
+  else
     stop("population must be a table or dataframe")
 
   if (!all(names(strata) %in% names(population)))

@@ -490,7 +490,7 @@ svyratio.twophase2<-function(numerator=formula, denominator, design, separate=FA
       x$prob[-i]<-Inf
       x$phase2$prob[-i]<-Inf
       x$dcheck<-lapply(x$dcheck, function(m) {m[-i,-i]<-0;m})
-    } else {
+    } else if (is.character(i)){
       ##character indexing: use brute force and ignorance
       tmp<-x$prob[i,]
       x$prob<-rep(Inf, length(x$prob))

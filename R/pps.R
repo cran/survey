@@ -203,10 +203,11 @@ summary.pps<-function(object,...){
 print.summary.pps<-function(x,...,varnames=TRUE){
   cat("Two-phase sparse-matrix design:\n ")
   print(x$call)
-   cat("Phase 1:\n")
+  cat("Sampling probabilities:\n")
+  print(summary(x$prob))
   if (varnames){
     cat("Data variables:\n")
-    print(names(x$phase1$full$variables))
+    print(names(x$variables))
   }
   invisible(x)
 }
@@ -453,7 +454,7 @@ svyratio.pps<-function(numerator=formula, denominator, design, separate=FALSE,na
       ## numeric indexing: use -
       x$prob[-i]<-Inf
       x$dcheck<-lapply(x$dcheck, function(m) {m$dcheck[-i,-i]<-0;m})
-    } else {
+    } else if (is.character(i)) {
       ##character indexing: use brute force and ignorance
       tmp<-x$prob[i,]
       x$prob<-rep(Inf, length(x$prob))

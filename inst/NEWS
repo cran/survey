@@ -1,3 +1,14 @@
+3.22-4 postStratify now allows 1-d matrix as well as vector in data frame
+       of population counts. (for Jean Opsomer)
+
+       print.summary.pps wasn't being exported (Gonzalo Perez)
+
+       svyhist() ignored right= argument
+
+       predict.svycoxph() was slightly overestimating standard errors for survival curves.
+
+       [.pps and [.twophase2 crashed when no observations were removed (Gonzalo Perez)
+
 3.22-3 bug in trimWeights (Richard Valliant), also add warning for
        attempts to trim past the mean weight.
 

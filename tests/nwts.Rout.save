@@ -1,6 +1,6 @@
 
-R version 2.9.0 beta (2009-04-08 r48309)
-Copyright (C) 2009 The R Foundation for Statistical Computing
+R version 2.11.1 (2010-05-31)
+Copyright (C) 2010 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -22,10 +22,9 @@ Type 'q()' to quit R.
 
 Attaching package: 'survey'
 
+The following object(s) are masked from 'package:graphics':
 
-	The following object(s) are masked from package:graphics :
-
-	 dotchart 
+    dotchart
 
 > load("nwts.rda")
 > nwtsnb<-nwts
@@ -50,15 +49,9 @@ Loading required package: lattice
 
 Attaching package: 'Matrix'
 
+The following object(s) are masked from 'package:base':
 
-	The following object(s) are masked from package:stats :
-
-	 xtabs 
-
-
-	The following object(s) are masked from package:base :
-
-	 rcond 
+    det
 
 > 
 > dccs8<-twophase(id=list(~id,~id),subset=~in.ccs,
@@ -168,7 +161,7 @@ factor(stage)4   1.0729     0.1782   6.022 2.73e-09 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
-(Dispersion parameter for quasibinomial family taken to be 1.000876)
+(Dispersion parameter for quasibinomial family taken to be 1.001333)
 
 Number of Fisher Scoring iterations: 4
 
@@ -201,7 +194,7 @@ factor(stage)4   1.0729     0.1759   6.101 1.70e-09 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
-(Dispersion parameter for quasibinomial family taken to be 1.000876)
+(Dispersion parameter for quasibinomial family taken to be 1.001333)
 
 Number of Fisher Scoring iterations: 4
 

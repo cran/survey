@@ -1,6 +1,6 @@
 
-R version 2.9.0 beta (2009-04-08 r48309)
-Copyright (C) 2009 The R Foundation for Statistical Computing
+R version 2.11.1 (2010-05-31)
+Copyright (C) 2010 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -19,10 +19,9 @@ Type 'q()' to quit R.
 
 Attaching package: 'survey'
 
+The following object(s) are masked from 'package:graphics':
 
-	The following object(s) are masked from package:graphics :
-
-	 dotchart 
+    dotchart
 
 > library(survival)
 Loading required package: splines
@@ -68,20 +67,20 @@ In svydesign.default(id = ~id, data = pbc2) :
 > 
 > (pc1<-confint(p1[[1]],(1:5)*365))
          0.025     0.975
-365  0.8475598 0.9194575
-730  0.7503249 0.8397774
-1095 0.5771295 0.6710279
-1460 0.4597188 0.5651130
-1825 0.3480505 0.4727843
+365  0.8410027 0.9266263
+730  0.7371114 0.8548312
+1095 0.5517779 0.7018583
+1460 0.4335073 0.5992819
+1825 0.3260899 0.5046241
 > (pc2<-confint(p2[[1]],(1:5)*365))
          0.025     0.975
-365  0.8476442 0.9193857
-730  0.7504154 0.8396764
-1095 0.5771613 0.6708448
-1460 0.4596111 0.5648916
-1825 0.3478089 0.4725304
+365  0.8409490 0.9267054
+730  0.7370152 0.8549432
+1095 0.5515848 0.7019513
+1460 0.4332252 0.5992968
+1825 0.3257172 0.5045795
 > all.equal(pc1, pc2)
-[1] "Mean relative difference: 0.0002150753"
+[1] "Mean relative difference: 0.0002070722"
 > 
 > (q1<-quantile(p1[[2]]))
 0.75  0.5 0.25 

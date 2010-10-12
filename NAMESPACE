@@ -60,6 +60,8 @@ S3method(summary, ODBCsvydesign)
 S3method(print, summary.ODBCsvydesign)
 S3method(print, ODBCsvydesign)
 S3method(print,  pps)
+S3method(summary, pps)
+S3method(print, summary.pps)
 
 S3method(svrepdesign, default)
 S3method(svrepdesign, imputationList)

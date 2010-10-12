@@ -343,7 +343,9 @@ postStratify.survey.design<-function(design, strata, population, partial=FALSE,.
 
   if (inherits(population,"table"))
     population<-as.data.frame(population)
-  else if (!is.data.frame(population))
+  else if (is.data.frame(population))
+    population$Freq <- as.vector(population$Freq) ##allows Freq computed by tapply()
+  else
     stop("population must be a table or dataframe")
 
   if (!all(names(strata) %in% names(population)))

@@ -1,5 +1,10 @@
 svyolr<-function(formula, design,...) UseMethod("svyolr",design)
 
+##
+## Much of this is taken from MASS polr, thus the GPL-2 license.
+##
+
+
 svyolr.svyrep.design<-function(formula,design,...,return.replicates=FALSE,
                                multicore=getOption("survey.multicore")){
  	require(MASS)
@@ -35,6 +40,25 @@ svyolr.svyrep.design<-function(formula,design,...,return.replicates=FALSE,
  	if (return.replicates) rval$replicates<-t(betas)
  	rval
  	}
+
+
+pgumbel<-
+function (q, loc = 0, scale = 1, lower.tail = TRUE) 
+{
+    q <- (q - loc)/scale
+    p <- exp(-exp(-q))
+    if (!lower.tail) 
+        1 - p
+    else p
+}
+dgumbel<-function (x, loc = 0, scale = 1, log = FALSE) 
+{
+    x <- (x - loc)/scale
+    d <- log(1/scale) - x - exp(-x)
+    if (!log) 
+        exp(d)
+    else d
+}
 
 
 svyolr.survey.design2<-function (formula, design,  start, ...,  na.action=na.omit, 
@@ -86,8 +110,6 @@ svyolr.survey.design2<-function (formula, design,  start, ...,  na.action=na.omi
     }
     m <- match.call(expand.dots = FALSE)
     method <- match.arg(method)
-
-    if (method=="cloglog") require(MASS) ## for Gumbel
 
     pfun <- switch(method, logistic = plogis, probit = pnorm, 
         cloglog = pgumbel, cauchit = pcauchy)
