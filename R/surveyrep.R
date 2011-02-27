@@ -1183,15 +1183,19 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL, ...,
   data<-design$variables
   
 
-      g<-match.call()
-      g$design<-NULL
-      g$var<-g$rho<-g$return.replicates<-g$multicore<-NULL
-      g$weights<-quote(.survey.prob.weights)
-      g[[1]]<-quote(glm)      
-      g$model<-TRUE
-      g$x<-TRUE
-      g$y<-TRUE
-      
+  g<-match.call()
+  formula<-eval.parent(formula)
+  environment(formula)<-environment()
+  g$formula<-formula
+  g$data<-quote(data)
+  g$design<-NULL
+  g$var<-g$rho<-g$return.replicates<-g$multicore<-NULL
+  g$weights<-quote(.survey.prob.weights)
+  g[[1]]<-quote(glm)      
+  g$model<-TRUE
+  g$x<-TRUE
+  g$y<-TRUE
+  
       scale<-design$scale
       rscales<-design$rscales
       if (!is.null(rho)) .NotYetUsed(rho)
