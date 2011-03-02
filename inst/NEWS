@@ -1,3 +1,11 @@
+3.23-1 svycdf() wasn't handling replicate weights correctly.
+
+       Change in svyquantile() for replicate weights when using type="quantile". 
+       Point estimate used to be mean of replicates, now is ordinary weighted quantile.
+       (for Bob Fay)
+
+       Small changes in handling of zero weights in svyquantile().
+
 3.23   two-sample svyttest() didn't work with replicate weights. (Richard Valliant)
 
 3.22-4 postStratify now allows 1-d matrix as well as vector in data frame

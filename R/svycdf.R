@@ -14,7 +14,7 @@ svycdf.default<-function(formula, design,na.rm=TRUE,...){
     names(rval)<-names(x)
     for(i in 1:ncol(x)){
     		xx<-x[,i]
-    		w <- weights(design)[nas==0]
+    		w <- weights(design,type="sampling")[nas==0]
     		oo<-order(xx)
     		cum.w<-cumsum(w[oo])/sum(w)
     		cdf <- approxfun( xx[oo],cum.w, method = "constant", 

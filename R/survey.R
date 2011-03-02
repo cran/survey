@@ -753,7 +753,7 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
       oo<-order(xx)
       cum.w<-cumsum(w[oo])/sum(w)
       cdf<-approxfun(cum.w,xx[oo],method=method,f=f,
-                     yleft=min(xx),yright=max(xx)) 
+                     yleft=min(xx),yright=max(xx),ties=min) 
       cdf(p)
     }
     
@@ -763,7 +763,7 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
       xx<-sort(unique(xx))
       cum.w <- cumsum(ww)/sum(ww)
       cdf <- approxfun(cum.w, xx, method = method, f = f, 
-                       yleft = min(xx), yright = max(xx))
+                       yleft = min(xx), yright = max(xx),ties=min)
       cdf(p)
     }
       
@@ -815,7 +815,7 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
       oo<-order(xx)
       cum.w<-cumsum(w[oo])/sum(w)
       approx(cum.w,xx[oo],xout=c(p.low,p.up), method=method,f=f,
-             yleft=min(xx),yright=max(xx))$y 
+             yleft=min(xx),yright=max(xx),ties=min)$y 
       
     }
     
@@ -832,7 +832,7 @@ svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
         oo<-order(xx)
         cum.w<-cumsum(ww)/sum(ww)
         approx(cum.w,uxx,xout=c(p.low,p.up), method=method,f=f,
-               yleft=min(xx),yright=max(xx))$y 
+               yleft=min(xx),yright=max(xx),ties=min)$y 
         
       }
 

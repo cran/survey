@@ -675,25 +675,62 @@ svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="li
 
     if (interval=="quantile"){
       ## interval on quantile scale
-      computeQuantiles<-function(xx){
-        oo<-order(xx)
-        cum.w<-apply(w,2,function(wi) cumsum(wi[oo])/sum(wi))
-        
-        qq<-apply(cum.w, 2,function(cum.wi) approx(cum.wi,xx[oo],method=method,f=f,
-                                                   yleft=min(xx),yright=max(xx),
-                                                   xout=quantiles,ties=max)$y)
-        if (length(quantiles)>1)
-          qq<-t(qq)
-        else
-          qq<-as.matrix(qq)
-        rval<-colMeans(qq)
-        
-        rval<-list(quantiles=rval,
-                   variances=diag(as.matrix(svrVar(qq,design$scale,design$rscales))))
-        if (return.replicates)
-          rval<-c(rval, list(replicates=qq))
-        rval
-      }
+      if (ties=="discrete")
+        computeQuantiles<-function(xx){
+          oo<-order(xx)
+          
+          ws<-weights(design,"sampling")
+          cum.ws<-cumsum(ws[oo])/sum(ws)
+          rval<-approx(cum.ws,xx[oo],method=method,f=f,
+                       yleft=min(xx),yright=max(xx),
+                       xout=quantiles,ties=min)$y
+          
+          cum.w<-apply(w,2,function(wi) cumsum(wi[oo])/sum(wi))
+          
+          qq<-apply(cum.w, 2,function(cum.wi) approx(cum.wi,xx[oo],method=method,f=f,
+                                                     yleft=min(xx),yright=max(xx),
+                                                     xout=quantiles,ties=min)$y)
+          if (length(quantiles)>1)
+            qq<-t(qq)
+          else
+            qq<-as.matrix(qq)
+          ##rval<-colMeans(qq)
+          
+          rval<-list(quantiles=rval,
+                     variances=diag(as.matrix(svrVar(qq,design$scale,design$rscales))))
+          if (return.replicates)
+            rval<-c(rval, list(replicates=qq))
+          rval
+        } else { ##ties="rounded"
+          computeQuantiles<-function(xx){
+            ws<-weights(design,"sampling")
+
+            wws<-rowsum(ws,xx,reorder=TRUE)
+            uxx<-sort(unique(xx))
+            
+            cum.wws<-cumsum(wws)/sum(wws)
+            rval<-approx(cum.wws,uxx,method=method,f=f,
+                     yleft=min(xx),yright=max(xx),
+                         xout=quantiles,ties=min)$y
+            
+            cum.w<-apply(rowsum(w,xx,reorder=TRUE),2,function(wi) cumsum(wi)/sum(wi))
+            
+            qq<-apply(cum.w, 2,function(cum.wi) approx(cum.wi,uxx,method=method,f=f,
+                                                       yleft=min(xx),yright=max(xx),
+                                                       xout=quantiles,ties=min)$y)
+            if (length(quantiles)>1)
+              qq<-t(qq)
+            else
+              qq<-as.matrix(qq)
+            ##rval<-colMeans(qq)
+            
+            rval<-list(quantiles=rval,
+                       variances=diag(as.matrix(svrVar(qq,design$scale,design$rscales))))
+            if (return.replicates)
+              rval<-c(rval, list(replicates=qq))
+            rval
+          }
+        }
     } else {
       ## interval on probability scale, backtransformed.
       if (ties=="discrete"){
@@ -703,7 +740,7 @@ svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="li
           cum.w<- cumsum(w[oo])/sum(w)
           Qf<-approxfun(cum.w,xx[oo],method=method,f=f,
                         yleft=min(xx),yright=max(xx),
-                        ties=max)
+                        ties=min)
           
           point.estimates<-Qf(quantiles)
           if(length(quantiles)==1)
@@ -730,13 +767,13 @@ svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="li
           cum.w<- cumsum(ww)/sum(ww)
           Qf<-approxfun(cum.w,uxx,method=method,f=f,
                         yleft=min(xx),yright=max(xx),
-                        ties=max)
+                        ties=min)
           
           point.estimates<-Qf(quantiles)
           if(length(quantiles)==1)
             estfun<-as.numeric(xx<point.estimates)
           else
-            estfun<-0+outer(xx,point.estimates,"<")
+                estfun<-0+outer(xx,point.estimates,"<")
           est<-svymean(estfun, design, return.replicates=return.replicates)
           if (return.replicates)
             q.estimates<-matrix(Qf(est$replicates),nrow=NROW(est$replicates))
@@ -748,26 +785,26 @@ svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="li
             rval<-c(rval, list(replicates=q.estimates))
           rval
         }
- 
+        
       }
     }
+
+  if (!is.null(dim(x)))
+    results<-apply(x,2,computeQuantiles)
+  else
+    results<-computeQuantiles(x)
   
-    if (!is.null(dim(x)))
-      results<-apply(x,2,computeQuantiles)
-    else
-      results<-computeQuantiles(x)
-
-    rval<-matrix(sapply(results,"[[","quantiles"),ncol=NCOL(x),nrow=length(quantiles),
-                 dimnames=list(paste("q",round(quantiles,2),sep=""), names(x)))
-    vv<-matrix(sapply(results,"[[","variances"),ncol=NCOL(x),nrow=length(quantiles),
-                 dimnames=list(paste("q",round(quantiles,2),sep=""), names(x)))
-    attr(rval,"var")<-vv
-    attr(rval, "statistic")<-"quantiles"
-    if (return.replicates)
-      rval<-list(mean=rval, replicates=do.call(cbind,lapply(results,"[[","replicates")))
-    class(rval)<-"svrepstat"
-    rval
-
+  rval<-matrix(sapply(results,"[[","quantiles"),ncol=NCOL(x),nrow=length(quantiles),
+               dimnames=list(paste("q",round(quantiles,2),sep=""), names(x)))
+  vv<-matrix(sapply(results,"[[","variances"),ncol=NCOL(x),nrow=length(quantiles),
+             dimnames=list(paste("q",round(quantiles,2),sep=""), names(x)))
+  attr(rval,"var")<-vv
+  attr(rval, "statistic")<-"quantiles"
+  if (return.replicates)
+    rval<-list(mean=rval, replicates=do.call(cbind,lapply(results,"[[","replicates")))
+  class(rval)<-"svrepstat"
+  rval
+  
 }
 
 
@@ -1476,15 +1513,16 @@ withReplicates<-function(design, theta,rho=NULL,...,
       
   v<-svrVar(thetas, scale, rscales)
 
-  attr(full,"var")<-v
-  if (return.replicates)
-    rval<-list(theta=full, replicates=thetas)
-  else
-    rval<-full
-  attr(rval,"statistic")<-"theta"
-  class(rval)<-"svrepstat"
-  rval
-}
+    attr(full,"var")<-v
+    attr(full,"statistic")<-"theta"
+
+    if (return.replicates)
+      rval<-list(theta=full, replicates=thetas)
+    else
+      rval<-full
+    class(rval)<-"svrepstat"
+    rval
+  }
 
 coef.svrepstat<-function(object,...){
   if (is.list(object)) object<-object[[1]]
