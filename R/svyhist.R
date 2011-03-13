@@ -12,7 +12,7 @@ svyhist<-function(formula, design, breaks = "Sturges",
     variable<-mf[,1]
     varname<-names(mf)
     h <- hist(variable,  plot=FALSE, breaks=breaks,right=right)
-    props <- coef(svymean(~cut(variable, h$breaks,right=right),
+    props <- coef(svymean(~cut(variable, h$breaks,right=right, include.lowest=include.lowest),
                           design, na.rm=TRUE))
     h$density<-props/diff(h$breaks)
     h$counts <- props*sum(weights(design))

@@ -25,7 +25,7 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
   byfactor<-do.call("interaction", byfactors)
   dropped<- weights(design,"sampling")==0
   if (na.rm.by) dropped<-dropped | apply(byfactors, 1, function(x) any(is.na(x)))
-  uniquelevels<-unique(byfactor[!dropped])
+  uniquelevels<-sort(unique(byfactor[!dropped]))
   uniques <- match(uniquelevels, byfactor)
 
   
@@ -84,6 +84,7 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
       rval<-t(sapply(results, unwrap))
       if (covmat || return.replicates) {
         replicates<-do.call(cbind,lapply(results,"[[","replicates"))
+        colnames(replicates)<-rep(as.character(uniquelevels), each=NCOL(replicates)/length(uniquelevels))
         covmat.mat<-svrVar(replicates,design$scale,design$rscales)
       }
     } else {

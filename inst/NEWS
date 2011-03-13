@@ -1,3 +1,8 @@
+3.23-2 svyhist() didn't handle include.lowest= correctly. (Chris Wild)
+
+       svyby(, return.replicates=TRUE) now returns the replicates in the same
+       order as the printed output, and labelled. (for Bob Fay)
+
 3.23-1 svycdf() wasn't handling replicate weights correctly.
 
        Change in svyquantile() for replicate weights when using type="quantile". 
