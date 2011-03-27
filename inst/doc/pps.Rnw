@@ -16,8 +16,13 @@ The survey package has always supported PPS (ie, arbitrary unequal probability) 
 
 Version 3.11 added an another approximation for PPS sampling without replacement, and version 3.16 added more support.  There are two broad classes of estimators for PPS sampling without replacement: approximations to the Horvitz--Thompson and Yates--Grundy estimators based on approximating the pairwise sampling probabilities, and estimators of H\'ajek type that attempt to recover the extra precision of a without-replacement design by conditioning on the estimated population size. 
 
-\subsection*{H\'ajek-type estimators}
-Using the standard recursive algorithm for stratified multistage sampling when one or more stages are actually PPS gives an approximation due to Brewer.  This is simple to compute, always non-negative, and appears to be fairly efficient.  
+\subsection*{Direct approximations}
+Using the standard recursive algorithm for stratified multistage
+sampling when one or more stages are actually PPS gives an
+approximation due to Brewer.  This is simple to compute, always
+non-negative, and appears to be fairly efficient. 
+
+
 
 \subsection*{Approximating $\pi_{ij}$}
 Given the pairwise sampling probabilities $\pi_{ij}$ we can define the weighted covariance of sampling indicators

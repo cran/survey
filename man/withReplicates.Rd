@@ -51,7 +51,20 @@ a<-svyratio(~alive, ~arrests, design=scdrep)
 print(a$ratio)
 print(a$var)
 withReplicates(scdrep, quote(sum(.weights*alive)/sum(.weights*arrests)))
-withReplicates(scdrep, function(w,data) sum(w*data$alive)/sum(w*data$arrests))
+withReplicates(scdrep, function(w,data)
+sum(w*data$alive)/sum(w*data$arrests))
+
+\dontrun{
+library(quantreg)
+data(api)
+## one-stage cluster sample
+dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
+## convert to bootstrap
+bclus1<-as.svrepdesign(dclus1,type="bootstrap", replicates=100)
+
+## median regression
+withReplicates(bclus1, quote(coef(rq(api00~api99, tau=0.5, weights=.weights))))
+}
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
 

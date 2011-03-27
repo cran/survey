@@ -1,3 +1,9 @@
+3.23-3 Some vignettes didn't load the package (Brian Ripley)
+
+       Added pFsum() for linear combination of F distributions with same denominator.
+
+       better example (quantile regression) in withReplicates().
+
 3.23-2 svyhist() didn't handle include.lowest= correctly. (Chris Wild)
 
        svyby(, return.replicates=TRUE) now returns the replicates in the same

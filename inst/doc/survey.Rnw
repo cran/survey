@@ -24,6 +24,7 @@ defined by the sampling unit (\texttt{dnum}) and the population
 size(\texttt{fpc}).  Sampling weights are computed from the population
 sizes, but could be provided separately.
 <<>>=
+library(survey)
 data(api)
 dclus1 <- svydesign(id = ~dnum, weights = ~pw, data = apiclus1, fpc = ~fpc)
 @ 
