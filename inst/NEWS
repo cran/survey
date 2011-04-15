@@ -1,3 +1,13 @@
+3.24   Rao-Scott test based on linear combinations of Fs is now also available in regTermTest
+
+       Algorithms from CompQuadForm (AS155 and AS204) now used for method="integration" 
+       in pFsum and pchisqsum.  These are more accurate and faster than the previous
+       implementations. If you use CRAN binary packages you will need at least R 2.12. 
+
+       pFsum() saddlepoint and Satterthwaite methods are also much faster. The 
+       saddlepoint approximation now works for the whole range, not just the right tail.
+       
+
 3.23-3 Some vignettes didn't load the package (Brian Ripley)
 
        Added pFsum() for linear combination of F distributions with same denominator.

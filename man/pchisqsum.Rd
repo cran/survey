@@ -13,7 +13,7 @@
 }
 \usage{
 pchisqsum(x, df, a, lower.tail = TRUE, method = c("satterthwaite", "integration","saddlepoint"))
-pFsum(x, df, a, ddf=Inf,lower.tail = TRUE, ...)
+pFsum(x, df, a, ddf=Inf,lower.tail = TRUE, method = c("saddlepoint","integration","satterthwaite"), ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -34,16 +34,21 @@ Vector of cumulative probabilities
   The \code{"satterthwaite"} method uses Satterthwaite's approximation,
   and this is also used as a fallback for the other methods. The
   accuracy is usually good, but is more variable depending on \code{a}
-  than the other methods.
+  than the other methods. The Satterthwaite approximation requires all \code{a>0}.
 
-  \code{"integration"} inverts the characteristic function
-  numerically. This is relatively slow, and not reliable for p-values
-  smaller than about 1e-5 in the upper tail, but is highly accurate for moderate p-values.
-
-  \code{"saddlepoint"} uses a saddlepoint approximation when
-  \code{x>1.05*sum(a)} and the Satterthwaite approximation for
-  smaller \code{x}. This is fast and is accurate in the upper tail, where
-  accuracy is important.
+  \code{"integration"} requires the \code{CompQuadForm} package. For
+  \code{pchisqsum} it uses Farebrother's algorithm if all
+  \code{a>0}. For \code{pFsum} or when some \code{a<0}
+  it inverts the characteristic function using the algorithm of Davies
+  (1980).  If the \code{CompQuadForm} package is not present, a warning
+  is given and the saddlepoint approximation is used.  These algorithms
+  are not accurate for very large \code{x}; a warning is given if the
+  relative error bound is more than 10\% of the result.
+  
+  \code{"saddlepoint"} uses Kuonen's saddlepoint approximation. This is
+  accurate even very far out in the upper tail and does not require any
+  additional packages. It is implemented in pure R and so is slower than
+  the \code{"integration"} method.
 
   The distribution in \code{pFsum} is standardised so that a likelihood
   ratio test can use the same \code{x} value as in \code{pchisqsum}.
@@ -56,6 +61,13 @@ Vector of cumulative probabilities
 \references{
 Davies RB (1973). "Numerical inversion of a characteristic function"
 Biometrika 60:415-7
+
+Davies RB (1980) "Algorithm AS 155: The Distribution of a Linear Combination of chi-squared Random Variables"
+Applied Statistics,Vol. 29, No. 3 (1980), pp. 323-333
+
+Farebrother R.W. (1984)  "Algorithm AS 204: The distribution of a
+Positive Linear Combination of chi-squared random variables". Applied
+Statistics Vol. 33, No. 3 (1984), p. 332-339
 
 Kuonen D (1999) Saddlepoint Approximations for Distributions of
 Quadratic Forms in Normal Variables. Biometrika, Vol. 86, No. 4
@@ -75,9 +87,9 @@ abline(0,1,lty=2,col="purple")
 plot(p.invert, p.sadd,type="l",log="xy")
 abline(0,1,lty=2,col="purple")
 
-pchisqsum(20, df=c(1,1,1),a=c(2.7,1,.3), lower.tail=FALSE)
-pFsum(20, df=c(1,1,1),a=c(2.7,1,.3), ddf=49,lower.tail=FALSE)
-pFsum(20, df=c(1,1,1),a=c(2.7,1,.3), ddf=1000,lower.tail=FALSE)
+pchisqsum(20, df=c(1,1,1),a=c(2.7,1,.3), lower.tail=FALSE,method="sad")
+pFsum(20, df=c(1,1,1),a=c(2.7,1,.3), ddf=49,lower.tail=FALSE,method="sad")
+pFsum(20, df=c(1,1,1),a=c(2.7,1,.3), ddf=1000,lower.tail=FALSE,method="sad")
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

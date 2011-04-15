@@ -14,7 +14,7 @@ svyplot.default<-function(formula,
                   design,
                   style=c("bubble","hex","grayhex","subsample","transparent"),
                   sample.size=500, subset=NULL,legend=1,inches=0.05,
-                  amount=NULL,basecol="black",alpha=c(0,0.8), xbins=30, ...){
+                  amount=NULL,basecol="black",alpha=c(0,0.8), xbins=30,...){
   
   style<-match.arg(style)
   if (style %in% c("hex","grayhex") && !require(hexbin)){

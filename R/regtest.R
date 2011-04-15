@@ -1,8 +1,8 @@
-##not exported, used by method="LRT"
+##deviance methods are not exported, used by method="LRT"
 deviance.svycoxph<-function(object,...) 2 * (object$ll[1] - object$ll[2])
 deviance.coxph<-function(object,...) 2 * (object$loglik[1] - object$loglik[2])
 
-regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","LRT")){
+regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","LRT"), lrt.approximation="saddlepoint"){
 
   method<-match.arg(method)
   
@@ -12,9 +12,10 @@ regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","LR
     sapply(tt,paste,collapse=":")
   }
     
+  
   if(inherits(test.terms,"formula"))
     test.terms<-attr(terms(test.terms),"term.labels")
-
+  
   okbeta<-!is.na(coef(model,na.rm=FALSE)) ## na.rm for svyglm
   tt<-attr(terms(model),"term.labels")
   aa<-attr(model.matrix(model),"assign")[okbeta]
@@ -29,6 +30,23 @@ regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","LR
   if (!is.null(null))
     beta<-beta-null
   V<-vcov(model)[index,index]
+
+  if (is.null(df)){
+    if (inherits(model,"svyglm"))
+      df<-model$df.residual
+    else if (inherits(model, "svycoxph"))
+      df<-model$degf.resid
+    else if (inherits(model,"lm"))
+      df<-model$df.residual
+    else if (inherits(model,"coxph"))
+      df<-model$n-length(coef(model))
+    else if (inherits(model, "MIresult"))
+      df<-min(model$df[index])
+    else if (inherits(model,"svyloglin"))
+      df<-model$df+1-length(index)
+    else
+      df<-length(resid(model))-length(coef(model))
+  }
 
   if (method=="LRT"){
     if (inherits(model,"svyglm"))
@@ -52,30 +70,18 @@ regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","LR
     model0<-eval(bquote(update(model, .~.-(.(test.formula)))))
     chisq<-deviance(model0)-deviance(model)
     misspec<-eigen(solve(V0)%*%V, only.values=TRUE)$values
-    p<-pchisqsum(chisq,1,misspec,method="saddlepoint",lower=FALSE)
+    if (df==Inf)
+      p<-pchisqsum(chisq,rep(1,length(misspec)),misspec,method=lrt.approximation,lower=FALSE)
+    else
+      p<-pFsum(chisq,rep(1,length(misspec)),misspec,ddf=df,method=lrt.approximation,lower=FALSE)
+      
     rval<-list(call=sys.call(),mcall=model$call,chisq=chisq,
                df=length(index),test.terms=test.terms, 
-               p=p,lambda=misspec)
+               p=p,lambda=misspec,ddf=df)
     class(rval)<-"regTermTestLRT"
     return(rval)
   }
   
-  if (is.null(df)){
-    if (inherits(model,"svyglm"))
-      df<-model$df.residual
-    else if (inherits(model, "svycoxph"))
-      df<-model$degf.residual
-    else if (inherits(model,"lm"))
-      df<-model$df.residual
-    else if (inherits(model,"coxph"))
-      df<-model$n-length(coef(model))
-    else if (inherits(model, "MIresult"))
-      df<-min(model$df[index])
-    else if (inherits(model,"svyloglin"))
-      df<-model$df+1-length(index)
-    else
-      df<-length(resid(model))-length(coef(model))
-  }
   
   chisq<-beta%*%solve(V)%*%beta
   if (df<Inf){
@@ -106,14 +112,20 @@ print.regTermTest<-function(x,...){
 }
 
 print.regTermTestLRT<-function(x,...){
-  cat("Working (Rao-Scott) LRT for ")
+  if (is.null(x$ddf) || x$ddf==Inf)
+    cat("Working (Rao-Scott) LRT for ")
+  else
+    cat("Working (Rao-Scott+F) LRT for ")
   cat(x$test.terms)
   cat("\n in ")
   print(x$mcall)
   chisq<-x$chisq/mean(x$lambda)
-  cat("Working LR = ",chisq, 'p=',format.pval(x$p),"\n")
+  cat("Working 2logLR = ",chisq, 'p=',format.pval(x$p),"\n")
   if (length(x$lambda)>1)
-    cat("(scale factors: ",signif(x$lambda/mean(x$lambda),2),")\n")
+    cat("(scale factors: ",signif(x$lambda/mean(x$lambda),2),")")
+  if (!is.null(x$ddf) && is.finite(x$ddf))
+    cat(";  denominator df=",x$ddf)
+  cat("\n")
   invisible(x)
 }
 
