@@ -12,7 +12,7 @@
 }
 \usage{
 as.svrepdesign(design, type=c("auto", "JK1", "JKn", "BRR", "bootstrap","subbootstrap","Fay"),
-fay.rho = 0, ..., compress=TRUE)
+fay.rho = 0, ..., compress=TRUE, mse=getOption("survey.replicates.mse"))
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -24,6 +24,8 @@ fay.rho = 0, ..., compress=TRUE)
     \code{brrweights}, or \code{bootweights} .}
   \item{compress}{Use a compressed representation of the replicate
     weights matrix.}
+  \item{mse}{if \code{TRUE}, compute variances from sums of squares around
+    the point estimate, rather than the mean of the replicates}
 }
 
 \value{

@@ -44,7 +44,8 @@ svyvar
 svyratio
 svytable                Contingency tables
 svychisq                Tests for two-way tables
-regTermTest             Tests in regression models
+svyttest                Design-based t-test
+svyranktest             Design-based two-sample rank tests
 marginpred              Predictive margins by direct standardization
 svykappa                Cohen's kappa for inter-rater agreement
 svymle                  Maximum pseudolikelihood estimation in complex surveys

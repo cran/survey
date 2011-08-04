@@ -298,7 +298,7 @@ brrweights<-function(strata,psu, match=NULL, small=c("fail","split","merge"),
 ##
 
 as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","subbootstrap","Fay"),
-                          fay.rho=0,...,compress=TRUE){
+                          fay.rho=0,...,compress=TRUE, mse=getOption("survey.replicates.mse")){
 
   type<-match.arg(type)
 
@@ -407,7 +407,7 @@ as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","su
 
   rval<-list(repweights=repweights, pweights=pweights,
              type=type, rho=fay.rho,scale=scale, rscales=rscales,
-             call=sys.call(), combined.weights=FALSE, selfrep=selfrep)
+             call=sys.call(), combined.weights=FALSE, selfrep=selfrep,mse=mse)
   rval$variables <- design$variables
   class(rval)<-"svyrep.design"
   rval$degf<-degf(rval)
@@ -419,9 +419,10 @@ as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","su
 svrepdesign<-function(variables, repweights, weights,data=NULL,...) UseMethod("svrepdesign",data)
 
 svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
-                      data=NULL,type=c("BRR","Fay","JK1", "JKn","bootstrap","other"),
-                      combined.weights=TRUE, rho=NULL, bootstrap.average=NULL,
-                      scale=NULL,rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),...)
+                              data=NULL,type=c("BRR","Fay","JK1", "JKn","bootstrap","other"),
+                              combined.weights=TRUE, rho=NULL, bootstrap.average=NULL,
+                              scale=NULL,rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),
+                              mse=getOption("survey.replicates.mse"),...)
 {
   
   type<-match.arg(type)
@@ -531,6 +532,7 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
   rval$repweights<-repweights
   class(rval)<-"svyrep.design"
   rval$degf<-degf(rval)
+  rval$mse<-mse
   rval
   
 }
@@ -550,7 +552,10 @@ print.svyrep.design<-function(x,...){
   if (x$type=="bootstrap")
     cat("Survey bootstrap ")
   nweights<-ncol(x$repweights)
-  cat("with", nweights,"replicates.\n")
+  cat("with", nweights,"replicates")
+  if (!is.null(x$mse) && x$mse) cat(" and MSE variances")
+  cat(".\n")
+  invisible(x)
 }
 
 summary.svyrep.design<-function(object,...){
@@ -562,7 +567,7 @@ print.summary.svyrep.design<-function(x,...){
   class(x)<-class(x)[-1]
   print(x)
   cat("Variables: \n")
-  print(colnames(x)) 
+  print(colnames(x))
 }
 
 
@@ -697,7 +702,7 @@ svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="li
           ##rval<-colMeans(qq)
           
           rval<-list(quantiles=rval,
-                     variances=diag(as.matrix(svrVar(qq,design$scale,design$rscales))))
+                     variances=diag(as.matrix(svrVar(qq,design$scale,design$rscales,mse=design$mse,coef=rval))))
           if (return.replicates)
             rval<-c(rval, list(replicates=qq))
           rval
@@ -725,7 +730,7 @@ svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="li
             ##rval<-colMeans(qq)
             
             rval<-list(quantiles=rval,
-                       variances=diag(as.matrix(svrVar(qq,design$scale,design$rscales))))
+                       variances=diag(as.matrix(svrVar(qq,design$scale,design$rscales,mse=design$mse,coef=rval))))
             if (return.replicates)
               rval<-c(rval, list(replicates=qq))
             rval
@@ -808,7 +813,7 @@ svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="li
 }
 
 
-svrVar<-function(thetas, scale, rscales,na.action=getOption("na.action")){
+svrVar<-function(thetas, scale, rscales,na.action=getOption("na.action"),mse=getOption("survey.replicates.mse"),coef){
   thetas<-get(na.action)(thetas)
   naa<-attr(thetas,"na.action")
   if (!is.null(naa)){
@@ -818,11 +823,21 @@ svrVar<-function(thetas, scale, rscales,na.action=getOption("na.action")){
     else
       stop("All replicates contained NAs")
   }
+  if (is.null(mse)) mse<-FALSE
+ 
   if (length(dim(thetas))==2){
-    meantheta<-colMeans(thetas[rscales>0,,drop=FALSE])
+    if (mse) {
+      meantheta<-coef
+    } else {
+      meantheta<-colMeans(thetas[rscales>0,,drop=FALSE])
+    }
     v<-crossprod( sweep(thetas,2, meantheta,"-")*sqrt(rscales))*scale
   }  else {
-    meantheta<-mean(thetas[rscales>0])
+    if (mse){
+      meantheta<-coef
+    } else {
+      meantheta<-mean(thetas[rscales>0])
+    }
     v<- sum( (thetas-meantheta)^2*rscales)*scale
   }
   attr(v,"na.replicates")<-naa
@@ -880,7 +895,7 @@ svyvar.svyrep.design<-svrepvar<-function(x, design, na.rm=FALSE, rho=NULL,
   repvars<-apply(wts,2, v)
   
   repvars<-drop(t(repvars))
-  attr(rval,"var")<-svrVar(repvars, scale, rscales)
+  attr(rval,"var")<-svrVar(repvars, scale, rscales,mse=design$mse, coef=rval)
   attr(rval, "statistic")<-"variance"
   if (return.replicates)
     rval<-list(variance=rval, replicates=repvars)
@@ -965,7 +980,7 @@ svymean.svyrep.design<-svrepmean<-function(x,design, na.rm=FALSE, rho=NULL,
     }
   }
   repmeans<-drop(repmeans)
-  v <- svrVar(repmeans, scale, rscales)
+  v <- svrVar(repmeans, scale, rscales,mse=design$mse, coef=rval)
 }
   attr(rval,"var") <-v
   attr(rval, "statistic")<-"mean"
@@ -1081,7 +1096,7 @@ svytotal.svyrep.design<-svreptotal<-function(x,design, na.rm=FALSE, rho=NULL,
    }
  }
    repmeans<-drop(repmeans)
-   v <- svrVar(repmeans, scale, rscales)
+   v <- svrVar(repmeans, scale, rscales,mse=design$mse,coef=rval)
  }
 attr(rval,"var") <- v
 attr(rval, "statistic")<-"total"
@@ -1182,7 +1197,7 @@ svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replica
   if (length(nas))
     design<-design[-nas,]
   
-  v<-svrVar(betas,scale, rscales)
+  v<-svrVar(betas,scale, rscales, mse=design$mse, coef=beta0)
   
   full$var<-v
   if (return.replicates) full$replicates<-betas
@@ -1298,7 +1313,7 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL, ...,
                                  intercept = incpt)$coefficients
             }
           }
-          v<-svrVar(betas,scale, rscales)
+          v<-svrVar(betas,scale, rscales,mse=design$mse,coef=beta0)
   }
 
   full$x<-NULL
@@ -1412,7 +1427,7 @@ svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, desi
     for(i in 1:nn){
       for(j in 1:nd){
         vars[i,j]<-svrVar(allstats$replicates[,i]/allstats$replicates[,nn+j],
-                          design$scale, design$rscales)
+                          design$scale, design$rscales,mse=design$mse,coef=rval$ratio[i,j])
         if (deff)
           deffs[i,j]<-deff(svytotal(numerator[,i]-rval[i,j]*denominator[,j],design))
       }
@@ -1423,7 +1438,7 @@ svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, desi
           vcovmat<-matrix(0,nn*nd,nn*nd)
       else
           vcovmat<-as.matrix(svrVar(allstats$replicates[,rep(1:nn,nd)]/allstats$replicates[,nn+rep(1:nd,each=nn)],
-                          design$scale, design$rscales))
+                          design$scale, design$rscales,mse=design$mse,coef=as.vector(rval$ratio)))
       rownames(vcovmat)<-names(numerator)[rep(1:nn,nd)]
       colnames(vcovmat)<-names(denominator)[rep(1:nd,each=nn)]
       rval$vcov<-vcovmat
@@ -1484,9 +1499,9 @@ withReplicates<-function(design, theta,rho=NULL,...,
     if (!is.null(rho)) .NotYetUsed("rho")
     
     if (scale.weights)
-        pwts<-design$pweights/sum(design$pweights)
+      pwts<-design$pweights/sum(design$pweights)
     else
-    pwts<-design$pweights
+      pwts<-design$pweights
     
   if (inherits(wts,"repweights_compressed")){
       if (scale.weights)
@@ -1511,7 +1526,7 @@ withReplicates<-function(design, theta,rho=NULL,...,
                                                  with(data, eval(theta))})))
     }
       
-  v<-svrVar(thetas, scale, rscales)
+  v<-svrVar(thetas, scale, rscales,mse=design$mse, coef=full)
 
     attr(full,"var")<-v
     attr(full,"statistic")<-"theta"

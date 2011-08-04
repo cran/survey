@@ -7,7 +7,7 @@ svyhist<-function(formula, design, breaks = "Sturges",
         updates = design$updates)
       class(design)<-"survey.design2"
     } 
-    mf<-model.frame(formula,design$variables, na.action=na.pass)
+    mf<-model.frame(formula,model.frame(design), na.action=na.pass)
     if (ncol(mf)>1) stop("Only one variable allowed.")
     variable<-mf[,1]
     varname<-names(mf)

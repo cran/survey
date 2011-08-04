@@ -85,7 +85,7 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
       if (covmat || return.replicates) {
         replicates<-do.call(cbind,lapply(results,"[[","replicates"))
         colnames(replicates)<-rep(as.character(uniquelevels), each=NCOL(replicates)/length(uniquelevels))
-        covmat.mat<-svrVar(replicates,design$scale,design$rscales)
+        covmat.mat<-svrVar(replicates,design$scale,design$rscales, mse=design$mse,coef=as.vector(sapply(results,coef)))
       }
     } else {
       unwrap2 <- function(x){

@@ -1168,7 +1168,7 @@ model.frame.svycoxph<-function(formula,...){
     f[[1]]<-as.name("model.frame")
     f$data<-quote(data)
     f$design<-NULL
-    f$method<-f$control<-f$singular.ok<-f$model<-f$x<-f$y<-NULL
+    f$method<-f$control<-f$singular.ok<-f$model<-f$x<-f$y<-f$iter<-NULL
     f$formula<-formula(formula)
     if (is.null(f$weights))
         f$weights<-quote(.survey.prob.weights)
@@ -1865,6 +1865,8 @@ model.frame.svyrep.design<-function(formula,...){
       options(survey.drop.replicates=TRUE)
   if (is.null(getOption("survey.multicore")))
     options(survey.multicore=FALSE)
+  if (is.null(getOption("survey.replicates.mse")))
+    options(survey.replicates.mse=FALSE)
 }
 
 

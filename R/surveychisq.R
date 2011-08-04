@@ -115,13 +115,13 @@ svychisq.survey.design<-function(formula, design,
     pearson$parameter<-c(ndf=d0,ddf=d0*nu)
     pearson$method<-"Pearson's X^2: Rao & Scott adjustment"
   }  else if (match.arg(statistic)=="lincom") {
-    pearson$p.value<-pchisqsum(pearson$statistic, rep(1,ncol(Delta)), eigen(Delta,only.values=TRUE)$values,
-                              lower.tail=FALSE,method="integration")
+    pearson$p.value<-pFsum(pearson$statistic, rep(1,ncol(Delta)), eigen(Delta,only.values=TRUE)$values,
+                              lower.tail=FALSE,method="integration",ddf=d0*nu)
     pearson$parameter<-NULL
     pearson$method<-"Pearson's X^2: asymptotic exact distribution"
   } else if  (match.arg(statistic)=="saddlepoint") {
-    pearson$p.value<-pchisqsum(pearson$statistic, rep(1,ncol(Delta)), eigen(Delta,only.values=TRUE)$values,
-                              lower.tail=FALSE,method="saddlepoint")
+    pearson$p.value<-pFsum(pearson$statistic, rep(1,ncol(Delta)), eigen(Delta,only.values=TRUE)$values,
+                              lower.tail=FALSE,method="saddlepoint",ddf=d0*nu)
     pearson$parameter<-NULL
     pearson$method<-"Pearson's X^2: saddlepoint approximation"
   } else{
@@ -252,13 +252,13 @@ svychisq.twophase<-function(formula, design,
     pearson$parameter<-c(ndf=d0,ddf=d0*nu)
     pearson$method<-"Pearson's X^2: Rao & Scott adjustment"
   }  else if (match.arg(statistic)=="lincom") {
-    pearson$p.value<-pchisqsum(pearson$statistic, rep(1,ncol(Delta)), eigen(Delta,only.values=TRUE)$values,
-                              lower.tail=FALSE,method="integration")
+    pearson$p.value<-pFsum(pearson$statistic, rep(1,ncol(Delta)), eigen(Delta,only.values=TRUE)$values,
+                              lower.tail=FALSE,method="integration",ddf=d0*nu)
     pearson$parameter<-NULL
     pearson$method<-"Pearson's X^2: asymptotic exact distribution"
   } else if  (match.arg(statistic)=="saddlepoint") {
-    pearson$p.value<-pchisqsum(pearson$statistic, rep(1,ncol(Delta)), eigen(Delta,only.values=TRUE)$values,
-                              lower.tail=FALSE,method="saddlepoint")
+    pearson$p.value<-pFsum(pearson$statistic, rep(1,ncol(Delta)), eigen(Delta,only.values=TRUE)$values,
+                              lower.tail=FALSE,method="saddlepoint",ddf=d0*nu)
     pearson$parameter<-NULL
     pearson$method<-"Pearson's X^2: saddlepoint approximation"
   } else{

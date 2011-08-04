@@ -10,7 +10,7 @@ svydesign.imputationList<-function(ids, probs = NULL, strata = NULL,
     	rval
     	}
 
-svrepdesign.imputationList<-function(variables=NULL, repweights,weights,data,...){
+svrepdesign.imputationList<-function(variables=NULL, repweights,weights,data,mse=getOption("survey.replicates.mse"),...){
   ## dispatch on data=
   if (!is.null(variables) && !inherits(variables,"imputationList"))
     stop("'variables' must also be an 'imputationList' (or NULL)")

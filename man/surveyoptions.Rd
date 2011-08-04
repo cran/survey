@@ -6,6 +6,7 @@
 \alias{survey.want.obsolete}
 \alias{survey.drop.replicates}
 \alias{survey.multicore}
+\alias{survey.replicates.mse}
 \title{Options for the survey package}
 \description{
   This help page documents the options that control the behaviour of
@@ -14,8 +15,17 @@
   
   \details{
     All the options for the survey package have names beginning with
-    "survey".  Three of them control standard error estimation.
-    
+    "survey".  Four of them control standard error estimation.
+
+    \code{options("survey.replicates.mse")} controls the default in
+    \code{svrepdesign} and \code{as.svrepdesign} for computing
+    variances. When \code{options("survey.replicates.mse")} is
+    \code{TRUE}, the default is to create replicate weight designs that
+    compute variances centered at the point estimate, rather than at the
+    mean of the replicates.  The option can be overridden by specifying
+    the \code{mse} argument explicitly in \code{svrepdesign} and
+    \code{as.svrepdesign}. The default is \code{FALSE}.
+  
     When \code{options("survey.ultimate.cluster")} is \code{TRUE},
     standard error estimation is based on independence of PSUs at the
     first stage of sampling, without using any information about

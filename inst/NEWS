@@ -1,3 +1,18 @@
+3.25   svyhist() didn't work for two-phase designs.
+
+       added svylogrank() for logrank test for survival data.
+
+       added svyranktest() for two-sample rank tests.
+
+       svrepdesign() and as.svrepdesign() now have mse= argument to request 
+       replicate-weight variances centered around the point estimate rather
+       than the mean of the replicates.  The default is controlled by 
+       options(survey.replicates.mse), which defaults to FALSE, consistent with
+       previous versions. (For Anthony Damico, among others)
+
+3.24-1 CHANGE: svychisq() statistic="lincom" and "saddlepoint" now use the linear combination
+       of F statistics from pFsum().
+
 3.24   Rao-Scott test based on linear combinations of Fs is now also available in regTermTest
 
        Algorithms from CompQuadForm (AS155 and AS204) now used for method="integration" 

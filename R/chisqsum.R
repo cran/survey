@@ -96,13 +96,13 @@ saddle<-function(x,lambda){
   kpprime0<-function(zeta) 2*sum(lambda^2/(1-2*zeta*lambda)^2)
   n<-length(lambda)
   if (any(lambda < 0)) {
-    lmin <- max(1/(2 * lambda[lambda < 0])) * 0.99
+    lmin <- max(1/(2 * lambda[lambda < 0])) * 0.999
   } else if (x>sum(lambda)){
     lmin <- -0.01
   } else {
     lmin<- -length(lambda)/(2*x)
   }
-  lmax<-min(1/(2*lambda[lambda>0]))*0.99
+  lmax<-min(1/(2*lambda[lambda>0]))*0.999
 
   hatzeta <- uniroot(function(zeta) kprime0(zeta) - x, 
                        lower = lmin, upper = lmax, tol = 1e-08)$root

@@ -31,10 +31,11 @@ Vector of cumulative probabilities
 }
 
 \details{
-  The \code{"satterthwaite"} method uses Satterthwaite's approximation,
-  and this is also used as a fallback for the other methods. The
-  accuracy is usually good, but is more variable depending on \code{a}
-  than the other methods. The Satterthwaite approximation requires all \code{a>0}.
+  The \code{"satterthwaite"} method uses Satterthwaite's
+  approximation, and this is also used as a fallback for the other
+  methods. The accuracy is usually good, but is more variable depending
+  on \code{a} than the other methods and is anticonservative in the
+  extreme tail. The Satterthwaite approximation requires all \code{a>0}.
 
   \code{"integration"} requires the \code{CompQuadForm} package. For
   \code{pchisqsum} it uses Farebrother's algorithm if all
@@ -64,6 +65,11 @@ Biometrika 60:415-7
 
 Davies RB (1980) "Algorithm AS 155: The Distribution of a Linear Combination of chi-squared Random Variables"
 Applied Statistics,Vol. 29, No. 3 (1980), pp. 323-333
+
+P. Duchesne, P. Lafaye de Micheaux (2010) "Computing the distribution
+of quadratic forms: Further comparisons between the Liu-Tang-Zhang
+approximation and exact methods", Computational Statistics and Data
+Analysis, Volume 54, (2010), 858-862
 
 Farebrother R.W. (1984)  "Algorithm AS 204: The distribution of a
 Positive Linear Combination of chi-squared random variables". Applied

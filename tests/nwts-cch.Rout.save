@@ -1,7 +1,8 @@
 
-R version 2.9.0 beta (2009-04-08 r48309)
-Copyright (C) 2009 The R Foundation for Statistical Computing
+R version 2.12.2 (2011-02-25)
+Copyright (C) 2011 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -19,10 +20,9 @@ Type 'q()' to quit R.
 
 Attaching package: 'survey'
 
+The following object(s) are masked from 'package:graphics':
 
-	The following object(s) are masked from package:graphics :
-
-	 dotchart 
+    dotchart
 
 > library(survival)
 Loading required package: splines
@@ -36,19 +36,12 @@ Loading required package: splines
 > d_BorganII <- twophase(id=list(~seqno,~seqno),
 +                        strata=list(NULL,~interaction(instit,rel)),
 +                        data=nwtco, subset=~I(rel |subcohort))
-Loading required package: lattice
 
 Attaching package: 'Matrix'
 
+The following object(s) are masked from 'package:base':
 
-	The following object(s) are masked from package:stats :
-
-	 xtabs 
-
-
-	The following object(s) are masked from package:base :
-
-	 rcond 
+    det
 
 > 
 > ##Coefficient results same as Splus with code from
@@ -68,7 +61,7 @@ factor(stage)4  1.0597      2.89   0.2052  5.163 2.4e-07
 factor(histol)2 1.5974      4.94   0.1334 11.973 0.0e+00
 I(age/12)       0.0299      1.03   0.0334  0.897 3.7e-01
 
-Likelihood ratio test=  on 5 df, p=  n= 1062 
+Likelihood ratio test=  on 5 df, p=  n= 1062, number of events= 571 
 > 
 > ##
 > ## This gives higher standard errors. calibrate() does not recompute the
@@ -94,5 +87,5 @@ factor(stage)4  1.0597      2.89   0.2051  5.166 2.4e-07
 factor(histol)2 1.5974      4.94   0.1304 12.246 0.0e+00
 I(age/12)       0.0299      1.03   0.0333  0.899 3.7e-01
 
-Likelihood ratio test=  on 5 df, p=  n= 1062 
+Likelihood ratio test=  on 5 df, p=  n= 1062, number of events= 571 
 > 

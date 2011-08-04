@@ -33,7 +33,7 @@ svyolr.svyrep.design<-function(formula,design,...,return.replicates=FALSE,
             c(m$coefficients, m$zeta)
           })
         }
- 	rval$var<-svrVar(t(betas),design$scale,design$rscales)
+ 	rval$var<-svrVar(t(betas),design$scale,design$rscales,mse=design$mse, coef=start)
  	class(rval)<-"svyolr"
  	rval$call<-sys.call()
         rval$call[[1]]<-as.name(.Generic)

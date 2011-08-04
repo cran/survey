@@ -53,6 +53,12 @@ svyglm.ODBCsvydesign<-function(formula, design,...){
 }
 
 
+svyranktest.ODBCsvydesign<-function(formula, design,...){
+  design$variables<-dropFactor(getvars(formula, design$db$connection, design$db$tablename,updates=design$updates),
+                               weights(design))
+  NextMethod("svyranktest",design)
+}
+
 
 svyplot.ODBCsvydesign<-function(formula,design,...){
   design$variables<-getvars(formula, design$db$connection, design$db$tablename, updates=design$updates)

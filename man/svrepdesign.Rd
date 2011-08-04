@@ -21,12 +21,13 @@ svrepdesign(variables , repweights , weights, data,...)
 \method{svrepdesign}{default}(variables = NULL, repweights = NULL, weights = NULL, data =
 NULL, type = c("BRR", "Fay", "JK1","JKn","bootstrap","other"),
 combined.weights=TRUE, rho = NULL, bootstrap.average=NULL,
-scale=NULL, rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),...)
-\method{svrepdesign}{imputationList}(variables=NULL, repweights,weights,data,...)
+scale=NULL, rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),mse=getOption("survey.replicates.mse"),...)
+\method{svrepdesign}{imputationList}(variables=NULL, repweights,weights,data,mse=getOption("survey.replicates.mse"),...)
 \method{svrepdesign}{character}(variables=NULL,repweights=NULL, weights=NULL,data=NULL,
 type=c("BRR","Fay","JK1", "JKn","bootstrap","other"),combined.weights=TRUE, rho=NULL, 
 bootstrap.average=NULL, scale=NULL,rscales=NULL,fpc=NULL,
-fpctype=c("fraction","correction"), dbtype="SQLite", dbname,...) 
+fpctype=c("fraction","correction"),mse=getOption("survey.replicates.mse"),
+ dbtype="SQLite", dbname,...) 
 
 \method{image}{svyrep.design}(x, ..., col=grey(seq(.5,1,length=30)), type.=c("rep","total"))
 }
@@ -45,6 +46,8 @@ fpctype=c("fraction","correction"), dbtype="SQLite", dbname,...)
   \item{scale, rscales}{Scaling constant for variance, see Details
 below}
 \item{fpc,fpctype}{Finite population correction information}
+\item{mse}{If \code{TRUE}, compute variances based on sum of squares
+  around the point estimate, rather than the mean of the replicates}
 \item{dbname}{name of database, passed to \code{DBI::dbConnect()}}
 \item{dbtype}{Database driver: see Details}
 \item{x}{survey design with replicate weights}

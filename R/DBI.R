@@ -178,6 +178,11 @@ svychisq.DBIsvydesign<-function(formula,design,...){
   NextMethod("svychisq",design)
 }
 
+svyranktest.DBIsvydesign<-function(formula,design,...){
+  design$variables<-getvars(formula, design$db$connection, design$db$tablename,updates=design$updates, subset=design$subset)
+  NextMethod("svyranktest",design)
+}
+
 svyratio.DBIsvydesign<-function(numerator, denominator, design,...){
   design$variables<-cbind(getvars(numerator,design$db$connection, design$db$tablename,updates=design$updates, subset=design$subset),
                           getvars(denominator,design$db$connection, design$db$tablename,updates=design$updates, subset=design$subset))
@@ -331,7 +336,7 @@ svrepdesign.character<-function (variables=NULL,repweights=NULL, weights=NULL,
                                  data=NULL,type=c("BRR","Fay","JK1", "JKn","bootstrap","other"),
                                  combined.weights=TRUE, rho=NULL, bootstrap.average=NULL,
                                  scale=NULL,rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),
-                                 dbtype="SQLite", dbname,
+                                 mse=getOption("survey.replicates.mse"),dbtype="SQLite", dbname,
                                  ...) 
 {
 

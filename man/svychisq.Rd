@@ -72,7 +72,8 @@ the Pearson chisquared test, and two Wald-type tests.
 
 The default (\code{statistic="F"}) is the Rao-Scott second-order
 correction.  The p-values are computed with a Satterthwaite
-approximation to the distribution.  The alternative
+approximation to the distribution and with denominator degrees of
+freedom as recommended by Thomas and Rao (1990). The alternative
 \code{statistic="Chisq"} adjusts the Pearson chisquared statistic by a
 design effect estimate and then compares it to the chisquared
 distribution it would have under simple random sampling.
@@ -82,13 +83,18 @@ and used by the SUDAAN software package. It is a Wald test based on the
 differences between the observed cells counts and those expected under
 independence. The adjustment given by \code{statistic="adjWald"} reduces
 the statistic when the number of PSUs is small compared to the number of
-degrees of freedom of the test. Rao and Thomas (1990) compare these
+degrees of freedom of the test. Thomas and Rao (1990) compare these
 tests and find the adjustment benefical.
 
-\code{statistic="lincom"} uses the exact asymptotic distribution, which
-is a linear combination of chi-squared variables (see
-\code{\link{pchisqsum}}, and \code{statistic="saddlepoint"} uses a
-saddlepoint approximation to this distribution.
+\code{statistic="lincom"} replaces the numerator of the Rao-Scott F with
+the exact asymptotic distribution, which is a linear combination of
+chi-squared variables (see \code{\link{pchisqsum}}, and
+\code{statistic="saddlepoint"} uses a saddlepoint approximation to this
+distribution.  The \code{CompQuadForm} package is needed for
+\code{statistic="lincom"} but not for
+\code{statistic="saddlepoint"}. The saddlepoint approximation is
+especially useful when the p-value is very small (as in large-scale
+multiple testing problems).
 
 For designs using replicate weights the code is essentially the same as
 for designs with sampling structure, since the necessary variance
@@ -107,6 +113,11 @@ At the moment, \code{svychisq} works only for 2-dimensional tables.
 \references{
 Davies RB (1973). "Numerical inversion of a characteristic function"
 Biometrika 60:415-7
+
+P. Duchesne, P. Lafaye de Micheaux (2010) "Computing the distribution of
+quadratic forms: Further comparisons between the Liu-Tang-Zhang
+approximation and exact methods", Computational Statistics and Data
+Analysis, Volume 54,  858-862
 
 Koch, GG, Freeman, DH, Freeman, JL (1975) "Strategies in the
 multivariate analysis of data from complex surveys" International
