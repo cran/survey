@@ -297,7 +297,7 @@ brrweights<-function(strata,psu, match=NULL, small=c("fail","split","merge"),
 ## Designs with replication weights rather than survey structure.
 ##
 
-as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","subbootstrap","Fay"),
+as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","subbootstrap","mrbbootstrap","Fay"),
                           fay.rho=0,...,compress=TRUE, mse=getOption("survey.replicates.mse")){
 
   type<-match.arg(type)
@@ -323,7 +323,7 @@ as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","su
   } else {
     if (inherits(design,"survey.design2")){
       fpc<-design$fpc$popsize
-      if(NCOL(fpc)>1){
+      if(NCOL(fpc)>1 && type!="mrbbootstrap"){
           fpc<-fpc[,1]
           warning("Finite population corrections after first stage have been dropped")
       }
@@ -399,6 +399,15 @@ as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","su
       r<-subbootweights(design$strata[,1],design$cluster[,1],compress=compress,...)
     else
       r<-subbootweights(design$strata,design$cluster[,1],compress=compress,...)
+    pweights<-1/design$prob
+    repweights<-r$repweights
+    scale<-r$scale
+    rscales<-r$rscales
+  } else if (type=="mrbbootstrap"){
+    if (inherits(design,"survey.design2"))
+      r<-mrbweights(design$cluster,design$strata,design$fpc,...)
+    else
+      stop("MRB bootstrap not available for obsolete svydesign objects")
     pweights<-1/design$prob
     repweights<-r$repweights
     scale<-r$scale
@@ -551,6 +560,10 @@ print.svyrep.design<-function(x,...){
     cat("Stratified cluster jackknife (JKn) ")
   if (x$type=="bootstrap")
     cat("Survey bootstrap ")
+  if (x$type=="mrbbootstrap")
+    cat("Multistage rescaled bootstrap ")
+  if (x$type=="subbootstrap")
+    cat("(n-1) bootstrap ")
   nweights<-ncol(x$repweights)
   cat("with", nweights,"replicates")
   if (!is.null(x$mse) && x$mse) cat(" and MSE variances")
@@ -1682,7 +1695,7 @@ svytable.svyrep.design<-svreptable<-function(formula, design,
    ## unstratified or unadjusted.
    if (is.null(Ntotal) || length(Ntotal)==1){
        ff<-eval(substitute(lhs~rhs,list(lhs=quote(weights), rhs=formula[[2]])))
-       tbl<-xtabs(ff, data=design$variables)
+       tbl<-xtabs(ff, data=design$variables,...)
        if (!is.null(Ntotal)) {
            tbl<-tbl*sum(Ntotal)/sum(tbl)
        }
@@ -1696,7 +1709,7 @@ svytable.svyrep.design<-svreptable<-function(formula, design,
    ff<-eval(substitute(lhs~strata+rhs,list(lhs=quote(weights),
                                            rhs=formula[[2]],
                                            strata=quote(design$strata))))
-   tbl<-xtabs(ff, data=design$variables)
+   tbl<-xtabs(ff, data=design$variables,...)
    ss<-match(sort(unique(design$strata)), Ntotal[,1])
    dm<-dim(tbl)
    layer<-prod(dm[-1])
@@ -1721,7 +1734,7 @@ postStratify.svyrep.design<-function(design, strata, population,
                                      partial=FALSE,compress=NULL,...){
 
   if(inherits(strata,"formula")){
-    mf<-substitute(model.frame(strata, data=design$variables))
+    mf<-substitute(model.frame(strata, data=design$variables,na.action=na.fail))
     strata<-eval.parent(mf)
   }
   strata<-as.data.frame(strata)
@@ -1832,7 +1845,7 @@ rake<-function(design, sample.margins, population.margins,
     
     strata<-lapply(sample.margins, function(margin)
                    if(inherits(margin,"formula")){
-                     mf<-model.frame(margin, data=design$variables)
+                     mf<-model.frame(margin, data=design$variables,na.action=na.fail)
                    }
                    )
     

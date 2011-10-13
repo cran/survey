@@ -53,7 +53,8 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
   \item{...}{options for other methods}
   \item{calfun}{Calibration function: see below}
   \item{maxit}{Number of iterations}
-  \item{epsilon}{tolerance in matching population total}
+  \item{epsilon}{tolerance in matching population total. Either a single
+  number or a vector of the same length as \code{population}}
   \item{verbose}{print lots of uninteresting information}
   \item{force}{Return an answer even if the specified accuracy was not achieved}
   \item{phase}{Phase of a two-phase design to calibrate (only

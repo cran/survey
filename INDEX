@@ -78,6 +78,7 @@ jk1weights              create replication weights
 jknweights              create replication weights
 bootweights             create replication weights
 brrweights              create replication weights
+mrbweights		create replication weights
 grake                  Computations for generalised raking
 *regcalibrate           Computations for regression calibration
 degf                    Degrees of freedom for replication weights

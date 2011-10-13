@@ -1,17 +1,17 @@
 \name{as.svrepdesign}
 \alias{as.svrepdesign}
-%- Also NEED an `\alias' for EACH other topic documented here.
+%- Also NEED an `\alias' for EACH other topic documented here. 
 \title{Convert a survey design to use replicate weights}
 \description{
   Creates a replicate-weights survey design object from a traditional
   strata/cluster survey design object. \code{JK1} and \code{JKn} are
   jackknife methods, \code{BRR} is Balanced Repeated Replicates and
   \code{Fay} is Fay's modification of this, \code{bootstrap} is Canty
-  and Davison's bootstrap and \code{subbootstrap} is Rao and Wu's
-  \eqn{(n-1)} bootstrap.
+  and Davison's bootstrap, \code{subbootstrap} is Rao and Wu's
+  \eqn{(n-1)} bootstrap, and \code{mrbbootstrap} is Preston's multistage rescaled bootstrap.
 }
 \usage{
-as.svrepdesign(design, type=c("auto", "JK1", "JKn", "BRR", "bootstrap","subbootstrap","Fay"),
+as.svrepdesign(design, type=c("auto", "JK1", "JKn", "BRR", "bootstrap","subbootstrap","mrbbootstrap","Fay"),
 fay.rho = 0, ..., compress=TRUE, mse=getOption("survey.replicates.mse"))
 }
 %- maybe also `usage' for other objects documented here.
@@ -31,9 +31,20 @@ fay.rho = 0, ..., compress=TRUE, mse=getOption("survey.replicates.mse"))
 \value{
   Object of class \code{svyrep.design}.
 }
+\references{
+  Canty AJ, Davison AC. (1999) Resampling-based variance
+  estimation for labour force surveys. The Statistician 48:379-391
+
+  Judkins, D. (1990), "Fay's Method for Variance Estimation," Journal of Official Statistics, 6, 223-239.
+
+  Preston J. (2009) Rescaled bootstrap for stratified multistage sampling. Survey Methodology 35(2) 227-234
+
+  Rao JNK, Wu CFJ. Bootstrap inference for sample surveys. Proc Section
+  on Survey Research Methodology. 1993 (866--871)
+}
 
 \seealso{\code{\link{brrweights}}, \code{\link{svydesign}},
-  \code{\link{svrepdesign}}, \code{\link{bootweights}}, \code{\link{subbootweights}}
+  \code{\link{svrepdesign}}, \code{\link{bootweights}}, \code{\link{subbootweights}}, \code{\link{mrbweights}}
 }
 
 \examples{
@@ -78,7 +89,10 @@ svytotal(~enroll, rclus1)
 svymean(~api00, bclus1)
 svytotal(~enroll, bclus1)
 
-
+dclus2<-svydesign(id = ~dnum + snum, fpc = ~fpc1 + fpc2, data = apiclus2)
+mrbclus2<-as.svrepdesign(dclus2, type="mrb",replicates=100)
+svytotal(~api00+stype, dclus2)
+svytotal(~api00+stype, mrbclus2)
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
 

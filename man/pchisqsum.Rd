@@ -39,17 +39,19 @@ Vector of cumulative probabilities
 
   \code{"integration"} requires the \code{CompQuadForm} package. For
   \code{pchisqsum} it uses Farebrother's algorithm if all
-  \code{a>0}. For \code{pFsum} or when some \code{a<0}
-  it inverts the characteristic function using the algorithm of Davies
-  (1980).  If the \code{CompQuadForm} package is not present, a warning
-  is given and the saddlepoint approximation is used.  These algorithms
-  are not accurate for very large \code{x}; a warning is given if the
-  relative error bound is more than 10\% of the result.
+  \code{a>0}. For \code{pFsum} or when some \code{a<0} it inverts the
+  characteristic function using the algorithm of Davies (1980).  If
+  the \code{CompQuadForm} package is not present, a warning is given
+  and the saddlepoint approximation is used.  These algorithms are not
+  accurate for very large \code{x} or when some \code{a} are close to
+  zero: a warning is given if the relative error bound is more than
+  10\% of the result.
   
-  \code{"saddlepoint"} uses Kuonen's saddlepoint approximation. This is
-  accurate even very far out in the upper tail and does not require any
-  additional packages. It is implemented in pure R and so is slower than
-  the \code{"integration"} method.
+  \code{"saddlepoint"} uses Kuonen's saddlepoint approximation. This
+  is accurate even very far out in the upper tail or with some
+  \code{a=0} and does not require any additional packages. It is
+  implemented in pure R and so is slower than the \code{"integration"}
+  method.
 
   The distribution in \code{pFsum} is standardised so that a likelihood
   ratio test can use the same \code{x} value as in \code{pchisqsum}.

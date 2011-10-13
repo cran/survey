@@ -33,6 +33,9 @@ calibrate.survey.design2<-function(design, formula, population,
   else
     if(!inherits(calfun,"calfun"))
       stop("'calfun' must be a string or of class 'calfun'.")
+
+  if (length(epsilon)!=1 && length(epsilon)!=length(population))
+    stop("'epsilon' must be a scalar or of the same length as 'population'")
   
   if (!is.null(aggregate.stage)){
     aggindex<-design$cluster[[aggregate.stage]]
@@ -113,6 +116,9 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
                                    maxit=50, epsilon=1e-7, verbose=FALSE,force=FALSE, trim=NULL,
                                    ...){
   if (is.character(calfun)) calfun<-match.arg(calfun)
+  if (length(epsilon)!=1 && length(epsilon)!=length(population))
+    stop("'epsilon' must be a scalar or of the same length as 'population'")
+  
   if (is.character(calfun) && calfun=="linear" && (bounds==c(-Inf,Inf))){
     ## old code is better for ill-conditioned linear calibration
     rval<-regcalibrate(design,formula,population, compress=compress,

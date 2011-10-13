@@ -19,7 +19,7 @@ postStratify(design, strata, population, partial = FALSE, ...)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{design}{A survey design with replicate weights}
-  \item{strata}{A formula or data frame of post-stratifying variables }
+  \item{strata}{A formula or data frame of post-stratifying variables, which must not contain missing values. }
   \item{population}{A \code{\link{table}}, \code{\link{xtabs}} or \code{data.frame}
     with population frequencies }
   \item{partial}{if \code{TRUE}, ignore population strata not present in

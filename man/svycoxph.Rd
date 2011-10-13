@@ -51,11 +51,13 @@ The standard errors for predicted survival curves are available only by lineariz
   weights. Predicted survival curves are not available for stratified
   Cox models.
 
-The standard errors use the delta-method approach of Williams (1995) for
-  the Nelson-Aalen estimator, modified to handle the Cox model following
-  Tsiatis (1981). The standard errors agree closely with \code{survfit.coxph}
-  for independent sampling when the model fits well, but are larger when
-  the model fits poorly.  
+The standard errors use the delta-method approach of Williams (1995)
+  for the Nelson-Aalen estimator, modified to handle the Cox model
+  following Tsiatis (1981). The standard errors agree closely with
+  \code{survfit.coxph} for independent sampling when the model fits
+  well, but are larger when the model fits poorly.  I believe the
+  standard errors are equivalent to those of Lin (2000), but I don't
+  know of any implementation that would allow a check.
   }
 \value{
   An object of class \code{svycoxph} for \code{svycoxph}, an object of
@@ -69,6 +71,8 @@ The standard error calculation for survival curves uses memory
 
 \references{Binder DA. (1992) Fitting Cox's proportional hazards models
   from survey data. Biometrika 79: 139-147
+
+Lin D-Y (2000) On fitting Cox's proportional hazards model to survey data. Biometrika 87: 37-47
 
 Tsiatis AA (1981) A Large Sample Study of Cox's Regression Model. Annals
 of Statistics 9(1) 93-108

@@ -14,7 +14,7 @@ rake(design, sample.margins, population.margins, control = list(maxit =
 \arguments{
   \item{design}{A survey object }
   \item{sample.margins}{list of formulas or data frames describing
-    sample margins}
+    sample margins, which must not contain missing values}
   \item{population.margins}{list of tables or data frames
     describing corresponding population margins }
   \item{control}{\code{maxit} controls the number of

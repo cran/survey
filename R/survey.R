@@ -333,7 +333,7 @@ print.summary.survey.design<-function(x,...){
 postStratify.survey.design<-function(design, strata, population, partial=FALSE,...){
 
   if(inherits(strata,"formula")){
-    mf<-substitute(model.frame(strata, data=design$variables))
+    mf<-substitute(model.frame(strata, data=design$variables,na.action=na.fail))
     strata<-eval.parent(mf)
   }
   strata<-as.data.frame(strata)
@@ -1044,9 +1044,9 @@ svytable.survey.design<-function(formula, design, Ntotal=NULL, round=FALSE,...){
   ## unstratified or unadjusted
   if (length(Ntotal)<=1 || !design$has.strata){
     if (length(formula)==3)
-      tblcall<-bquote(xtabs(I(weights*.(formula[[2]]))~.(formula[[3]]), data=model.frame(design)))
+      tblcall<-bquote(xtabs(I(weights*.(formula[[2]]))~.(formula[[3]]), data=model.frame(design),...))
        else
-         tblcall<-bquote(xtabs(weights~.(formula[[2]]), data=model.frame(design)))
+         tblcall<-bquote(xtabs(weights~.(formula[[2]]), data=model.frame(design),...))
     tbl<-eval(tblcall)
     if (!is.null(Ntotal)) {
       if(length(formula)==3)
@@ -1062,9 +1062,9 @@ svytable.survey.design<-function(formula, design, Ntotal=NULL, round=FALSE,...){
   }
   ## adjusted and stratified
   if (length(formula)==3)
-    tblcall<-bquote(xtabs(I(weights*.(formula[[2]]))~design$strata[,1]+.(formula[[3]]), data=model.frame(design)))
+    tblcall<-bquote(xtabs(I(weights*.(formula[[2]]))~design$strata[,1]+.(formula[[3]]), data=model.frame(design),...))
   else
-    tblcall<-bquote(xtabs(weights~design$strata[,1]+.(formula[[2]]), data=model.frame(design)))
+    tblcall<-bquote(xtabs(weights~design$strata[,1]+.(formula[[2]]), data=model.frame(design),...))
   
   tbl<-eval(tblcall)
   

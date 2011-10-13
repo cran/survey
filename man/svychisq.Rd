@@ -40,15 +40,17 @@ degf(design, ...)
     integer?}
   \item{na.rm}{Remove missing values}
   \item{object}{Output from \code{svytable}}
-  \item{...}{Other arguments for future expansion}
+  \item{...}{For \code{svytable} these are passed to \code{xtabs}. Use
+    \code{exclude=NULL}, \code{na.action=na.pass} to include \code{NA}s
+    in the table}
   \item{tol}{Tolerance for \code{\link{qr}} in computing the matrix rank}
  }
 \details{
  
-The \code{svytable} function computes a weighted
-crosstabulation.  In many cases it is easier to use
-\code{\link{svytotal}} or \code{\link{svymean}}, which also produce
-standard errors, design effects, etc.
+The \code{svytable} function computes a weighted crosstabulation. This
+is especially useful for producing graphics. It is sometimes easier
+to use \code{\link{svytotal}} or \code{\link{svymean}}, which also
+produce standard errors, design effects, etc.
 
 The frequencies in the table can be normalised to some convenient total
 such as 100 or 1.0 by specifying the \code{Ntotal} argument.  If the
@@ -149,6 +151,8 @@ for simple goodness-of-fit statistics under cluster sampling" JASA 82:630-636
   more complex tables of summary statistics.
 
   See \code{\link{svyloglin}} for loglinear models.
+
+  See \code{\link{regTermTest}} for Rao-Scott tests in regression models.
 }
 \examples{
   data(api)
@@ -158,6 +162,9 @@ for simple goodness-of-fit statistics under cluster sampling" JASA 82:630-636
   summary(dclus1)
 
   (tbl <- svytable(~sch.wide+stype, dclus1))
+  plot(tbl)
+  fourfoldplot(svytable(~sch.wide+comp.imp+stype,design=dclus1,round=TRUE), conf.level=0)
+
   svychisq(~sch.wide+stype, dclus1)
   summary(tbl, statistic="Chisq")
   svychisq(~sch.wide+stype, dclus1, statistic="adjWald")

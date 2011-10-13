@@ -675,7 +675,7 @@ calibrate.twophase<-function(design, phase=2, formula, population,
 
 
 postStratify.twophase<-function(design, ...) {
-	stop("postStratify not yet implemented for two-phase designs. Use calibrate()")
+	stop("postStratify not implemented for two-phase designs. Use calibrate()")
 }
 
 estWeights<-function(data, formula, ...) UseMethod("estWeights")

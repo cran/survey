@@ -5,3 +5,6 @@ Known bug:
    when the sampling fraction is very close to one
 
 2. svydesign should check that `weights` is the right length
+
+3. options(survey.lonely.psu="adjust") does not do what it says in the 
+case of svytotal(). Not yet clear whether it does the right thing, though.

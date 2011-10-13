@@ -6,8 +6,8 @@
 \description{
   Because observations in survey samples may represent very different
   numbers of units in the population ordinary plots can be misleading.
-  The \code{svyplot} function produces plots adjusted in various ways
-  for sampling weights.
+  The \code{svyplot} function produces scatterplots adjusted in various ways
+  for sampling weights. 
 }
 \usage{
 svyplot(formula, design,...)
@@ -58,7 +58,10 @@ alpha=c(0, 0.8),xbins=30,...)
 }
 
 \seealso{
-  \code{\link{symbols}} for other options (such as colour) for bubble plots.
+  \code{\link{symbols}} for other options (such as colour) for bubble
+  plots.
+
+  \code{\link{svytable}} for plots of discrete data.
 }
 \examples{
 data(api)
@@ -67,7 +70,7 @@ dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
 svyplot(api00~api99, design=dstrat, style="bubble")
 svyplot(api00~api99, design=dstrat, style="transparent",pch=19)
 \dontrun{
-## these two require the hexbin package from Bioconductor
+## these two require the hexbin package 
 svyplot(api00~api99, design=dstrat, style="hex", xlab="1999 API",ylab="2000 API")
 svyplot(api00~api99, design=dstrat, style="grayhex",legend=0)
 }
@@ -83,6 +86,9 @@ svyplot(api00~api99, design=dstrat,
   style="transparent",pch=19,alpha=c(0,1))
 legend("topleft",col=c("goldenrod","tomato","sienna"), pch=19, legend=c("E","H","M"))
 
+## For discrete data, estimate a population table and plot the table.
+plot(svytable(~sch.wide+comp.imp+stype,design=dstrat))
+fourfoldplot(svytable(~sch.wide+comp.imp+stype,design=dstrat,round=TRUE))
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
 \keyword{hplot}% __ONLY ONE__ keyword per line

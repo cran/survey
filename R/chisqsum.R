@@ -51,16 +51,18 @@ pchisqsum<-function(x,df,a,lower.tail=TRUE,
  
   if (method=="integration"){
     require("CompQuadForm")
-    if (any(a<0)){
+    if (any(a<=0)){
       for(i in seq(length=length(x))){
-        guess[i]<-davies(x[i],a,df,acc=1e-7)$Qq
+        f<-davies(x[i],a,df,acc=1e-7)
+        if (f$ifault>0) warning("Probable loss of accuracy ")
+        guess[i]<-f$Qq
       }
       if(any(guess<1e-6)) warning("Probable loss of accuracy ")
     } else{
       for(i in seq(length=length(x))){
         guess[i]<-farebrother(x[i],a,df)$res
-        if(any(guess<1e-9)) warning("Probable loss of accuracy ")
       }
+      if(any(guess<1e-9)) warning("Probable loss of accuracy ")
     }
     if (lower.tail)
       guess<-1-guess

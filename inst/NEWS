@@ -1,3 +1,16 @@
+3.26   Added Preston's multistage rescaled bootstrap (for Alois Haslinger)
+
+       The multistage bootstrap can use the multicore package if available.
+
+       calibrate() can take a vector of tolerances (for Alois Haslinger)
+       [this actually used to work by accident, but now it's documented]
+
+       Clearer error messages when post-strata contain NAs.
+
+3.25-1 The ... argument to svytable() is now passed to xtabs()
+
+       Clearer documentation about graphing discrete variables.
+
 3.25   svyhist() didn't work for two-phase designs.
 
        added svylogrank() for logrank test for survival data.
@@ -82,7 +95,7 @@
        changed scaling in biplot.svyprcomp so area is proportional to 
        weight, rather than height proportional to weight.
 
-3.21-3   svyratio() can now estimate design effects (for Scott Kostyshak)
+3.21-3 svyratio() can now estimate design effects (for Scott Kostyshak)
 
 3.21-2 Rao & Wu bootstrap wasn't sampling n-1 PSUs (Richard Valliant)
 
