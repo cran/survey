@@ -1,3 +1,7 @@
+3.26-1 Better missing-value handling with replicated weights in svyquantile
+
+       svyboxplot() has all.outliers= argument to plot all outliers
+
 3.26   Added Preston's multistage rescaled bootstrap (for Alois Haslinger)
 
        The multistage bootstrap can use the multicore package if available.

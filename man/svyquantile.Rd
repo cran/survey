@@ -16,7 +16,7 @@ Compute quantiles for data from complex surveys.
    ties=c("discrete","rounded"), df=Inf,...)
 \method{svyquantile}{svyrep.design}(x, design, quantiles,
    method ="linear", interval.type=c("probability","quantile"), f = 1,
-   return.replicates=FALSE, ties=c("discrete","rounded"),...)
+   return.replicates=FALSE, ties=c("discrete","rounded"),na.rm=FALSE,...)
 \method{SE}{svyquantile}(object,...)
 }
 %- maybe also `usage' for other objects documented here.

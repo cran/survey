@@ -1,24 +1,16 @@
 Package: survey
 Title: analysis of complex survey samples
-Description: Summary statistics, two-sample tests, generalised linear
-        models, cumulative link models, Cox models, loglinear models,
-        and general maximum pseudolikelihood estimation for multistage
-        stratified, cluster-sampled, unequally weighted survey samples.
-        Variances by Taylor series linearisation or replicate weights.
-        Post-stratification, calibration, and raking. Two-phase
-        subsampling designs. Graphics. Predictive margins by direct
-        standardization. PPS sampling without replacement. Principal
-        components, factor analysis.
-Version: 3.26
+Description: Summary statistics, two-sample tests, generalised linear models, cumulative link models, Cox models, loglinear models, and general maximum pseudolikelihood estimation for multistage stratified, cluster-sampled, unequally weighted survey samples. Variances by Taylor series linearisation or replicate weights. Post-stratification, calibration, and raking. Two-phase subsampling designs. Graphics. Predictive margins by direct standardization. PPS sampling without replacement. Principal components, factor analysis.
+Version: 3.26-1
 Author: Thomas Lumley
 Maintainer: Thomas Lumley <tlumley@u.washington.edu>
 License: GPL-2 | GPL-3
-Depends: R (>= 2.2.0)
+Depends: R (>= 2.10.0)
 Suggests: survival, MASS, splines, KernSmooth, hexbin, mitools,
         lattice, RSQLite, RODBC, quantreg, Matrix, multicore,
         CompQuadForm
 Enhances: odfWeave.survey
 URL: http://faculty.washington.edu/tlumley/survey/
-Packaged: 2011-10-13 19:29:27 UTC; tlum005
+Packaged: 2011-11-14 20:51:20 UTC; tlum005
 Repository: CRAN
-Date/Publication: 2011-10-14 06:42:15
+Date/Publication: 2011-11-15 06:50:02

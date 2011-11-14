@@ -103,8 +103,8 @@ svyplot.default<-function(formula,
 
 }
 
-svyboxplot<-function(formula, design,...) UseMethod("svyboxplot",design)
-svyboxplot.default<-function(formula, design, col=NULL, ...){
+svyboxplot<-function(formula, design,all.outliers=FALSE,...) UseMethod("svyboxplot",design)
+svyboxplot.default<-function(formula, design,  all.outliers=FALSE,col=NULL,...){
     
     formula<-as.formula(formula)
     if(length(formula)!=3) stop("need a two-sided formula")
@@ -117,6 +117,8 @@ svyboxplot.default<-function(formula, design, col=NULL, ...){
         qs <- svyby(outcome,groups,design,svyquantile,ci=FALSE,
                     keep.var=FALSE,
                     quantiles=c(0,0.25,0.5,0.75,1),na.rm=TRUE)
+        outcome.values<-model.frame(outcome, model.frame(design),na.action=na.pass)
+        group.values<-model.frame(groups, model.frame(design),na.action=na.pass)[[1]]
         n<-NCOL(qs)
         iqr<- qs[,n-1]-qs[,n-3]
         low<-pmax(qs[,n-4],qs[,n-2]-1.5*iqr)
@@ -126,6 +128,11 @@ svyboxplot.default<-function(formula, design, col=NULL, ...){
         for(i in 1:ncol(stats)){
             out<-c(if(qs[i,n]!=hi[i]) qs[i,n],
                    if(qs[i,n-4]!=low[i])qs[i,n-4])
+            if (all.outliers){
+              outlo<-sort(outcome.values[!is.na(outcome.values) & (as.numeric(group.values) %in% i) & outcome.values<low[i] ])
+              outhi<-sort(outcome.values[!is.na(outcome.values) & (as.numeric(group.values) %in% i) & outcome.values>hi[i] ])
+              out<-na.omit(unique(c(outlo,outhi)))
+            }
             z$out<-c(z$out,out)
             z$group<-c(z$group,rep(i,length(out)))
             z$names<-as.character(qs[,1])

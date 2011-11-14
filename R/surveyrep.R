@@ -656,7 +656,7 @@ weights.survey.design<-function(object,...){
 svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="linear",
                                                    interval.type=c("probability","quantile"),f=1,
                                                    return.replicates=FALSE,
-                                                   ties=c("discrete","rounded"),...){
+                                                   ties=c("discrete","rounded"),na.rm=FALSE,...){
 
   if (!exists(".Generic",inherits=FALSE))
     .Deprecated("svyquantile")
@@ -668,9 +668,19 @@ svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="li
   if (design$type %in% "other" && interval=="quantile")
     warning("Not all replicate weight designs give valid standard errors for quantiles.")
   if (inherits(x,"formula"))
-		x<-model.frame(x,design$variables)
+		x<-model.frame(x,design$variables,na.action=if(na.rm) na.pass else na.fail)
     else if(typeof(x) %in% c("expression","symbol"))
         x<-eval(x, design$variables)
+
+
+   if (na.rm){
+         nas<-rowSums(is.na(x))
+       design<-design[nas==0,]
+        if (length(nas)>length(design$prob))
+          x<-x[nas==0,,drop=FALSE]
+        else
+          x[nas>0,]<-0
+      }
     
   if (NROW(x)<=1){
       rval<-matrix(rep(as.matrix(x),length(quantiles)),ncol=NCOL(x),nrow=length(quantiles),byrow=TRUE)
