@@ -111,13 +111,13 @@ svyboxplot.default<-function(formula, design,  all.outliers=FALSE,col=NULL,...){
     ##if(length(formula[[3]])>2) stop("only one rhs variable allowed")
     
     outcome<-eval(bquote(~.(formula[[2]])))
+    outcome.values<-model.frame(outcome, model.frame(design),na.action=na.pass)
     
     if (length(attr(terms(formula),"term.labels"))){
         groups<-eval(bquote(~.(formula[[3]])))
         qs <- svyby(outcome,groups,design,svyquantile,ci=FALSE,
                     keep.var=FALSE,
                     quantiles=c(0,0.25,0.5,0.75,1),na.rm=TRUE)
-        outcome.values<-model.frame(outcome, model.frame(design),na.action=na.pass)
         group.values<-model.frame(groups, model.frame(design),na.action=na.pass)[[1]]
         n<-NCOL(qs)
         iqr<- qs[,n-1]-qs[,n-3]
@@ -146,6 +146,12 @@ svyboxplot.default<-function(formula, design,  all.outliers=FALSE,col=NULL,...){
                 n=sum(weights(design,"sampling")))
         z$out<-c(if(qs[5]!=z$stats[5]) qs[5],
                  if(qs[1]!=z$stats[1]) qs[1])
+        if (all.outliers){
+          outlo<-sort(outcome.values[!is.na(outcome.values) &  outcome.values<qs[2]-1.5*iqr ])
+          outhi<-sort(outcome.values[!is.na(outcome.values) & outcome.values>qs[4]+1.5*iqr])
+          z$out<-na.omit(unique(c(outlo,outhi)))
+        }
+        z$group<-rep(1,length(z$out))
     }
     if (is.null(col)) col<-par("bg")
     bxp(z,boxfill=col,...)

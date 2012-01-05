@@ -1,4 +1,4 @@
-##deviance methods are not exported, used by method="LRT"
+##deviance methods not exported, used by method="LRT"
 deviance.svycoxph<-function(object,...) 2 * (object$ll[1] - object$ll[2])
 deviance.coxph<-function(object,...) 2 * (object$loglik[1] - object$loglik[2])
 
@@ -123,6 +123,7 @@ print.regTermTestLRT<-function(x,...){
   cat("Working 2logLR = ",chisq, 'p=',format.pval(x$p),"\n")
   if (length(x$lambda)>1)
     cat("(scale factors: ",signif(x$lambda/mean(x$lambda),2),")")
+  else cat("df=1")
   if (!is.null(x$ddf) && is.finite(x$ddf))
     cat(";  denominator df=",x$ddf)
   cat("\n")

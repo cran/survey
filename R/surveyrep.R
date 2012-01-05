@@ -1350,6 +1350,13 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL, ...,
   
   class(full)<-c("svrepglm", "svyglm", class(full))
   full$call<-sys.call(-1)
+  if(!("formula" %in% names(full$call))) {
+    if (is.null(names(full$call)))
+      i<-1
+    else
+      i<-min(which(names(full$call)[-1]==""))
+    names(full$call)[i+1]<-"formula"
+  }
   full$survey.design<-design
   full
 }

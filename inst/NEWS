@@ -1,3 +1,10 @@
+3.27   added anova.svyglm() for Wald tests and Rao-Scott LRT.
+       anova(model1, model2) works for nested models even if not symbolically nested.
+
+       formula component of svyglm$call is now always named, so update() will work.
+
+       svyboxplot(,all.outliers=TRUE) didn't work for single boxes (Takahiro Tsuchiya)
+
 3.26-1 Better missing-value handling with replicated weights in svyquantile
 
        svyboxplot() has all.outliers= argument to plot all outliers

@@ -1282,6 +1282,13 @@ svyglm.survey.design<-function(formula,design,subset=NULL,...){
       class(g)<-c("svyglm",class(g))
       g$call<-sys.call()
       g$call[[1]]<-as.name(.Generic)
+      if(!("formula" %in% names(g$call))) {
+        if (is.null(names(g$call)))
+          i<-1
+        else
+          i<-min(which(names(g$call)[-1]==""))
+        names(g$call)[i+1]<-"formula"
+      }
       g$survey.design<-design 
       g
 }
