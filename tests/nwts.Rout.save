@@ -1,7 +1,8 @@
 
-R version 2.11.1 (2010-05-31)
-Copyright (C) 2010 The R Foundation for Statistical Computing
+R version 2.14.0 (2011-10-31)
+Copyright (C) 2011 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -45,7 +46,6 @@ The following object(s) are masked from 'package:graphics':
 > 
 > dccs2<-twophase(id=list(~id,~id),subset=~in.ccs,
 +                 strata=list(NULL,~interaction(instit,rel)),data=nwt.exp)
-Loading required package: lattice
 
 Attaching package: 'Matrix'
 
@@ -62,7 +62,7 @@ The following object(s) are masked from 'package:base':
 > summary(svyglm(rel~factor(stage)*factor(histol),family=quasibinomial,design=dccs2))
 
 Call:
-svyglm(rel ~ factor(stage) * factor(histol), family = quasibinomial, 
+svyglm(formula = rel ~ factor(stage) * factor(histol), family = quasibinomial, 
     design = dccs2)
 
 Survey design:
@@ -89,7 +89,7 @@ Number of Fisher Scoring iterations: 4
 > summary(svyglm(rel~factor(stage)*factor(histol),family=quasibinomial,design=dccs8))
 
 Call:
-svyglm(rel ~ factor(stage) * factor(histol), family = quasibinomial, 
+svyglm(formula = rel ~ factor(stage) * factor(histol), family = quasibinomial, 
     design = dccs8)
 
 Survey design:
@@ -116,7 +116,7 @@ Number of Fisher Scoring iterations: 4
 > summary(svyglm(rel~factor(stage)*factor(histol),family=quasibinomial,design=gccs8))
 
 Call:
-svyglm(rel ~ factor(stage) * factor(histol), family = quasibinomial, 
+svyglm(formula = rel ~ factor(stage) * factor(histol), family = quasibinomial, 
     design = gccs8)
 
 Survey design:
@@ -146,8 +146,8 @@ Number of Fisher Scoring iterations: 4
 +                family=quasibinomial,design=subset(dccs8,histol==1)))
 
 Call:
-svyglm(rel ~ factor(stage), family = quasibinomial, design = subset(dccs8, 
-    histol == 1))
+svyglm(formula = rel ~ factor(stage), family = quasibinomial, 
+    design = subset(dccs8, histol == 1))
 
 Survey design:
 subset(dccs8, histol == 1)
@@ -179,8 +179,8 @@ Warning messages:
 +                family=quasibinomial,design=subset(gccs8,histol==1)))
 
 Call:
-svyglm(rel ~ factor(stage), family = quasibinomial, design = subset(gccs8, 
-    histol == 1))
+svyglm(formula = rel ~ factor(stage), family = quasibinomial, 
+    design = subset(gccs8, histol == 1))
 
 Survey design:
 subset(gccs8, histol == 1)

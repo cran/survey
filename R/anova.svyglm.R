@@ -41,7 +41,7 @@ print.seqanova.svyglm<-function(x,...){
     rval<-cbind(stats,df,ddf,p)
   }
   rownames(rval)<-terms
-  printCoefmat(rval,tst.ind=1,zap.i=2:3,has.Pvalue=TRUE)
+  printCoefmat(rval,tst.ind=1,zap.ind=2:3,has.Pvalue=TRUE)
   invisible(x)
 }
 
@@ -129,9 +129,9 @@ anova.svyglm<-function(object, object2=NULL,test=c("F","Chisq"),method=c("LRT","
     
     if (test=="Chisq") 
       p <- pchisqsum(chisq, rep(1, length(misspec)), misspec, 
-                     method = "sad", lower = FALSE)
+                     method = "sad", lower.tail = FALSE)
     else p <- pFsum(chisq, rep(1, length(misspec)), misspec, 
-                    ddf = df, method = "sad", lower = FALSE)
+                    ddf = df, method = "sad", lower.tail = FALSE)
     
     rval <- list(call = sys.call(),  chisq = chisq, 
             df = length(index),  p = p, 

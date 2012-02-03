@@ -12,6 +12,7 @@ requests from users, including:
   Michael Donohue
   Melanie Edwards
   Bob Fay
+  Daniel Fernandes
   Ben French
   Jacques Ferrez
   Daniella Gollinelli
@@ -47,9 +48,9 @@ requests from users, including:
   Alan Zaslavksy
 and from dicussions with Chris Wild and Alastair Scott. 
 
-Some work on the package has been funded by Fondation Leducq through a
-grant to the LINAT collaboration and by the Marsden Fund through a
-grant to the University of Auckland.
+Some work on the package while I was on sabbatical was funded by
+Fondation Leducq through a grant to the LINAT collaboration and by the
+Marsden Fund through a grant to the University of Auckland.
 
 Patrick Aboyoun did the S-PLUS port of version 3.6-8
 

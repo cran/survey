@@ -1,3 +1,14 @@
+
+3.28   svyvar() for replicate-weight designs now returns whole matrix
+   
+       withReplicates() has method for svyvar() output, to simplify multivariate analyses.
+
+       design effect estimate for svytotal with replicate weights was wrong (Daniel Fernandes)
+
+       transform() is now a synonym for update().
+
+       lots of partial argument matching removed to keep CRAN happy.
+
 3.27   added anova.svyglm() for Wald tests and Rao-Scott LRT.
        anova(model1, model2) works for nested models even if not symbolically nested.
 

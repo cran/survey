@@ -112,10 +112,10 @@ biplot.svyprcomp<-function(x, cols=c("black","darkred"),xlabs=NULL,weight=c("tra
    } else if (weight=="scaled"){
      xcexs<-par("cex")*pmax(0.2, max.cex*sqrt(w/max(w)))
      rgbcol<-col2rgb(cols[1])
-     xcols<-rgb(rgbcol[1,],rgbcol[2,],rgbcol[3,],alpha=max.alpha*255, max=255)
+     xcols<-rgb(rgbcol[1,],rgbcol[2,],rgbcol[3,],alpha=max.alpha*255, maxColorValue=255)
    } else if (weight=="none"){
      rgbcol<-col2rgb(cols[1])
-     xcols<-rgb(rgbcol[1,],rgbcol[2,],rgbcol[3,],alpha=max.alpha*255, max=255)
+     xcols<-rgb(rgbcol[1,],rgbcol[2,],rgbcol[3,],alpha=max.alpha*255, maxColorValue=255)
      xcexs<-par("cex")*max.cex
    }
 

@@ -8,7 +8,7 @@ twophase<-function(id,strata=NULL, probs=NULL, weights=NULL, fpc=NULL,
     return(twophase2(id=id, strata=strata, probs=probs, fpc=fpc,subset=subset,data=data))
   }
                      
-  d1<-svydesign(id=id[[1]],strata=strata[[1]],weights=weights[[1]],
+  d1<-svydesign(ids=id[[1]],strata=strata[[1]],weights=weights[[1]],
                 probs=probs[[1]],fpc=fpc[[1]],data=data)
 
   if(inherits(subset,"formula"))
@@ -19,7 +19,7 @@ twophase<-function(id,strata=NULL, probs=NULL, weights=NULL, fpc=NULL,
 
   if (any(is.na(subset))) stop("missing values in 'subset'")
   
-  d1s<-svydesign(id=id[[1]],strata=strata[[1]],weights=weights[[1]],
+  d1s<-svydesign(ids=id[[1]],strata=strata[[1]],weights=weights[[1]],
                 probs=probs[[1]],fpc=fpc[[1]],data=data[subset,])
   d1s$prob<-d1$prob[subset]
   d1s$allprob<-d1$allprob[subset,,drop=FALSE]
@@ -31,7 +31,7 @@ twophase<-function(id,strata=NULL, probs=NULL, weights=NULL, fpc=NULL,
   if (is.null(fpc[[2]])){
     complete.vars<-names(data)[apply(data, 2, function(v) all(!is.na(v)))]
     if (all(c(all.vars(id[[2]]), all.vars(strata[[2]])) %in% complete.vars)){
-      dfpc<-svydesign(id=id[[2]], strata=strata[[2]], data=data, probs=NULL)
+      dfpc<-svydesign(ids=id[[2]], strata=strata[[2]], data=data, probs=NULL)
       popsize<-mapply(function(s,i) ave(!duplicated(i),s,FUN=sum), dfpc$strata, dfpc$cluster)
       rm(dfpc)
     } else {
@@ -40,21 +40,21 @@ twophase<-function(id,strata=NULL, probs=NULL, weights=NULL, fpc=NULL,
     }
   } else popsize<-NULL
 
-  d2<-svydesign(id=id[[2]], strata=strata[[2]], probs=probs[[2]],
+  d2<-svydesign(ids=id[[2]], strata=strata[[2]], probs=probs[[2]],
                 weights=weights[[2]], fpc=fpc[[2]], data=data[subset,])
 
   ## ugly hack to get nicer labels
   if(!is.null(fpc[[2]])){
-    d2call<-bquote(svydesign(id=.(id[[2]]),strata=.(strata[[2]]), probs=.(probs[[2]]),
+    d2call<-bquote(svydesign(ids=.(id[[2]]),strata=.(strata[[2]]), probs=.(probs[[2]]),
                               weights=.(weights[[2]]), fpc=.(fpc[[2]])))
   } else{
-    d2call<-bquote(svydesign(id=.(id[[2]]),strata=.(strata[[2]]), probs=.(probs[[2]]),
+    d2call<-bquote(svydesign(ids=.(id[[2]]),strata=.(strata[[2]]), probs=.(probs[[2]]),
                               weights=.(weights[[2]]), fpc=`*phase1*`))
   }
   for(i in names(d2call)[-1])
     d2call[[i]]<-d2call[[i]]
   d2$call<-d2call
-  d1call<-bquote(svydesign(id=.(id[[1]]), strata=.(strata[[1]]), probs=.(probs[[1]]),
+  d1call<-bquote(svydesign(ids=.(id[[1]]), strata=.(strata[[1]]), probs=.(probs[[1]]),
                               weights=.(weights[[1]]), fpc=.(fpc[[1]])))
   for(i in names(d1call)[-1])
     d1call[[i]]<-d1call[[i]]

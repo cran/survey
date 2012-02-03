@@ -1,7 +1,8 @@
 
-R version 2.9.0 beta (2009-04-08 r48309)
-Copyright (C) 2009 The R Foundation for Statistical Computing
+R version 2.14.0 (2011-10-31)
+Copyright (C) 2011 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -27,10 +28,9 @@ Type 'q()' to quit R.
 
 Attaching package: 'survey'
 
+The following object(s) are masked from 'package:graphics':
 
-	The following object(s) are masked from package:graphics :
-
-	 dotchart 
+    dotchart
 
 > data(fpc)
 > dfpc<-svydesign(id=~psuid,strat=~stratid,weight=~weight,data=fpc,nest=TRUE)
@@ -53,7 +53,7 @@ Warning messages:
 > summary(m3)
 
 Call:
-svyglm(x ~ I(x > 4) + 0, design = dfpc)
+svyglm(formula = x ~ I(x > 4) + 0, design = dfpc)
 
 Survey design:
 svydesign(id = ~psuid, strat = ~stratid, weight = ~weight, data = fpc, 
@@ -148,19 +148,12 @@ calibrate(dclus1, ~stype + api99, c(pop.totals, api99 = 3914069))
 > 
 > des.rei2 <- twophase(id=list(~id,~id), strata=list(NULL,~h),
 +                     fpc=list(~N,NULL), subset=~sub, data=rei, method="full")
-Loading required package: lattice
 
 Attaching package: 'Matrix'
 
+The following object(s) are masked from 'package:base':
 
-	The following object(s) are masked from package:stats :
-
-	 xtabs 
-
-
-	The following object(s) are masked from package:base :
-
-	 rcond 
+    det
 
 > tot2<- svytotal(~y, subset(des.rei2, y>3))
 > 

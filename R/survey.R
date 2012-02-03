@@ -310,6 +310,7 @@ update.survey.design<-function(object,...){
   object 
 }
 
+
 subset.survey.design<-function(x,subset,...){
         e <- substitute(subset)
         r <- eval(e, x$variables, parent.frame())

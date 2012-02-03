@@ -71,9 +71,9 @@ regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","LR
     chisq<-deviance(model0)-deviance(model)
     misspec<-eigen(solve(V0)%*%V, only.values=TRUE)$values
     if (df==Inf)
-      p<-pchisqsum(chisq,rep(1,length(misspec)),misspec,method=lrt.approximation,lower=FALSE)
+      p<-pchisqsum(chisq,rep(1,length(misspec)),misspec,method=lrt.approximation,lower.tail=FALSE)
     else
-      p<-pFsum(chisq,rep(1,length(misspec)),misspec,ddf=df,method=lrt.approximation,lower=FALSE)
+      p<-pFsum(chisq,rep(1,length(misspec)),misspec,ddf=df,method=lrt.approximation,lower.tail=FALSE)
       
     rval<-list(call=sys.call(),mcall=model$call,chisq=chisq,
                df=length(index),test.terms=test.terms, 
@@ -88,11 +88,11 @@ regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","LR
     Ftest<-chisq/length(index)
     rval<-list(call=sys.call(),mcall=model$call, Ftest=Ftest,
              df=length(index),ddf=df,test.terms=test.terms,
-             p=pf(Ftest,length(index),df,lower=FALSE))
+             p=pf(Ftest,length(index),df,lower.tail=FALSE))
   } else {
     rval<-list(call=sys.call(),mcall=model$call,chisq=chisq,
                df=length(index),test.terms=test.terms,
-               p=pchisq(chisq,length(index),lower=FALSE))
+               p=pchisq(chisq,length(index),lower.tail=FALSE))
   }
   class(rval)<-"regTermTest"
   rval

@@ -32,6 +32,10 @@ modify the database, either with SQL queries from the R interface or
 separately. One useful intermediate approach is to create a table with
 the new variables and a view that joins this table to the table of
 existing variables.
+
+There is now a base-R function \code{\link{transform}} for adding new
+  variables to a data frame, so I have added \code{transform} as a synonym for
+  \code{update} for survey objects.
   }
 \value{
 A survey design object

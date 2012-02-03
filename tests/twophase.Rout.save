@@ -1,5 +1,5 @@
 
-R version 2.12.2 (2011-02-25)
+R version 2.14.0 (2011-10-31)
 Copyright (C) 2011 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
@@ -69,10 +69,10 @@ Two-phase design: twophase(id = list(~id1, ~id), strata = list(NULL, ~id1), fpc 
 Phase 1:
 1 - level Cluster Sampling design
 With (5) clusters.
-svydesign(id = ~id1, fpc = ~n1)
+svydesign(ids = ~id1, fpc = ~n1)
 Phase 2:
 Stratified Independent Sampling design
-svydesign(id = ~id, strata = ~id1, fpc = `*phase1*`)
+svydesign(ids = ~id, strata = ~id1, fpc = `*phase1*`)
 > (d22mu284<-twophase(id=list(~id1,~id),strata=list(NULL,~id1),
 +                    fpc=list(~n1,NULL),data=mu284.1,subset=~sub,method="full"))
 Two-phase sparse-matrix design:
@@ -91,14 +91,14 @@ Two-phase design: twophase(id = list(~id1, ~id), strata = list(NULL, ~id1), fpc 
 Phase 1:
 1 - level Cluster Sampling design
 With (5) clusters.
-svydesign(id = ~id1, fpc = ~n1)
+svydesign(ids = ~id1, fpc = ~n1)
 Probabilities:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
     0.1     0.1     0.1     0.1     0.1     0.1 
 Population size (PSUs): 50 
 Phase 2:
 Stratified Independent Sampling design
-svydesign(id = ~id, strata = ~id1, fpc = `*phase1*`)
+svydesign(ids = ~id, strata = ~id1, fpc = `*phase1*`)
 Probabilities:
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.3333  0.3750  0.4286  0.4674  0.6000  0.6000 

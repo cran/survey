@@ -517,7 +517,7 @@ as.svydesign2<-function(object){
     }
   }
   
-  sampsize<-matrix(nc=nc,nr=nrow(object$cluster))
+  sampsize<-matrix(ncol=nc,nrow=nrow(object$cluster))
   
   sampsize[,1]<-object$nPSU[match(object$strata, names(object$nPSU))]
   if (nc>1){

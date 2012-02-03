@@ -1,18 +1,22 @@
 \name{withReplicates}
 \alias{withReplicates}
+\alias{withReplicates.svyrep.design}
+\alias{withReplicates.svrepvar}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Compute variances by replicate weighting}
 \description{
 Given a function or expression computing a statistic based on sampling
 weights, \code{withReplicates} evaluates the statistic and produces a
-replicate-based estimate of variance.
+replicate-based estimate of variance. 
 }
 \usage{
-withReplicates(design, theta, rho = NULL, ..., scale.weights=FALSE, return.replicates=FALSE)
+withReplicates(design, theta,..., return.replicates=FALSE)
+\method{withReplicates}{svyrep.design}(design, theta, rho = NULL, ..., scale.weights=FALSE, return.replicates=FALSE)
+\method{withReplicates}{svrepvar}(design, theta,  ...,  return.replicates=FALSE)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
-  \item{design}{A survey design with replicate weights (eg from \code{\link{svrepdesign}})}
+  \item{design}{A survey design with replicate weights (eg from \code{\link{svrepdesign}}) or a suitable object with replicate parameter estimates}
   \item{theta}{A function or expression: see Details below}
   \item{rho}{If \code{design} uses BRR weights, \code{rho} optionally
     specifies the parameter for Fay's variance estimator.}
@@ -23,15 +27,26 @@ withReplicates(design, theta, rho = NULL, ..., scale.weights=FALSE, return.repli
     the variance?}
 }
 \details{
-  If \code{theta} is a function its first argument will be a vector of
+The method for \code{svyrep.design} objects evaluates a function or
+expression using the sampling weights and then each set of replicate
+weights.  The method for \code{svrepvar} objects evaluates the function
+or expression on an estimated population covariance matrix and its
+replicates, to simplify multivariate statistics such as structural
+equation models.
+
+For the \code{svyrep.design} method, if \code{theta} is a function its first argument will be a vector of
   weights and the second argument will be a data frame containing the
-  variables from the design object. 
-  
-  If it is an expression, the sampling weights will be available as the
+  variables from the design object.   If it is an expression, the sampling weights will be available as the
   variable \code{.weights}.  Variables in the design object will also
   be in scope.  It is possible to use global variables in the
   expression, but unwise, as they may be masked by local variables
   inside \code{withReplicates}.
+
+For the \code{svrepvar} method a function will get the covariance
+matrix as its first argument, and an expression will be evaluated with
+\code{.replicate} set to the variance matrix.
+
+
 }
 \value{
   If \code{return.replicates=FALSE},  the weighted statistic, with the
@@ -53,6 +68,14 @@ print(a$var)
 withReplicates(scdrep, quote(sum(.weights*alive)/sum(.weights*arrests)))
 withReplicates(scdrep, function(w,data)
 sum(w*data$alive)/sum(w*data$arrests))
+
+data(api)
+dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
+rclus1<-as.svrepdesign(dclus1)
+varmat<-svyvar(~api00+api99+ell+meals+hsg+mobility,rclus1,return.replicates=TRUE)
+withReplicates(varmat, quote( factanal(covmat=.replicate, factors=2)$unique) )
+
+
 
 \dontrun{
 library(quantreg)

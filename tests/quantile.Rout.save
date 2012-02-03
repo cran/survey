@@ -1,7 +1,8 @@
 
-R version 2.7.2 (2008-08-25)
-Copyright (C) 2008 The R Foundation for Statistical Computing
+R version 2.14.0 (2011-10-31)
+Copyright (C) 2011 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -19,10 +20,9 @@ Type 'q()' to quit R.
 
 Attaching package: 'survey'
 
+The following object(s) are masked from 'package:graphics':
 
-	The following object(s) are masked from package:graphics :
-
-	 dotchart 
+    dotchart
 
 > set.seed(42)
 > 
@@ -49,8 +49,8 @@ q0.99 1.86410482
 > 
 > svyquantile(~y,ddf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE,ties="rounded",interval.type="betaWald")
 $quantiles
-        0.01       0.1      0.5  0.9 0.99
-y 0.02352941 0.2230769 0.934091 3.55  9.4
+        0.01       0.1       0.5  0.9 0.99
+y 0.02352941 0.2230769 0.9340909 3.55  9.4
 
 $CIs
 , , y

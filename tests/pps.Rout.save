@@ -1,7 +1,8 @@
 
-R version 2.9.0 beta (2009-04-08 r48309)
-Copyright (C) 2009 The R Foundation for Statistical Computing
+R version 2.14.0 (2011-10-31)
+Copyright (C) 2011 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -19,10 +20,9 @@ Type 'q()' to quit R.
 
 Attaching package: 'survey'
 
+The following object(s) are masked from 'package:graphics':
 
-	The following object(s) are masked from package:graphics :
-
-	 dotchart 
+    dotchart
 
 > data(election)
 > 
@@ -62,19 +62,12 @@ Nader   478530  102420
 > data(election)
 > dpps_br<- svydesign(id=~1,  fpc=~p, data=election_pps, pps="brewer")
 > dpps_ov<- svydesign(id=~1,  fpc=~p, data=election_pps, pps="overton")
-Loading required package: lattice
 
 Attaching package: 'Matrix'
 
+The following object(s) are masked from 'package:base':
 
-	The following object(s) are masked from package:stats :
-
-	 xtabs 
-
-
-	The following object(s) are masked from package:base :
-
-	 rcond 
+    det
 
 > dpps_hr<- svydesign(id=~1,  fpc=~p, data=election_pps, pps=HR(sum(election$p^2)/40))
 > dpps_hr1<- svydesign(id=~1, fpc=~p, data=election_pps, pps=HR())

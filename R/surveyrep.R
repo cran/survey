@@ -902,10 +902,13 @@ svyvar.svyrep.design<-svrepvar<-function(x, design, na.rm=FALSE, rho=NULL,
     pw<-design$pweights
 
   n<-NROW(x)
+  p<-NCOL(x)
   v<-function(w){
     xbar<-colSums(as.vector(w)*pw*x)/sum(as.vector(w)*pw)
     xdev<-sweep(x,2,xbar,"-")
-    (n/(n-1))*colSums(xdev*xdev*as.vector(w)*pw)/sum(as.vector(w)*pw)
+    x1<-matrix(rep(xdev,p),ncol=p*p)
+    x2<-xdev[,rep(1:p,each=p),drop=FALSE]
+    (n/(n-1))*colSums(x1*x2*as.vector(w)*pw)/sum(as.vector(w)*pw)
   }
 
   if (design$combined.weights)
@@ -913,6 +916,8 @@ svyvar.svyrep.design<-svrepvar<-function(x, design, na.rm=FALSE, rho=NULL,
   else
     rval<-v(rep(1,length(design$pweights)))
 
+  rval<-matrix(rval, ncol=p)
+  dimnames(rval)<-list(colnames(x),colnames(x))
   if (estimate.only) return(rval)
   
   repvars<-apply(wts,2, v)
@@ -920,12 +925,36 @@ svyvar.svyrep.design<-svrepvar<-function(x, design, na.rm=FALSE, rho=NULL,
   repvars<-drop(t(repvars))
   attr(rval,"var")<-svrVar(repvars, scale, rscales,mse=design$mse, coef=rval)
   attr(rval, "statistic")<-"variance"
+  attr(repvars,"scale")<-scale
+  attr(repvars,"rscales")<-rscales
+  attr(repvars,"mse")<-design$mse
   if (return.replicates)
     rval<-list(variance=rval, replicates=repvars)
-  class(rval)<-"svrepstat"
+  class(rval)<-c("svrepvar","svrepstat")
   rval
 
 }
+
+
+print.svrepvar<-function (x,  covariance=FALSE, ...) 
+{
+    if (is.list(x)) x<-x[[1]]
+    vv <- as.matrix(attr(x, "var"))
+    if (covariance){
+      nms<-outer(rownames(x),colnames(x),paste,sep=":")
+      m<-cbind(as.vector(x), sqrt(diag(vv)))
+      rownames(m)<-nms
+    } else{
+      ii <- which(diag(sqrt(length(x)))>0)
+      m <- cbind(x[ii], sqrt(diag(vv))[ii])
+      if(length(ii)==1) rownames(m)<-rownames(x)
+    }
+    colnames(m) <- c(attr(x, "statistic"), "SE")
+    printCoefmat(m)
+}
+
+as.matrix.svrepvar<-function(x,...) if (is.list(x)) unclass(x[[1]]) else unclass(x)
+
 
 svymean.svyrep.design<-svrepmean<-function(x,design, na.rm=FALSE, rho=NULL,
                                            return.replicates=FALSE,deff=FALSE,...)
@@ -1087,7 +1116,7 @@ svytotal.svyrep.design<-svreptotal<-function(x,design, na.rm=FALSE, rho=NULL,
  if (is.character(deff) || deff){
      nobs<-length(design$pweights)
      npop<-sum(design$pweights)
-     vsrs<-unclass(svyvar(x,design,na.rm=na.rm, return.replicates=FALSE,estimate.only=TRUE))*sum(design$pweights^2)
+     vsrs<-unclass(svyvar(x,design,na.rm=na.rm, return.replicates=FALSE,estimate.only=TRUE))*sum(design$pweights)^2/nobs
      if (deff!="replace")
          vsrs<-vsrs*(npop-nobs)/npop
  }
@@ -1244,7 +1273,7 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL, ...,
                                          rho=NULL, return.replicates=FALSE, na.action,
                                          multicore=getOption("survey.multicore")){
 
-  if (!exists(".Generic",inherit=FALSE))
+  if (!exists(".Generic",inherits=FALSE))
     .Deprecated("svyglm")
   
   subset<-substitute(subset)
@@ -1398,7 +1427,7 @@ print.summary.svyglm<-function (x, digits = max(3, getOption("digits") - 3),
         if (p > 1) {
             cat("\nCorrelation of Coefficients:\n")
             if (is.logical(symbolic.cor) && symbolic.cor) {
-                print(symnum(correl, abbr.col = NULL))
+                print(symnum(correl, abbr.colnames = NULL))
             }
             else {
                 correl <- format(round(correl, 2), nsmall = 2, 
@@ -1520,7 +1549,45 @@ extractAIC.svrepglm<-function(fit,...){
 }
 
 
-withReplicates<-function(design, theta,rho=NULL,...,
+withReplicates<-function(design, theta,  ..., return.replicates=FALSE){
+  UseMethod("withReplicates",design)
+}
+
+withReplicates.svrepvar<-function(design, theta, ...,return.replicates=FALSE){
+  if (is.null(reps<-design$replicates)) stop("object does not contain replicate estimates")
+
+  p<-sqrt(NCOL(reps))
+    if (is.function(theta)){
+        full<-theta(design[[1]],...)
+        thetas<-drop(t(apply(reps,1,
+                             function(rr) theta(matrix(rr,p,p), ...))))
+    } else{
+        full<-eval(theta, list(.replicate=design[[1]]))
+        thetas<-drop(t(apply(reps,1,
+                             function(rr) eval(theta, list(.replicate=matrix(rr,p,p))))))
+    }
+
+  v<-svrVar(thetas, attr(reps,"scale"), attr(reps,"rscales"), mse=attr(reps,"mse"), coef=full)
+  
+  attr(full,"var")<-v
+  attr(full,"statistic")<-"theta"
+  
+  if (return.replicates){
+    attr(thetas,"scale")<-attr(reps,"scale")
+    attr(thetas,"rscales")<-attr(reps,"rscales")
+    attr(thetas,"mse")<-attr(reps,"mse")
+    rval<-list(theta=full, replicates=thetas)
+  }  else {
+    rval<-full
+  }
+  class(rval)<-"svrepstat"
+  rval
+  
+  
+}
+
+
+withReplicates.svyrep.design<-function(design, theta, rho=NULL,...,
                          scale.weights=FALSE,
                          return.replicates=FALSE){
     wts<-design$repweights

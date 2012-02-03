@@ -1,7 +1,8 @@
 
-R version 2.7.2 (2008-08-25)
-Copyright (C) 2008 The R Foundation for Statistical Computing
+R version 2.14.0 (2011-10-31)
+Copyright (C) 2011 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -25,10 +26,9 @@ Type 'q()' to quit R.
 
 Attaching package: 'survey'
 
+The following object(s) are masked from 'package:graphics':
 
-	The following object(s) are masked from package:graphics :
-
-	 dotchart 
+    dotchart
 
 > data(api)
 > 
@@ -51,8 +51,8 @@ Attaching package: 'survey'
         mean     SE
 api99 642.14 31.434
 > svymean(~api99, dclus2g)
-        mean     SE
-api99 654.49 29.820
+        mean    SE
+api99 654.49 29.82
 > 
 > round(svyby(~api99, ~dnum, design=dclus2, svymean),4)
     dnum    api99 se.api99
@@ -128,8 +128,8 @@ There were 29 warnings (use warnings() to see them)
 > dclus1g<-calibrate(dclus1, ~enroll, pop, aggregate=1)
 > 
 > svytotal(~enroll,dclus1g)
-         total        SE
-enroll 3811472 3.226e-10
+         total SE
+enroll 3811472  0
 > svytotal(~api.stu,dclus1g)
           total    SE
 api.stu 3242857 38967
@@ -187,7 +187,7 @@ api.stu 3190038 29566
 > summary(svyglm(y~z+x,design=dps,family=quasibinomial))
 
 Call:
-svyglm(y ~ z + x, design = dps, family = quasibinomial)
+svyglm(formula = y ~ z + x, design = dps, family = quasibinomial)
 
 Survey design:
 postStratify(des, ~w, popw)
@@ -200,7 +200,7 @@ x             2.2602     0.2514   8.992   <2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
-(Dispersion parameter for quasibinomial family taken to be 1.919938)
+(Dispersion parameter for quasibinomial family taken to be 1.919987)
 
 Number of Fisher Scoring iterations: 9
 

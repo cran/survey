@@ -49,7 +49,7 @@ svyplot.default<-function(formula,
              plot(rval,legend=legend,style="centroids",...)
            } else {
              ## new version
-             rval<-hexbin(X,Y,ID=TRUE,xbins=xbins)
+             rval<-hexbin(X,Y,IDs=TRUE,xbins=xbins)
              cell<-rval@cID
              rval@count<-as.vector(tapply(W,cell,sum))
              rval@xcm<-as.vector(tapply(1:length(X), cell,
@@ -178,7 +178,7 @@ svycoplot.default<-function(formula, design, style=c("hexbin","transparent"),
                     wd<-convertWidth(vp$width,unitTo="cm",valueOnly=TRUE)
                     ht<-convertHeight(vp$height,unitTo="cm",valueOnly=TRUE)
                     W<-wt[subscripts]
-                    rval<-hexbin(x,y,ID=TRUE,xbins=xbins,shape=ht/wd,xbnds=vp$xscale,ybnds=vp$yscale)
+                    rval<-hexbin(x,y,IDs=TRUE,xbins=xbins,shape=ht/wd,xbnds=vp$xscale,ybnds=vp$yscale)
                     cell<-rval@cID
                     rval@count<-as.vector(tapply(W,cell,sum))
                     rval@xcm<-as.vector(tapply(1:length(x), cell,
