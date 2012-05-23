@@ -298,7 +298,7 @@ brrweights<-function(strata,psu, match=NULL, small=c("fail","split","merge"),
 ##
 
 as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","subbootstrap","mrbbootstrap","Fay"),
-                          fay.rho=0,...,compress=TRUE, mse=getOption("survey.replicates.mse")){
+                          fay.rho=0, fpc=NULL, fpctype=NULL,...,compress=TRUE, mse=getOption("survey.replicates.mse")){
 
   type<-match.arg(type)
 
@@ -314,29 +314,33 @@ as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","su
   if (type %in% c("JKn","BRR","Fay") && !design$has.strata)
     stop("Must use JK1 or bootstrap for an unstratified design")
   
-  fpctype<-"population"
-  if (is.null(design$fpc) ||
-      (inherits(design, "survey.design2") && is.null(design$fpc$popsize))){
+  if (is.null(fpc)) {
+    fpctype<-"population"
+    
+    if (is.null(design$fpc) ||
+        (inherits(design, "survey.design2") && is.null(design$fpc$popsize))){
       fpc<-NULL
-  } else if (type %in% c("Fay","BRR")){
+    } else if (type %in% c("Fay","BRR")){
       warning("Finite population correction dropped in conversion")
-  } else {
-    if (inherits(design,"survey.design2")){
-      fpc<-design$fpc$popsize
-      if(NCOL(fpc)>1 && type!="mrbbootstrap"){
+    } else {
+      if (inherits(design,"survey.design2")){
+        fpc<-design$fpc$popsize
+        if(NCOL(fpc)>1 && type!="mrbbootstrap"){
           fpc<-fpc[,1]
           warning("Finite population corrections after first stage have been dropped")
-      }
-      if (getOption("survey.drop.replicates")){
+        }
+        if (getOption("survey.drop.replicates")){
           selfrep<-design$fpc$popsize[,1]==design$fpc$sampsize[,1]
-      } 
-  } else{
-      fpc<-design$fpc[,2]
-      names(fpc)<-design$fpc[,1]
+        } 
+      } else{
+        fpc<-design$fpc[,2]
+        names(fpc)<-design$fpc[,1]
+      }
     }
+  } else {
+    if (type %in% c("Fay","BRR","subbootstrap")) stop(paste("fpc information cannot be used for type=",type))
+    if (is.null(fpctype)) stop("fpctype must be supplied if fpc is supplied")
   }
-
-  
   if (type=="JK1"){
     ##JK1
     r<-jk1weights(design$cluster[,1], fpc=fpc,fpctype=fpctype, compress=compress)
@@ -486,6 +490,10 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
   probably.not.combined.weights<-(repwtmn<5) & (wtmn/repwtmn>5)
   if (combined.weights & probably.not.combined.weights) warning(paste("Data do not look like combined weights: mean replication weight is", repwtmn," and mean sampling weight is",wtmn))
   if (!combined.weights & probably.combined.weights) warning(paste("Data look like combined weights: mean replication weight is", repwtmn," and mean sampling weight is",wtmn))
+
+  if (!is.null(rscales) && !(length(rscales) %in% c(1, ncol(repweights)))){
+    stop(paste("rscales has length ",length(rscales),", should be ncol(repweights)",sep=""))
+  }
   
   if (type == "BRR")
     scale<-1/ncol(repweights)

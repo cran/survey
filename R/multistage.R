@@ -230,7 +230,7 @@ onestrat<-function(x,cluster,nPSU,fpc, lonely.psu,stratum=NULL,stage=1,cal=cal){
       (nPSU>1 & !getOption("survey.adjust.domain.lonely")))
       x<-sweep(x, 2, colMeans(x), "-")
 
-  if (nsubset==1 && nPSU>1){ 
+  if (nsubset==1 && nPSU>1 && getOption("survey.adjust.domain.lonely")){ 
       warning("Stratum (",stratum,") has only one PSU at stage ",stage)
       if (lonely.psu=="average" && getOption("survey.adjust.domain.lonely"))
           scale<-NA
@@ -565,7 +565,7 @@ is.pps<-function(x) if(is.null(x$pps)) FALSE else (x$pps!=FALSE)
           index<-is.finite(x$prob)
           psu<-!duplicated(x$cluster[index,1])
           tt<-table(x$strata[index,1][psu])
-          if(any(tt==1)){
+          if(any(tt==1) && getOption("survey.adjust.domain.lonely")){
               warning(sum(tt==1)," strata have only one PSU in this subset.")
           }
       } else {

@@ -1,6 +1,6 @@
 
-R version 2.14.0 (2011-10-31)
-Copyright (C) 2011 The R Foundation for Statistical Computing
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
 
@@ -36,13 +36,6 @@ Loading required package: splines
 > d_BorganII <- twophase(id=list(~seqno,~seqno),
 +                        strata=list(NULL,~interaction(instit,rel)),
 +                        data=nwtco, subset=~I(rel |subcohort))
-
-Attaching package: 'Matrix'
-
-The following object(s) are masked from 'package:base':
-
-    det
-
 > 
 > ##Coefficient results same as Splus with code from
 > ## http://faculty.washington.edu/norm/software.html
@@ -89,3 +82,6 @@ I(age/12)       0.0299      1.03   0.0333  0.899 3.7e-01
 
 Likelihood ratio test=  on 5 df, p=  n= 1062, number of events= 571 
 > 
+> proc.time()
+   user  system elapsed 
+  4.269   0.196   4.455 

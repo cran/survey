@@ -14,7 +14,7 @@ svyolr.svyrep.design<-function(formula,design,...,return.replicates=FALSE,
         if (multicore && !require("multicore", quietly=TRUE))
           multicore <- FALSE
         
- 	rval<-suppressWarnings(polr(formula,data=df,...,Hess=FALSE,model=FALSE,
+ 	rval<-suppressWarnings(polr(formula,data=df,...,Hess=TRUE,model=FALSE,
                                     weights=pwt))
  	start<-c(rval$coefficients,rval$zeta)
  	rw<-weights(design,"analysis")
@@ -34,6 +34,8 @@ svyolr.svyrep.design<-function(formula,design,...,return.replicates=FALSE,
           })
         }
  	rval$var<-svrVar(t(betas),design$scale,design$rscales,mse=design$mse, coef=start)
+        rval$df.residual<-degf(design)-length(rval$coefficients)
+        rval$deviance<-rval$deviance/mean(pwt)
  	class(rval)<-"svyolr"
  	rval$call<-sys.call()
         rval$call[[1]]<-as.name(.Generic)
@@ -186,7 +188,7 @@ svyolr.survey.design2<-function (formula, design,  start, ...,  na.action=na.omi
     beta <- res$par[seq_len(pc)]
     theta <- res$par[pc + 1:q]
     zeta <- cumsum(c(theta[1], exp(theta[-1])))
-    deviance <- 2 * res$value
+    deviance <- 2 * res$value/mean(wt)
     niter <- c(f.evals = res$counts[1], g.evals = res$counts[2])
     names(zeta) <- paste(lev[-length(lev)], lev[-1], sep = "|")
     if (pc > 0) {
@@ -218,7 +220,8 @@ svyolr.survey.design2<-function (formula, design,  start, ...,  na.action=na.omi
     fit$var<-svyrecvar(inffun, design$cluster, 
                      design$strata, design$fpc,
                      postStrata = design$postStrata)
-    
+    fit$df.residual<-degf(design)-length(beta)
+
 
     fit$na.action <- attr(m, "na.action")
     fit$contrasts <- cons

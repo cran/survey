@@ -28,8 +28,6 @@ Object of class \code{survey.design2}
 }
 
 \seealso{\code{\link{svydesign}}, \code{\link{svyrecvar}}}
-\examples{
 
-}
 \keyword{survey}% at least one, from doc/KEYWORDS
 \keyword{manip}% __ONLY ONE__ keyword per line

@@ -42,6 +42,11 @@ A vector of numbers for \code{dim}, a list of vectors of strings for \code{dimna
 
 \seealso{ \code{\link{update.DBIsvydesign}}, \code{\link{with.svyimputationList}}}
 \examples{
+data(api)
+dclus1 <- svydesign(ids=~dnum,weights=~pw,data=apiclus1,fpc=~fpc)
+dim(dclus1)
+dimnames(dclus1)
+colnames(dclus1)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

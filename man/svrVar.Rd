@@ -29,8 +29,6 @@ covariance matrix.
 \seealso{\code{\link{svrepdesign}}, \code{\link{as.svrepdesign}},
   \code{\link{brrweights}},
   \code{\link{jk1weights}}, \code{\link{jknweights}}}
-\examples{
 
-}
 \keyword{survey}% at least one, from doc/KEYWORDS
 

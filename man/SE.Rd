@@ -22,8 +22,6 @@ SE(object, ...)
   Vector of standard errors.
 }
 \seealso{ \code{\link{vcov}}}
-\examples{
 
-}
 \keyword{models}% at least one, from doc/KEYWORDS
 

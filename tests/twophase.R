@@ -34,10 +34,10 @@ all.equal(coef(t1),coef(t2))
 all.equal(coef(t1),coef(t22))
 all.equal(coef(m1),coef(m2))
 all.equal(coef(m1),coef(m22))
-all.equal(SE(m1),SE(m2))
-all.equal(SE(m1),SE(m22))
-all.equal(SE(m1),SE(m2))
-all.equal(SE(m1),SE(m22))
+all.equal(as.vector(SE(m1)),as.vector(SE(m2)))
+all.equal(as.vector(SE(m1)),as.vector(SE(m22)))
+all.equal(as.vector(SE(t1)),as.vector(SE(t2)))
+all.equal(as.vector(SE(t1)),as.vector(SE(t22)))
 
 ## case-cohort design
 ##this example requires R 2.3.1 or later for cch and data.

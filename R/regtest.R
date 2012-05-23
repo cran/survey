@@ -31,6 +31,7 @@ regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","LR
     beta<-beta-null
   V<-vcov(model)[index,index]
 
+  ## this should be rewritten as methods, but that's not happening any time soon.
   if (is.null(df)){
     if (inherits(model,"svyglm"))
       df<-model$df.residual
@@ -44,6 +45,8 @@ regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","LR
       df<-min(model$df[index])
     else if (inherits(model,"svyloglin"))
       df<-model$df+1-length(index)
+    else if (inherits(model, "svyolr"))
+      df<-model$df.residual
     else
       df<-length(resid(model))-length(coef(model))
   }
@@ -60,8 +63,9 @@ regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","LR
         V0<-model$var
       else
         V0<-model$naive.var
-    }
-    else stop("method='LRT' not supported for this model")
+    } else if (inherits(model,"svyolr")) {
+      V0<-solve(model$Hess)
+    } else stop("method='LRT' not supported for this model")
     V0<-V0[index,index]
     test.formula<-make.formula(test.terms)[[2]]
     if (!("formula") %in% names(model$call))

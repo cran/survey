@@ -1,6 +1,6 @@
 
-R version 2.14.0 (2011-10-31)
-Copyright (C) 2011 The R Foundation for Statistical Computing
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
 
@@ -43,15 +43,15 @@ The following object(s) are masked from 'package:graphics':
           mean      SE   DEff
 uriage 113.700  35.626 1.0101
 > (SE(res.srs)^2) / ((1-10/1000) * coef(svyvar(~uriage, des.srs)) / 10)
-  uriage 
-1.010101 
+         uriage
+uriage 1.010101
 > 
 > (tres.srs <- svytotal(~uriage, des.srs, deff=TRUE))
         total     SE   DEff
 uriage 113700  35626 1.0101
 > (SE(tres.srs)^2) / (1000^2 * (1-10/1000) * coef(svyvar(~uriage, des.srs)) / 10)
-  uriage 
-1.010101 
+         uriage
+uriage 1.010101
 > 
 > 
 > des.pps <- svydesign(ids=~1, weights=~pps.w, data=kigyo)
@@ -59,14 +59,17 @@ uriage 113700  35626 1.0101
           mean      SE   DEff
 uriage 243.914  48.752 1.9741
 > (SE(res.pps)^2) / (coef(svyvar(~uriage, des.pps)) / 10)
-  uriage 
-1.974067 
+         uriage
+uriage 1.974067
 > (tres.pps <- svytotal(~uriage, des.pps, deff='replace'))
         total     SE   DEff
 uriage 305136 184965 18.157
 > (N.hat <- sum(weights(des.pps)))
 [1] 1251
 > (SE(tres.pps)^2) / (N.hat^2 * coef(svyvar(~uriage, des.pps)) / 10)
-  uriage 
-18.15669 
+         uriage
+uriage 18.15669
 > 
+> proc.time()
+   user  system elapsed 
+  0.253   0.028   0.271 

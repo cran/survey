@@ -598,6 +598,11 @@ vcov.svystat<-function(object,...){
   as.matrix(attr(object,"var"))
 }
 
+SE.svystat<-function(object,...){
+ v<-vcov(object)
+ if (!is.matrix(v) || NCOL(v)==1) sqrt(v) else sqrt(diag(v))
+}
+
 deff <- function(object,quietly=FALSE,...) UseMethod("deff")
 
 deff.default <- function(object, quietly=FALSE,...){

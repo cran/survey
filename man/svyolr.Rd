@@ -35,13 +35,17 @@ svyolr(formula, design, ...)
 \author{The code is based closely on polr() from the MASS package of
   Venables and Ripley.}
 
-\seealso{\code{\link{svyglm}} }
+\seealso{\code{\link{svyglm}}, \code{\link{regTermTest}} }
 \examples{
 data(api)
 dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
 dclus1<-update(dclus1, mealcat=cut(meals,c(0,25,50,75,100)))
 
-svyolr(mealcat~avg.ed+mobility+stype, design=dclus1)
+m<-svyolr(mealcat~avg.ed+mobility+stype, design=dclus1)
+m
+
+## Use regTermTest for testing multiple parameters
+regTermTest(m, ~avg.ed+stype, method="LRT")
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

@@ -1,3 +1,19 @@
+3.28-1 SE now works with output of predict.svyglm (Kieran Healy)
+
+       make.panel.svysmooth() sometimes had invalid bandwidth choices.
+
+       as.svrepdesign() now allows for fpc information not present in 
+       the design object (Alistair Gray)
+
+       regTermTest(,method="LRT") works for svyolr(), and
+       method="Wald" now doesn't need user-specified df (for Zachary Grinspan)
+
+       svrepdesign() checks the length of the rscales= argument  (Ward Kinkade).
+
+       Document the problem with in-line data-dependent variable construction
+       in svyby()  (Anthony Damico)
+
+       Check for completely-missing groups in svyby 
 
 3.28   svyvar() for replicate-weight designs now returns whole matrix
    
@@ -32,6 +48,7 @@
 3.25-1 The ... argument to svytable() is now passed to xtabs()
 
        Clearer documentation about graphing discrete variables.
+
 
 3.25   svyhist() didn't work for two-phase designs.
 

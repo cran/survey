@@ -180,6 +180,7 @@ S3method(confint, svyquantile)
 
 S3method(SE,default)
 S3method(SE,svrepstat)
+S3method(SE,svystat)
 S3method(SE,svyby)
 S3method(SE,svyquantile)
 S3method(SE,svyratio)

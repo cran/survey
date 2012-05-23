@@ -109,8 +109,8 @@ vcov(tot2)
 ## comparing to regression
 reg<-svyglm(y~I(y<4), design=des.rei2)
 mn<-svymean(~y, subset(des.rei2,y>3))
-all.equal(coef(reg)[1],coef(mn))
-all.equal(SE(reg)[1],SE(mn))
+all.equal(as.vector(coef(reg))[1],as.vector(coef(mn)))
+all.equal(as.vector(SE(reg))[1],as.vector(SE(mn)))
 vcov(mn)
 vcov(reg)
 

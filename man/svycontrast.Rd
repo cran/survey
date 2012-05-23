@@ -49,6 +49,11 @@ svycontrast(a, list(avg=c(api00=0.5,api99=0.5), diff=c(api00=1,api99=-1)))
 svycontrast(a, quote(api00/api99))
 svyratio(~api00, ~api99, dclus1)
 
+## Example: standardised skewness coefficient
+moments<-svymean(~I(api00^3)+I(api00^2)+I(api00), dclus1)
+svycontrast(moments, quote((`I(api00^3)`-3*`I(api00^2)`*`I(api00)`+3*`I(api00)`*`I(api00)`^2-`I(api00)`^3)/(`I(api00^2)`-`I(api00)`^2)^1.5))
+
+
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
 

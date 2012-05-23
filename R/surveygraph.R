@@ -1,7 +1,7 @@
 make.panel.svysmooth<-function(design,bandwidth=NULL){
   function(x,y,span=NULL,col.smooth="red",col=par("col"),bg=NA,pch=par("pch"),cex=1,...){
     if(!is.null(span))
-      bandwidth<-range(x)*span/3
+      bandwidth<-diff(range(x))*span/3
     s<-svysmooth(y~x,design=design,bandwidth=bandwidth)
     points(x,y,pch=pch,bg=bg,col=col)
     lines(s[[1]],col=col.smooth,...)
@@ -69,7 +69,7 @@ svyplot.default<-function(formula,
              plot(rval, legend=legend,...)
            } else {
              ## new version
-             rval<-hexbin(X,Y,ID=TRUE,xbins=xbins)
+             rval<-hexbin(X,Y,IDs=TRUE,xbins=xbins)
              cell<-rval@cID
              rval@count<-as.vector(tapply(W,cell,sum))
              gplot.hexbin(rval, legend=legend,...)

@@ -15,8 +15,8 @@ Compute survey statistics on subsets of a survey defined by factors.
 svyby(formula, by ,design,...)
 \method{svyby}{default}(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE,
 keep.names = TRUE,verbose=FALSE, vartype=c("se","ci","ci","cv","cvpct","var"),
- drop.empty.groups=TRUE, covmat=FALSE, return.replicates=FALSE, na.rm.by=FALSE,
- multicore=getOption("survey.multicore"))
+ drop.empty.groups=TRUE, covmat=FALSE, return.replicates=FALSE,
+ na.rm.by=FALSE, na.rm.all=FALSE,  multicore=getOption("survey.multicore"))
 \method{SE}{svyby}(object,...)
 \method{deff}{svyby}(object,...)
 \method{coef}{svyby}(object,...)
@@ -44,7 +44,11 @@ unwtd.count(x, design, ...)
   variation,  percent coefficient of variation, or variance}
 \item{drop.empty.groups}{If \code{FALSE}, report \code{NA} for empty
   groups, if \code{TRUE} drop them from the output}
-\item{na.rm.by}{If true, omit groups defined by \code{NA} values of the \code{by} variables}.
+\item{na.rm.by}{If true, omit groups defined by \code{NA} values of the
+  \code{by} variables}.
+\item{na.rm.all}{If true, check for groups with no non-missing
+  observations for variables defined by \code{formula} and treat these groups
+  as empty}
 \item{covmat}{If \code{TRUE}, compute covariances between estimates for
   different subsets (currently only for replicate-weight
   designs). Allows \code{\link{svycontrast}} to be used on output.}
@@ -85,6 +89,18 @@ The variance type "ci" asks for confidence intervals, which are produced
 
   }
 
+  \note{The function works by making a lot of calls of the form
+    \code{FUN(formula, subset(design, by==i))}, where \code{formula} is
+    re-evaluated in each subset, so it is unwise to use data-dependent
+    terms in \code{formula}.  In particular, \code{svyby(~factor(a), ~b,
+    design=d, svymean)}, will create factor variables whose levels are
+    only those values of \code{a}  present in each subset.  Use
+    \code{\link{update.survey.design}} to add variables to the design
+    object instead. 
+
+    
+    }
+  
 \note{ Asking for a design effect (\code{deff=TRUE}) from a function
   that does not produce one will cause an error or incorrect formatting
   of the output. The same will occur with \code{keep.var=TRUE} if the

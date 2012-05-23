@@ -1,6 +1,6 @@
 
-R version 2.14.0 (2011-10-31)
-Copyright (C) 2011 The R Foundation for Statistical Computing
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
 
@@ -56,29 +56,29 @@ enroll 3647280 463582
 > 
 > summary(weights(rclus1g)/weights(rclus1r))
        V1           V2          V3          V4           V5          V6   
- Min.   : 1   Min.   :1   Min.   :1   Min.   : 1   Min.   :1   Min.   :1  
- 1st Qu.: 1   1st Qu.:1   1st Qu.:1   1st Qu.: 1   1st Qu.:1   1st Qu.:1  
- Median : 1   Median :1   Median :1   Median : 1   Median :1   Median :1  
- Mean   : 1   Mean   :1   Mean   :1   Mean   : 1   Mean   :1   Mean   :1  
- 3rd Qu.: 1   3rd Qu.:1   3rd Qu.:1   3rd Qu.: 1   3rd Qu.:1   3rd Qu.:1  
- Max.   : 1   Max.   :1   Max.   :1   Max.   : 1   Max.   :1   Max.   :1  
+ Min.   :1    Min.   :1   Min.   :1   Min.   :1    Min.   :1   Min.   :1  
+ 1st Qu.:1    1st Qu.:1   1st Qu.:1   1st Qu.:1    1st Qu.:1   1st Qu.:1  
+ Median :1    Median :1   Median :1   Median :1    Median :1   Median :1  
+ Mean   :1    Mean   :1   Mean   :1   Mean   :1    Mean   :1   Mean   :1  
+ 3rd Qu.:1    3rd Qu.:1   3rd Qu.:1   3rd Qu.:1    3rd Qu.:1   3rd Qu.:1  
+ Max.   :1    Max.   :1   Max.   :1   Max.   :1    Max.   :1   Max.   :1  
  NA's   :11   NA's   :4   NA's   :2   NA's   :13   NA's   :2   NA's   :4  
        V7          V8           V9         V10          V11    
- Min.   :1   Min.   : 1   Min.   :1   Min.   : 1   Min.   : 1  
- 1st Qu.:1   1st Qu.: 1   1st Qu.:1   1st Qu.: 1   1st Qu.: 1  
- Median :1   Median : 1   Median :1   Median : 1   Median : 1  
- Mean   :1   Mean   : 1   Mean   :1   Mean   : 1   Mean   : 1  
- 3rd Qu.:1   3rd Qu.: 1   3rd Qu.:1   3rd Qu.: 1   3rd Qu.: 1  
- Max.   :1   Max.   : 1   Max.   :1   Max.   : 1   Max.   : 1  
+ Min.   :1   Min.   :1    Min.   :1   Min.   :1    Min.   :1   
+ 1st Qu.:1   1st Qu.:1    1st Qu.:1   1st Qu.:1    1st Qu.:1   
+ Median :1   Median :1    Median :1   Median :1    Median :1   
+ Mean   :1   Mean   :1    Mean   :1   Mean   :1    Mean   :1   
+ 3rd Qu.:1   3rd Qu.:1    3rd Qu.:1   3rd Qu.:1    3rd Qu.:1   
+ Max.   :1   Max.   :1    Max.   :1   Max.   :1    Max.   :1   
  NA's   :4   NA's   :16   NA's   :9   NA's   :34   NA's   :21  
-      V12               V13          V14         V15    
- Min.   : 0.9997   Min.   : 1   Min.   :1   Min.   : 1  
- 1st Qu.: 1.0001   1st Qu.: 1   1st Qu.:1   1st Qu.: 1  
- Median : 1.0001   Median : 1   Median :1   Median : 1  
- Mean   : 1.0000   Mean   : 1   Mean   :1   Mean   : 1  
- 3rd Qu.: 1.0001   3rd Qu.: 1   3rd Qu.:1   3rd Qu.: 1  
- Max.   : 1.0002   Max.   : 1   Max.   :1   Max.   : 1  
- NA's   :37.0000   NA's   :13   NA's   :1   NA's   :12  
+      V12              V13          V14         V15    
+ Min.   :0.9997   Min.   :1    Min.   :1   Min.   :1   
+ 1st Qu.:1.0001   1st Qu.:1    1st Qu.:1   1st Qu.:1   
+ Median :1.0001   Median :1    Median :1   Median :1   
+ Mean   :1.0000   Mean   :1    Mean   :1   Mean   :1   
+ 3rd Qu.:1.0001   3rd Qu.:1    3rd Qu.:1   3rd Qu.:1   
+ Max.   :1.0002   Max.   :1    Max.   :1   Max.   :1   
+ NA's   :37       NA's   :13   NA's   :1   NA's   :12  
 > 
 > 
 > ## Do it for a design without replicate weights
@@ -128,3 +128,6 @@ api00 642.61 22.731
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
   0.999   1.000   1.000   1.000   1.000   1.002 
 > 
+> proc.time()
+   user  system elapsed 
+  0.718   0.040   0.748 

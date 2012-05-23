@@ -108,7 +108,7 @@ biplot.svyprcomp<-function(x, cols=c("black","darkred"),xlabs=NULL,weight=c("tra
    if (weight=="transparent"){
      xcexs<-par("cex")*max.cex
      rgbcol<-col2rgb(rep(cols[1],length=length(w)))
-     xcols<-rgb(rgbcol[1,],rgbcol[2,],rgbcol[3,],alpha=pmax(1,255*w*max.alpha/max(w)), max=255)
+     xcols<-rgb(rgbcol[1,],rgbcol[2,],rgbcol[3,],alpha=pmax(1,255*w*max.alpha/max(w)), maxColorValue=255)
    } else if (weight=="scaled"){
      xcexs<-par("cex")*pmax(0.2, max.cex*sqrt(w/max(w)))
      rgbcol<-col2rgb(cols[1])

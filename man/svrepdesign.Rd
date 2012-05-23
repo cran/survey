@@ -74,9 +74,10 @@ below}
   
   The variance is computed as the sum of squared deviations of the
   replicates from their mean.  This may be rescaled: \code{scale} is an
-  overall multiplier and \code{rscale} is a vector of
-  replicate-specific multipliers for the squared deviations.  If the
-  replication weights incorporate the sampling weights
+  overall multiplier and \code{rscales} is a vector of
+  replicate-specific multipliers for the squared deviations. That is,
+  \code{rscales} should have one entry for each column of \code{repweights}
+  If thereplication weights incorporate the sampling weights
   (\code{combined.weights=TRUE}) or for \code{type="other"} these must
   be specified, otherwise they can be guessed from the weights.
 
@@ -138,6 +139,10 @@ database and so can be used with read-only permissions on the database.
 
 \note{To use replication-weight analyses on a survey specified by
   sampling design, use \code{as.svrepdesign} to convert it. }
+\note{The successive difference weights in the American Community Survey
+  use \code{scale = 4/ncol(repweights)} and \code{rscales=rep(1,
+  ncol(repweights)}.  JK2 weights use \code{scale=1},
+  \code{rscales=rep(1, ncol(repweights))}}
 
 \seealso{\code{\link{as.svrepdesign}}, \code{\link{svydesign}},
   \code{\link{brrweights}}, \code{bootweights} }

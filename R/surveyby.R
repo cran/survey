@@ -6,6 +6,7 @@ svyby<-function(formula, by, design,...) UseMethod("svyby",design)
 svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
                         keep.names=TRUE, verbose=FALSE, vartype=c("se","ci","ci","cv","cvpct","var"),
                         drop.empty.groups=TRUE, covmat=FALSE, return.replicates=FALSE, na.rm.by=FALSE,
+                        na.rm.all=FALSE,
                         multicore=getOption("survey.multicore")){
 
   if (inherits(by, "formula"))
@@ -21,14 +22,6 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
   if (multicore && !require("multicore",quietly=TRUE))
     multicore<-FALSE
 
-  ## all combinations that actually occur in this design
-  byfactor<-do.call("interaction", byfactors)
-  dropped<- weights(design,"sampling")==0
-  if (na.rm.by) dropped<-dropped | apply(byfactors, 1, function(x) any(is.na(x)))
-  uniquelevels<-sort(unique(byfactor[!dropped]))
-  uniques <- match(uniquelevels, byfactor)
-
-  
   ## some people insist on using vectors rather than formulas
   ## so I suppose we should be nice to them
   if (!inherits(formula, "formula")){
@@ -40,6 +33,21 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
           stop("invalid type for 'formula'")
       }
   }
+  
+  ## all combinations that actually occur in this design
+  byfactor<-do.call("interaction", byfactors)
+  dropped<- weights(design,"sampling")==0
+  if (na.rm.by) dropped<-dropped | apply(byfactors, 1, function(x) any(is.na(x)))
+  if (na.rm.all){
+    if (inherits(formula,"formula"))
+      allx<-model.frame(formula,model.frame(design),na.action=na.pass)
+    else
+      allx<-formula
+    dropped <- dropped | (!complete.cases(allx))
+  }
+  uniquelevels<-sort(unique(byfactor[!dropped]))
+  uniques <- match(uniquelevels, byfactor)
+
   
   if(missing(vartype)) vartype<-"se"
   vartype<-match.arg(vartype,several.ok=TRUE)

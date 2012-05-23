@@ -1,6 +1,6 @@
 
-R version 2.14.0 (2011-10-31)
-Copyright (C) 2011 The R Foundation for Statistical Computing
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
 
@@ -30,22 +30,15 @@ The following object(s) are masked from 'package:graphics':
 > pbc$id<-1:nrow(pbc)
 > pbc$randomized<-with(pbc, !is.na(trt) & trt>-9)
 > (d2pbc<-twophase(id=list(~id,~id), data=pbc, subset=~I(!randomized)))
-
-Attaching package: 'Matrix'
-
-The following object(s) are masked from 'package:base':
-
-    det
-
 Two-phase sparse-matrix design:
  twophase2(id = id, strata = strata, probs = probs, fpc = fpc, 
     subset = subset, data = data)
 Phase 1:
 Independent Sampling design (with replacement)
-svydesign(id = ~id)
+svydesign(ids = ~id)
 Phase 2:
 Independent Sampling design
-svydesign(id = ~id, fpc = `*phase1*`)
+svydesign(ids = ~id, fpc = `*phase1*`)
 > m<-svymean(~bili, d2pbc)
 > all.equal(as.vector(coef(m)),with(pbc, mean(bili[!randomized])))
 [1] TRUE
@@ -81,10 +74,10 @@ Two-phase sparse-matrix design:
 Phase 1:
 1 - level Cluster Sampling design
 With (5) clusters.
-svydesign(id = ~id1, fpc = ~n1)
+svydesign(ids = ~id1, fpc = ~n1)
 Phase 2:
 Stratified Independent Sampling design
-svydesign(id = ~id, strata = ~id1, fpc = `*phase1*`)
+svydesign(ids = ~id, strata = ~id1, fpc = `*phase1*`)
 > summary(d2mu284)
 Two-phase design: twophase(id = list(~id1, ~id), strata = list(NULL, ~id1), fpc = list(~n1, 
     NULL), data = mu284.1, subset = ~sub, method = "approx")
@@ -126,14 +119,14 @@ Data variables:
 [1] TRUE
 > all.equal(coef(m1),coef(m22))
 [1] TRUE
-> all.equal(SE(m1),SE(m2))
+> all.equal(as.vector(SE(m1)),as.vector(SE(m2)))
 [1] TRUE
-> all.equal(SE(m1),SE(m22))
-[1] "names for target but not for current"
-> all.equal(SE(m1),SE(m2))
+> all.equal(as.vector(SE(m1)),as.vector(SE(m22)))
 [1] TRUE
-> all.equal(SE(m1),SE(m22))
-[1] "names for target but not for current"
+> all.equal(as.vector(SE(t1)),as.vector(SE(t2)))
+[1] TRUE
+> all.equal(as.vector(SE(t1)),as.vector(SE(t22)))
+[1] TRUE
 > 
 > ## case-cohort design
 > ##this example requires R 2.3.1 or later for cch and data.
@@ -155,10 +148,10 @@ Two-phase sparse-matrix design:
     subset = subset, data = data)
 Phase 1:
 Independent Sampling design (with replacement)
-svydesign(id = ~seqno)
+svydesign(ids = ~seqno)
 Phase 2:
 Stratified Independent Sampling design
-svydesign(id = ~seqno, strata = ~rel, fpc = `*phase1*`)
+svydesign(ids = ~seqno, strata = ~rel, fpc = `*phase1*`)
 > cch1<-svycoxph(Surv(edrel,rel)~factor(stage)+factor(histol)+I(age/12),
 +                design=dcchs)
 > dcchs2<-twophase(id=list(~seqno,~seqno), strata=list(NULL,~rel),
@@ -279,3 +272,6 @@ attr(,"phases")$phase2
 [1] TRUE
 > 
 > 
+> proc.time()
+   user  system elapsed 
+  4.052   0.161   4.202 

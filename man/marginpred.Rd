@@ -38,9 +38,6 @@ marginpred(model, adjustfor, predictat, ...)
     of memory if the sample size is large)}
   \item{\dots}{Extra arguments, passed to the \code{predict} method for \code{model}}
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
 
 \seealso{
   \code{\link{calibrate}}

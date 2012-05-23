@@ -12,7 +12,7 @@
 }
 \usage{
 as.svrepdesign(design, type=c("auto", "JK1", "JKn", "BRR", "bootstrap","subbootstrap","mrbbootstrap","Fay"),
-fay.rho = 0, ..., compress=TRUE, mse=getOption("survey.replicates.mse"))
+fay.rho = 0, fpc=NULL,fpctype=NULL,..., compress=TRUE, mse=getOption("survey.replicates.mse"))
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -20,8 +20,8 @@ fay.rho = 0, ..., compress=TRUE, mse=getOption("survey.replicates.mse"))
   \item{type}{Type of replicate weights. \code{"auto"} uses JKn for
     stratified, JK1 for unstratified designs}
   \item{fay.rho}{Tuning parameter for Fay's variance method }
-  \item{\dots}{Other arguments to \code{jk1weights}, \code{jknweights},
-    \code{brrweights}, or \code{bootweights} .}
+  \item{fpc,fpctype,\dots}{Passed to \code{jk1weights}, \code{jknweights},
+    \code{brrweights}, \code{bootweights}, \code{subbootweights}, or \code{mrbweights}.}
   \item{compress}{Use a compressed representation of the replicate
     weights matrix.}
   \item{mse}{if \code{TRUE}, compute variances from sums of squares around

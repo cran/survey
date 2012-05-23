@@ -96,7 +96,5 @@ study of this procedure, but it should at least be conservative.
 
 \seealso{\code{\link{svydesign}}, \code{\link{svyrecvar}}, \code{\link{surveyoptions}}, \code{\link{postStratify}} }
 
-\examples{
-}
 \keyword{utilities}% at least one, from doc/KEYWORDS
 \keyword{survey}% __ONLY ONE__ keyword per line
