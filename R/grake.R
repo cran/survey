@@ -18,6 +18,18 @@ calibrate.survey.design2<-function(design, formula, population,
                                     bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
                                     maxit=50, epsilon=1e-7, verbose=FALSE, force=FALSE, trim=NULL,
                                     ...){
+
+  if(is.list(formula) && is.list(population)){
+    ## inputs as marginal totals, as in rake()
+    population<-margins2totals(formula,population)
+    formula<-as.formula(paste("~",paste(sapply(formula,function(f) paste(all.vars(f),collapse="*")),collapse="+")))
+    if (verbose){
+      print(formula)
+      print(population)
+    }
+  }
+
+  
   if (is.character(calfun)) calfun<-match.arg(calfun)
   if (is.character(calfun) && calfun=="linear" && (bounds==c(-Inf,Inf))){
     ## old code is better for ill-conditioned linear calibration
@@ -63,9 +75,11 @@ calibrate.survey.design2<-function(design, formula, population,
   }
 
     
-  if (length(sample.total)!=length(population))
+  if (length(sample.total)!=length(population)){
+    print(sample.total)
+    print(population)
     stop("Population and sample totals are not the same length.")
-
+  }
   if(!is.null(names(population))){
     if (!all(names(sample.total) %in% names(population)))
       warning("Sampling and population totals have different names.")
@@ -115,6 +129,17 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
                                    bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
                                    maxit=50, epsilon=1e-7, verbose=FALSE,force=FALSE, trim=NULL,
                                    ...){
+
+  if(is.list(formula) && is.list(population)){
+    ## inputs as marginal totals, as in rake()
+    population<-margins2totals(formula,population)
+    formula<-as.formula(paste("~",paste(sapply(formula,function(f) paste(all.vars(f),collapse="*")),collapse="+")))
+    if (verbose){
+      print(formula)
+      print(population)
+    }
+  }
+   
   if (is.character(calfun)) calfun<-match.arg(calfun)
   if (length(epsilon)!=1 && length(epsilon)!=length(population))
     stop("'epsilon' must be a scalar or of the same length as 'population'")
@@ -165,9 +190,12 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
   }
   
     
-  if (length(sample.total)!=length(population))
-    stop("Population and sample totals are not the same length.")
 
+  if (length(sample.total)!=length(population)){
+    print(sample.total)
+    print(population)
+    stop("Population and sample totals are not the same length.")
+  }
   if (!is.null(names(population))){
     if (!all(names(sample.total) %in% names(population)))
       warning("Sample and population totals have different names.")
@@ -239,6 +267,7 @@ cal.raking<-make.calfun(function(u,bounds) pmin(pmax(exp(u),bounds[1]),bounds[2]
                         "raking")
 cal.logit<-make.calfun(
                        function(u,bounds) {
+                         if (any(!is.finite(bounds))) stop("Logit calibration requires finite bounds")
                          L <- bounds[1]
                          U <- bounds[2]
                          A <- (U-L)/((U-1)*(1-L))
@@ -269,6 +298,16 @@ grake<-function(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verb
   deriv <- dF(xeta, bounds)
   iter<-1
 
+  ## pre-scaling for people starting with no weights
+  SOMETHRESHOLD<-20
+  scales<-population/sample.total
+  if (min(scales)> SOMETHRESHOLD){
+    scale<-mean(scales)
+    ww<-ww*scale
+    if(verbose) message(paste("Sampling weights rescaled by",signif(scale,3)))
+    if (any(is.finite(bounds))) warning(paste("Bounds were set but will be interpreted after rescaling by",signif(scale,3)))
+  } else scale<-NULL
+  
   repeat({
     Tmat<-crossprod(mm*ww*deriv, mm)
 
@@ -279,7 +318,7 @@ grake<-function(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verb
     xeta<- drop(mm%*%eta)
     g<-1+Fm1(xeta, bounds)
     deriv <- dF(xeta, bounds)
-    while(iter<maxit && any(is.na(g),is.na(deriv))){
+    while(iter<maxit && any(!is.finite(g),!is.finite(deriv))){
       iter<-iter+1
       deta<-deta/2
       eta<-eta-deta
@@ -304,6 +343,7 @@ grake<-function(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verb
      }
   })
 
+  if (!is.null(scale)) g<-g*scale
   attr(g,"eta")<-eta
   g
 }
@@ -354,3 +394,24 @@ trimWeights.svyrep.design<-function(design, upper=Inf, lower= -Inf, compress=FAL
   
   design
 }
+
+
+margins2totals<-function(formulas, totals){
+	totals<-mapply(onemargin2totals,formulas,totals,SIMPLIFY=FALSE)
+	totaln<-do.call(c,totals)
+	totalorder<-do.call(c,lapply(totals,function(x) attr(x,"order")))
+	totaln<-totaln[order(totalorder)]
+
+	totaln[!duplicated(names(totaln))]	
+	}
+	
+	
+onemargin2totals<-function(formula,total){
+		newformula<-as.formula(paste("Freq",paste(all.vars(formula),collapse="*"),sep="~"))
+		mf<-model.frame(newformula,as.data.frame(total))
+		mm<-model.matrix(newformula,mf)
+		intorder<-c(1,attr(terms(newformula),"order")[attr(mm,"assign")])
+		rval<-colSums(mf$Freq*mm)
+		attr(rval,"order")<-intorder
+		rval
+	}	

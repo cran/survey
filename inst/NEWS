@@ -1,3 +1,11 @@
+3.28-2	calibrate() prints out sample and population totals when the lengths disagree
+
+	calibrate() is more stable when the initial weights are wrong by orders of
+	magnitude (for Kirill Mueller)
+
+	calibrate() can now take a list of margins as input, similar to rake()
+  	(for various people including Kirill Mueller)
+
 3.28-1 SE now works with output of predict.svyglm (Kieran Healy)
 
        make.panel.svysmooth() sometimes had invalid bandwidth choices.

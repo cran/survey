@@ -1,6 +1,6 @@
 
-R version 2.14.0 (2011-10-31)
-Copyright (C) 2011 The R Foundation for Statistical Computing
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
 
@@ -46,13 +46,6 @@ The following object(s) are masked from 'package:graphics':
 > 
 > dccs2<-twophase(id=list(~id,~id),subset=~in.ccs,
 +                 strata=list(NULL,~interaction(instit,rel)),data=nwt.exp)
-
-Attaching package: 'Matrix'
-
-The following object(s) are masked from 'package:base':
-
-    det
-
 > 
 > dccs8<-twophase(id=list(~id,~id),subset=~in.ccs,
 +                 strata=list(NULL,~interaction(instit,stage,rel)),data=nwt.exp)
@@ -205,3 +198,6 @@ Warning messages:
   observations with zero weight not used for calculating dispersion
 > 
 > 
+> proc.time()
+   user  system elapsed 
+  4.672   0.206   4.867 

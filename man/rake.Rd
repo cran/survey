@@ -102,6 +102,13 @@ pop.imp<-data.frame(comp.imp=c("No","Yes"),Freq=c(1712,4482))
 dclus1r2<-rake(dclus1, list(~stype+sch.wide, ~comp.imp),
                list(pop.table, pop.imp))
 svymean(~api00, dclus1r2)
+
+## compare to calibrate() syntax with tables
+dclus1r2<-calibrate(dclus1, formula=list(~stype+sch.wide, ~comp.imp),
+               population=list(pop.table, pop.imp),calfun="raking")
+svymean(~api00, dclus1r2)
+
+
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
 \keyword{manip}

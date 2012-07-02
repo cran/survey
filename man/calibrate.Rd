@@ -34,10 +34,11 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{design}{survey design object}
-  \item{formula}{model formula for calibration model}
+  \item{formula}{model formula for calibration model, or list of
+    formulas for each margin}
   \item{population}{Vectors of population column totals for the model matrix in the
     calibration model, or list of such vectors for each
-    cluster. Required except for two-phase designs}
+    cluster, or list of tables for each margin. Required except for two-phase designs}
   \item{compress}{compress the resulting replicate weights if
     \code{TRUE} or if \code{NA} and weights were previously compressed}
   \item{stage}{See Details below}
@@ -64,6 +65,15 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
   \item{eta}{starting values for iteration}
 }
 \details{
+
+  The \code{formula} argument specifies a model matrix, and the
+  \code{population} argument is the population column sums of this
+  matrix.
+
+  For the special case where the calibration totals are (possibly
+  overlapping) marginal tables of factor variables, as in classical
+  raking, the \code{formula} and \code{population} arguments may be
+  lists in the same format as the input to \code{\link{rake}}.
 
   If the \code{population} argument has a names attribute it will be
   checked against the names produced by \code{model.matrix(formula)} and
@@ -259,7 +269,14 @@ rclus1tr <- calibrate(rclus1, ~stype+api99, c(pop.totals, api99=3914069),bounds=
 svymean(~api00+api99+enroll, rclus1tr)
 svytotal(~stype,rclus1tr)
 
-
+## Input in the same format as rake() for classical raking
+pop.table <- xtabs(~stype+sch.wide,apipop)
+pop.table2 <- xtabs(~stype+comp.imp,apipop)
+dclus1r<-rake(dclus1, list(~stype+sch.wide, ~stype+comp.imp),
+               list(pop.table, pop.table2))
+gclus1r<-calibrate(dclus1, formula=list(~stype+sch.wide, ~stype+comp.imp), population=list(pop.table, pop.table2),calfun="raking")
+svymean(~api00+stype, dclus1r)
+svymean(~api00+stype, gclus1r)
 
 
 ## generalised raking

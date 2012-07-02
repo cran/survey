@@ -16,7 +16,7 @@ svyby(formula, by ,design,...)
 \method{svyby}{default}(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE,
 keep.names = TRUE,verbose=FALSE, vartype=c("se","ci","ci","cv","cvpct","var"),
  drop.empty.groups=TRUE, covmat=FALSE, return.replicates=FALSE,
- na.rm.by=FALSE, na.rm.all=FALSE,  multicore=getOption("survey.multicore"))
+ na.rm.by=FALSE, na.rm.all=FALSE, multicore=getOption("survey.multicore"))
 \method{SE}{svyby}(object,...)
 \method{deff}{svyby}(object,...)
 \method{coef}{svyby}(object,...)

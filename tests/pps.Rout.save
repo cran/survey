@@ -1,6 +1,6 @@
 
-R version 2.14.0 (2011-10-31)
-Copyright (C) 2011 The R Foundation for Statistical Computing
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
 
@@ -62,13 +62,6 @@ Nader   478530  102420
 > data(election)
 > dpps_br<- svydesign(id=~1,  fpc=~p, data=election_pps, pps="brewer")
 > dpps_ov<- svydesign(id=~1,  fpc=~p, data=election_pps, pps="overton")
-
-Attaching package: 'Matrix'
-
-The following object(s) are masked from 'package:base':
-
-    det
-
 > dpps_hr<- svydesign(id=~1,  fpc=~p, data=election_pps, pps=HR(sum(election$p^2)/40))
 > dpps_hr1<- svydesign(id=~1, fpc=~p, data=election_pps, pps=HR())
 > dpps_ht<- svydesign(id=~1,  fpc=~p, data=election_pps, pps=ppsmat(election_jointprob))
@@ -131,3 +124,6 @@ Nader   478530  102016
 FALSE        FALSE     19  0
 TRUE          TRUE     21  0
 > 
+> proc.time()
+   user  system elapsed 
+  2.783   0.089   2.862 
