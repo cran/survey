@@ -32,7 +32,10 @@ A survey design object
 Object of class \code{htest}
 }
 \references{
-as
+Lumley T, Scott AJ (2012) "Two-sample rank tests under complex
+sampling". Technical Report 2012-4, Department of Statistics, University
+of Auckland.
+
 }
 
 \seealso{

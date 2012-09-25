@@ -29,7 +29,7 @@ alpha=c(0, 0.8),xbins=30,...)
     jittering to use in subsample plots, or \code{NULL} for the default
     amount}
   \item{basecol}{base color for transparent plots, or a function to
-    compute the color (see below)}
+    compute the color (see below), or color for bubble plots}
   \item{alpha}{minimum and maximum opacity for transparent plots}
 \item{xbins}{Number of (x-axis) bins for hexagonal binning}
   \item{\dots}{Passed to \code{plot} methods}

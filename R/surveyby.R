@@ -33,6 +33,8 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
           stop("invalid type for 'formula'")
       }
   }
+
+  hasdeff<- is.character(deff) || deff
   
   ## all combinations that actually occur in this design
   byfactor<-do.call("interaction", byfactors)
@@ -117,7 +119,7 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
   }
 
   nr<-NCOL(rval)
-  nstats<-nr/(1+ keep.var*length(vartype) +deff)
+  nstats<-nr/(1+ keep.var*length(vartype) + hasdeff)
 
               
   if (nr>1)

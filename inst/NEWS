@@ -1,3 +1,29 @@
+3.29    svystandardize() for direct standardization over domains 
+
+        withReplicates() has a method for svrepstat objects
+
+	added predict.svrepglm(), which can return replicates
+
+        saddlepoint approximation to sum of chisquares works further out into the tails
+
+        fixed bug in rescaling in calibrate() when initial weights are very wrong (Takahiro Tsuchiya)
+
+        documented df= argument in svyciprop(method="mean") (Anthony Damico)
+
+        added df= argument to other svyciprop methods for Stata compatibility (Anthony Damico)
+
+3.28-3  svykappa didn't work for larger than 2x2 tables. (Jeffery Hughes)
+
+        svyby didn't allow deff="replace"  (Francisco Fabuel)
+
+	svrepdesign(,type="other") now warns if scale, rscales arguments are not given
+
+	svystat, svrepstat objects now have a plot method (barplot, currently.)
+
+        svyplot(,type="bubble") now uses the basecol= argument for colors.
+
+        postStratify() now works when some input weights are zero
+
 3.28-2	calibrate() prints out sample and population totals when the lengths disagree
 
 	calibrate() is more stable when the initial weights are wrong by orders of

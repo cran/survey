@@ -18,7 +18,7 @@ svyplot.default<-function(formula,
   
   style<-match.arg(style)
   if (style %in% c("hex","grayhex") && !require(hexbin)){
-    stop(style," plots require the hexbin package (from Bioconductor)")
+    stop(style," plots require the hexbin package")
   }
 
   subset<-substitute(subset)
@@ -34,7 +34,8 @@ svyplot.default<-function(formula,
   
   switch(style, 
          bubble={
-           symbols(X,Y,circles=sqrt(W),inches=inches,...)
+           if(is.function(basecol)) basecol<-basecol(model.frame(design))
+           symbols(X,Y,circles=sqrt(W),inches=inches,fg=basecol,...)
          },
          hex={
            if (exists("hcell")) {
@@ -211,6 +212,9 @@ svycoplot.default<-function(formula, design, style=c("hexbin","transparent"),
 barplot.svystat<-function(height,...) barplot(coef(height),...)
 barplot.svrepstat<-function(height,...) barplot(coef(height),...)
 
+plot.svystat<-function(x,...) barplot(coef(x),...)
+plot.svrepstat<-function(x,...) barplot(coef(x),...)
+
 barplot.svyby<-function(height,beside=TRUE,...){    
   aa <- attr(height, "svyby")
   rval <- height[, max(aa$margins) + (1:aa$nstats)]
@@ -229,6 +233,9 @@ barplot.svyby<-function(height,beside=TRUE,...){
   }
   barplot(rval,beside=beside,...)
 }
+
+plot.svyby<-function(x,...) barplot.svyby(x,...)
+
 
 dotchart.default<-graphics::dotchart
 dotchart<-function(x,...,pch=19) UseMethod("dotchart")

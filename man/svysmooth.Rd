@@ -1,5 +1,6 @@
 \name{svysmooth}
 \alias{svysmooth}
+\alias{svysmooth.default}
 \alias{plot.svysmooth}
 \alias{print.svysmooth}
 \alias{lines.svysmooth}
@@ -11,7 +12,9 @@ Scatterplot smoothing and density estimation for probability-weighted
 data. 
 }
 \usage{
-svysmooth(formula, design, method = c("locpoly","quantreg"), bandwidth=NULL,quantile,df, ...)
+svysmooth(formula, design, ...)
+\method{svysmooth}{default}(formula, design, method = c("locpoly", "quantreg"), 
+    bandwidth = NULL, quantile, df = 4, ...)
 \method{plot}{svysmooth}(x, which=NULL, type="l", xlabs=NULL, ylab=NULL,...)
 \method{lines}{svysmooth}(x,which=NULL,...)
 make.panel.svysmooth(design,bandwidth=NULL)

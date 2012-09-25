@@ -70,7 +70,7 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
   \code{population} argument is the population column sums of this
   matrix.
 
-  For the special case where the calibration totals are (possibly
+  For the important special case where the calibration totals are (possibly
   overlapping) marginal tables of factor variables, as in classical
   raking, the \code{formula} and \code{population} arguments may be
   lists in the same format as the input to \code{\link{rake}}.
@@ -79,6 +79,11 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
   checked against the names produced by \code{model.matrix(formula)} and
   reordered if necessary.  This protects against situations where the
   (locale-dependent) ordering of factor levels is not what you expected.
+
+  Numerical instabilities may result if the sampling weights in the
+  \code{design} object are wrong by multiple orders of magnitude. The
+  code now attempts to rescale the weights first, but it is better for
+  the user to ensure that the scale is reasonable. 
   
   The \code{calibrate} function implements linear, bounded linear,
   raking, bounded raking, and logit calibration functions. All except
@@ -168,6 +173,8 @@ Procedures in Survey Sampling. JASA 88:1013-1020
 Kalton G, Flores-Cervantes I (2003) "Weighting methods" J Official
  Stat 19(2) 81-97
   
+Lumley T, Shaw PA, Dai JY (2011) "Connections between survey calibration estimators and semiparametric models for incomplete data" International Statistical Review. 79:200-220. (with discussion 79:221-232)
+
 Sarndal C-E, Swensson B, Wretman J. "Model Assisted Survey
 Sampling". Springer. 1991.
 

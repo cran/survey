@@ -41,18 +41,18 @@ svyttest.default<-function(formula, design, ...){
 expit<-function(eta) exp(eta)/(1+exp(eta))
 	
 svyciprop<-function(formula, design, method=c("logit","likelihood","asin","beta","mean"),
-                    level=0.95,...)	{
+                    level=0.95,df=degf(design),...)	{
   method<-match.arg(method)
   if (method=="mean"){
     m<-eval(bquote(svymean(~as.numeric(.(formula[[2]])),design,...)))
-    ci<-as.vector(confint(m,1,level=level,...))
+    ci<-as.vector(confint(m,1,level=level,df=df,...))
     rval<-coef(m)[1]
     attr(rval,"var")<-vcov(m)
   } else if (method=="asin"){
     m<-eval(bquote(svymean(~as.numeric(.(formula[[2]])),design,...)))
     names(m)<-1
     xform<-svycontrast(m,quote(asin(sqrt(`1`))))
-    ci<-sin(as.vector(confint(xform,1,level=level,...)))^2
+    ci<-sin(as.vector(confint(xform,1,level=level,df=df,...)))^2
     rval<-coef(m)[1]
     attr(rval,"var")<-vcov(m)
   } else if (method=="beta"){
@@ -67,7 +67,7 @@ svyciprop<-function(formula, design, method=c("logit","likelihood","asin","beta"
   } else {
     m<-eval(bquote(svyglm(.(formula[[2]])~1,design, family=quasibinomial)))
     cimethod<-switch(method, logit="Wald",likelihood="likelihood")
-    ci<-suppressMessages(as.numeric(expit(confint(m,1,level=level,method=cimethod,ddf=NULL))))
+    ci<-suppressMessages(as.numeric(expit(confint(m,1,level=level,method=cimethod,ddf=df))))
     rval<-expit(coef(m))[1]
     attr(rval,"var")<-vcov(eval(bquote(svymean(~as.numeric(.(formula[[2]])),design,...))))
   }

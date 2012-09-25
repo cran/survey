@@ -35,6 +35,8 @@ method=c("Wald","LRT"), lrt.approximation="saddlepoint")
 }
 \references{
 Rao, JNK, Scott, AJ (1984) "On Chi-squared Tests For Multiway Contingency Tables with Proportions Estimated From Survey Data" Annals of Statistics 12:46-60.
+
+Lumley T, Scott A (2012) "Partial likelihood ratio tests for the Cox model under complex sampling" Statistics in Medicine 17 JUL 2012. DOI: 10.1002/sim.5492
 }
 \seealso{\code{\link{anova}}, \code{\link{vcov}}, \code{\link{contrasts}},\code{\link{pchisqsum}}}
 \examples{

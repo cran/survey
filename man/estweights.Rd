@@ -50,12 +50,17 @@ estWeights(data,formula,...)
 }
 
 \references{
+Breslow NE, Lumley T, Ballantyne CM, Chambless LE, Kulich M. (2009) Using the Whole Cohort in the Analysis of Case-Cohort Data.  Am J Epidemiol. 2009 Jun 1;169(11):1398-405.
+
 Robins JM, Rotnitzky A, Zhao LP. (1994) Estimation of regression
 coefficients when some regressors are not always observed. Journal of
 the American Statistical Association, 89, 846-866.
 
 Kulich M, Lin DY (2004). Improving the Efficiency of Relative-Risk
 Estimation in Case-Cohort Studies. Journal of the American Statistical Association, Vol. 99,  pp.832-844 
+
+Lumley T, Shaw PA, Dai JY (2011) "Connections between survey calibration estimators and semiparametric models for incomplete data" International Statistical Review. 79:200-220. (with discussion 79:221-232)
+
 }
 
 \seealso{ \code{\link{postStratify}},

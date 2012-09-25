@@ -46,7 +46,8 @@ svytable                Contingency tables
 svychisq                Tests for two-way tables
 svyttest                Design-based t-test
 svyranktest             Design-based two-sample rank tests
-marginpred              Predictive margins by direct standardization
+svylogrank		Design-based logrank tests
+svystandardize		Direct standardisation 
 svykappa                Cohen's kappa for inter-rater agreement
 svymle                  Maximum pseudolikelihood estimation in complex surveys
 svyprcomp               Principal component analysis and biplots
@@ -95,4 +96,4 @@ scd                     Cardiac arrests example
 api                     California Academic Performance Index
 crowd                   Small example from VPLX manual
 mu284                   Two-stage sample from MU284 population
-
+nhanes			Subset of NHANES 2009-10

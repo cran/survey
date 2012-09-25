@@ -25,6 +25,9 @@ svykappa(formula, design, ...)
 data(api)
 dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
 svykappa(~comp.imp+sch.wide, dclus1)
+
+dclus1<-update(dclus1, stypecopy=stype)
+svykappa(~stype+stypecopy,dclus1)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

@@ -34,8 +34,8 @@ Possible additional developments in no particular order:
 
  - an interface to twophase and calibrate for IPTW estimation.
 
- - Replicate weights for two-phase designs and for multistage designs
-   with large sampling fraction (Fukuoka's BBE?)
+ - Replicate weights for two-phase designs 
+   -- [done] and for multistage designs with large sampling fraction (Fukuoka's BBE?)
 
  [experimental] parallel processing for replicate weights, svyby(), svyrecvar()?
 

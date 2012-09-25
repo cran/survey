@@ -85,6 +85,8 @@ Survival Times" Lifetime Data Analysis 1: 171--186
 
   \code{\link{svykm}} for estimation of Kaplan-Meier survival curves and
   for methods that operate on survival curves.
+
+\code{\link{regTermTest}} for Wald and (Rao-Scott) likelihood ratio tests for one or more parameters.
 }
 
 \examples{

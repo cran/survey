@@ -297,6 +297,8 @@ svyrecvar<-function(x, clusters,  stratas, fpcs, postStrata=NULL,
         psw<-attr(psvar, "weights")
         oldw<-attr(psvar, "oldweights")
         if (is.null(oldw)) oldw<-rep(1,length(psw))
+        zeroes<-which(psw==0 & oldw==0)
+        if (length(zeroes)) psw[zeroes]=1
         psvar<-as.factor(psvar)
         psmeans<-rowsum(x*oldw/psw,psvar,reorder=TRUE)/as.vector(by(oldw,psvar,sum))
         x<- x-psmeans[match(psvar,sort(unique(psvar))),]*psw

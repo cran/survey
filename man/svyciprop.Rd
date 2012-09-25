@@ -8,7 +8,7 @@ more accurate near 0 and 1 than simply using \code{confint(svymean())}.
 }
 \usage{
 svyciprop(formula, design, method = c("logit", "likelihood", "asin", "beta",
-"mean"), level = 0.95, ...)
+"mean"), level = 0.95, df=degf(design),...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -16,7 +16,12 @@ svyciprop(formula, design, method = c("logit", "likelihood", "asin", "beta",
   \item{design}{ survey design object}
   \item{method}{ See Details below. Partial matching is done on the argument.}
   \item{level}{Confidence level for interval}
-  \item{\dots}{for future methods}
+  \item{df}{denominator degrees of freedom, for all methods except
+    \code{"beta"}.  Use \code{Inf} for confidence intervals based on a
+    Normal distribution, and for \code{"likelihood"} and \code{"logit"}
+    use \code{NULL} for the default method in glms (currently
+    \code{degf(design)-1}, but this may be improved in the future)}
+  \item{\dots}{For \code{"mean"} and \code{"asin"}, this is passed to \code{\link{confint.svystat}} }
 }
 \details{
 The \code{"logit"} method fits a logistic regression model and computes a
@@ -72,6 +77,8 @@ svyciprop(~I(ell==0), dclus1, method="lo")
 svyciprop(~I(ell==0), dclus1, method="as")
 svyciprop(~I(ell==0), dclus1, method="be")
 svyciprop(~I(ell==0), dclus1, method="me")
+## reproduces Stata
+svyciprop(~I(ell==0), dclus1, method="me", df=degf(dclus1))
 
 rclus1<-as.svrepdesign(dclus1)
 svyciprop(~I(emer==0), rclus1, method="li")

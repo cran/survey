@@ -304,6 +304,7 @@ grake<-function(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verb
   if (min(scales)> SOMETHRESHOLD){
     scale<-mean(scales)
     ww<-ww*scale
+    sample.total<-sample.total*scale
     if(verbose) message(paste("Sampling weights rescaled by",signif(scale,3)))
     if (any(is.finite(bounds))) warning(paste("Bounds were set but will be interpreted after rescaling by",signif(scale,3)))
   } else scale<-NULL

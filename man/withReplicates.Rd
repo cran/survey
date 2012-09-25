@@ -2,6 +2,7 @@
 \alias{withReplicates}
 \alias{withReplicates.svyrep.design}
 \alias{withReplicates.svrepvar}
+\alias{withReplicates.svrepstat}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Compute variances by replicate weighting}
 \description{
@@ -13,6 +14,7 @@ replicate-based estimate of variance.
 withReplicates(design, theta,..., return.replicates=FALSE)
 \method{withReplicates}{svyrep.design}(design, theta, rho = NULL, ..., scale.weights=FALSE, return.replicates=FALSE)
 \method{withReplicates}{svrepvar}(design, theta,  ...,  return.replicates=FALSE)
+\method{withReplicates}{svrepstat}(design, theta,  ...,  return.replicates=FALSE)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -46,6 +48,9 @@ For the \code{svrepvar} method a function will get the covariance
 matrix as its first argument, and an expression will be evaluated with
 \code{.replicate} set to the variance matrix.
 
+For the \code{svrepstat} method a function will get the point estimate, and an expression will be evaluated with
+\code{.replicate} set to each replicate.  The method can only be used
+when the \code{svrepstat} object includes replicates.
 
 }
 \value{
@@ -76,6 +81,13 @@ varmat<-svyvar(~api00+api99+ell+meals+hsg+mobility,rclus1,return.replicates=TRUE
 withReplicates(varmat, quote( factanal(covmat=.replicate, factors=2)$unique) )
 
 
+data(nhanes)
+nhanesdesign <- svydesign(id=~SDMVPSU, strata=~SDMVSTRA, weights=~WTMEC2YR, nest=TRUE,data=nhanes)
+logistic <- svyglm(HI_CHOL~race+agecat+RIAGENDR, design=as.svrepdesign(nhanesdesign),
+family=quasibinomial, return.replicates=TRUE)
+fitted<-predict(logistic, return.replicates=TRUE, type="response")
+sensitivity<-function(pred,actual) mean(pred>0.1 & actual)/mean(actual)
+withReplicates(fitted, sensitivity, actual=logistic$y)
 
 \dontrun{
 library(quantreg)

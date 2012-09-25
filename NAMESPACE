@@ -10,7 +10,7 @@ export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        make.calfun, cal.linear, cal.raking, cal.logit, svycdf, svykappa, svykm,
        svyolr, svycoplot, svyloglin, make.panel.svysmooth, dotchart, subbootweights,
        svyciprop, svyttest, marginpred, twophasevar, twophase2var, ppsmat, HR, unwtd.count,
-       svyfactanal, svyprcomp, trimWeights,stratsample,svylogrank,svyranktest)
+       svyfactanal, svyprcomp, trimWeights,stratsample,svylogrank,svyranktest,svystandardize)
 
 S3method(svyloglin,survey.design)
 S3method(svyloglin,svyrep.design)
@@ -145,8 +145,11 @@ S3method(svycdf, default)
 S3method(svycdf, DBIsvydesign)
 S3method(svycdf, ODBCsvydesign)
 
+S3method(plot, svystat)
+S3method(plot, svrepstat)
 S3method(barplot, svystat)
 S3method(barplot, svrepstat)
+S3method(plot, svyby)
 S3method(barplot, svyby)
 
 S3method(dotchart, svystat)
@@ -155,6 +158,7 @@ S3method(dotchart, svyby)
 S3method(dotchart, default)
 
 S3method(predict, svyglm)
+S3method(predict, svrepglm)
 S3method(predict, svyratio)
 S3method(predict, svyratio_separate)
 S3method(coef,svyratio)
@@ -293,6 +297,7 @@ S3method(as.matrix, svrepvar)
 
 S3method(withReplicates, svyrep.design)
 S3method(withReplicates, svrepvar)
+S3method(withReplicates, svrepstat)
 
 S3method(dim,repweights_compressed)
 S3method(dim,survey.design)
