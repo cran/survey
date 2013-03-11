@@ -11,7 +11,7 @@ as a function.
 }
 \usage{
 \method{with}{svyimputationList}(data, expr, fun, ...,multicore=getOption("survey.multicore"))
-\method{subset}{svyimputationList}(x, subset,...,all=FALSE)
+\method{subset}{svyimputationList}(x, subset,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -21,9 +21,7 @@ as a function.
   \item{\dots}{for future expansion }
   \item{multicore}{Use \code{multicore} package to distribute imputed data sets over multiple processors?}
   \item{subset}{An logical expression specifying the subset}
-  \item{all}{If \code{TRUE} the subset is those where the expression is \code{TRUE} 
-  for all imputations, otherwise it is those where the expression is \code{TRUE} for
-  any imputation.}
+ 
 }
 
 \value{

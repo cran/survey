@@ -121,7 +121,11 @@ svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
       fpc<-eval.parent(mf)
     }
       
-      
+  ## check for only one PSU: probably a typo
+  if ((length(unique(ids[,1]))==1) && !(nest && has.strata)){
+    stop("Design has only one primary sampling unit")
+  }
+  
       ## force subclusters nested in clusters
       if (NCOL(ids)>1){
         N<-ncol(ids)

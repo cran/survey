@@ -1442,8 +1442,10 @@ extractAIC.svyglm<-function(fit,...){
 
 confint.svyglm<-function(object,parm,level=0.95,method=c("Wald","likelihood"),ddf=Inf,...){
   method<-match.arg(method)
-  if(method=="Wald")
+  if(method=="Wald"){
+    tlevel<-pt(qnorm(level),df=ddf)
     return(confint.default(object,parm=parm,level=level,...))
+  }
   pnames <- names(coef(object))
   if (missing(parm)) 
     parm <- seq_along(pnames)

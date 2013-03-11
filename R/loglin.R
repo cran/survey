@@ -107,7 +107,7 @@ anova.svyloglin<-function(object,object1,...,integrate=FALSE){
   an<-anova(m0,m1)
   dev<-an$Deviance[2]
   if (integrate){
-    pdev<-pchisqsum(dev,rep(1,ncol(wX2)), a=eigen(Delta,only.values=TRUE)$values,
+    pdev<-pchisqsum(dev,rep(1,ncol(wX2)), a=eigen(Delta,only.values=TRUE,symmetric=TRUE)$values,
                     lower.tail=FALSE,method="integration")
   } else pdev<-NA
   pdev1<-pchisq(dev*ncol(wX2)/tr(Delta),df=ncol(wX2),lower.tail=FALSE)
@@ -118,19 +118,19 @@ anova.svyloglin<-function(object,object1,...,integrate=FALSE){
   
   pearson<-n*sum( (pi1-pi0)^2/pi0 )
   if (integrate){
-    pearsonp<-pchisqsum(pearson, rep(1,ncol(wX2)), a=eigen(Delta,only.values=TRUE)$values,
+    pearsonp<-pchisqsum(pearson, rep(1,ncol(wX2)), a=eigen(Delta,only.values=TRUE,symmetric=TRUE)$values,
                         lower.tail=FALSE,method="integration")
   } else pearsonp<-NA
   prs1<-pchisq(pearson*ncol(wX2)/tr(Delta),df=ncol(wX2),lower.tail=FALSE)
   prs2<-pchisq(pearson*ncol(wX2)/tr(Delta),df=tr(Delta)^2/tr2(Delta),lower.tail=FALSE)
   prs2a<-pf(pearson/tr(Delta), tr(Delta)^2/tr2(Delta),dfnull*tr(Delta)^2/tr2(Delta),
             lower.tail=FALSE)
-  pchisqsad<-pchisqsum(pearson, rep(1,ncol(wX2)), a=eigen(Delta,only.values=TRUE)$values,
+  pchisqsad<-pchisqsum(pearson, rep(1,ncol(wX2)), a=eigen(Delta,only.values=TRUE,symmetric=TRUE)$values,
                         lower.tail=FALSE,method="saddlepoint")
 
   rval<-list(an, dev=list(dev=dev, p=c(pdev,pdev1,pdev2a,pdevsad)),
              score=list(chisq=pearson,p=c(pearsonp,prs1,prs2a,pchisqsad)),
-             integrate=integrate,a=eigen(Delta,only.values=TRUE)$values,p=ncol(wX2))
+             integrate=integrate,a=eigen(Delta,only.values=TRUE,symmetric=TRUE)$values,p=ncol(wX2))
   class(rval)<-"anova.svyloglin"
   rval
 }

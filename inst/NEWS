@@ -1,3 +1,19 @@
+3.29-4  add symmetric=TRUE to eigenvalue calculation in anova.svyloglin,
+	to improve numerical stability
+
+	subset.svyimputationList now allows the subsets to end up with 
+ 	different observations in them (for Anthony Damico)
+
+	subset.svyDBimputationList now gives an error if the subsets 
+	have different observations, not just a warning that people
+  	ignored.
+
+	svydesign gives an error if there is only one PSU, to catch
+	omission of tilde in svydesign(id=~1,...) (Milan Bouchet-Valat)
+
+3.29-2  confint.svyglm(method="Wald") wasn't using its ddf= argument, 
+	because confint.default() doesn't (Anthony Damico)
+
 3.29    svystandardize() for direct standardization over domains 
 
         withReplicates() has a method for svrepstat objects

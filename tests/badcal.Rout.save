@@ -1,0 +1,41 @@
+
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ##
+> ## Calibration with badly-scaled initial weights (bug report by Takahiro Tsuchiya)
+> ##
+> library(survey)
+
+Attaching package: 'survey'
+
+The following object(s) are masked from 'package:graphics':
+
+    dotchart
+
+> data <- data.frame(x=c(1,1,1,1,2,2,2,2,2,2), w=rep(10,10))
+> des <- svydesign(ids=~1, weights=~w, data=data)
+> des.c <- calibrate(des, ~factor(x), c(10000, 5000))
+> des.r <- calibrate(des, ~factor(x), c(10000, 5000), calfun='raking')
+Loading required package: MASS
+Warning message:
+package 'MASS' was built under R version 2.15.1 
+> stopifnot(all.equal(svytotal(~factor(x), des.c), svytotal(~factor(x), des.r)))
+> 
+> proc.time()
+   user  system elapsed 
+  0.262   0.030   0.281 

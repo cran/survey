@@ -1,0 +1,122 @@
+
+R version 2.15.0 (2012-03-30)
+Copyright (C) 2012 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> 
+> ## regression test for testing regression
+> 
+> library(survey)
+
+Attaching package: 'survey'
+
+The following object(s) are masked from 'package:graphics':
+
+    dotchart
+
+> data(api)
+> 
+> dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
+> 
+> 
+> f<-function(){
++   form<-acs.46~stype
++   svyglm(formula=form, design = dstrat)  
++ }
+> 
+> g<-function(form){
++   svyglm(formula=form, design = dstrat)  
++ }
+> f()
+Stratified Independent Sampling design
+svydesign(id = ~1, strata = ~stype, weights = ~pw, data = apistrat, 
+    fpc = ~fpc)
+
+Call:  svyglm(formula = form, design = dstrat)
+
+Coefficients:
+(Intercept)       stypeH       stypeM  
+    28.7449       0.7551       0.4022  
+
+Degrees of Freedom: 133 Total (i.e. Null);  129 Residual
+  (66 observations deleted due to missingness)
+Null Deviance:	    1838 
+Residual Deviance: 1835 	AIC: 719.8 
+> g(acs.46~stype)
+Stratified Independent Sampling design
+svydesign(id = ~1, strata = ~stype, weights = ~pw, data = apistrat, 
+    fpc = ~fpc)
+
+Call:  svyglm(formula = form, design = dstrat)
+
+Coefficients:
+(Intercept)       stypeH       stypeM  
+    28.7449       0.7551       0.4022  
+
+Degrees of Freedom: 133 Total (i.e. Null);  129 Residual
+  (66 observations deleted due to missingness)
+Null Deviance:	    1838 
+Residual Deviance: 1835 	AIC: 719.8 
+> 
+> f<-function(){
++   form<-Surv(acs.46)~stype
++   svycoxph(formula=form, design = dstrat)  
++ }
+> 
+> g<-function(form){
++   svycoxph(formula=form, design = dstrat)  
++ }
+> 
+> f()
+Loading required package: survival
+Loading required package: splines
+Call:
+svycoxph(formula = form, design = dstrat)
+
+
+         coef exp(coef) se(coef)     z    p
+stypeH -0.677     0.508    0.665 -1.02 0.31
+stypeM -0.251     0.778    0.209 -1.20 0.23
+
+Likelihood ratio test=  on 2 df, p=  n= 134, number of events= 134 
+   (66 observations deleted due to missingness)
+> g(Surv(acs.46)~stype)
+Call:
+svycoxph(formula = form, design = dstrat)
+
+
+         coef exp(coef) se(coef)     z    p
+stypeH -0.677     0.508    0.665 -1.02 0.31
+stypeM -0.251     0.778    0.209 -1.20 0.23
+
+Likelihood ratio test=  on 2 df, p=  n= 134, number of events= 134 
+   (66 observations deleted due to missingness)
+> 
+> ## check coxph for a single predictor
+> svycoxph(Surv(acs.46)~api00,design=dstrat)
+Call:
+svycoxph(formula = Surv(acs.46) ~ api00, design = dstrat)
+
+
+          coef exp(coef) se(coef)       z    p
+api00 6.06e-06         1 0.000749 0.00809 0.99
+
+Likelihood ratio test=  on 1 df, p=  n= 134, number of events= 134 
+   (66 observations deleted due to missingness)
+> 
+> proc.time()
+   user  system elapsed 
+  0.390   0.034   0.415 
