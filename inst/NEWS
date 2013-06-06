@@ -1,3 +1,12 @@
+3.29-5  Change from multicore to parallel.  
+	Parallel processing is now only available with R >=2.14
+
+	ddf argument really works now in confint.svyglm (Anthony Damic)
+
+	colour specification in plot.svykmlist now works (Mark Rosenstein)
+
+        svyplot() documentation explains how to annotate a hexbin plot
+
 3.29-4  add symmetric=TRUE to eigenvalue calculation in anova.svyloglin,
 	to improve numerical stability
 

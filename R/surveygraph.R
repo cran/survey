@@ -105,7 +105,7 @@ svyplot.default<-function(formula,
 }
 
 svyboxplot<-function(formula, design,all.outliers=FALSE,...) UseMethod("svyboxplot",design)
-svyboxplot.default<-function(formula, design,  all.outliers=FALSE,col=NULL,...){
+svyboxplot.default<-function(formula, design,  all.outliers=FALSE,col=NULL,names,...){
     
     formula<-as.formula(formula)
     if(length(formula)!=3) stop("need a two-sided formula")
@@ -155,6 +155,7 @@ svyboxplot.default<-function(formula, design,  all.outliers=FALSE,col=NULL,...){
         z$group<-rep(1,length(z$out))
     }
     if (is.null(col)) col<-par("bg")
+    if (!missing(names)) z$names<-names
     bxp(z,boxfill=col,...)
 }
 

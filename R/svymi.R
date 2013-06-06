@@ -127,7 +127,7 @@ subset.svyDBimputationList<-function(x, subset,...,all=FALSE){
 
 with.svyimputationList<-function (data, expr, fun, ..., multicore=getOption("survey.multicore")) {
     pf <- parent.frame()
-    if (multicore && !require("multicore",quietly=TRUE))
+    if (multicore && !require("parallel",quietly=TRUE))
       multicore<-FALSE
 
     if (!is.null(match.call()$expr)) {
@@ -136,7 +136,7 @@ with.svyimputationList<-function (data, expr, fun, ..., multicore=getOption("sur
       if (multicore){
         results <- mclapply(data$designs,
                             function(.design) {
-                            multicore:::closeAll()
+                            parallel:::closeAll()
                             eval(expr, list(.design=.design),enclos=pf)
                           }
                             )
@@ -168,11 +168,11 @@ with.svyDBimputationList<-function (data, expr,  ..., multicore=getOption("surve
     if (!is.null(match.call()$expr)) {
       expr <- substitute(expr)
       expr$design<-as.name(".design")
-      if (multicore && !require("multicore")) multicore <-FALSE
+      if (multicore && !require("parallel")) multicore <-FALSE
       if (multicore){
         results<-mclapply(data$imputations,
                           function(tablename) {
-                            multicore:::closeAll()
+                            parallel:::closeAll()
                             close(data)
                             .design<-data$design
                             db<-data$db

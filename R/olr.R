@@ -11,7 +11,7 @@ svyolr.svyrep.design<-function(formula,design,...,return.replicates=FALSE,
  	environment(formula)<-environment()
  	df<-model.frame(design)
  	pwt<-weights(design,"sampling")
-        if (multicore && !require("multicore", quietly=TRUE))
+        if (multicore && !require("parallel", quietly=TRUE))
           multicore <- FALSE
         
  	rval<-suppressWarnings(polr(formula,data=df,...,Hess=TRUE,model=FALSE,
@@ -20,7 +20,7 @@ svyolr.svyrep.design<-function(formula,design,...,return.replicates=FALSE,
  	rw<-weights(design,"analysis")
         if (multicore){
           betas<-do.call(cbind,mclapply(1:ncol(rw), function(i){
-            multicore:::closeAll()
+            parallel:::closeAll()
             w<-rw[,i]
             environment(formula)<-environment()
             m<-polr(formula,data=df,Hess=FALSE, start=start, model=FALSE, weights=w)

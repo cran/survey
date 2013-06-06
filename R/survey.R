@@ -1444,7 +1444,7 @@ confint.svyglm<-function(object,parm,level=0.95,method=c("Wald","likelihood"),dd
   method<-match.arg(method)
   if(method=="Wald"){
     tlevel<-pt(qnorm(level),df=ddf)
-    return(confint.default(object,parm=parm,level=level,...))
+    return(confint.default(object,parm=parm,level=tlevel,...))
   }
   pnames <- names(coef(object))
   if (missing(parm)) 

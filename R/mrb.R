@@ -10,7 +10,7 @@ mrbweights<-function(clusters,stratas,fpcs, replicates=50, multicore=getOption("
     nstages<-1
   }
   
-  if (multicore & !require("multicore", quietly=TRUE))
+  if (multicore & !require("parallel", quietly=TRUE))
     multicore<-FALSE
   do.it<-if(multicore) mclapply else lapply
   

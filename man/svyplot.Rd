@@ -89,6 +89,13 @@ legend("topleft",col=c("goldenrod","tomato","sienna"), pch=19, legend=c("E","H",
 ## For discrete data, estimate a population table and plot the table.
 plot(svytable(~sch.wide+comp.imp+stype,design=dstrat))
 fourfoldplot(svytable(~sch.wide+comp.imp+stype,design=dstrat,round=TRUE))
+
+
+## To draw on a hexbin plot you need grid graphics, eg,
+
+h<-svyplot(api00~api99, design=dstrat, style="hex", xlab="1999 API",ylab="2000 API")
+s<-svysmooth(api00~api99,design=dstrat)
+grid.polyline(s$api99$x,s$api99$y,vp=h$plot.vp@hexVp.on,default.units="native", gp=gpar(col="red",lwd=2))
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
 \keyword{hplot}% __ONLY ONE__ keyword per line

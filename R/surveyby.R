@@ -19,7 +19,7 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
       stop("covmat=TRUE not implemented for this design type")
   }
 
-  if (multicore && !require("multicore",quietly=TRUE))
+  if (multicore && !require("parallel",quietly=TRUE))
     multicore<-FALSE
 
   ## some people insist on using vectors rather than formulas
@@ -75,7 +75,7 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
       ## but it seems to work.
       results<-(if (multicore) mclapply else lapply)(uniques,
                       function(i){
-                        if (multicore) multicore:::closeAll()
+                        if (multicore) parallel:::closeAll()
                         if(verbose && !multicore) print(as.character(byfactor[i]))
                         if (inherits(formula,"formula"))
                           data<-formula

@@ -9,17 +9,17 @@ Description: Summary statistics, two-sample tests, generalised linear
         subsampling designs. Graphics. Predictive margins by direct
         standardization. PPS sampling without replacement. Principal
         components, factor analysis.
-Version: 3.29-4
+Version: 3.29-5
 Author: Thomas Lumley
 Maintainer: Thomas Lumley <tlumley@u.washington.edu>
 License: GPL-2 | GPL-3
 Depends: R (>= 2.10.0)
 Suggests: foreign, survival, MASS, splines, KernSmooth, hexbin,
-        mitools, lattice, RSQLite, RODBC, quantreg, Matrix, multicore,
+        mitools, lattice, RSQLite, RODBC, quantreg, Matrix, parallel,
         CompQuadForm
 Enhances: odfWeave.survey
 URL: http://faculty.washington.edu/tlumley/survey/
-Packaged: 2013-03-11 01:29:20 UTC; tlum005
+Packaged: 2013-06-06 23:46:49 UTC; tlum005
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2013-03-11 07:36:04
+Date/Publication: 2013-06-12 17:40:08

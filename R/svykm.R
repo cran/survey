@@ -124,7 +124,7 @@ lines.svykm<-function(x,xlab="time",type="s",ci=FALSE,lty=1,...){
 }
 
 plot.svykmlist<-function(x, pars=NULL, ci=FALSE,...){
-  if (!is.null(pars)) pars<-as.data.frame(pars)
+  if (!is.null(pars)) pars<-as.data.frame(pars,stringsAsFactors=FALSE)
 
   if(is.null(pars))
     plot(x[[1]],ci=ci,...)

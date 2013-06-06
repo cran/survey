@@ -1199,7 +1199,7 @@ svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replica
   subset<-eval(subset, design$variables, parent.frame())
   if (!is.null(subset))
     design<-design[subset,]
-  if (multicore && !require(multicore,quietly=TRUE))
+  if (multicore && !require(parallel,quietly=TRUE))
     multicore<-FALSE
   
   data<-design$variables
@@ -1259,7 +1259,7 @@ svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replica
 ##  }
   if (multicore){
     betas<-do.call(rbind, mclapply(1:ncol(wts), function(i){
-      multicore:::closeAll()
+      parallel:::closeAll()
       fitter(full$x, full$y, full$strata, full$offset,
              coef(full), coxph.control(),
              as.vector(wts[,i])*pw1+EPSILON,
@@ -1314,7 +1314,7 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL, ...,
   if (!is.null(subset))
     design<-design[subset,]
 
-  if(multicore && !require("multicore",quietly=TRUE))
+  if(multicore && !require("parallel",quietly=TRUE))
     multicore<-FALSE
   
   data<-design$variables
@@ -1379,7 +1379,7 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL, ...,
           contrl<-full$control
           if (multicore){
             betas<-do.call(rbind,mclapply(1:ncol(wts), function(i){
-              multicore:::closeAll()
+              parallel:::closeAll()
               wi<-as.vector(wts[,i])*pw1
               glm.fit(XX, YY, weights = wi/sum(wi),
                       start =beta0,
