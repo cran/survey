@@ -10,15 +10,12 @@ make.panel.svysmooth<-function(design,bandwidth=NULL){
 
 
 svyplot<-function(formula, design,...) UseMethod("svyplot",design)
-
-if(getRversion() >= "2.15.1")  utils::globalVariables("hcell")
-
 svyplot.default<-function(formula,
                   design,
                   style=c("bubble","hex","grayhex","subsample","transparent"),
                   sample.size=500, subset=NULL,legend=1,inches=0.05,
                   amount=NULL,basecol="black",alpha=c(0,0.8), xbins=30,...){
-
+  
   style<-match.arg(style)
   if (style %in% c("hex","grayhex") && !require(hexbin)){
     stop(style," plots require the hexbin package")
@@ -31,27 +28,17 @@ svyplot.default<-function(formula,
 
   W<-weights(design, "sampling")
 
-  mf<-model.frame(formula, design$variables,na.action=na.pass)
+  mf<-model.frame(formula, design$variables,na.action=na.pass)  
   Y<-model.response(mf)
   X<-mf[,attr(attr(mf,"terms"),"term.labels")]
-
-  switch(style,
+  
+  switch(style, 
          bubble={
            if(is.function(basecol)) basecol<-basecol(model.frame(design))
            symbols(X,Y,circles=sqrt(W),inches=inches,fg=basecol,...)
          },
          hex={
-           if (exists("hcell", mode = "function")) {
-             ## old version of hexbin
-             rval<-hexbin(X,Y,xbins=xbins)
-             cell<-hcell(X,Y)$cell
-             rval$cnt<-tapply(W,cell,sum)
-           rval$xcm<-tapply(1:length(X), cell,
-                          function(ii) weighted.mean(X[ii],W[ii]))
-           rval$ycm<-tapply(1:length(Y), cell,
-                           function(ii) weighted.mean(Y[ii],W[ii]))
-             plot(rval,legend=legend,style="centroids",...)
-           } else {
+           ## CRAN will be happier if we stop supporting the old version of hexbin
              ## new version
              rval<-hexbin(X,Y,IDs=TRUE,xbins=xbins)
              cell<-rval@cID
@@ -61,24 +48,16 @@ svyplot.default<-function(formula,
              rval@ycm<-as.vector(tapply(1:length(Y), cell,
                               function(ii) weighted.mean(Y[ii],W[ii])))
              gplot.hexbin(rval, legend=legend, style="centroids",...)
-           }
-
+           
+           
          },
          grayhex={
-           if (exists("hcell", mode = "function")) {
-             ## old version of hexbin
-             rval<-hexbin(X,Y,xbins=xbins)
-             cell<-hcell(X,Y)$cell
-             rval$cnt<-tapply(W,cell,sum)
-             plot(rval, legend=legend,...)
-           } else {
              ## new version
              rval<-hexbin(X,Y,IDs=TRUE,xbins=xbins)
              cell<-rval@cID
              rval@count<-as.vector(tapply(W,cell,sum))
              gplot.hexbin(rval, legend=legend,...)
-           }
-
+        
          },
          subsample={
            index<-sample(length(X),sample.size,replace=TRUE, prob=W)
@@ -109,14 +88,14 @@ svyplot.default<-function(formula,
 
 svyboxplot<-function(formula, design,all.outliers=FALSE,...) UseMethod("svyboxplot",design)
 svyboxplot.default<-function(formula, design,  all.outliers=FALSE,col=NULL,names,...){
-
+    
     formula<-as.formula(formula)
     if(length(formula)!=3) stop("need a two-sided formula")
     ##if(length(formula[[3]])>2) stop("only one rhs variable allowed")
-
+    
     outcome<-eval(bquote(~.(formula[[2]])))
     outcome.values<-model.frame(outcome, model.frame(design),na.action=na.pass)
-
+    
     if (length(attr(terms(formula),"term.labels"))){
         groups<-eval(bquote(~.(formula[[3]])))
         qs <- svyby(outcome,groups,design,svyquantile,ci=FALSE,
@@ -171,7 +150,7 @@ svycoplot.default<-function(formula, design, style=c("hexbin","transparent"),
   require(lattice)
   style<-match.arg(style)
   wt<-weights(design,"sampling")
-
+  
   switch(style,
          hexbin={
            require(hexbin) || stop("hexbin package is required (from Bioconductor)")
@@ -179,9 +158,9 @@ svycoplot.default<-function(formula, design, style=c("hexbin","transparent"),
            xyplot(formula, data=model.frame(design), xbins=xbins,
                   panel=function(x,y,style="centroids",xbins,subscripts,...) {
                     if (!length(x)) return(panel.xyplot(x,y,...))
-                    vp<-grid::current.viewport()
-                    wd<-grid::convertWidth(vp$width,unitTo="cm",valueOnly=TRUE)
-                    ht<-grid::convertHeight(vp$height,unitTo="cm",valueOnly=TRUE)
+                    vp<-current.viewport()
+                    wd<-convertWidth(vp$width,unitTo="cm",valueOnly=TRUE)
+                    ht<-convertHeight(vp$height,unitTo="cm",valueOnly=TRUE)
                     W<-wt[subscripts]
                     rval<-hexbin(x,y,IDs=TRUE,xbins=xbins,shape=ht/wd,xbnds=vp$xscale,ybnds=vp$yscale)
                     cell<-rval@cID
@@ -203,7 +182,7 @@ svycoplot.default<-function(formula, design, style=c("hexbin","transparent"),
            minw<-0
            alphas<- (alpha[1]*(maxw-wt)+alpha[2]*(wt-minw))/(maxw-minw)
            cols<-transcol(basecol,alphas)
-           xyplot(formula, data=model.frame(design),
+           xyplot(formula, data=model.frame(design), 
                   panel=function(x,y,basecol="black",subscripts,...) {
                     a<-alphas[subscripts]
                     panel.xyplot(x,y,col=cols[subscripts],pch=19,...)
@@ -219,7 +198,7 @@ barplot.svrepstat<-function(height,...) barplot(coef(height),...)
 plot.svystat<-function(x,...) barplot(coef(x),...)
 plot.svrepstat<-function(x,...) barplot(coef(x),...)
 
-barplot.svyby<-function(height,beside=TRUE,...){
+barplot.svyby<-function(height,beside=TRUE,...){    
   aa <- attr(height, "svyby")
   rval <- height[, max(aa$margins) + (1:aa$nstats)]
   if (is.null(dim(rval))) {

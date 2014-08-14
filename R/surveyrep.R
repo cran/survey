@@ -1766,13 +1766,27 @@ coef.svrepstat<-function(object,...){
   unclass(object)
 }
 
-vcov.svrepstat<-function(object,...){
-  nms<-names(coef(object))
-  if(is.list(object)) object<-object[[1]]
-  v<-as.matrix(attr(object,"var"))
-  dimnames(v)<-list(nms,nms)
-  v
+vcov.svrepstat<-function (object, ...) 
+{
+  nms <- names(coef(object))
+  if (is.list(object)) 
+    object <- object[[1]]
+  v <- as.matrix(attr(object, "var"))
+  
+  if (length(object) == NCOL(v)) {
+    dimnames(v) <- list(nms, nms)
+    v
+  }
+  else if (length(object) == length(v)) {
+    dnms <- dimnames(coef(object))
+    vmat <- matrix(NA, nrow = length(object), ncol = length(object))
+    diag(vmat) <- as.vector(v)
+    nms <- as.vector(outer(dnms[[1]], dnms[[2]], paste, sep = ":"))
+    dimnames(vmat) <- list(nms, nms)
+    vmat
+  }
 }
+
 
 
 as.data.frame.svrepstat<-function(x,...){

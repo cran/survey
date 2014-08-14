@@ -35,7 +35,7 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
   }
 
   hasdeff<- is.character(deff) || deff
-
+  
   ## all combinations that actually occur in this design
   byfactor<-do.call("interaction", byfactors)
   dropped<- weights(design,"sampling")==0
@@ -50,12 +50,12 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
   uniquelevels<-sort(unique(byfactor[!dropped]))
   uniques <- match(uniquelevels, byfactor)
 
-
+  
   if(missing(vartype)) vartype<-"se"
   vartype<-match.arg(vartype,several.ok=TRUE)
   nvartype<-which(eval(formals(sys.function())$vartype) %in% vartype)
   if(any(is.na(nvartype))) stop("invalid vartype")
-
+  
   if (keep.var){
       unwrap <-function(x){
         rval<-c(coef(x))
@@ -95,18 +95,17 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
         replicates<-do.call(cbind,lapply(results,"[[","replicates"))
         colnames(replicates)<-rep(as.character(uniquelevels), each=NCOL(replicates)/length(uniquelevels))
         covmat.mat<-svrVar(replicates,design$scale,design$rscales, mse=design$mse,coef=as.vector(sapply(results,coef)))
-##       } else{
-        ## unused, does not work with multiple responses
-##         covmats<-lapply(results,vcov)
-##         ncovmat<-sum(sapply(covmats,ncol))
-##         covmat.mat<-matrix(0,ncol=ncovmat,nrow=ncovmat)
-##         j<-0
-##         for(i in 1:length(covmats)){
-##           ni<-nrow(covmats[[i]])
-##           covmat.mat[j+(1:ni),j+(1:ni)]<-covmats[[i]]
-##           j<-j+ni
-##         }
-       }
+      } else{
+        covmats<-lapply(results,vcov)
+        ncovmat<-sum(sapply(covmats,ncol))
+        covmat.mat<-matrix(0,ncol=ncovmat,nrow=ncovmat)
+        j<-0
+        for(i in 1:length(covmats)){
+          ni<-nrow(covmats[[i]])
+          covmat.mat[j+(1:ni),j+(1:ni)]<-covmats[[i]]
+          j<-j+ni
+        }
+      }      
     } else {
       unwrap2 <- function(x){
           if(!is.null(attr(x, "deff")))
@@ -129,9 +128,9 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
   }
 
   nr<-NCOL(rval)
-  nstats<-nr/(1+ keep.var*length(vartype) + hasdeff)
+  nstats<-nr/(1+ keep.var*(length(vartype)+ ("ci" %in% vartype)) + hasdeff)
 
-
+              
   if (nr>1)
     rval<-cbind(byfactors[uniques,,drop=FALSE], rval)
   else
@@ -142,7 +141,7 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
     if (x){
       i<-matrix(1:(ns*reps),ncol=reps)
       rval<-t(i[index,])
-
+      
     } else{
       i<-matrix(1:(ns*reps), ncol=reps, nrow=ns, byrow=TRUE)
       rval<- i[index,]
@@ -154,10 +153,11 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
       if (keep.names)
           rownames(rval)<-paste(byfactor[uniques])
       rval<-rval[order(byfactor[uniques]),]
-      if(covmat){
-        i<-expand.index(order(byfactor[uniques]),nstats)
+
+      i<-expand.index(order(byfactor[uniques]),nstats)
+      if (keep.var)
         covmat.mat<-covmat.mat[i,i]
-      }
+
   } else {
       a<-do.call("expand.grid", lapply(byfactors,function(f) levels(as.factor(f))))
       a<-cbind(a,matrix(NA, ncol=nr, nrow=nrow(a)))
@@ -166,14 +166,14 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
       rval<-a
       if (keep.names)
           rownames(rval)<-levels(byfactor)
-      if(covmat){
+      if (keep.var){
         tmp<-matrix(ncol=nrow(a)*nstats,nrow=nrow(a)*nstats)
         i<-expand.index(match(byfactor[uniques], levels(byfactor)),nstats,TRUE)
         tmp[i,i]<-covmat.mat
         covmat.mat<-tmp
       }
   }
-
+                  
   attr(rval,"svyby")<-list(margins=1:NCOL(byfactors),nstats=nstats,
                            vars=if(keep.var) length(vartype) else 0,
                            deffs=deff,
@@ -206,7 +206,7 @@ SE.svyby <-function(object,...){
     else if (pos<-match("cvpct",vartype,0))
          object[,max(aa$margins)+aa$nstats*pos+(1:aa$nstats)]*coef(object)/100
     else stop("This can't happen")
-
+           
 }
 
 coef.svyby<-function (object, ...)
@@ -251,9 +251,9 @@ confint.svyquantile<-function(object,parm=NULL,level=NULL,...){
   colnames(ci)<-dimnames(object$CIs)[[1]]
   rownames(ci)<-outer(dimnames(object$CIs)[[2]],
                       dimnames(object$CIs)[[3]],paste,sep="_")
-  if (is.null(parm))
+  if (is.null(parm)) 
     ci
-  else
+  else 
     ci[parm,,drop=FALSE]
 }
-
+	
