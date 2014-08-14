@@ -8,6 +8,8 @@ Possible additional developments in no particular order:
 
  [mostly done] Rao-Scott-type tests for glms.
 
+- AIC/BIC
+
 - better choice of denominator df for tests
 
  [done] More general HT estimator for sampling without replacement
@@ -35,7 +37,7 @@ Possible additional developments in no particular order:
  - an interface to twophase and calibrate for IPTW estimation.
 
  - Replicate weights for two-phase designs 
-   -- [done] and for multistage designs with large sampling fraction (Fukuoka's BBE?)
+   [done] and for multistage designs with large sampling fraction (Fukuoka's BBE?)
 
  [experimental] parallel processing for replicate weights, svyby(), svyrecvar()?
 
@@ -48,5 +50,5 @@ Possible additional developments in no particular order:
  - Multivariate statistics
    [done] principal components
    [experimental] factor analysis 
-    - SEMs? 
+   [done in lavaan.survey package] SEMs? 
 

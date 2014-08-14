@@ -44,6 +44,51 @@ svykm.survey.design<-function(formula, design,se=FALSE, ...){
   return(s)
 }
 
+
+svykm.svyrep.design<-function(formula, design,se=FALSE, ...){
+  require("survival")
+  if (!inherits(formula,"formula")) stop("need a formula")
+  if (length(formula)!=3) stop("need a two-sided formula")
+  mf<-model.frame(formula, model.frame(design), na.action=na.pass)
+  mf<-na.omit(mf)
+  drop<-attr(mf,"na.action")
+  if (!is.null(drop)) 
+    design<-design[-drop,] 
+  y<-model.response(mf)
+  if (!is.Surv(y) || attr(y,"type")!="right")
+    stop("response must be a right-censored Surv object")      
+
+  if (ncol(mf)==1) {
+    if (se)
+      stop("SE not yet available")
+    else 
+      s<-svykm.fit(y,weights(design,"sampling"))
+  } else {
+    x<-mf[,-1]
+    if (NCOL(x)>1)
+      groups<-do.call(interaction,x)
+    else
+      groups<-as.factor(x)
+    
+    if (se){
+      lhs<-formula
+      lhs[[3]]<-1
+      s<-lapply(levels(groups), function(g) svykm(lhs, subset(design,groups==g),se=TRUE))
+    }else{
+      s<-lapply(levels(groups), function(g) svykm.fit(y[groups==g],weights(design)[groups==g]))
+    }
+    names(s)<-levels(groups)
+    class(s)<-"svykmlist"
+  }
+  call<-match.call()
+  call[[1]]<-as.name(.Generic)
+  attr(s,"call")<-call
+  attr(s, "formula")<-formula
+  attr(s, "na.action")<-drop
+  return(s)
+}
+
+
 svykm.fit<-function(y,w){
   t<-y[,"time"]
   s<-y[,"status"]
@@ -241,7 +286,7 @@ predict.svycoxph<-function(object, newdata, se=FALSE,
 ##
 ## The simple case first
 ##  
-  risk<-survival:::predict.coxph(object,type="risk",se.fit=FALSE)
+  risk<-getS3method("predict","coxph")(object,type="risk",se.fit=FALSE)
   if(se==FALSE){
     tt<-c(time,entry)
     ss<-c(status,rep(0,length(entry)))

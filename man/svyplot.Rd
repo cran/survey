@@ -69,11 +69,11 @@ dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
 
 svyplot(api00~api99, design=dstrat, style="bubble")
 svyplot(api00~api99, design=dstrat, style="transparent",pch=19)
-\dontrun{
+
 ## these two require the hexbin package 
 svyplot(api00~api99, design=dstrat, style="hex", xlab="1999 API",ylab="2000 API")
 svyplot(api00~api99, design=dstrat, style="grayhex",legend=0)
-}
+
 
 dclus2<-svydesign(id=~dnum+snum,  weights=~pw,
                     data=apiclus2, fpc=~fpc1+fpc2)
@@ -92,10 +92,11 @@ fourfoldplot(svytable(~sch.wide+comp.imp+stype,design=dstrat,round=TRUE))
 
 
 ## To draw on a hexbin plot you need grid graphics, eg,
-
+library(grid)
 h<-svyplot(api00~api99, design=dstrat, style="hex", xlab="1999 API",ylab="2000 API")
 s<-svysmooth(api00~api99,design=dstrat)
-grid.polyline(s$api99$x,s$api99$y,vp=h$plot.vp@hexVp.on,default.units="native", gp=gpar(col="red",lwd=2))
+grid.polyline(s$api99$x,s$api99$y,vp=h$plot.vp@hexVp.on,default.units="native", 
+   gp=gpar(col="red",lwd=2))
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
 \keyword{hplot}% __ONLY ONE__ keyword per line

@@ -28,7 +28,8 @@ data(fpc)
 fpc
 
 
-withoutfpc<-svydesign(weights=~weight, ids=~psuid, strata=~stratid, variables=~x, data=fpc, nest=TRUE)
+withoutfpc<-svydesign(weights=~weight, ids=~psuid, strata=~stratid, variables=~x, 
+   data=fpc, nest=TRUE)
 
 withoutfpc
 svymean(~x, withoutfpc)

@@ -1248,9 +1248,9 @@ svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replica
     if (attr(full$y,"type")=="right")
       fitter<-coxph.fit
     else if(attr(full$y,"type")=="counting")
-      fitter<-survival:::agreg.fit
+      fitter<-survival::agreg.fit
     else stop("invalid survival type")
-  } else fitter<-survival:::agexact.fit
+  } else fitter<-survival::agexact.fit
                  
 ##  g$init<-beta0
 ## for(i in 1:ncol(wts)){
@@ -1259,7 +1259,6 @@ svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replica
 ##  }
   if (multicore){
     betas<-do.call(rbind, mclapply(1:ncol(wts), function(i){
-      parallel:::closeAll()
       fitter(full$x, full$y, full$strata, full$offset,
              coef(full), coxph.control(),
              as.vector(wts[,i])*pw1+EPSILON,
@@ -1370,6 +1369,7 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL, ...,
           XX<-full$x
           YY<-full$y
           beta0<-coef(full)
+          if (!all(is.finite(beta0))) stop(paste("Infinite/NA values in estimate (",paste(beta0,collapse=","),")"))
           if(is.null(full$offset))
           offs<-rep(0,nrow(XX))
           else
@@ -1379,7 +1379,6 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL, ...,
           contrl<-full$control
           if (multicore){
             betas<-do.call(rbind,mclapply(1:ncol(wts), function(i){
-              parallel:::closeAll()
               wi<-as.vector(wts[,i])*pw1
               glm.fit(XX, YY, weights = wi/sum(wi),
                       start =beta0,
@@ -1638,10 +1637,6 @@ residuals.svrepglm<-function(object,type = c("deviance", "pearson", "working",
 
 logLik.svrepglm<-function(object,...){
    stop("svrepglm not fitted by maximum likelihood.")
-}
-
-extractAIC.svrepglm<-function(fit,...){
-    stop("svrepglm not fitted by maximum likelihood")
 }
 
 

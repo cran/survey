@@ -1,8 +1,7 @@
 
-R version 2.15.0 (2012-03-30)
-Copyright (C) 2012 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
-Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+R version 3.1.0 (2014-04-10) -- "Spring Dance"
+Copyright (C) 2014 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.1.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -20,7 +19,7 @@ Type 'q()' to quit R.
 
 Attaching package: 'survey'
 
-The following object(s) are masked from 'package:graphics':
+The following object is masked from 'package:graphics':
 
     dotchart
 
@@ -135,7 +134,7 @@ Loading required package: splines
 
 Attaching package: 'survival'
 
-The following object(s) are masked _by_ '.GlobalEnv':
+The following object is masked _by_ '.GlobalEnv':
 
     pbc
 
@@ -274,4 +273,4 @@ attr(,"phases")$phase2
 > 
 > proc.time()
    user  system elapsed 
-  4.052   0.161   4.202 
+  2.546   0.105   2.667 

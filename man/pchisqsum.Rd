@@ -12,8 +12,10 @@
 
 }
 \usage{
-pchisqsum(x, df, a, lower.tail = TRUE, method = c("satterthwaite", "integration","saddlepoint"))
-pFsum(x, df, a, ddf=Inf,lower.tail = TRUE, method = c("saddlepoint","integration","satterthwaite"), ...)
+pchisqsum(x, df, a, lower.tail = TRUE, 
+   method = c("satterthwaite", "integration","saddlepoint"))
+pFsum(x, df, a, ddf=Inf,lower.tail = TRUE, 
+   method = c("saddlepoint","integration","satterthwaite"), ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

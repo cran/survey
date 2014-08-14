@@ -18,11 +18,13 @@ data structure for such a survey.
 }
 \usage{
 svrepdesign(variables , repweights , weights, data,...)
-\method{svrepdesign}{default}(variables = NULL, repweights = NULL, weights = NULL, data =
-NULL, type = c("BRR", "Fay", "JK1","JKn","bootstrap","other"),
-combined.weights=TRUE, rho = NULL, bootstrap.average=NULL,
-scale=NULL, rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),mse=getOption("survey.replicates.mse"),...)
-\method{svrepdesign}{imputationList}(variables=NULL, repweights,weights,data,mse=getOption("survey.replicates.mse"),...)
+\method{svrepdesign}{default}(variables = NULL, repweights = NULL, weights = NULL, 
+   data = NULL, type = c("BRR", "Fay", "JK1","JKn","bootstrap","other"),
+   combined.weights=TRUE, rho = NULL, bootstrap.average=NULL,
+   scale=NULL, rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),
+   mse=getOption("survey.replicates.mse"),...)
+\method{svrepdesign}{imputationList}(variables=NULL, repweights,weights,data,
+   mse=getOption("survey.replicates.mse"),...)
 \method{svrepdesign}{character}(variables=NULL,repweights=NULL, weights=NULL,data=NULL,
 type=c("BRR","Fay","JK1", "JKn","bootstrap","other"),combined.weights=TRUE, rho=NULL, 
 bootstrap.average=NULL, scale=NULL,rscales=NULL,fpc=NULL,

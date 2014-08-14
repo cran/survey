@@ -15,7 +15,7 @@ svyhist<-function(formula, design, breaks = "Sturges",
     props <- coef(svymean(~cut(variable, h$breaks,right=right, include.lowest=include.lowest),
                           design, na.rm=TRUE))
     h$density<-props/diff(h$breaks)
-    h$counts <- props*sum(weights(design))
+    h$counts <- props*sum(weights(design,"sampling"))
     if (is.null(xlab)) xlab<-varname
     if (is.null(main)) main<-paste("Histogram of",varname)
     plot(h, ..., freq=freq,xlab=xlab,main=main)

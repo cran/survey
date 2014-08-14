@@ -11,10 +11,10 @@ Computes principal components using the sampling weights.
 }
 \usage{
 svyprcomp(formula, design, center = TRUE, scale. = FALSE, tol = NULL, scores = FALSE, ...)
-\method{biplot}{svyprcomp}(x, cols=c("black","darkred"),xlabs=NULL,weight=c("transparent","scaled","none"),
-                           max.alpha=0.5,max.cex=0.5,xlim=NULL,ylim=NULL,pc.biplot=FALSE,expand=1,xlab=NULL,ylab=NULL,
-                           arrow.len=0.1,
-                           ...)
+\method{biplot}{svyprcomp}(x, cols=c("black","darkred"),xlabs=NULL,
+   weight=c("transparent","scaled","none"),
+  max.alpha=0.5,max.cex=0.5,xlim=NULL,ylim=NULL,pc.biplot=FALSE,
+  expand=1,xlab=NULL,ylab=NULL, arrow.len=0.1, ...)
 }
 \arguments{
   \item{formula}{

@@ -1,8 +1,7 @@
 
-R version 2.15.0 (2012-03-30)
-Copyright (C) 2012 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
-Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+R version 3.1.0 (2014-04-10) -- "Spring Dance"
+Copyright (C) 2014 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.1.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -28,7 +27,7 @@ Type 'q()' to quit R.
 
 Attaching package: 'survey'
 
-The following object(s) are masked from 'package:graphics':
+The following object is masked from 'package:graphics':
 
     dotchart
 
@@ -59,7 +58,7 @@ Coefficients:
 I(x > 4)FALSE   3.3143     0.3117   10.63 0.000127 ***
 I(x > 4)TRUE    6.1950     0.7555    8.20 0.000439 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for gaussian family taken to be 2.557379)
 
@@ -218,4 +217,4 @@ I(y < 4)TRUE  -0.1692994    0.3313365
 > 
 > proc.time()
    user  system elapsed 
-  2.570   0.075   2.636 
+  1.707   0.055   1.778 

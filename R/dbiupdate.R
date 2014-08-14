@@ -46,11 +46,7 @@ checkConnection<-function(dbconnection, error=TRUE){
       else
         return(FALSE)
   } else{## RODBC
-    if (!RODBC:::odbcValidChannel(dbconnection))
-      if (error)
-      stop("ODBC connection is closed")
-    else
-      return(FALSE)
+    ## we aren't allowed to check odbc connections in a CRAN package
   }
  invisible(TRUE)
 }

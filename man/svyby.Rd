@@ -141,7 +141,8 @@ str(svyby(~api99, ~stype, rclus1, svymean,return.replicates=TRUE))
 
 
 ## extractor functions
-(a<-svyby(~enroll, ~stype, rclus1, svytotal, deff=TRUE, verbose=TRUE, vartype=c("se","cv","cvpct","var")))
+(a<-svyby(~enroll, ~stype, rclus1, svytotal, deff=TRUE, verbose=TRUE, 
+  vartype=c("se","cv","cvpct","var")))
 deff(a)
 SE(a)
 cv(a)

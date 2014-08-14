@@ -1,8 +1,7 @@
 
-R version 2.14.0 (2011-10-31)
-Copyright (C) 2011 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
-Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+R version 3.1.0 (2014-04-10) -- "Spring Dance"
+Copyright (C) 2014 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.1.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -20,7 +19,7 @@ Type 'q()' to quit R.
 
 Attaching package: 'survey'
 
-The following object(s) are masked from 'package:graphics':
+The following object is masked from 'package:graphics':
 
     dotchart
 
@@ -40,7 +39,8 @@ fpc> fpc
 7       2     2      4  3 12 6.6
 8       2     3      4  3 12 4.2
 
-fpc> withoutfpc<-svydesign(weights=~weight, ids=~psuid, strata=~stratid, variables=~x, data=fpc, nest=TRUE)
+fpc> withoutfpc<-svydesign(weights=~weight, ids=~psuid, strata=~stratid, variables=~x, 
+fpc+    data=fpc, nest=TRUE)
 
 fpc> withoutfpc
 Stratified Independent Sampling design (with replacement)
@@ -100,3 +100,6 @@ fpc> svymean(~x, withfpc)
 x 5.4481 0.616
 > 
 > 
+> proc.time()
+   user  system elapsed 
+  0.194   0.025   0.229 

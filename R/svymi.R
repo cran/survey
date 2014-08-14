@@ -136,7 +136,6 @@ with.svyimputationList<-function (data, expr, fun, ..., multicore=getOption("sur
       if (multicore){
         results <- mclapply(data$designs,
                             function(.design) {
-                            parallel:::closeAll()
                             eval(expr, list(.design=.design),enclos=pf)
                           }
                             )
@@ -172,7 +171,6 @@ with.svyDBimputationList<-function (data, expr,  ..., multicore=getOption("surve
       if (multicore){
         results<-mclapply(data$imputations,
                           function(tablename) {
-                            parallel:::closeAll()
                             close(data)
                             .design<-data$design
                             db<-data$db

@@ -12,7 +12,8 @@ replicate-based estimate of variance.
 }
 \usage{
 withReplicates(design, theta,..., return.replicates=FALSE)
-\method{withReplicates}{svyrep.design}(design, theta, rho = NULL, ..., scale.weights=FALSE, return.replicates=FALSE)
+\method{withReplicates}{svyrep.design}(design, theta, rho = NULL, ..., 
+     scale.weights=FALSE, return.replicates=FALSE)
 \method{withReplicates}{svrepvar}(design, theta,  ...,  return.replicates=FALSE)
 \method{withReplicates}{svrepstat}(design, theta,  ...,  return.replicates=FALSE)
 }

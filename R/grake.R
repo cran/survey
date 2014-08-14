@@ -408,11 +408,21 @@ margins2totals<-function(formulas, totals){
 	
 	
 onemargin2totals<-function(formula,total){
-		newformula<-as.formula(paste("Freq",paste(all.vars(formula),collapse="*"),sep="~"))
-		mf<-model.frame(newformula,as.data.frame(total))
-		mm<-model.matrix(newformula,mf)
-		intorder<-c(1,attr(terms(newformula),"order")[attr(mm,"assign")])
-		rval<-colSums(mf$Freq*mm)
-		attr(rval,"order")<-intorder
-		rval
-	}	
+    if (is.table(total)) total<-as.data.frame(total)
+    if (!is.data.frame(total) && is.vector(total) && (length(formula[[2]])==1)){
+        ## just a vector
+        total<-as.table(total)
+        d<-dimnames(total)
+        names(d)<-deparse(formula[[2]])
+        total<-as.data.frame(total)
+    }
+    if (!is.data.frame(total)) stop("incorrect format for population totals")
+    
+    newformula<-as.formula(paste("Freq",paste(all.vars(formula),collapse="*"),sep="~"))
+    mf<-model.frame(newformula,as.data.frame(total))
+    mm<-model.matrix(newformula,mf)
+    intorder<-c(1,attr(terms(newformula),"order")[attr(mm,"assign")])
+    rval<-colSums(mf$Freq*mm)
+    attr(rval,"order")<-intorder
+    rval
+}	

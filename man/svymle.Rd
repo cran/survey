@@ -84,15 +84,18 @@ model the \code{stderr="model"} should work fairly well.
  ## fit with glm
  m0 <- svyglm(api00~api99+ell,family="gaussian",design=dstrat)
  ## fit as mle (without gradient)
- m1 <- svymle(loglike=dnorm,gradient=NULL, design=dstrat, formulas=list(mean=api00~api99+ell, sd=~1),start=list(c(80,1,0),c(20)), log=TRUE)
+ m1 <- svymle(loglike=dnorm,gradient=NULL, design=dstrat, 
+    formulas=list(mean=api00~api99+ell, sd=~1),
+    start=list(c(80,1,0),c(20)), log=TRUE)
  ## with gradient
  gr<- function(x,mean,sd,log){
 	 dm<-2*(x - mean)/(2*sd^2)
 	 ds<-(x-mean)^2*(2*(2 * sd))/(2*sd^2)^2 - sqrt(2*pi)/(sd*sqrt(2*pi))
          cbind(dm,ds)
       }
- m2 <- svymle(loglike=dnorm,gradient=gr, design=dstrat, formulas=list(mean=api00~api99+ell, sd=~1),
-               start=list(c(80,1,0),c(20)), log=TRUE, method="BFGS")
+ m2 <- svymle(loglike=dnorm,gradient=gr, design=dstrat, 
+    formulas=list(mean=api00~api99+ell, sd=~1),
+    start=list(c(80,1,0),c(20)), log=TRUE, method="BFGS")
 
  summary(m0)
  summary(m1,stderr="model")

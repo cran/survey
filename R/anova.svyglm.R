@@ -74,7 +74,7 @@ anova.svyglm<-function(object, object2=NULL,test=c("F","Chisq"),method=c("LRT","
     Z<-tmp
     bigger<-1
   } else bigger<-2
-  if (any(sapply(summary(lm(X~Z)), "[[","sigma")/(tolerance+SD(X))>tolerance)) stop("models not nested")
+  if (any(sapply(suppressWarnings(summary(lm(X~Z))), "[[","sigma")/(tolerance+SD(X))>tolerance)) stop("models not nested")
   
   XX<-matrix(nrow=nrow(Z),ncol=ncol(Z))
   xform<-lm(Z[,1]~X+0)

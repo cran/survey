@@ -8,12 +8,13 @@ Compare survival distributions
 Computes a weighted version of the logrank and stratified logrank tests
 for comparing two or more survival distributions.  The generalization to
 complex samples is based on the characterization of the logrank test as
-the score test in a Cox model. Under simple random sampling with
-replacement, this function is almost identical to the robust score test
+the score test in a Cox model,  Under simple random sampling with
+replacement, this function with \code{rho=0} and \code{gamma=0} 
+is almost identical to the robust score test
 in the survival package.
 }
 \usage{
-svylogrank(formula, design, ...)
+svylogrank(formula, design, rho=0,gamma=0,method=c("small","large","score"), ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -23,6 +24,13 @@ svylogrank(formula, design, ...)
   \item{design}{
   A survey design object
 }
+\item{rho,gamma}{Coefficients for the Harrington/Fleming G-rho-gamma
+  tests. The default is the logrank test, \code{rho=1} gives a
+  generalised Wilcoxon test}
+\item{method}{\code{"small"} works faster when a matrix with dimension
+  number of events by number of people fits easily in memory;
+  \code{"large"} works faster for large data sets;  \code{"score"} works
+by brute-force construction of an expanded data set, and is for debugging}
   \item{\dots}{
   for future expansion.
 }
@@ -30,6 +38,10 @@ svylogrank(formula, design, ...)
 
 \value{
 A vector containing the z-statistic for comparing each level of the variable to the lowest, the chisquared statistic for the logrank test, and the p-value.
+}
+
+\references{
+Rader K (2014) 
 }
 
 
@@ -53,6 +65,8 @@ pbc$randprob<-fitted(biasmodel)
 dpbc<-svydesign(id=~1, prob=~randprob, strata=~edema, data=subset(pbc,randomized))
 
 svylogrank(Surv(time,status==2)~trt,design=dpbc)
+
+svylogrank(Surv(time,status==2)~trt,design=dpbc,rho=1)
 
 rpbc<-as.svrepdesign(dpbc)
 svylogrank(Surv(time,status==2)~trt,design=rpbc)

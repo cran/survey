@@ -1,8 +1,7 @@
 
-R version 2.15.0 (2012-03-30)
-Copyright (C) 2012 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
-Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+R version 3.1.0 (2014-04-10) -- "Spring Dance"
+Copyright (C) 2014 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.1.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -26,7 +25,7 @@ Type 'q()' to quit R.
 
 Attaching package: 'survey'
 
-The following object(s) are masked from 'package:graphics':
+The following object is masked from 'package:graphics':
 
     dotchart
 
@@ -196,7 +195,7 @@ Coefficients:
 z             6.2118     0.6451   9.630   <2e-16 ***
 x             2.2602     0.2514   8.992   <2e-16 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for quasibinomial family taken to be 1.919987)
 
@@ -205,4 +204,4 @@ Number of Fisher Scoring iterations: 9
 > 
 > proc.time()
    user  system elapsed 
-  2.027   0.045   2.060 
+  1.287   0.034   1.330 

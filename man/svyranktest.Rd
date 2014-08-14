@@ -5,11 +5,12 @@
 Design-based rank tests
 }
 \description{
-Design-based versions of two-sample rank tests.  The built-in tests are
-all for location hypotheses, but the user can specify others.  
+Design-based versions of k-sample rank tests.  The built-in tests are
+all for location hypotheses, but the user could specify others.  
 }
 \usage{
-svyranktest(formula, design, test = c("wilcoxon", "vanderWaerden", "median"), ...)
+svyranktest(formula, design, 
+  test = c("wilcoxon", "vanderWaerden", "median","KruskalWallis"), ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -22,7 +23,8 @@ A survey design object
   \item{test}{
     Which rank test to use: Wilcoxon, van der Waerden's normal-scores
     test, Mood's test for the median, or a function \code{f(r,N)} where
-    \code{r} is the rank and \code{N} the estimated population size. 
+    \code{r} is the rank and \code{N} the estimated population
+    size. "KruskalWallis" is a synonym for "wilcoxon" for more than two groups.
 }
   \item{\dots}{ for future expansion}
 
@@ -32,9 +34,7 @@ A survey design object
 Object of class \code{htest}
 }
 \references{
-Lumley T, Scott AJ (2012) "Two-sample rank tests under complex
-sampling". Technical Report 2012-4, Department of Statistics, University
-of Auckland.
+Lumley, T., & Scott, A. J. (2013). Two-sample rank tests under complex sampling. BIOMETRIKA, 100 (4), 831-842. 
 
 }
 
@@ -48,6 +48,12 @@ dclus1<-svydesign(id=~dnum, weights=~pw, fpc=~fpc, data=apiclus1)
 
 svyranktest(ell~comp.imp, dclus1)
 svyranktest(ell~comp.imp, dclus1, test="median")
+
+
+svyranktest(ell~stype, dclus1)
+svyranktest(ell~stype, dclus1, test="median")
+
+
 
 ## upper quartile
 svyranktest(ell~comp.imp, dclus1, test=function(r,N) as.numeric(r>0.75*N))

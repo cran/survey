@@ -21,10 +21,12 @@
 \usage{
 \method{svytable}{survey.design}(formula, design, Ntotal = NULL, round = FALSE,...)
 \method{svytable}{svyrep.design}(formula, design, Ntotal = sum(weights(design, "sampling")), round = FALSE,...)
-\method{svychisq}{survey.design}(formula, design, statistic = c("F",  "Chisq","Wald","adjWald","lincom","saddlepoint"),na.rm=TRUE,...)
-\method{svychisq}{svyrep.design}(formula, design, statistic = c("F",  "Chisq","Wald","adjWald","lincom","saddlepoint"),na.rm=TRUE,...)
-\method{summary}{svytable}(object, statistic = c("F",
-"Chisq","Wald","adjWald","lincom","saddlepoint"),...)
+\method{svychisq}{survey.design}(formula, design, 
+   statistic = c("F",  "Chisq","Wald","adjWald","lincom","saddlepoint"),na.rm=TRUE,...)
+\method{svychisq}{svyrep.design}(formula, design, 
+   statistic = c("F",  "Chisq","Wald","adjWald","lincom","saddlepoint"),na.rm=TRUE,...)
+\method{summary}{svytable}(object, 
+   statistic = c("F","Chisq","Wald","adjWald","lincom","saddlepoint"),...)
 degf(design, ...)
 \method{degf}{survey.design2}(design, ...)
 \method{degf}{svyrep.design}(design, tol=1e-5,...)

@@ -20,7 +20,6 @@ svyolr.svyrep.design<-function(formula,design,...,return.replicates=FALSE,
  	rw<-weights(design,"analysis")
         if (multicore){
           betas<-do.call(cbind,mclapply(1:ncol(rw), function(i){
-            parallel:::closeAll()
             w<-rw[,i]
             environment(formula)<-environment()
             m<-polr(formula,data=df,Hess=FALSE, start=start, model=FALSE, weights=w)

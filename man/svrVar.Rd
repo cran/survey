@@ -10,7 +10,8 @@ the mean of the replicates. It is usually taken from the \code{mse}
 component of the design object.
 }
 \usage{
-svrVar(thetas, scale, rscales, na.action=getOption("na.action"), mse=getOption("survey.replicates.mse"),coef)
+svrVar(thetas, scale, rscales, na.action=getOption("na.action"), 
+  mse=getOption("survey.replicates.mse"),coef)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{

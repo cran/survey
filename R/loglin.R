@@ -15,7 +15,7 @@ svyloglin.survey.design<-function(formula,design,...){
   if (length(formula)!=2) stop("needs a one-sided formula")
   mdata<-model.frame(design)[,all.vars(formula)]
   mf<-model.frame(formula,mdata,na.action=na.pass)
-  n<-nrow(mf)
+  n<-as.numeric(nrow(mf))
   hatp<-svymean(~I(do.call(interaction,mf)),design,na.rm=TRUE)
   dat<-do.call(expand.grid,lapply(mdata,function(x) sort(unique(x))))
   dat<-as.data.frame(lapply(dat,as.factor))

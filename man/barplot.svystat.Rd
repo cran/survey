@@ -37,7 +37,8 @@ dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
 
 a<-svymean(~stype, dclus1)
 barplot(a)
-barplot(a, names.arg=c("Elementary","High","Middle"), col="purple", main="Proportions of school level")
+barplot(a, names.arg=c("Elementary","High","Middle"), col="purple", 
+  main="Proportions of school level")
 
 b<-svyby(~enroll+api.stu, ~stype, dclus1, svymean)
 barplot(b,beside=TRUE,legend=TRUE)

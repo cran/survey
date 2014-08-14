@@ -267,12 +267,14 @@ svytotal(~enroll, dclus1g3b)
 svytotal(~stype, dclus1g3b)
 
 ## trimming
-dclus1tr <- calibrate(dclus1, ~stype+api99, c(pop.totals, api99=3914069),bounds=c(0.5,2), trim=c(2/3,3/2))
+dclus1tr <- calibrate(dclus1, ~stype+api99, c(pop.totals, api99=3914069), 
+   bounds=c(0.5,2), trim=c(2/3,3/2))
 svymean(~api00+api99+enroll, dclus1tr)
 svytotal(~stype,dclus1tr)
 range(weights(dclus1tr)/weights(dclus1))
 
-rclus1tr <- calibrate(rclus1, ~stype+api99, c(pop.totals, api99=3914069),bounds=c(0.5,2), trim=c(2/3,3/2))
+rclus1tr <- calibrate(rclus1, ~stype+api99, c(pop.totals, api99=3914069),
+   bounds=c(0.5,2), trim=c(2/3,3/2))
 svymean(~api00+api99+enroll, rclus1tr)
 svytotal(~stype,rclus1tr)
 
@@ -281,7 +283,8 @@ pop.table <- xtabs(~stype+sch.wide,apipop)
 pop.table2 <- xtabs(~stype+comp.imp,apipop)
 dclus1r<-rake(dclus1, list(~stype+sch.wide, ~stype+comp.imp),
                list(pop.table, pop.table2))
-gclus1r<-calibrate(dclus1, formula=list(~stype+sch.wide, ~stype+comp.imp), population=list(pop.table, pop.table2),calfun="raking")
+gclus1r<-calibrate(dclus1, formula=list(~stype+sch.wide, ~stype+comp.imp), 
+     population=list(pop.table, pop.table2),calfun="raking")
 svymean(~api00+stype, dclus1r)
 svymean(~api00+stype, gclus1r)
 

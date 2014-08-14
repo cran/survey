@@ -1,8 +1,7 @@
 
-R version 2.15.0 (2012-03-30)
-Copyright (C) 2012 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
-Platform: x86_64-apple-darwin9.8.0/x86_64 (64-bit)
+R version 3.1.0 (2014-04-10) -- "Spring Dance"
+Copyright (C) 2014 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.1.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -23,7 +22,7 @@ Type 'q()' to quit R.
 
 Attaching package: 'survey'
 
-The following object(s) are masked from 'package:graphics':
+The following object is masked from 'package:graphics':
 
     dotchart
 
@@ -73,7 +72,7 @@ factor(stage)2:factor(histol)2   0.1152     0.4410   0.261 0.793876
 factor(stage)3:factor(histol)2   0.5066     0.4241   1.194 0.232548    
 factor(stage)4:factor(histol)2   0.9785     0.6214   1.575 0.115615    
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for quasibinomial family taken to be 1.000876)
 
@@ -100,7 +99,7 @@ factor(stage)2:factor(histol)2 -0.04743    0.43495  -0.109    0.913
 factor(stage)3:factor(histol)2  0.28064    0.41298   0.680    0.497    
 factor(stage)4:factor(histol)2  0.90983    0.63774   1.427    0.154    
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for quasibinomial family taken to be 1.000876)
 
@@ -127,7 +126,7 @@ factor(stage)2:factor(histol)2 -0.04743    0.43432  -0.109    0.913
 factor(stage)3:factor(histol)2  0.28064    0.41231   0.681    0.496    
 factor(stage)4:factor(histol)2  0.90983    0.63187   1.440    0.150    
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for quasibinomial family taken to be 1.000876)
 
@@ -152,7 +151,7 @@ factor(stage)2   0.7814     0.1473   5.306 1.48e-07 ***
 factor(stage)3   0.8009     0.1525   5.252 1.97e-07 ***
 factor(stage)4   1.0729     0.1782   6.022 2.73e-09 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for quasibinomial family taken to be 1.001333)
 
@@ -185,7 +184,7 @@ factor(stage)2   0.7814     0.1457   5.363 1.10e-07 ***
 factor(stage)3   0.8009     0.1504   5.324 1.34e-07 ***
 factor(stage)4   1.0729     0.1759   6.101 1.70e-09 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for quasibinomial family taken to be 1.001333)
 
@@ -200,4 +199,4 @@ Warning messages:
 > 
 > proc.time()
    user  system elapsed 
-  4.672   0.206   4.867 
+  2.841   0.113   2.963 

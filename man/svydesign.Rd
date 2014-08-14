@@ -14,8 +14,9 @@
 \usage{
 svydesign(ids, probs=NULL, strata = NULL, variables = NULL, fpc=NULL,
 data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,pps=FALSE,...)
-\method{svydesign}{default}(ids, probs=NULL, strata = NULL, variables = NULL, fpc=NULL,
-data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,pps=FALSE,variance=c("HT","YG"),...)
+\method{svydesign}{default}(ids, probs=NULL, strata = NULL, variables = NULL,
+  fpc=NULL,data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,
+  pps=FALSE,variance=c("HT","YG"),...)
 \method{svydesign}{imputationList}(ids, probs = NULL, strata = NULL, variables = NULL, 
     fpc = NULL, data, nest = FALSE, check.strata = !nest, weights = NULL, pps=FALSE,
      ...)

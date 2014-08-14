@@ -11,8 +11,10 @@
   \eqn{(n-1)} bootstrap, and \code{mrbbootstrap} is Preston's multistage rescaled bootstrap.
 }
 \usage{
-as.svrepdesign(design, type=c("auto", "JK1", "JKn", "BRR", "bootstrap","subbootstrap","mrbbootstrap","Fay"),
-fay.rho = 0, fpc=NULL,fpctype=NULL,..., compress=TRUE, mse=getOption("survey.replicates.mse"))
+as.svrepdesign(design, type=c("auto", "JK1", "JKn", "BRR", "bootstrap",
+   "subbootstrap","mrbbootstrap","Fay"),
+   fay.rho = 0, fpc=NULL,fpctype=NULL,..., compress=TRUE, 
+   mse=getOption("survey.replicates.mse"))
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
