@@ -213,6 +213,8 @@ onestrat<-function(x,cluster,nPSU,fpc, lonely.psu,stratum=NULL,stage=1,cal=cal){
       f<-ifelse(fpc==Inf, 1, (fpc-nPSU)/fpc)
   }
 
+ # Apply Bessel correction and FPC correction!
+
   if (nPSU>1)
       scale<-f*nPSU/(nPSU-1)
   else
