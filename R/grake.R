@@ -72,6 +72,9 @@ calibrate.survey.design2<-function(design, formula, population,
     mm<-mm[,!zz]
     population<-population[!zz]
     sample.total<-sample.total[!zz]
+    if(length(epsilon)>0){
+      epsilon <- epsilon[!zz]
+    }
   }
 
     
@@ -187,6 +190,9 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
     mm<-mm[,!zz]
     population<-population[!zz]
     sample.total<-sample.total[!zz]
+    if(length(epsilon)>0){
+      epsilon <- epsilon[!zz]
+    }
   }
   
     
