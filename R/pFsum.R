@@ -2,7 +2,7 @@ pFsum<-function(x,df,a,ddf=Inf,lower.tail=TRUE,method=c("saddlepoint","integrati
   if (ddf==Inf) return(pchisqsum(x,df=df,a=a,lower.tail=lower.tail,...))
   
   method<-match.arg(method)
-  if (method=="integration" && !suppressWarnings(require("CompQuadForm"))){
+  if (method=="integration" && !(requireNamespace("CompQuadForm",quietly=TRUE))){
       warning("Package 'CompQuadForm' not found, using saddlepoint approximation")
       method<-"saddlepoint"
     }
@@ -10,11 +10,11 @@ pFsum<-function(x,df,a,ddf=Inf,lower.tail=TRUE,method=c("saddlepoint","integrati
   
   if (method=="integration"){
     
-    int<-davies(0,lambda=c(a,-x/ddf), h=c(df,ddf),acc=1e-7)
+    int<-CompQuadForm::davies(0,lambda=c(a,-x/ddf), h=c(df,ddf),acc=1e-7)
     if ( (int$ifault %in% c(0,2))){
       rval<-int$Qq
     } else { 
-      rval<-davies(0,lambda=c(a,-x/ddf), h=c(df,ddf),acc=1e-5)$Qq
+      rval<-CompQuadForm::davies(0,lambda=c(a,-x/ddf), h=c(df,ddf),acc=1e-5)$Qq
     }
     if(lower.tail)
       return(1-rval)

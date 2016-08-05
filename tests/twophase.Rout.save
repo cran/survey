@@ -1,7 +1,7 @@
 
-R version 3.1.0 (2014-04-10) -- "Spring Dance"
-Copyright (C) 2014 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin13.1.0 (64-bit)
+R version 3.2.1 (2015-06-18) -- "World-Famous Astronaut"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -16,6 +16,9 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > library(survey)
+Loading required package: grid
+Loading required package: Matrix
+Loading required package: survival
 
 Attaching package: 'survey'
 
@@ -130,14 +133,6 @@ Data variables:
 > ## case-cohort design
 > ##this example requires R 2.3.1 or later for cch and data.
 > library("survival")
-Loading required package: splines
-
-Attaching package: 'survival'
-
-The following object is masked _by_ '.GlobalEnv':
-
-    pbc
-
 > data(nwtco, package="survival")
 > ## unstratified, equivalent to Lin & Ying (1993)
 > print(dcchs<-twophase(id=list(~seqno,~seqno), strata=list(NULL,~rel),
@@ -273,4 +268,4 @@ attr(,"phases")$phase2
 > 
 > proc.time()
    user  system elapsed 
-  2.546   0.105   2.667 
+  1.967   0.106   2.094 

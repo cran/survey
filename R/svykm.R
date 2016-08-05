@@ -2,7 +2,6 @@
 svykm<-function(formula, design, se=FALSE, ...) UseMethod("svykm",design)
 
 svykm.survey.design<-function(formula, design,se=FALSE, ...){
-  require("survival")
   if (!inherits(formula,"formula")) stop("need a formula")
   if (length(formula)!=3) stop("need a two-sided formula")
   mf<-model.frame(formula, model.frame(design), na.action=na.pass)
@@ -46,7 +45,6 @@ svykm.survey.design<-function(formula, design,se=FALSE, ...){
 
 
 svykm.svyrep.design<-function(formula, design,se=FALSE, ...){
-  require("survival")
   if (!inherits(formula,"formula")) stop("need a formula")
   if (length(formula)!=3) stop("need a two-sided formula")
   mf<-model.frame(formula, model.frame(design), na.action=na.pass)

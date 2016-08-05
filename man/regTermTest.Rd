@@ -38,6 +38,10 @@ Rao, JNK, Scott, AJ (1984) "On Chi-squared Tests For Multiway Contingency Tables
 
 Lumley T, Scott A (2012) "Partial likelihood ratio tests for the Cox model under complex sampling" Statistics in Medicine 17 JUL 2012. DOI: 10.1002/sim.5492
 }
+\note{
+The \code{"LRT"} method will not work if the model had starting values supplied for the regression coefficients. Instead, fit the two models separately and use \code{anova(model1, model2, force=TRUE)}
+
+}
 \seealso{\code{\link{anova}}, \code{\link{vcov}}, \code{\link{contrasts}},\code{\link{pchisqsum}}}
 \examples{
  data(esoph)

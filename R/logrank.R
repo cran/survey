@@ -86,7 +86,6 @@ print.svylogrank<-function(x,...){
 svylogrank.survey.design2<-function(formula, design,rho=0,gamma=0,
                                     method=c("small","large","score"),
                                     ...){
-	require(survival) || stop("requires the survival package")
         method<-match.arg(method)
         if (method=="small")
             return(.logrank(formula,design, rho,gamma,...))
@@ -133,7 +132,6 @@ svylogrank.ODBCsvydesign<-function (formula, design, ...)
 }	
 	
 svylogrank.svyrep.design<-function(formula, design,rho=0,gamma=0,method=c("small","large","score"), ...){
-	require(survival) || stop("requires the survival package")
         method<-match.arg(method)
         if (method=="small")
             return(.logrank(formula,design, rho,gamma,...))

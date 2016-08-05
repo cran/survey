@@ -57,7 +57,6 @@ postStratify(design, strata, population, partial = FALSE, ...)
   If the sampling weights are already post-stratified there will be no
   change in point estimates after \code{postStratify} but the standard
   error estimates will decrease to correctly reflect the post-stratification.
-  See  \url{http://www.dcs.napier.ac.uk/peas/exemplar1.htm} for an example.
 }
 
 \value{

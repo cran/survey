@@ -72,6 +72,7 @@ calibrate.survey.design2<-function(design, formula, population,
     mm<-mm[,!zz]
     population<-population[!zz]
     sample.total<-sample.total[!zz]
+    if (length(epsilon)>1) epsilon <- epsilon[!zz]
   }
 
     
@@ -187,6 +188,7 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
     mm<-mm[,!zz]
     population<-population[!zz]
     sample.total<-sample.total[!zz]
+    if (length(epsilon)>1) epsilon <- epsilon[!zz]
   }
   
     
@@ -287,7 +289,6 @@ cal.logit<-make.calfun(
 grake<-function(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit){
 
   sample.total<-colSums(mm*ww)
-  require(MASS) ##ginv
   if(!inherits(calfun,"calfun")) stop("'calfun' must be of class 'calfun'")
   
   Fm1<-calfun$Fm1
@@ -313,7 +314,7 @@ grake<-function(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verb
     Tmat<-crossprod(mm*ww*deriv, mm)
 
     misfit<-(population-sample.total-colSums(mm*ww*Fm1(xeta, bounds)))
-    deta<-ginv(Tmat, tol=256*.Machine$double.eps)%*%misfit
+    deta<-MASS::ginv(Tmat, tol=256*.Machine$double.eps)%*%misfit
     eta<-eta+deta
 
     xeta<- drop(mm%*%eta)

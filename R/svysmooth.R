@@ -9,9 +9,6 @@ svysmooth.default<-function(formula, design,method=c("locpoly","quantreg"),bandw
 fitted.rq<-function(object,...) object$x%*% object$coefficients/object$weights
 
 svyrqss<-function(formula,design,quantile=0.5,df=4,...){
-  require("quantreg") || stop("needs quantreg package")
-  require("splines") || stop("needs splines package, which should be part of R")
-
   mf<-model.frame(formula, model.frame(design), na.action=na.omit)
   naa<-attr(mf,"na.action")
 
@@ -33,8 +30,8 @@ svyrqss<-function(formula,design,quantile=0.5,df=4,...){
   ll<-vector("list", length(tt))
   for(i in 1:length(tt)){
     termi<-as.name(tt[i])
-    ff<-eval(bquote(update(formula,.~bs(.(termi),df=.(df[i])))))
-    rqfit<-rq(ff, tau=quantile[i],weights=w,data=mf,...)
+    ff<-eval(bquote(update(formula,.~splines::bs(.(termi),df=.(df[i])))))
+    rqfit<-quantreg::rq(ff, tau=quantile[i],weights=w,data=mf,...)
     xx<-mf[,i+1]
     oo<-order(xx)
     ll[[i]]<-list(x=xx[oo],y=fitted.rq(rqfit)[oo])
@@ -56,7 +53,6 @@ svyrqss<-function(formula,design,quantile=0.5,df=4,...){
   
 svylocpoly<-function(formula, design, ngrid=401, xlim=NULL,
                      ylim=NULL, bandwidth=NULL,...){
-  require("KernSmooth") || stop("needs KernSmooth package")
 
   mf<-model.frame(formula,model.frame(design))
   mm<-model.matrix(terms(formula),mf)
@@ -82,7 +78,7 @@ svylocpoly<-function(formula, design, ngrid=401, xlim=NULL,
   if (is.null(bandwidth)){
     bandwidth<-numeric(ncol(mm))
     for(i in 1:ncol(mm)){
-      bandwidth[i]<-if(density) dpik(mm[,i],gridsize=ngrid) else dpill(mm[,i],Y,gridsize=ngrid)
+      bandwidth[i]<-if(density) KernSmooth::dpik(mm[,i],gridsize=ngrid) else KernSmooth::dpill(mm[,i],Y,gridsize=ngrid)
     }
   } else {
     bandwidth<-rep(bandwidth, length=ncol(mm))
@@ -96,11 +92,11 @@ svylocpoly<-function(formula, design, ngrid=401, xlim=NULL,
     gx<-seq(min(xlim[,i]), max(xlim[,i]), length=ngrid)
     nx<-rowsum(c(rep(0,ngrid),w), c(1:ngrid, findInterval(mm[,i],gx)))
     if (density){
-      ll[[i]]<-locpoly(rep(1,ngrid),nx*ngrid/(diff(xlim[,i])*sum(w)),
+      ll[[i]]<-KernSmooth::locpoly(rep(1,ngrid),nx*ngrid/(diff(xlim[,i])*sum(w)),
                            binned=TRUE, bandwidth=bandwidth[i], range.x=xlim[,i])
     }else{
       ny<-rowsum(c(rep(0,ngrid), Y*w), c(1:ngrid, findInterval(mm[,i],gx)))
-      ll[[i]]<-locpoly(nx, ny, binned=TRUE, bandwidth=bandwidth[i], range.x=xlim[,i])
+      ll[[i]]<-KernSmooth::locpoly(nx, ny, binned=TRUE, bandwidth=bandwidth[i], range.x=xlim[,i])
     }
     names(ll)<-attr(terms(formula),"term.labels")
   }

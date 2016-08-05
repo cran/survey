@@ -1099,7 +1099,6 @@ svycoxph.survey.design<-function(formula,design,subset=NULL,...){
 
     if(any(weights(design)<0)) stop("weights must be non-negative")
     
-    require(survival) || stop("Needs the survival package")
     data<-model.frame(design)
     
     g<-match.call()
@@ -1493,8 +1492,8 @@ dBIC<-function(modela,modelM){
 confint.svyglm<-function(object,parm,level=0.95,method=c("Wald","likelihood"),ddf=Inf,...){
   method<-match.arg(method)
   if(method=="Wald"){
-    tlevel<-pt(qnorm(level),df=ddf)
-    return(confint.default(object,parm=parm,level=tlevel,...))
+      tlevel <- 1 - 2*pnorm(qt((1 - level)/2, df = ddf))
+      return(confint.default(object,parm=parm,level=tlevel,...))
   }
   pnames <- names(coef(object))
   if (missing(parm)) 

@@ -40,7 +40,7 @@ updatesOutfilter<-function(df, varlist,history, updates){
 
 checkConnection<-function(dbconnection, error=TRUE){
  if (is(dbconnection,"DBIConnection")) {
-    if (!isIdCurrent(dbconnection))
+    if (!DBI::dbIsValid(dbconnection))
       if (error)
         stop("Database connection is closed")
       else
@@ -74,18 +74,18 @@ getvars<-function (formula, dbconnection, tables, db.only = TRUE, updates=NULL, 
     else {
         query <- sub("@tab@", tables, "select * from @tab@ limit 1")
         if (is(dbconnection,"DBIConnection"))
-          oneline <- dbGetQuery(dbconnection, query)
+          oneline <- DBI::dbGetQuery(dbconnection, query)
         else ##ODBC
-          oneline <- sqlQuery(dbconnection, query)
+          oneline <- RODBC::sqlQuery(dbconnection, query)
         in.db <- infilter$varlist[infilter$varlist %in% names(oneline)]
     }
     query <- paste("select", paste(in.db, collapse = ", "), "from", 
         tables)
     
     if (is(dbconnection, "DBIConnection"))
-      df <- dbGetQuery(dbconnection, query)
+      df <- DBI::dbGetQuery(dbconnection, query)
     else ##ODBC
-      df<-sqlQuery(dbconnection, query)
+      df<-RODBC::sqlQuery(dbconnection, query)
 
     if (!is.null(subset)) df<-df[subset,,drop=FALSE]
 

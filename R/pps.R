@@ -82,7 +82,6 @@ combine_stages<-function(Dcheck1,Dcheck2){
 }
 
 make_pps_covmat<-function(design,method){##FIXME
-  require("Matrix",quietly=TRUE) || stop("These designs require the Matrix package")
   if (method=="overton")
     multi.overton2Dcheck(design$cluster, design$strata, design$allprob)
   else stop("method",method,"not recognized")
@@ -90,7 +89,6 @@ make_pps_covmat<-function(design,method){##FIXME
 }
 
 image.pps<-function(x,...){
-  require(Matrix)
   Matrix::image(x$dcheck[[1]]$dcheck,...)
 }
 

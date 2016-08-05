@@ -39,7 +39,7 @@ pchisqsum<-function(x,df,a,lower.tail=TRUE,
     return(guess)
   
   method<-match.arg(method)
-  if (method=="integration" && !suppressWarnings(require("CompQuadForm"))){
+  if (method=="integration" && !(requireNamespace("CompQuadForm",quietly=TRUE))){
       warning("Package 'CompQuadForm' not found, using saddlepoint approximation")
       method<-"saddlepoint"
     }
@@ -50,17 +50,16 @@ pchisqsum<-function(x,df,a,lower.tail=TRUE,
   reltol<-rep(1/1000,length(abstol))
  
   if (method=="integration"){
-    require("CompQuadForm")
     if (any(a<=0)){
       for(i in seq(length=length(x))){
-        f<-davies(x[i],a,df,acc=1e-7)
+        f<-CompQuadForm::davies(x[i],a,df,acc=1e-7)
         if (f$ifault>0) warning("Probable loss of accuracy ")
         guess[i]<-f$Qq
       }
       if(any(guess<1e-6)) warning("Probable loss of accuracy ")
     } else{
       for(i in seq(length=length(x))){
-        guess[i]<-farebrother(x[i],a,df)$res
+        guess[i]<-CompQuadForm::farebrother(x[i],a,df)$res
       }
       if(any(guess<1e-9)) warning("Probable loss of accuracy ")
     }

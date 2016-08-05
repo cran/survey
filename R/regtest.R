@@ -171,9 +171,10 @@ contrast<-function(coef,var,contrasts){
     v<-matrix(NA,length(rval),length(rval))
     v[!bad,!bad]<-contrasts[!bad,!badin,drop=FALSE]%*%var[!badin,!badin,drop=FALSE]%*%t(contrasts[!bad,!badin,drop=FALSE])
     dimnames(v)<-list(names(rval),names(rval))
+    rval<-drop(rval)
     attr(rval, "var")<-v
   } else{
-    rval<-contrasts%*%coef
+    rval<-drop(contrasts%*%coef)
     v<-contrasts%*%var%*%t(contrasts)
     dimnames(v)<-list(names(rval),names(rval))
     attr(rval,"var")<-v

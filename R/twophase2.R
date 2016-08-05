@@ -67,7 +67,6 @@ twophaseDcheck<-function(Dcheck1,Dcheck2){
 }
 
 make_covmat<-function(design1,design2,subset){
-  require("Matrix",quietly=TRUE) || stop("These designs require the Matrix package")
   withreplacement<-is.null(design1$fpc$popsize)
   phase1<-Dcheck_multi_subset(design1$cluster, design1$strata, subset, design1$allprob, withreplacement)
   phase2<-Dcheck_multi(design2$cluster, design2$strata, design2$allprob)

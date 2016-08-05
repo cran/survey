@@ -1,7 +1,7 @@
 
-R version 3.1.0 (2014-04-10) -- "Spring Dance"
-Copyright (C) 2014 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin13.1.0 (64-bit)
+R version 3.3.1 (2016-06-21) -- "Bug in Your Hair"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -16,6 +16,9 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > library(survey)
+Loading required package: grid
+Loading required package: Matrix
+Loading required package: survival
 
 Attaching package: 'survey'
 
@@ -24,7 +27,6 @@ The following object is masked from 'package:graphics':
     dotchart
 
 > library(survival)
-Loading required package: splines
 > data(nwtco)
 > 
 > ntwco<-subset(nwtco, !is.na(edrel))
@@ -45,15 +47,15 @@ Call:
 svycoxph(formula = Surv(edrel, rel) ~ factor(stage) + factor(histol) + 
     I(age/12), design = d_BorganII)
 
+                  coef exp(coef) se(coef)     z       p
+factor(stage)2  0.4629    1.5886   0.1809  2.56  0.0105
+factor(stage)3  0.5831    1.7916   0.1785  3.27  0.0011
+factor(stage)4  1.0597    2.8854   0.2052  5.16 2.4e-07
+factor(histol)2 1.5974    4.9403   0.1334 11.97 < 2e-16
+I(age/12)       0.0299    1.0304   0.0334  0.90  0.3697
 
-                  coef exp(coef) se(coef)      z       p
-factor(stage)2  0.4629      1.59   0.1809  2.559 1.0e-02
-factor(stage)3  0.5831      1.79   0.1785  3.267 1.1e-03
-factor(stage)4  1.0597      2.89   0.2052  5.163 2.4e-07
-factor(histol)2 1.5974      4.94   0.1334 11.973 0.0e+00
-I(age/12)       0.0299      1.03   0.0334  0.897 3.7e-01
-
-Likelihood ratio test=  on 5 df, p=  n= 1062, number of events= 571 
+Likelihood ratio test=  on 5 df, p=
+n= 1062, number of events= 571 
 > 
 > ##
 > ## This gives higher standard errors. calibrate() does not recompute the
@@ -71,16 +73,16 @@ Call:
 svycoxph(formula = Surv(edrel, rel) ~ factor(stage) + factor(histol) + 
     I(age/12), design = d_BorganIIps)
 
+                  coef exp(coef) se(coef)     z       p
+factor(stage)2  0.4629    1.5886   0.1808  2.56  0.0104
+factor(stage)3  0.5831    1.7916   0.1784  3.27  0.0011
+factor(stage)4  1.0597    2.8854   0.2051  5.17 2.4e-07
+factor(histol)2 1.5974    4.9403   0.1304 12.25 < 2e-16
+I(age/12)       0.0299    1.0304   0.0333  0.90  0.3688
 
-                  coef exp(coef) se(coef)      z       p
-factor(stage)2  0.4629      1.59   0.1808  2.561 1.0e-02
-factor(stage)3  0.5831      1.79   0.1784  3.269 1.1e-03
-factor(stage)4  1.0597      2.89   0.2051  5.166 2.4e-07
-factor(histol)2 1.5974      4.94   0.1304 12.246 0.0e+00
-I(age/12)       0.0299      1.03   0.0333  0.899 3.7e-01
-
-Likelihood ratio test=  on 5 df, p=  n= 1062, number of events= 571 
+Likelihood ratio test=  on 5 df, p=
+n= 1062, number of events= 571 
 > 
 > proc.time()
    user  system elapsed 
-  2.564   0.103   2.685 
+  1.823   0.105   1.962 

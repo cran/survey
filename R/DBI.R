@@ -7,22 +7,21 @@ svydesign.character<-function (ids, probs = NULL, strata = NULL, variables = NUL
 {
 
   if (dbtype == "ODBC"){
-    library(RODBC)
     if (dbname=="")
-      dbconn<-odbcDriverConnect(dbname,...)
+      dbconn<-RODBC::odbcDriverConnect(dbname,...)
     else
-      dbconn<-odbcConnect(dbname,...)
+      dbconn<-RODBC::odbcConnect(dbname,...)
   } else {
-    db<-dbDriver(dbtype)
-    dbconn<- dbConnect(db, dbname,...)
+    db<-DBI::dbDriver(dbtype)
+    dbconn<- DBI::dbConnect(db, dbname,...)
   }
   design.vars<-c(all.vars(ids), all.vars(probs), all.vars(strata),
                  all.vars(fpc), all.vars(weights))
   design.query<-paste("select", paste(design.vars,collapse=","), "from", data)
   if (dbtype=="ODBC")
-    design.data<-sqlQuery(dbconn, design.query)
+    design.data<-RODBC::sqlQuery(dbconn, design.query)
   else
-    design.data<-dbGetQuery(dbconn, design.query)
+    design.data<-DBI::dbGetQuery(dbconn, design.query)
     
   rval<-svydesign(ids=ids, probs=probs, strata=strata, data=design.data,
                   fpc=fpc, variables=variables, nest=nest,check.strata=check.strata,
@@ -56,13 +55,13 @@ print.summary.DBIsvydesign<-function(x,...){
 }
 
 close.DBIsvydesign<-function(con,...){
-  dbDisconnect(con$db$connection,...)
+  DBI::dbDisconnect(con$db$connection,...)
   invisible(con)
 }
 
 open.DBIsvydesign<-function(con,...){
-  db<-dbDriver(con$db$dbtype)
-  con$db$connection<-dbConnect(db, dbname=con$db$dbname,...)
+  db<-DBI::dbDriver(con$db$dbtype)
+  con$db$connection<-DBI::dbConnect(db, dbname=con$db$dbname,...)
   con
 }
 
@@ -231,7 +230,7 @@ subset.DBIsvydesign<-function (x, subset, ...)
 dim.DBIsvydesign<-function(x){
   w<-weights(x)
   nrow<-sum(w!=0)
-   coln<-names(dbGetQuery(x$db$conn, paste("select * from", x$db$tablename, "limit 1")))
+   coln<-names(DBI::dbGetQuery(x$db$conn, paste("select * from", x$db$tablename, "limit 1")))
    if (!is.null(x$updates)){
      update.names<-do.call(c, lapply(x$updates, names))
      ncol<-length(unique(c(coln,update.names)))
@@ -245,7 +244,7 @@ dim.DBIrepdesign<-function(x){
     nrow <-nrow(x$repweights)
   else
     nrow<-length(x$subset)
-  coln<-names(dbGetQuery(x$db$conn, paste("select * from", x$db$tablename, "limit 1")))
+  coln<-names(DBI::dbGetQuery(x$db$conn, paste("select * from", x$db$tablename, "limit 1")))
   if (!is.null(x$updates)){
     update.names<-do.call(c, lapply(x$updates, names))
     ncol<-length(unique(c(coln,update.names)))
@@ -255,7 +254,7 @@ dim.DBIrepdesign<-function(x){
 
 dimnames.DBIsvydesign<-function(x){
    rown<-rownames(x$cluster)[weights(x)!=0]
-   coln<-names(dbGetQuery(x$db$conn, paste("select * from", x$db$tablename, "limit 1")))
+   coln<-names(DBI::dbGetQuery(x$db$conn, paste("select * from", x$db$tablename, "limit 1")))
    if (!is.null(x$updates)){
      update.names<-do.call(c, lapply(x$updates, names))
      coln<-unique(c(coln,update.names))
@@ -269,7 +268,7 @@ dimnames.DBIrepdesign<-function(x){
      rown<-rownames(x$cluster)
    else 
      rown<-rownames(x$cluster)[x$subset]
-   coln<-names(dbGetQuery(x$db$conn, paste("select * from", x$db$tablename, "limit 1")))
+   coln<-names(DBI::dbGetQuery(x$db$conn, paste("select * from", x$db$tablename, "limit 1")))
    if (!is.null(x$updates)){
      update.names<-do.call(c, lapply(x$updates, names))
      coln<-unique(c(coln,update.names))
@@ -341,17 +340,16 @@ svrepdesign.character<-function (variables=NULL,repweights=NULL, weights=NULL,
 {
 
   if (dbtype == "ODBC"){
-    library(RODBC)
     if (dbname=="")
-      dbconn<-odbcDriverConnect(dbname,...)
+      dbconn<-RODBC::odbcDriverConnect(dbname,...)
     else
-      dbconn<-odbcConnect(dbname,...)
+      dbconn<-RODBC::odbcConnect(dbname,...)
   } else {
-    db<-dbDriver(dbtype)
-    dbconn<- dbConnect(db, dbname,...)
+    db<-DBI::dbDriver(dbtype)
+    dbconn<- DBI::dbConnect(db, dbname,...)
   }
   if (is.character(repweights)){
-    allvars<-names(dbGetQuery(dbconn, paste("select * from",data,"limit 1"))) 
+    allvars<-names(DBI::dbGetQuery(dbconn, paste("select * from",data,"limit 1"))) 
     design.vars<-c(all.vars(weights),grep(repweights,allvars,value=TRUE))
   } else {
     design.vars<-c(all.vars(weights),all.vars(repweights))
@@ -360,14 +358,14 @@ svrepdesign.character<-function (variables=NULL,repweights=NULL, weights=NULL,
   
   design.query<-paste("select", paste(design.vars,collapse=","), "from", data)
   if (dbtype=="ODBC")
-    design.data<-sqlQuery(dbconn, design.query)
+    design.data<-RODBC::sqlQuery(dbconn, design.query)
   else
-    design.data<-dbGetQuery(dbconn, design.query)
+    design.data<-DBI::dbGetQuery(dbconn, design.query)
     
   rval<-svrepdesign(variables=variables,repweights=repweights, weights=weights, type=type,
                     data=design.data,
                     combined.weights=combined.weights, rho=rho, bootstrap.average=NULL,
-                    scale=scale,rscales=rscales,fpc=fpc, fpctype=c("fraction","correction"))
+                    scale=scale,rscales=rscales,fpc=fpc, fpctype=c("fraction","correction"), mse=mse)
   
   rval$db<-list(dbname=dbname, tablename=data, connection=dbconn, dbtype=dbtype)
   rval$variables<-NULL

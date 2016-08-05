@@ -18,18 +18,18 @@ svrepdesign.imputationList<-function(variables=NULL, repweights,weights,data,mse
   
   if(!is.null(variables)){
     if (inherits(repweights,"imputationList")){
-      designs <- mapply(function(v,d,r) svrepdesign(variables=v, repweights=r, weights=weights,data=NULL,...),
+      designs <- mapply(function(v,d,r) svrepdesign(variables=v, repweights=r, weights=weights,data=NULL,mse=mse,...),
                         variables$imputations,data$imputations, repweights$imputations,SIMPLIFY=FALSE)
     } else {
-      designs <- mapply(function(d,v) svrepdesign(variables=v, repweights=repweights, weights=weights,data=d,...),
+      designs <- mapply(function(d,v) svrepdesign(variables=v, repweights=repweights, weights=weights,data=d,mse=mse,...),
                       data$imputations,variables$imputations,SIMPLIFY=FALSE)
     }
   }else{
     if (inherits(repweights,"imputationList")){
-      designs <- mapply(function(d,r) svrepdesign(repweights=r, weights=weights,data=NULL,...),
+      designs <- mapply(function(d,r) svrepdesign(repweights=r, weights=weights,data=NULL,mse=mse,...),
                         data$imputations, repweights$imputations,SIMPLIFY=FALSE)
     } else {
-      designs <- lapply(data$imputations, function(d) svrepdesign( repweights=repweights, weights=weights,data=d,...))
+      designs <- lapply(data$imputations, function(d) svrepdesign( repweights=repweights, weights=weights,data=d,mse=mse,...))
     }
   }
   rval <- list(designs=designs, call=sys.call(-1))
@@ -44,9 +44,9 @@ svydesign.DBimputationList<-function(ids, probs = NULL, strata = NULL,
   design.vars<-c(all.vars(ids), all.vars(probs), all.vars(strata),all.vars(fpc), all.vars(weights))
   design.query<-paste("select", paste(design.vars,collapse=","), "from", data$imputations[1])
   if (data$db$dbtype=="ODBC")
-    design.data<-sqlQuery(data$db$connection, design.query)
+    design.data<-RODBC::sqlQuery(data$db$connection, design.query)
   else
-    design.data<-dbGetQuery(data$db$connection, design.query)
+    design.data<-DBI::dbGetQuery(data$db$connection, design.query)
 
   rval<-list()
   rval$design<-svydesign(ids=ids, probs=probs, strata=strata, data=design.data,
@@ -85,6 +85,7 @@ subset.svyimputationList<-function(x, subset,...){
     n<-nrow(x$designs[[1]])
     e<-substitute(subset)
     r<-eval(e,x$designs[[1]]$variables, parent.frame())
+    r <- r & !is.na( r )
     x$designs[[1]]<-x$designs[[1]][r,]
     same<-TRUE
     for(i in 2:length(x$designs)){
@@ -127,14 +128,14 @@ subset.svyDBimputationList<-function(x, subset,...,all=FALSE){
 
 with.svyimputationList<-function (data, expr, fun, ..., multicore=getOption("survey.multicore")) {
     pf <- parent.frame()
-    if (multicore && !require("parallel",quietly=TRUE))
+    if (multicore && !requireNamespace("parallel",quietly=TRUE))
       multicore<-FALSE
 
     if (!is.null(match.call()$expr)) {
       expr <- substitute(expr)
       expr$design<-as.name(".design")
       if (multicore){
-        results <- mclapply(data$designs,
+        results <- parallel::mclapply(data$designs,
                             function(.design) {
                             eval(expr, list(.design=.design),enclos=pf)
                           }
@@ -167,9 +168,9 @@ with.svyDBimputationList<-function (data, expr,  ..., multicore=getOption("surve
     if (!is.null(match.call()$expr)) {
       expr <- substitute(expr)
       expr$design<-as.name(".design")
-      if (multicore && !require("parallel")) multicore <-FALSE
+      if (multicore && !requireNamespace("parallel")) multicore <-FALSE
       if (multicore){
-        results<-mclapply(data$imputations,
+        results<-parallel::mclapply(data$imputations,
                           function(tablename) {
                             close(data)
                             .design<-data$design
@@ -229,20 +230,20 @@ update.svyimputationList<-function(object, ...){
 close.svyDBimputationList<-function(con,...){
   dbcon<-con$db$connection
   if (is(dbcon,"DBIConnection"))
-    dbDisconnect(dbcon)
+    DBI::dbDisconnect(dbcon)
   else
-    close(dbcon)
+    RODBC::odbcClose(dbcon)
   invisible(con)
 }
 
 open.svyDBimputationList<-function(con,...){
   if(con$db$dbtype=="ODBC"){
     oldenc<-attr(con$db$connection)
-    con$db$connection<-odbcReConnect(con$db$connection,...)
+    con$db$connection<-RODBC::odbcReConnect(con$db$connection,...)
     attr(con$db$connection,"encoding")<-oldenc
   } else {
-    dbdriver<-dbDriver(con$db$dbtype)
-    con$db$connection<-dbConnect(dbdriver,dbname=con$db$dbname,...)
+    dbdriver<-DBI::dbDriver(con$db$dbtype)
+    con$db$connection<-DBI::dbConnect(dbdriver,dbname=con$db$dbname,...)
   }
   con
 }

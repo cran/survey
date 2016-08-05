@@ -31,7 +31,7 @@ A Hadamard matrix
 \note{Strictly speaking, a Hadamard matrix has entries +1 and -1 rather
   than 1 and 0, so \code{2*hadamard(n)-1} is a Hadamard matrix}
 \references{
-  Sloane NJA. A Library of Hadamard Matrices \url{http://www.research.att.com/~njas/hadamard/}
+  Sloane NJA. A Library of Hadamard Matrices \url{http://neilsloane.com/hadamard/}
 
 
 Plackett RL, Burman JP. (1946) The Design of Optimum Multifactorial Experiments

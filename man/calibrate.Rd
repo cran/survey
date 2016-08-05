@@ -188,7 +188,7 @@ the American Statistical Association, 89, 846-866.
 
 Vanderhoeft C (2001) Generalized Calibration at Statistics
 Belgium. Statistics Belgium Working Paper No 3.
-\url{http://www.statbel.fgov.be/studies/paper03_en.asp}
+\url{http://statbel.fgov.be/nl/binaries/paper03\%5B1\%5D_tcm325-35412.pdf}
 }
 
 \seealso{ \code{\link{postStratify}}, \code{\link{rake}} for other ways

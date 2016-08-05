@@ -17,7 +17,7 @@ svyplot.default<-function(formula,
                   amount=NULL,basecol="black",alpha=c(0,0.8), xbins=30,...){
   
   style<-match.arg(style)
-  if (style %in% c("hex","grayhex") && !require(hexbin)){
+  if (style %in% c("hex","grayhex") && !requireNamespace("hexbin",quietly=TRUE)){
     stop(style," plots require the hexbin package")
   }
 
@@ -40,23 +40,23 @@ svyplot.default<-function(formula,
          hex={
            ## CRAN will be happier if we stop supporting the old version of hexbin
              ## new version
-             rval<-hexbin(X,Y,IDs=TRUE,xbins=xbins)
+             rval<-hexbin::hexbin(X,Y,IDs=TRUE,xbins=xbins)
              cell<-rval@cID
              rval@count<-as.vector(tapply(W,cell,sum))
              rval@xcm<-as.vector(tapply(1:length(X), cell,
                               function(ii) weighted.mean(X[ii],W[ii])))
              rval@ycm<-as.vector(tapply(1:length(Y), cell,
                               function(ii) weighted.mean(Y[ii],W[ii])))
-             gplot.hexbin(rval, legend=legend, style="centroids",...)
+             hexbin::gplot.hexbin(rval, legend=legend, style="centroids",...)
            
            
          },
          grayhex={
              ## new version
-             rval<-hexbin(X,Y,IDs=TRUE,xbins=xbins)
+             rval<-hexbin::hexbin(X,Y,IDs=TRUE,xbins=xbins)
              cell<-rval@cID
              rval@count<-as.vector(tapply(W,cell,sum))
-             gplot.hexbin(rval, legend=legend,...)
+             hexbin::gplot.hexbin(rval, legend=legend,...)
         
          },
          subsample={
@@ -104,7 +104,7 @@ svyboxplot.default<-function(formula, design,  all.outliers=FALSE,col=NULL,names
         group.values<-model.frame(groups, model.frame(design),na.action=na.pass)[[1]]
         n<-NCOL(qs)
         iqr<- qs[,n-1]-qs[,n-3]
-        low<-pmax(qs[,n-4],qs[,n-2]-1.5*iqr)
+        low<-pmax(qs[,n-4],qs[,n-3]-1.5*iqr)
         hi<-pmin(qs[,n],qs[,n-1]+1.5*iqr)
         stats<-t(as.matrix(cbind(low,qs[,n-(3:1)],hi)))
         z<-list(stats=stats,n=coef(svytotal(groups,design,na.rm=TRUE)))
@@ -147,13 +147,11 @@ svycoplot<-function(formula, design, style=c("hexbin","transparent"),
                             basecol="black",alpha=c(0,0.8),hexscale=c("relative","absolute"),...) UseMethod("svycoplot",design)
 svycoplot.default<-function(formula, design, style=c("hexbin","transparent"),
                             basecol="black",alpha=c(0,0.8),hexscale=c("relative","absolute"),xbins=15,...){
-  require(lattice)
   style<-match.arg(style)
   wt<-weights(design,"sampling")
   
   switch(style,
          hexbin={
-           require(hexbin) || stop("hexbin package is required (from Bioconductor)")
            hexscale<-match.arg(hexscale)
            xyplot(formula, data=model.frame(design), xbins=xbins,
                   panel=function(x,y,style="centroids",xbins,subscripts,...) {
@@ -162,14 +160,14 @@ svycoplot.default<-function(formula, design, style=c("hexbin","transparent"),
                     wd<-convertWidth(vp$width,unitTo="cm",valueOnly=TRUE)
                     ht<-convertHeight(vp$height,unitTo="cm",valueOnly=TRUE)
                     W<-wt[subscripts]
-                    rval<-hexbin(x,y,IDs=TRUE,xbins=xbins,shape=ht/wd,xbnds=vp$xscale,ybnds=vp$yscale)
+                    rval<-hexbin::hexbin(x,y,IDs=TRUE,xbins=xbins,shape=ht/wd,xbnds=vp$xscale,ybnds=vp$yscale)
                     cell<-rval@cID
                     rval@count<-as.vector(tapply(W,cell,sum))
                     rval@xcm<-as.vector(tapply(1:length(x), cell,
                                                function(ii) weighted.mean(x[ii],W[ii])))
                     rval@ycm<-as.vector(tapply(1:length(y), cell,
                                                function(ii) weighted.mean(x[ii],W[ii])))
-                    grid.hexagons(rval,style=style, maxarea=switch(hexscale, relative=0.8,
+                    hexbin::grid.hexagons(rval,style=style, maxarea=switch(hexscale, relative=0.8,
                                                       absolute=0.8*sum(W)/sum(wt)))
                   },...)
          }, transparent={

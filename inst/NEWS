@@ -1,3 +1,35 @@
+3.31	update isIdValid() to dbIsValid() for DBI changes.
+
+	explicitly :: or import ALL THE THINGS.
+
+	mse option for svrepdesign.character and svyrepdesign.imputationList was ignored (Antony Damico)
+
+	confint works on output of svycontrast (for Michael Laviolette)
+
+	denominator df fixed in confint.svyglm (Joey Morris)
+
+	svyboxplot rule for which lower-tail points are outliers was wrong (David Collins)
+
+	calibrate() with variable-specific epsilons and zero sample totals didn't work (Alex Kowarik)
+
+	document that regTermTest(method="LRT") can't handle models with a start= argument
+	and document how to use anova.svyglm instead. (Brad Biggerstaff)
+
+	update tests output for new formatting in current R.
+
+
+3.30-4  svypredmeans() does the same things (together with svycontrast()) as
+        as PREDMARG in SUDAAN (for Thomas Yokota and Anthony Damico)
+
+3.30-4  confint.svystat was handling denominator degrees of freedom wrongly
+	for the Wald method (Jared Smith)
+
+3.30-3  vcov.svrepstat does more sensible things when covariances aren't
+        estimated (eg for quantiles). This fixes issues with svyby
+
+        dropped support for old version of hexbin
+
+
 3.30-1  Fix example(svyplot) now that "hexbin" package no longer loads
         grid package
 

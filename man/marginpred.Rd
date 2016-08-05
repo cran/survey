@@ -12,7 +12,7 @@ Standardised predictions (predictive margins) for regression models.
 Reweights the design (using \code{\link{calibrate}}) so that the adjustment variables are uncorrelated
 with the variables in the model, and then performs predictions by
 calling \code{predict}.  When the adjustment model is saturated this is
-equivalent to direct standardization on the adjustment variables.
+equivalent to direct standardization on the adjustment variables. 
 
 The \code{svycoxph} and \code{svykmlist} methods return survival curves.
 }
@@ -40,6 +40,8 @@ marginpred(model, adjustfor, predictat, ...)
 }
 
 \seealso{
+  \code{\link{svypredmeans}} for the method of Graubard and Korn implemented in SUDAAN.
+
   \code{\link{calibrate}}
 
   \code{\link{predict.svycoxph}}

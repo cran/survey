@@ -19,13 +19,13 @@ print.summary.ODBCsvydesign<-function(x,...){
 }
 
 close.ODBCsvydesign<-function(con,...){
-  close(con$db$connection,...)
+  RODBC::odbcClose(con$db$connection,...)
   invisible(con)
 }
 
 open.ODBCsvydesign<-function(con,...){
   oldenc<-attr(con$db$connection,"encoding")  ## bug in RODBC 1.2-3
-  con$db$connection<-odbcReConnect(con$db$connection,...)
+  con$db$connection<-RODBC::odbcReConnect(con$db$connection,...)
   attr(con$db$connection,"encoding")<-oldenc
   con
 }
@@ -170,7 +170,7 @@ subset.ODBCsvydesign<-function (x, subset, ...)
 dim.ODBCsvydesign<-function(x){
   w<-weights(x)
   nrow<-sum(w!=0)
-  coln<-names(sqlQuery(x$db$conn, paste("select * from", x$db$tablename, "limit 1")))
+  coln<-names(RODBC::sqlQuery(x$db$conn, paste("select * from", x$db$tablename, "limit 1")))
   if (!is.null(x$updates)){
     update.names<-do.call(c, lapply(x$updates, names))
     ncol<-length(unique(c(coln,update.names)))
@@ -182,7 +182,7 @@ dim.ODBCsvydesign<-function(x){
 dimnames.ODBCsvydesign<-function(x){
   w<-weights(x)
   rown<-rownames(x$cluster)[w!=0]
-   coln<-names(sqlQuery(x$db$conn, paste("select * from", x$db$tablename, "limit 1")))
+   coln<-names(RODBC::sqlQuery(x$db$conn, paste("select * from", x$db$tablename, "limit 1")))
    if (!is.null(x$updates)){
      update.names<-do.call(c, lapply(x$updates, names))
      coln<-unique(c(coln,update.names))

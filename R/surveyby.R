@@ -19,7 +19,7 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
       stop("covmat=TRUE not implemented for this design type")
   }
 
-  if (multicore && !require("parallel",quietly=TRUE))
+  if (multicore && !requireNamespace("parallel",quietly=TRUE))
     multicore<-FALSE
 
   ## some people insist on using vectors rather than formulas
@@ -53,7 +53,7 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
   
   if(missing(vartype)) vartype<-"se"
   vartype<-match.arg(vartype,several.ok=TRUE)
-  nvartype<-which(eval(formals(sys.function())$vartype) %in% vartype)
+  nvartype<-base::which(eval(formals(sys.function())$vartype) %in% vartype)
   if(any(is.na(nvartype))) stop("invalid vartype")
   
   if (keep.var){
@@ -73,7 +73,7 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
 
       ## In dire need of refactoring (or rewriting)
       ## but it seems to work.
-      results<-(if (multicore) mclapply else lapply)(uniques,
+      results<-(if (multicore) parallel::mclapply else lapply)(uniques,
                       function(i){
                         if(verbose && !multicore) print(as.character(byfactor[i]))
                         if (inherits(formula,"formula"))
