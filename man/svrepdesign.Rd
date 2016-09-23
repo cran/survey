@@ -136,7 +136,7 @@ database and so can be used with read-only permissions on the database.
 
   Yee et al (1999). Bootstrat Variance Estimation for the National
     Population Health Survey. Proceedings of the ASA Survey Research
-    Methodology Section. \url{ http://www.amstat.org/Sections/Srms/Proceedings/papers/1999_136.pdf}
+    Methodology Section. \url{https://web.archive.org/web/20151110170959/http://www.amstat.org/sections/SRMS/Proceedings/papers/1999_136.pdf}
 }
 
 \note{To use replication-weight analyses on a survey specified by

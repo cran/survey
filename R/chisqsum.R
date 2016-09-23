@@ -58,24 +58,16 @@ pchisqsum<-function(x,df,a,lower.tail=TRUE,
       }
       if(any(guess<1e-6)) warning("Probable loss of accuracy ")
     } else{
-      for(i in seq(length=length(x))){
-        guess[i]<-CompQuadForm::farebrother(x[i],a,df)$res
+        for(i in seq(length=length(x))){
+            ## version 1.4.2 of CompQuadForm changed the *name* of the result. Grr.
+            temp<-CompQuadForm::farebrother(x[i],a,df)
+            guess[i]<-if ("Qq" %in% names(temp)) temp$Qq else temp$res
       }
       if(any(guess<1e-9)) warning("Probable loss of accuracy ")
     }
     if (lower.tail)
-      guess<-1-guess
-    ## for(i in seq(length=length(x))){
-    ##   if (guess[i]< 1e-5 || guess[i]> 1-1e-5)
-    ##     next ## don't even try.
-    ##   ff<-make.integrand(x[i],df,a)
-    ##   rval<-integrate(ff,0,Inf,subdivisions=10000,
-    ##                       abs.tol=abstol[i],rel.tol=reltol[i],stop.on.error=FALSE)
-    ##   if (inherits(rval, "try-error") || rval$message!="OK"){
-    ##     warning("integration failed for x=",x[i],", using Satterthwaite approximation")
-    ##   }else
-    ##   guess[i]<- if (lower.tail) 1/2-rval$value else 1/2+rval$value
-    ## }
+        guess<-1-guess
+    
     return(guess)
   } else if (method=="saddlepoint"){
     for(i in seq(length=length(x))){

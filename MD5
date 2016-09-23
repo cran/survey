@@ -1,10 +1,10 @@
-d6b53ccab0e63f6f16f05b4f16c96883 *DESCRIPTION
+c27868ee882387bf379605ba06374d5f *DESCRIPTION
 fa70b76256f29938ad0c3c8b28705130 *INDEX
 175f0dc82260e98f5a49d644d1c0e2a9 *NAMESPACE
 45c49773b7c06193c416f570f41bf4e6 *R/DBI.R
 44549058d2737ce0bfb2b5486f83ff46 *R/anova.svyglm.R
 5b81c3cd21b951d535a27679230eeda4 *R/bootstrap.R
-0602b115c830affaecf9817228da56b8 *R/chisqsum.R
+4a27dd1029f20c1db823e474cecd6994 *R/chisqsum.R
 b5cffd73326ccfbef1954d2ad032efa0 *R/compressweights.R
 fd916fce7443a3771c3a965175efa324 *R/confint.R
 e4b7519f8c5cad157788d9ff0bebb9b5 *R/count.R
@@ -36,7 +36,7 @@ e867dc537df5a0597e28540ea441e156 *R/surveyby.R
 5bc03f84ff7bf31c74e055c9efe00678 *R/svycdf.R
 80cfb5f559a64507400fa4d2d1b46f1b *R/svyhist.R
 f167949077f73d87c969525ae5e11550 *R/svykappa.R
-f2fb95b8cacd00f507e9823c67e09edc *R/svykm.R
+b8e77fabd7cd3969701f976aec1d5867 *R/svykm.R
 dcf500be3b5b5432d57cba2e763a9a1c *R/svymi.R
 9c89fe232fc819518a6ececefcef7a38 *R/svypredmeans.R
 cb39b6c0471f473b887426b65410e61e *R/svyranktest.R
@@ -59,9 +59,9 @@ a0ab4e6f1f4f3c57bcd5826b5a1c32fb *data/fpc.rda
 f1ddb94254f3e1cc3500ad7807bc6603 *data/nhanes.rda
 c62d5c1c21c8acd86f9a1d14a5ce26e3 *data/scd.rda
 b31a81da0dd6e5adc582717575192368 *inst/BUGS
-3f3ced6ae215c1b25dea5c9620826473 *inst/CITATION
+fdcf452fb9d9c233f443fcfe55ea24f4 *inst/CITATION
 9dbfcdd76553194b1513751a02042f91 *inst/COPYING
-a09b42af9c02269e76c8f2eae3d0dc23 *inst/NEWS
+23ce4de3a9f95e41a6697d40a15d5f22 *inst/NEWS
 ad0ca60c6d7d1c64ed77618b40c5d1c5 *inst/api.db
 fedebdbde4e7cfe28b3941fc8371e857 *inst/disclaimer
 bd13d234657132da1a44e0a33bcfb456 *inst/doc/domain.R
@@ -122,7 +122,7 @@ e2d5e837e99c491b1c02c0d135516aa3 *man/subset.survey.design.Rd
 4d4f8685de34adf511eca14f1d25bcd1 *man/surveyoptions.Rd
 9970c91560e1c33898ba7bc2d4f71010 *man/surveysummary.Rd
 4c4993863452ec84eeb68d5ef07c7e6f *man/svrVar.Rd
-ceb01c2c8110b744703936a5d4cc66d3 *man/svrepdesign.Rd
+b959cd069e930a155c09c5f7bc32c0a4 *man/svrepdesign.Rd
 939d043da650a1f44502ba376d12ec3d *man/svy.varcoef.Rd
 ae19a003c9f60058fa4cb749f23e1c68 *man/svyCprod.Rd
 44100e27219878082cc8447e9ea523ac *man/svyby.Rd

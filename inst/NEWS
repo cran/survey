@@ -1,3 +1,7 @@
+3.31-2	explicitly dropping dimensions on a 1x1 matrix
+
+3.31-1	Allow for incompatible change in output of CompQuadForm::farebrother()  
+
 3.31	update isIdValid() to dbIsValid() for DBI changes.
 
 	explicitly :: or import ALL THE THINGS.

@@ -363,7 +363,7 @@ predict.svycoxph<-function(object, newdata, se=FALSE,
   for(i in 1:nrow(z.pred)){
     zi<-z.pred[i,]-object$means
     riski<-exp(sum(zi*coef(object)))
-    Vz<-crossprod(zi,varbeta%*%zi)*riski^2*h^2
+    Vz<-drop(crossprod(zi,varbeta%*%zi))*riski^2*h^2
     CVz<-colSums(t(dCV)*zi)*riski^2*h
     
     V<-V0*riski^2+Vz+CVz*2
