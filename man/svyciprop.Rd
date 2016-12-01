@@ -8,7 +8,7 @@ more accurate near 0 and 1 than simply using \code{confint(svymean())}.
 }
 \usage{
 svyciprop(formula, design, method = c("logit", "likelihood", "asin", "beta",
-"mean"), level = 0.95, df=degf(design),...)
+"mean","xlogit"), level = 0.95, df=degf(design),...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -39,12 +39,15 @@ The \code{"beta"} method uses the incomplete beta function as in
 \code{\link{binom.test}}, with an effective sample size based on the
 estimated variance of the proportion. (Korn and Graubard, 1998)
 
+The \code{"xlogit"} method uses a logit transformation of the mean and
+then back-transforms to the probablity scale. This appears to be the
+method used by SUDAAN and SPSS COMPLEX SAMPLES. 
 
 The \code{"mean"} method is a Wald-type interval on the probability
 scale, the same as \code{confint(svymean())}
 
 All methods undercover for probabilities close enough to zero or one,
-but \code{"beta"}, \code{"likelihood"} and \code{"logit"} are noticeably
+but \code{"beta"}, \code{"likelihood"}, \code{"logit"}, and \code{"logit"} are noticeably
 better than the other two. None of the methods will work when the
 observed proportion is exactly 0 or 1.
 
@@ -67,7 +70,7 @@ Korn EL, Graubard BI. (1998) Confidence Intervals For Proportions With
   
 }
 
-\seealso{ \code{\link{svymean}} }
+\seealso{ \code{\link{svymean}}, \code{\link{yrbs}} }
 \examples{
 data(api)
 dclus1<-svydesign(id=~dnum, fpc=~fpc, data=apiclus1)
@@ -77,6 +80,8 @@ svyciprop(~I(ell==0), dclus1, method="lo")
 svyciprop(~I(ell==0), dclus1, method="as")
 svyciprop(~I(ell==0), dclus1, method="be")
 svyciprop(~I(ell==0), dclus1, method="me")
+svyciprop(~I(ell==0), dclus1, method="xl")
+
 ## reproduces Stata svy: mean
 svyciprop(~I(ell==0), dclus1, method="me", df=degf(dclus1))
 ## reproduces Stata svy: prop

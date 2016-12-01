@@ -2,15 +2,18 @@ The survey package has benefited from code, bug reports, and feature
 requests from users, including:
   Daniel Almirall
   Guiseppe Antonaci
+  Brad Biggerstaff
   Milan Bouchet-Valat
   Norman Breslow
   Arthur Burke
   Ron Burns
   Stefano Calza
   Shelby Chartkoff
+  David Collins
   Anthony Damico
   Wade Davis
   Michael Donohue
+  Rex Dwyer
   Melanie Edwards
   Francisco Fabuel
   Bob Fay
@@ -28,11 +31,14 @@ requests from users, including:
   Ward Kinkade
   Stas Kolenikov
   Scott Kostyshak
+  Alex Kowarik
+  Michael Laviolette
   Jean Paul Lucas
   Lisa McShane
   Ana Patricia Martins
   Tapan Mehta
   Daryl Morris
+  Joey Morris
   Kirill Mueller
   Jean Opsomer
   Gonzalo Perez
@@ -55,7 +61,7 @@ requests from users, including:
   Renzo Vettori
   Thomas Yokota
   Diego Zardetto
-  Alan Zaslavksy
+  Alan Zaslavsky
 and from dicussions with Chris Wild and Alastair Scott. 
 
 Some work on the package while I was on sabbatical was funded by
@@ -66,6 +72,7 @@ Patrick Aboyoun did the S-PLUS port of version 3.6-8
 
 John Preston provided an example of the multistage rescaled bootstrap for testing.
 
-The svyolr() code is largely ripped from the MASS package of Venables & Ripley, and
-parts of the code for svycoxph() are modified from Therneau's survival package.
+The svyolr() code and the likelihood-based confidenece intervals are largely ripped from
+the MASS package of Venables & Ripley, and parts of the code for svycoxph() are modified 
+from Therneau's survival package.
 

@@ -97,3 +97,5 @@ api                     California Academic Performance Index
 crowd                   Small example from VPLX manual
 mu284                   Two-stage sample from MU284 population
 nhanes			Subset of NHANES 2009-10
+yrbs                    One variable from Youth Risk Behavior Survey
+

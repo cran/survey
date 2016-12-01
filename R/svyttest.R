@@ -40,7 +40,7 @@ svyttest.default<-function(formula, design, ...){
 
 expit<-function(eta) exp(eta)/(1+exp(eta))
 	
-svyciprop<-function(formula, design, method=c("logit","likelihood","asin","beta","mean"),
+svyciprop<-function(formula, design, method=c("logit","likelihood","asin","beta","mean","xlogit"),
                     level=0.95,df=degf(design),...)	{
   method<-match.arg(method)
   if (method=="mean"){
@@ -55,7 +55,14 @@ svyciprop<-function(formula, design, method=c("logit","likelihood","asin","beta"
     ci<-sin(as.vector(confint(xform,1,level=level,df=df,...)))^2
     rval<-coef(m)[1]
     attr(rval,"var")<-vcov(m)
-  } else if (method=="beta"){
+ } else if (method=="xlogit"){
+    m<-eval(bquote(svymean(~as.numeric(.(formula[[2]])),design,...)))
+    names(m)<-1
+    xform<-svycontrast(m,quote(log(`1`/(1-`1`))))
+    ci<-expit(as.vector(confint(xform,1,level=level,df=df,...)))
+    rval<-coef(m)[1]
+    attr(rval,"var")<-vcov(m)
+ } else if (method=="beta"){
     m<-eval(bquote(svymean(~as.numeric(.(formula[[2]])),design,...)))
     n.eff <- coef(m)*(1-coef(m))/vcov(m)
     rval<-coef(m)[1]

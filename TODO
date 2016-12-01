@@ -8,7 +8,7 @@ Possible additional developments in no particular order:
 
  [mostly done] Rao-Scott-type tests for glms.
 
-- AIC/BIC
+[done] AIC/BIC
 
 - better choice of denominator df for tests
 
@@ -37,7 +37,7 @@ Possible additional developments in no particular order:
  - an interface to twophase and calibrate for IPTW estimation.
 
  - Replicate weights for two-phase designs 
-   [done] and for multistage designs with large sampling fraction (Fukuoka's BBE?)
+ [done] and for multistage designs with large sampling fraction (Fukuoka's BBE?)
 
  [experimental] parallel processing for replicate weights, svyby(), svyrecvar()?
 
@@ -52,3 +52,6 @@ Possible additional developments in no particular order:
    [experimental] factor analysis 
    [done in lavaan.survey package] SEMs? 
 
+########## things to fix ################
+
+Use naresid() to get better missing-value handling in svyglm, panel.svysmooth, etc

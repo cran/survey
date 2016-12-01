@@ -1503,14 +1503,16 @@ confint.svyglm<-function(object,parm,level=0.95,method=c("Wald","likelihood"),dd
   lambda<-diag(object$cov.unscaled[parm,parm,drop=FALSE])/diag(object$naive.cov[parm,parm,drop=FALSE])
   if(is.null(ddf)) ddf<-object$df.residual
   if (ddf==Inf)
-    level<- 1-2*pnorm(qnorm((1-level)/2)*sqrt(lambda))
+      alpha<-pnorm(qnorm((1-level)/2)*sqrt(lambda))/2
   else {
-    level<- 1-2*pnorm(qt((1-level)/2,df=ddf)*sqrt(lambda))
+      alpha<-pnorm(qt((1-level)/2,df=ddf)*sqrt(lambda))/2
   }
   rval<-vector("list",length(parm))
   for(i in 1:length(parm)){
-    rval[[i]]<-NextMethod(object=object,parm=parm[i],level=level[i],...)
+    temp<-MASSprofile_glm(fitted=object,which=parm[i],alpha=alpha[i],...)
+    rval[[i]]<-confint_profile(temp,parm=parm[i],level=level, unscaled_level=2*alpha[i],...)
   }
+  
   names(rval)<-pnames[parm]
   if (length(rval)==1)
     rval<-rval[[1]]
@@ -1520,6 +1522,122 @@ confint.svyglm<-function(object,parm,level=0.95,method=c("Wald","likelihood"),dd
   rval
 }
 
+
+##
+## based on MASS:::confint.profile.glm
+## which is GPL and (c) Bill Venables and Brian D Ripley.
+##
+confint_profile <- function (object, parm = seq_along(pnames), level = 0.95, unscaled_level, ...) 
+{
+    of <- attr(object, "original.fit")
+    pnames <- names(coef(of))
+    if (is.character(parm)) 
+        parm <- match(parm, pnames, nomatch = 0L)
+    a <- (1-level)/2
+    a <- c(a, 1 - a)
+    pct <- paste(round(100 * a, 1), "%")
+    ci <- array(NA, dim = c(length(parm), 2L), dimnames = list(pnames[parm], 
+        pct))
+    cutoff <- c(qnorm(unscaled_level),qnorm(unscaled_level, lower.tail=FALSE))
+    for (pm in parm) {
+        pro <- object[[pnames[pm]]]
+        if (is.null(pro)) 
+            next
+        if (length(pnames) > 1L) 
+            sp <- spline(x = pro[, "par.vals"][, pm], y = pro[, 
+                1])
+        else sp <- spline(x = pro[, "par.vals"], y = pro[, 1])
+        ci[pnames[pm], ] <- approx(sp$y, sp$x, xout = cutoff)$y
+    }
+    drop(ci)
+}
+
+##
+## MASS:::profile.glm with very slight changes to avoid rounding error in 1-alpha
+## original is GPL and (c) Bill Venables and Brian D Ripley.
+##
+
+MASSprofile_glm<-function (fitted, which = 1:p, alpha = 0.01, maxsteps = 10, del = zmax/5, 
+    trace = FALSE, ...) 
+{
+    Pnames <- names(B0 <- coef(fitted))
+    nonA <- !is.na(B0)
+    pv0 <- t(as.matrix(B0))
+    p <- length(Pnames)
+    if (is.character(which)) 
+        which <- match(which, Pnames)
+    summ <- summary(fitted)
+    std.err <- summ$coefficients[, "Std. Error", drop = FALSE]
+    mf <- model.frame(fitted)
+    Y <- model.response(mf)
+    n <- NROW(Y)
+    O <- model.offset(mf)
+    if (!length(O)) 
+        O <- rep(0, n)
+    W <- model.weights(mf)
+    if (length(W) == 0L) 
+        W <- rep(1, n)
+    OriginalDeviance <- deviance(fitted)
+    DispersionParameter <- summ$dispersion
+    X <- model.matrix(fitted)
+    fam <- family(fitted)
+    switch(fam$family, binomial = , poisson = , `Negative Binomial` = {
+        zmax <- sqrt(qchisq(alpha, 1,lower.tail=FALSE))
+        profName <- "z"
+    }, gaussian = , quasi = , inverse.gaussian = , quasibinomial = , 
+        quasipoisson = , {
+            zmax <- sqrt(qf(alpha, 1, n - p,lower.tail=FALSE))
+            profName <- "tau"
+        })
+    prof <- vector("list", length = length(which))
+    names(prof) <- Pnames[which]
+    for (i in which) {
+        if (!nonA[i]) 
+            next
+        zi <- 0
+        pvi <- pv0
+        a <- nonA
+        a[i] <- FALSE
+        Xi <- X[, a, drop = FALSE]
+        pi <- Pnames[i]
+        for (sgn in c(-1, 1)) {
+            if (trace) 
+                message("\nParameter: ", pi, " ", c("down", "up")[(sgn + 
+                  1)/2 + 1])
+            step <- 0
+            z <- 0
+            LP <- X[, nonA, drop = FALSE] %*% B0[nonA] + O
+            while ((step <- step + 1) < maxsteps && abs(z) < 
+                zmax) {
+                bi <- B0[i] + sgn * step * del * std.err[Pnames[i], 
+                  1]
+                o <- O + X[, i] * bi
+                fm <- glm.fit(x = Xi, y = Y, weights = W, etastart = LP, 
+                  offset = o, family = fam, control = fitted$control)
+                LP <- Xi %*% fm$coefficients + o
+                ri <- pv0
+                ri[, names(coef(fm))] <- coef(fm)
+                ri[, pi] <- bi
+                pvi <- rbind(pvi, ri)
+                zz <- (fm$deviance - OriginalDeviance)/DispersionParameter
+                if (zz > -0.001) 
+                  zz <- max(zz, 0)
+                else stop("profiling has found a better solution, so original fit had not converged")
+                z <- sgn * sqrt(zz)
+                zi <- c(zi, z)
+            }
+        }
+        si <- order(zi)
+        prof[[pi]] <- structure(data.frame(zi[si]), names = profName)
+        prof[[pi]]$par.vals <- pvi[si, , drop = FALSE]
+    }
+    val <- structure(prof, original.fit = fitted, summary = summ)
+    class(val) <- c("profile.glm", "profile")
+    val
+}
+
+
+###
 
 svymle<-function(loglike, gradient=NULL, design, formulas,
                  start=NULL, control=list(maxit=1000),
@@ -2007,8 +2125,8 @@ predict.svyglm <- function(object, newdata=NULL, total=NULL,
     if (type=="terms")
       return(predterms(object,se=se.fit,...))
     tt<-delete.response(terms(formula(object)))
-    mf<-model.frame(tt,data=newdata)
-    mm<-model.matrix(tt,mf)
+    mf<-model.frame(tt,data=newdata, xlev=object$xlevels)
+    mm<-model.matrix(tt,mf,contrasts.arg = object$contrasts)
     if (!is.null(total) && attr(tt,"intercept")){
         mm[,attr(tt,"intercept")]<-mm[,attr(tt,"intercept")]*total
     }

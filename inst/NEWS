@@ -1,3 +1,19 @@
+3.31-5  predict.svyglm() uses object$xlevels and object$contrasts and so should be able to
+        guess the right factor levels when they aren't supplied in newdata= (for @thosjleeper)
+
+	fix return() without parentheses in svykm.R
+
+3.31-4	svyciprop(,method="like") and confint.svyglm(method="like") work even when the 
+        design effect is large. 
+
+3.31-3  svyciprop has method="xlogit" that reproduces what SUDAAN and SPSS give. (for Rex Dwyer)
+
+	Added reference for svylogrank
+
+	Added example from YRBS for software comparison
+
+	Copied some names from NEWS into THANKS
+
 3.31-2	explicitly dropping dimensions on a 1x1 matrix
 
 3.31-1	Allow for incompatible change in output of CompQuadForm::farebrother()  

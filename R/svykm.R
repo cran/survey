@@ -175,7 +175,7 @@ plot.svykmlist<-function(x, pars=NULL, ci=FALSE,...){
     do.call(plot,c(list(x[[1]]),pars[1,,drop=FALSE],ci=ci,...))
 
   m<-length(x)
-  if(m==1) return
+  if(m==1) return()
   for(i in 2:m){
     if(is.null(pars))
       lines(x[[i]],ci=ci,...)
