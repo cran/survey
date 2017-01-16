@@ -510,7 +510,7 @@ svyCprod<-function(x, strata, psu, fpc, nPSU, certainty=NULL, postStrata=NULL,
 
 
 svymean<-function(x, design,na.rm=FALSE,...){
-  .svycheck(design)
+  #.svycheck(design)
   UseMethod("svymean",design)
 }
 
@@ -545,10 +545,15 @@ svymean.survey.design<-function(x,design, na.rm=FALSE,deff=FALSE,...){
   
   pweights<-1/design$prob
   psum<-sum(pweights)
+  
+  # It's just like 1/n(sums)
   average<-colSums(x*pweights/psum)
+  
   x<-sweep(x,2,average)
+  
   v<-svyCprod(x*pweights/psum,design$strata,design$cluster[[1]], design$fpc,
               design$nPSU,design$certainty, design$postStrata)
+
   attr(average,"var")<-v
   attr(average,"statistic")<-"mean"
   class(average)<-"svystat"

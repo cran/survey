@@ -210,8 +210,10 @@ onestrat<-function(x,cluster,nPSU,fpc, lonely.psu,stratum=NULL,stage=1,cal=cal){
   if (is.null(fpc))
       f<-rep(1,NROW(x))
   else{
-      f<-ifelse(fpc==Inf, 1, (fpc-nPSU)/fpc)
+      f<-ifelse(fpc==Inf, 1, (fpc-nPSU)/fpc) # (1-n/N)
   }
+
+ # Apply Bessel correction and FPC correction!
 
   if (nPSU>1)
       scale<-f*nPSU/(nPSU-1)
@@ -257,17 +259,23 @@ onestrat<-function(x,cluster,nPSU,fpc, lonely.psu,stratum=NULL,stage=1,cal=cal){
 
 
 onestage<-function(x, strata, clusters, nPSU, fpc, lonely.psu=getOption("survey.lonely.psu"),stage=0, cal){
+
+  # Calculate variance for each stratum
   stratvars<- tapply(1:NROW(x), list(factor(strata)), function(index){
              onestrat(x[index,,drop=FALSE], clusters[index],
              nPSU[index][1], fpc[index], ##changed from fpc[index][1], to allow pps(brewer)
              lonely.psu=lonely.psu,stratum=strata[index][1], stage=stage,cal=cal)
   })
+ 
   p<-NCOL(x)
   nstrat<-length(unique(strata))
   nokstrat<-sum(sapply(stratvars,function(m) !any(is.na(m))))
+  
+  # This is like summing all of them up
   apply(array(unlist(stratvars),c(p,p,length(stratvars))),1:2,sum,na.rm=TRUE)*nstrat/nokstrat
 }
 
+#(1-n/N)s*s/N
 
 svyrecvar<-function(x, clusters,  stratas, fpcs, postStrata=NULL,
                     lonely.psu=getOption("survey.lonely.psu"),
