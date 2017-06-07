@@ -41,7 +41,7 @@ marginpred.svycoxph<-function(model, adjustfor, predictat, se=FALSE, ...){
                        )
                  )
 
-  g<-grake(mm,weights(design), calfun=cal.raking, bounds=c(0,Inf),
+  g<-grake(mm,weights(design), calfun=cal.raking, bounds=list(lower=0,upper=Inf),
                 population=pop, epsilon=1e-4,maxit=100,verbose=FALSE)
   
   if ( !is.null(attr(g,"failed"))) stop("Calibration failed")
@@ -103,7 +103,7 @@ marginpred.svykmlist<-function(model, adjustfor, predictat, se=FALSE, ...){
                        )
                  )
 
-  g<-grake(mm,weights(design), calfun=cal.raking, bounds=c(0, Inf),
+  g<-grake(mm,weights(design), calfun=cal.raking, bounds=list(lower=0, upper=Inf),
                 population=pop, epsilon=1e-4, maxit=100, verbose=FALSE)
   
   if ( !is.null(attr(g,"failed"))) stop("Calibration failed")
@@ -162,7 +162,7 @@ marginpred.svyglm<-function(model, adjustfor, predictat,  ...){
                        )
                  )
 
-  g<-grake(mm,weights(design), calfun=cal.raking, bounds=c(0,Inf),
+  g<-grake(mm,weights(design), calfun=cal.raking, bounds=list(lower=0,upper=Inf),
                 population=pop, epsilon=1e-4, maxit=100, verbose=FALSE)
   
   if ( !is.null(attr(g,"failed"))) stop("Calibration failed")

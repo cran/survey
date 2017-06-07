@@ -63,6 +63,15 @@ alpha=c(0, 0.8),xbins=30,...)
 
   \code{\link{svytable}} for plots of discrete data.
 }
+
+\references{
+
+Korn EL, Graubard BI (1998) "Scatterplots with Survey Data" The American Statistician 52: 58-69
+
+Lumley T, Scott A (2017) "Fitting Regression Models to Survey Data"
+Statistical Science 32: 265-278
+}
+
 \examples{
 data(api)
 dstrat<-svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)

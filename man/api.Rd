@@ -72,7 +72,7 @@ data(api)
 }
 \source{
   Data were obtained from the survey sampling help pages of UCLA
-  Academic Technology Services, at \url{http://www.ats.ucla.edu/stat/stata/Library/svy_survey.htm}.
+  Academic Technology Services; these pages are no longer on line. 
 }
 \references{
   The API program and original data files are at  \url{http://api.cde.ca.gov/}

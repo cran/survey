@@ -1,3 +1,25 @@
+3.32	Add diffs for calibration from Daniel Oehm at ABS
+
+        - Sparse matrix support
+	- Heteroscedasticity parameters
+        - more flexible boundary constraints
+
+        Update references to AIC/BIC paper, Statistical Science review paper
+
+        More information on accuracy of pchisqsum methods
+
+        svyglm() didn't work with missing values in database-backed designs (Anthony Damico)
+
+3.31-8  Add svysurvreg() (for Pam Shaw and Eric Oh)
+
+        Remove the tests that don't produce character-identical output on all platforms (for CRAN)
+
+3.31-7  Add deff="replace" as an option for svyratio (for Chris Webb)
+
+        Add psrsq() for pseudo-R^2 statistics (for Ward Kinkade)
+
+3.31-6  Make database-backed svydesign work with *no* design variables  (for Anthony Damico and Guilherme Jacob)
+
 3.31-5  predict.svyglm() uses object$xlevels and object$contrasts and so should be able to
         guess the right factor levels when they aren't supplied in newdata= (for @thosjleeper)
 

@@ -108,6 +108,13 @@ mean and total can also be obtained with \code{\link{calibrate}}.
   \code{\link{svyttest}} for one-sample and two-sample t-tests.
 }
 
+\references{
+
+Lumley T, Scott A (2017) "Fitting Regression Models to Survey Data"
+Statistical Science 32: 265-278
+
+  }
+
 \examples{
 
   data(api)

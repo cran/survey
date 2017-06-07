@@ -8,8 +8,7 @@ is.calibrated<-function(design){ !is.null(design$postStrata)}
 ## collinearity than Deville & Sarndal's Newton algorithm.
 ##
 regcalibrate.survey.design2<-function(design, formula, population,
-                                   stage=NULL,  lambda=NULL, aggregate.stage=NULL,...){
-  
+                                   stage=NULL,  lambda=NULL, aggregate.stage=NULL, sparse=FALSE,...){
   if (is.null(stage))
     stage<-if (is.list(population)) 1 else 0
 
@@ -19,12 +18,20 @@ regcalibrate.survey.design2<-function(design, formula, population,
   
   if(stage==0){
     ## calibration to population totals
-    mm<-model.matrix(formula, model.frame(formula, model.frame(design)))
+    if(sparse){
+      mm<-sparse.model.matrix(formula, model.frame(formula, model.frame(design)))
+    }else{
+      mm<-model.matrix(formula, model.frame(formula, model.frame(design)))
+    }
     ww<-weights(design)
-    if (is.null(lambda))
+    
+    if (is.null(lambda)){
       sigma2<-rep(1,nrow(mm))
-    else
-      sigma2<-drop(mm%*%lambda)
+    }else if(length(lambda) == nrow(mm)){ # for the heteroskedasticity parameter
+      sigma2<-drop(lambda)
+    }else{
+      sigma2<-drop(mm%*%lambda) # to keep the same functionality when variance = 1
+    }
 
     if (!is.null(aggregate.stage)){
       mm<-apply(mm,2,function(mx) ave(mx,aggindex))
@@ -86,12 +93,19 @@ regcalibrate.survey.design2<-function(design, formula, population,
     caldata<-list(qr=vector("list",nc), w=vector("list",nc),
                   stage=stage,index=as.character(clusters))
 
-    mm<-model.matrix(formula, model.frame(formula, model.frame(design)))
+    if(sparse){
+      mm<-sparse.model.matrix(formula, model.frame(formula, model.frame(design)))
+    }else{
+      mm<-model.matrix(formula, model.frame(formula, model.frame(design)))
+    }
 
-    if (is.null(lambda))
+    if (is.null(lambda)){
       sigma2<-rep(1,nrow(mm))
-    else
-      sigma2<-drop(mm%*%lambda)
+    }else if(length(lambda) == nrow(mm)){ # for the heteroskedasticity parameter
+      sigma2<-drop(lambda)
+    }else{
+      sigma2<-drop(mm%*%lambda) # to keep the same functionality when variance = 1
+    }
     
     if(NCOL(mm)!=length(population[[1]]))
         stop("Population and sample totals are not the same length.")
@@ -144,14 +158,23 @@ regcalibrate.survey.design2<-function(design, formula, population,
 
 
 regcalibrate.svyrep.design<-function(design, formula, population,compress=NA,lambda=NULL,
-                                  aggregate.index=NULL,...){
+                                  aggregate.index=NULL,sparse=FALSE,...){
   mf<-model.frame(formula, design$variables)
-  mm<-model.matrix(formula, mf)
+  if(sparse){
+    mm<-sparse.model.matrix(formula, mf)
+  }else{
+    mm<-model.matrix(formula, mf)
+  }
+  
   ww<-design$pweights
-  if (is.null(lambda))
+
+  if (is.null(lambda)){
     sigma2<-rep(1,nrow(mm))
-  else
-    sigma2<-drop(mm%*%lambda)
+  }else if(length(lambda) == nrow(mm)){ # for the heteroskedasticity parameter
+    sigma2<-drop(lambda)
+  }else{
+    sigma2<-drop(mm%*%lambda) # to keep the same functionality when variance = 1
+  }
   
   repwt<-as.matrix(design$repweights)
   if (!design$combined.weights)

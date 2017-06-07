@@ -37,23 +37,23 @@ Vector of cumulative probabilities
   approximation, and this is also used as a fallback for the other
   methods. The accuracy is usually good, but is more variable depending
   on \code{a} than the other methods and is anticonservative in the
-  extreme tail. The Satterthwaite approximation requires all \code{a>0}.
+  right tail (eg for upper tail probabilities less than \code{10^-5}).
+ The Satterthwaite approximation requires all \code{a>0}.
 
   \code{"integration"} requires the \code{CompQuadForm} package. For
   \code{pchisqsum} it uses Farebrother's algorithm if all
   \code{a>0}. For \code{pFsum} or when some \code{a<0} it inverts the
-  characteristic function using the algorithm of Davies (1980).  If
-  the \code{CompQuadForm} package is not present, a warning is given
-  and the saddlepoint approximation is used.  These algorithms are not
-  accurate for very large \code{x} or when some \code{a} are close to
-  zero: a warning is given if the relative error bound is more than
-  10\% of the result.
+  characteristic function using the algorithm of Davies (1980).
+  These algorithms are highly accurate for the lower tail probability, but they obtain the upper tail probability by subtraction from 1 and so fail completely when the upper tail probability is comparable to machine epsilon or smaller. 
+
+If  the \code{CompQuadForm} package is not present, a warning is given
+  and the saddlepoint approximation is used. 
   
   \code{"saddlepoint"} uses Kuonen's saddlepoint approximation. This
-  is accurate even very far out in the upper tail or with some
+  is moderately accurate even very far out in the upper tail or with some
   \code{a=0} and does not require any additional packages. It is
   implemented in pure R and so is slower than the \code{"integration"}
-  method.
+  method. 
 
   The distribution in \code{pFsum} is standardised so that a likelihood
   ratio test can use the same \code{x} value as in \code{pchisqsum}.

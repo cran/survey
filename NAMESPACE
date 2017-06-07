@@ -12,7 +12,9 @@ export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        make.calfun, cal.linear, cal.raking, cal.logit, svycdf, svykappa, svykm,
        svyolr, svycoplot, svyloglin, make.panel.svysmooth, dotchart, subbootweights,
        svyciprop, svyttest, marginpred, twophasevar, twophase2var, ppsmat, HR, unwtd.count,
-       svyfactanal, svypredmeans, svyprcomp, trimWeights,stratsample,svylogrank,svyranktest,svystandardize)
+       svyfactanal, svypredmeans, svyprcomp, trimWeights,stratsample,svylogrank,
+       svyranktest,svystandardize,
+       psrsq, svysurvreg)
 
 S3method(svyloglin,survey.design)
 S3method(svyloglin,svyrep.design)
@@ -168,8 +170,12 @@ S3method(svycoxph,svyrep.design)
 S3method(svycoxph, DBIsvydesign)
 S3method(svycoxph, ODBCsvydesign)
 
+S3method(svysurvreg,survey.design)
+
 S3method(residuals, svrepglm)
 S3method(residuals, svyglm)
+S3method(residuals, svysurvreg)
+
 
 S3method(coef,svrepstat)
 S3method(coef,svystat)
@@ -449,3 +455,7 @@ S3method(svyranktest,survey.design)
 S3method(svyranktest,svyrep.design)
 S3method(svyranktest,DBIsvydesign)
 S3method(svyranktest,ODBCsvydesign)
+
+S3method(psrsq,glm)
+S3method(psrsq,svyglm)
+

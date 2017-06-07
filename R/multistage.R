@@ -283,7 +283,7 @@ svyrecvar<-function(x, clusters,  stratas, fpcs, postStrata=NULL,
       if (inherits(psvar, "greg_calibration")) {
         if (psvar$stage==0){
           ## G-calibration at population level
-          x<-qr.resid(psvar$qr,x/psvar$w)*psvar$w
+          x<-as.matrix(qr.resid(psvar$qr,x/psvar$w)*psvar$w)
         } else {
           ## G-calibration within clusters
           cal<-c(cal, list(psvar))
@@ -337,7 +337,7 @@ multistage<-function(x, clusters,  stratas, nPSUs, fpcs,
           stop("Internal problem in g-calibration data: stage",stage,
                ", cluster", j)
         j<-j[[1]]
-        x[index,]<-qr.resid(cali$qr[[j]], x[index,,drop=FALSE]/cali$w[[j]])*cali$w[[j]]
+        x[index,]<-as.matrix(qr.resid(cali$qr[[j]], x[index,,drop=FALSE]/cali$w[[j]])*cali$w[[j]])
       }
       multistage(x[index,,drop=FALSE], clusters[index,-1,drop=FALSE],
                  stratas[index,-1,drop=FALSE], nPSUs[index,-1,drop=FALSE],
@@ -788,15 +788,15 @@ svyratio.survey.design2<-function(numerator=formula, denominator, design, separa
     
     vars<-matrix(ncol=nd,nrow=nn)
 
-    if (deff) deffs<-matrix(ncol=nd,nrow=nn)
+    if (deff=="replace" || deff) deffs<-matrix(ncol=nd,nrow=nn)
     
     for(i in 1:nn){
       for(j in 1:nd){
         r<-(numerator[,i]-rval$ratio[i,j]*denominator[,j])/sum(denominator[,j]/design$prob)
         vars[i,j]<-svyrecvar(r*1/design$prob, design$cluster, design$strata, design$fpc,
                             postStrata=design$postStrata)
-        if (deff){
-          deffs[i,j]<-deff(svytotal(r,design,deff=TRUE))
+        if (deff=="replace" || deff){
+          deffs[i,j]<-deff(svytotal(r,design,deff=deff))
         }
       }
     }
@@ -813,7 +813,7 @@ svyratio.survey.design2<-function(numerator=formula, denominator, design, separa
     colnames(vars)<-colnames(denominator)
     rownames(vars)<-colnames(numerator)
     rval$var<-vars
-    if (deff) attr(rval,"deff")<-deffs
+    if (deff=="replace" || deff) attr(rval,"deff")<-deffs
     attr(rval,"call")<-sys.call()
     class(rval)<-"svyratio"
     rval

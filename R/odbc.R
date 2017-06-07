@@ -169,7 +169,7 @@ subset.ODBCsvydesign<-function (x, subset, ...)
 
 dim.ODBCsvydesign<-function(x){
   w<-weights(x)
-  nrow<-sum(w!=0)
+  nrow<-length (w) ## need honest vector length, not subset size sum(w!=0)
   coln<-names(RODBC::sqlQuery(x$db$conn, paste("select * from", x$db$tablename, "limit 1")))
   if (!is.null(x$updates)){
     update.names<-do.call(c, lapply(x$updates, names))

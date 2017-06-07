@@ -35,6 +35,7 @@ svycontrast             linear combinations of estimates
 svycoxph                Survey-weighted Cox models
 svyglm                  Survey-weighted generalised linear models.
 svyolr                  Ordinal logistic regression
+svysurvreg              Accelerated failure models
 regTermTest             Test sets of terms in a regression model
 svyloglin               Loglinear models
 svyquantile             Summary statistics for sample surveys

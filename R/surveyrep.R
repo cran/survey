@@ -1577,8 +1577,8 @@ svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, desi
       for(j in 1:nd){
         vars[i,j]<-svrVar(allstats$replicates[,i]/allstats$replicates[,nn+j],
                           design$scale, design$rscales,mse=design$mse,coef=rval$ratio[i,j])
-        if (deff)
-          deffs[i,j]<-deff(svytotal(numerator[,i]-rval[i,j]*denominator[,j],design))
+        if (deff=="replace" || deff)
+          deffs[i,j]<-deff(svytotal(numerator[,i]-rval[i,j]*denominator[,j],design,deff=deff))
       }
     }
   }
@@ -1601,7 +1601,7 @@ svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, desi
   }
   rval$var<-vars
   attr(rval,"call")<-sys.call()
-  if (deff) attr(rval,"deff")<-deffs
+  if (deff=="replace" || deff) attr(rval,"deff")<-deffs
   class(rval)<-"svyratio"
   rval
 }

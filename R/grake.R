@@ -17,6 +17,7 @@ calibrate.survey.design2<-function(design, formula, population,
                                     aggregate.stage=NULL, stage=0, variance=NULL,
                                     bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
                                     maxit=50, epsilon=1e-7, verbose=FALSE, force=FALSE, trim=NULL,
+                                    bounds.const = FALSE, sparse=FALSE,
                                     ...){
 
   if(is.list(formula) && is.list(population)){
@@ -30,12 +31,13 @@ calibrate.survey.design2<-function(design, formula, population,
   }
 
   
+  if (!is.list(bounds)) bounds <- list(lower = bounds[1], upper = bounds[2]) ## converting to list if not already
   if (is.character(calfun)) calfun<-match.arg(calfun)
-  if (is.character(calfun) && calfun=="linear" && (bounds==c(-Inf,Inf))){
+  if (is.character(calfun) && calfun=="linear" && all(unlist(bounds) == c(-Inf, Inf))){
     ## old code is better for ill-conditioned linear calibration
     rval<-regcalibrate(design,formula,population,
                        aggregate.stage=aggregate.stage, stage=stage,
-                       lambda=variance,...)
+                       lambda=variance,sparse=sparse,...)
     rval$call<-sys.call(-1)
     return(rval)
   }
@@ -56,8 +58,15 @@ calibrate.survey.design2<-function(design, formula, population,
   expit<-function(x) 1-1/(1+exp(x))
   
   ## calibration to population totals
-  mm<-model.matrix(formula, model.frame(formula, model.frame(design)))
+  if(sparse){
+    mm<-sparse.model.matrix(formula, model.frame(formula, model.frame(design)))
+  }else{
+    mm<-model.matrix(formula, model.frame(formula, model.frame(design)))
+  }
+  
   ww<-weights(design)
+  
+  if (bounds.const) bounds<-lapply(bounds, function(x) x/ww) # if bounds are set to a constant convert to multiplicative value and run as normal
   
   if (!is.null(aggregate.stage)){
     mm<-apply(mm,2,function(mx) ave(mx,aggindex))
@@ -91,11 +100,11 @@ calibrate.survey.design2<-function(design, formula, population,
   }
   
   tqr<-qr(mm*whalf)
-  if (!all(abs(qr.resid(tqr,whalf))<1e-10))
-    warning("G-calibration models must have an intercept")
+  #if (!all(abs(qr.resid(tqr,whalf))<1e-10))
+  #  warning("G-calibration models must have an intercept")
 
   g<-grake(mm,ww,calfun, bounds=bounds,population=population,
-           verbose=verbose,epsilon=epsilon,maxit=maxit)
+           verbose=verbose,epsilon=epsilon,maxit=maxit, variance=variance)
 
   if(!is.null(trim)) {
       gnew<-pmax(trim[1], pmin(g, trim[2]))
@@ -129,6 +138,7 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
                                    aggregate.index=NULL, variance=NULL,
                                    bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
                                    maxit=50, epsilon=1e-7, verbose=FALSE,force=FALSE, trim=NULL,
+                                   bounds.const=FALSE, sparse=FALSE,
                                    ...){
 
   if(is.list(formula) && is.list(population)){
@@ -145,7 +155,8 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
   if (length(epsilon)!=1 && length(epsilon)!=length(population))
     stop("'epsilon' must be a scalar or of the same length as 'population'")
   
-  if (is.character(calfun) && calfun=="linear" && (bounds==c(-Inf,Inf))){
+  if (!is.list(bounds)) bounds <- list(lower = bounds[1], upper = bounds[2]) ## converting to list if not already
+  if (is.character(calfun) && calfun=="linear" && all(unlist(bounds)==c(-Inf,Inf))){
     ## old code is better for ill-conditioned linear calibration
     rval<-regcalibrate(design,formula,population, compress=compress,
                        aggregate.index=aggregate.index,
@@ -155,7 +166,11 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
   }
   
   mf<-model.frame(formula, design$variables)
-  mm<-model.matrix(formula, mf)
+  if(sparse){
+    mm<-sparse.model.matrix(formula, model.frame(formula, model.frame(design)))
+  }else{
+    mm<-model.matrix(formula, model.frame(formula, model.frame(design)))
+  }
   ww<-design$pweights
   
   repwt<-as.matrix(design$repweights)
@@ -212,7 +227,8 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
   else if (!inherits(calfun,"calfun"))
     stop("'calfun' must be a string or a 'calfun' object")
   gtotal <- grake(mm,ww,calfun,bounds=bounds,population=population,
-                  verbose=verbose, epsilon=epsilon, maxit=maxit)
+                  verbose=verbose, epsilon=epsilon, maxit=maxit, 
+                  variance=variance)
 
   if(!is.null(trim)) {
       gnew<-pmax(trim[1], pmin(gtotal, trim[2]))
@@ -233,7 +249,8 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
     wwi<-repwt[,i]
     if(verbose) cat("replicate = ",i,"\n")
     g<-grake(mm, wwi, calfun, eta=rep(0,NCOL(mm)), bounds=bounds, population=population,
-             epsilon=epsilon, verbose=verbose, maxit=maxit)
+             epsilon=epsilon, verbose=verbose, maxit=maxit, 
+             variance=variance)
     
     if(length(trim)==2){
       outside<-(g<trim[1]) | (g>trim[2])
@@ -261,40 +278,49 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
   design
 }
 
-cal.linear<-make.calfun(function(u,bounds) pmin(pmax(u+1,bounds[1]),bounds[2])-1,
-                        function(u, bounds) as.numeric(u<bounds[2]-1 & u>bounds[1]-1),
+cal.linear<-make.calfun(function(u,bounds) pmin(pmax(u+1,bounds$lower),bounds$upper)-1,
+                        function(u, bounds) as.numeric(u < bounds$upper-1 & u > bounds$lower-1),
                         "linear calibration")
-cal.raking<-make.calfun(function(u,bounds) pmin(pmax(exp(u),bounds[1]),bounds[2])-1,
-                        function(u, bounds) ifelse(u<bounds[2]-1 & u>bounds[1]-1,exp(u),0),
+cal.raking<-make.calfun(function(u,bounds) pmin(pmax(exp(u),bounds$lower),bounds$upper)-1,
+                        function(u, bounds) ifelse(u<bounds$upper-1 & u>bounds$lower-1,exp(u),0),
                         "raking")
 cal.logit<-make.calfun(
-                       function(u,bounds) {
-                         if (any(!is.finite(bounds))) stop("Logit calibration requires finite bounds")
-                         L <- bounds[1]
-                         U <- bounds[2]
-                         A <- (U-L)/((U-1)*(1-L))
-                         eAu <- exp(A*u)
-                         ( L*(U-1) + U*(1-L)*eAu)/(U-1+(1-L)*eAu)-1
-                       },
-                       function(u,bounds) {
-                         L <- bounds[1]
-                         U <- bounds[2]
-                         A <- (U-L)/((U-1)*(1-L))
-                         eAu <- exp(A*u)
-                         U*(1-L)*eAu*A/(U-1+(1-L)*eAu)-( (L*(U-1)+U*(1-L)*eAu)*( (1-L)*eAu*A ) )/(U-1+(1-L)*eAu)^2
-                       },
-                       "logit calibration"
-                       )
+  function(u,bounds) {
+    if (any(!is.finite(unlist(bounds)))) stop("Logit calibration requires finite bounds")
+    L <- bounds$lower
+    U <- bounds$upper
+    A <- (U-L)/((U-1)*(1-L))
+    eAu <- exp(A*u)
+    ( L*(U-1) + U*(1-L)*eAu)/(U-1+(1-L)*eAu)-1
+  },
+  function(u,bounds) {
+    L <- bounds$lower
+    U <- bounds$upper
+    A <- (U-L)/((U-1)*(1-L))
+    eAu <- exp(A*u)
+    U*(1-L)*eAu*A/(U-1+(1-L)*eAu)-( (L*(U-1)+U*(1-L)*eAu)*( (1-L)*eAu*A ) )/(U-1+(1-L)*eAu)^2
+  },
+  "logit calibration"
+)
                       
-grake<-function(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit){
-
+grake<-function(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, 
+                verbose, maxit, variance=NULL){
   sample.total<-colSums(mm*ww)
   if(!inherits(calfun,"calfun")) stop("'calfun' must be of class 'calfun'")
   
   Fm1<-calfun$Fm1
   dF<-calfun$dF
-
-  xeta<-drop(mm%*%eta)
+  
+  if (is.null(variance)){
+    sigma2<-rep(1,nrow(mm))
+  }
+  else if(length(variance) == nrow(mm)){
+    sigma2<-drop(variance)
+  }else{
+    sigma2<-drop(mm%*%variance)
+  }
+  
+  xeta<-drop(mm%*%eta/sigma2)
   g<-1+Fm1(xeta, bounds)
   deriv <- dF(xeta, bounds)
   iter<-1
@@ -307,24 +333,24 @@ grake<-function(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verb
     ww<-ww*scale
     sample.total<-sample.total*scale
     if(verbose) message(paste("Sampling weights rescaled by",signif(scale,3)))
-    if (any(is.finite(bounds))) warning(paste("Bounds were set but will be interpreted after rescaling by",signif(scale,3)))
+    if (any(is.finite(unlist(bounds)))) warning(paste("Bounds were set but will be interpreted after rescaling by",signif(scale,3)))
   } else scale<-NULL
   
   repeat({
-    Tmat<-crossprod(mm*ww*deriv, mm)
+    Tmat<-crossprod(mm*ww/sqrt(sigma2)*deriv, mm/sqrt(sigma2))
 
     misfit<-(population-sample.total-colSums(mm*ww*Fm1(xeta, bounds)))
-    deta<-MASS::ginv(Tmat, tol=256*.Machine$double.eps)%*%misfit
+    deta<-round(MASS::ginv(as(Tmat, "matrix"), tol=256*.Machine$double.eps)%*%misfit, 10)
     eta<-eta+deta
 
-    xeta<- drop(mm%*%eta)
+    xeta<- drop(mm%*%eta/sigma2)
     g<-1+Fm1(xeta, bounds)
     deriv <- dF(xeta, bounds)
     while(iter<maxit && any(!is.finite(g),!is.finite(deriv))){
       iter<-iter+1
       deta<-deta/2
       eta<-eta-deta
-      xeta<- drop(mm%*%eta)
+      xeta<- drop(mm%*%eta/sigma2)
       g<-1+Fm1(xeta, bounds)
       deriv <- dF(xeta, bounds)
       if(verbose) print("Step halving")

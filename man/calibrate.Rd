@@ -22,19 +22,22 @@ calibrate(design,...)
 \method{calibrate}{survey.design2}(design, formula, population,
        aggregate.stage=NULL, stage=0, variance=NULL,
        bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),
-       maxit=50,epsilon=1e-7,verbose=FALSE,force=FALSE,trim=NULL,...)
+       maxit=50,epsilon=1e-7,verbose=FALSE,force=FALSE,trim=NULL,
+       bounds.const=FALSE, sparse=FALSE,...)
 \method{calibrate}{svyrep.design}(design, formula, population,compress=NA,
        aggregate.index=NULL, variance=NULL, bounds=c(-Inf,Inf),
        calfun=c("linear","raking","logit"),
-       maxit=50, epsilon=1e-7, verbose=FALSE,force=FALSE,trim=NULL, ...)
+       maxit=50, epsilon=1e-7, verbose=FALSE,force=FALSE,trim=NULL,
+       bounds.const=FALSE, sparse=FALSE,...)
 \method{calibrate}{twophase}(design, phase=2,formula, population,
        calfun=c("linear","raking","logit","rrz"),...)
-grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
+grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, 
+  verbose,maxit,variance=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{design}{survey design object}
-  \item{formula}{model formula for calibration model, or list of
+  \item{design}{Survey design object}
+  \item{formula}{Model formula for calibration model, or list of
     formulas for each margin}
   \item{population}{Vectors of population column totals for the model matrix in the
     calibration model, or list of such vectors for each
@@ -42,7 +45,7 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
   \item{compress}{compress the resulting replicate weights if
     \code{TRUE} or if \code{NA} and weights were previously compressed}
   \item{stage}{See Details below}
-  \item{variance}{Coefficients for variance in calibration model (see
+  \item{variance}{Coefficients for variance in calibration model (heteroskedasticity parameters) (see
     Details below)}
   \item{aggregate.stage}{An integer. If not \code{NULL}, make calibration weights
     constant within sampling units at this stage.}
@@ -50,19 +53,21 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
     constant within levels of this variable}
   \item{bounds}{Bounds for the calibration weights, optional
     except for \code{calfun="logit"}}
+  \item{bounds.const}{Should be \code{TRUE} if \code{bounds} have been spcified as constant values rather than multiplicative values}
   \item{trim}{Weights outside this range will be trimmed to these bounds.}
-  \item{...}{options for other methods}
+  \item{...}{Options for other methods}
   \item{calfun}{Calibration function: see below}
   \item{maxit}{Number of iterations}
-  \item{epsilon}{tolerance in matching population total. Either a single
+  \item{epsilon}{Tolerance in matching population total. Either a single
   number or a vector of the same length as \code{population}}
-  \item{verbose}{print lots of uninteresting information}
+  \item{verbose}{Print lots of uninteresting information}
   \item{force}{Return an answer even if the specified accuracy was not achieved}
   \item{phase}{Phase of a two-phase design to calibrate (only
     \code{phase=2} currently implemented.)}
-  \item{mm}{model matrix}
-  \item{ww}{vector of weights}
-  \item{eta}{starting values for iteration}
+  \item{mm}{Model matrix}
+  \item{ww}{Vector of weights}
+  \item{eta}{Starting values for iteration}
+  \item{sparse}{Use sparse matrices for faster computation}
 }
 \details{
 
@@ -94,6 +99,13 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
   function may be specified as a string naming one of the three built-in
   functions or as an object of class \code{calfun}, allowing
   user-defined functions. See \code{\link{make.calfun}} for details.
+
+  The \code{bounds} argument can be specified as global upper and lower bounds e.g
+  \code{bounds=c(0.5, 2)} or as a list with lower and upper vectors e.g. 
+  \code{bounds=list(lower=lower, upper=upper)}. This allows for individual 
+  boundary constraints for each unit. The lower and upper vectors must be 
+  the same length as the input data. The bounds can be specified as multiplicative 
+  values or constant values. If constant, \code{bounds.const} must be set to \code{TRUE}.
 
   Calibration with bounds, or on highly collinear data, may fail. If
   \code{force=TRUE} the approximately calibrated design object will
@@ -141,12 +153,13 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, verbose,maxit)
   about an exactly singular matrix) for PSUs that have fewer
   observations than the number of calibration variables.
   
-  For unbounded linear calibration only, the variance in the calibration
-  model may depend on covariates.  If \code{variance=NULL} the
+  The variance in the calibration model may depend on covariates.  If \code{variance=NULL} the
   calibration model has constant variance.  If \code{variance} is not \code{NULL}
   it specifies a linear combination of the columns of the model matrix
-  and the calibration variance is proportional to that linear
-  combination.
+  and the calibration variance is proportional to that linear combination.
+  Alternatively \code{variance} can be specified as a vector of values the
+  same length as the input data specifying a heteroskedasticity parameter
+  for each unit.
 
   The design matrix specified by formula (after any aggregation) must be
   of full rank, with one exception. If the population total for a column
@@ -266,6 +279,17 @@ svymean(~api00, dclus1g3b)
 svytotal(~enroll, dclus1g3b)
 svytotal(~stype, dclus1g3b)
 
+## Individual boundary constraints as constant values
+# the first weight will be bounded at 40, the rest free to move
+bnds <- list(
+  lower = rep(-Inf, nrow(apiclus1)), 
+  upper = c(40, rep(Inf, nrow(apiclus1)-1))) 
+head(weights(dclus1g3))
+dclus1g3b1 <- calibrate(dclus1, ~stype+api99, c(pop.totals, api99=3914069), 
+  bounds=bnds, bounds.const=TRUE)
+head(weights(dclus1g3b1))
+svytotal(~api.stu, dclus1g3b1)
+
 ## trimming
 dclus1tr <- calibrate(dclus1, ~stype+api99, c(pop.totals, api99=3914069), 
    bounds=c(0.5,2), trim=c(2/3,3/2))
@@ -312,6 +336,9 @@ pop<-3811472
 dstratg1<-calibrate(dstrat,~enroll-1, pop, variance=1)
 svytotal(~api.stu, dstratg1)
 
+# Alternatively specifying the heteroskedasticity parameters directly
+dstratgh <- calibrate(dstrat,~enroll-1, pop, variance=apistrat$enroll)
+svytotal(~api.stu, dstratgh)
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

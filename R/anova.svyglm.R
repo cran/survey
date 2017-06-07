@@ -116,7 +116,10 @@ anova.svyglm<-function(object, object2=NULL,test=c("F","Chisq"),method=c("LRT","
   else if (inherits(design, "twophase2")) 
     V<-twophase2var(estfun %*% Ainv, design)
   else if (inherits(design, "pps")) 
-        V<-ppsvar(estfun %*% Ainv, design)
+      V<-ppsvar(estfun %*% Ainv, design)
+  else if (inherits(design, "svyrep.design")){
+      V<-vcov(svymean(estfun%*% Ainv/pweights, design))*length(pweights)^2
+  } else stop("not implemented for this type of design")
   
   V<-V[index,index]
   df<-min(object$df.residual, object2$df.residual)
