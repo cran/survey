@@ -9,9 +9,19 @@ svydesign<-function(ids, probs = NULL, strata = NULL, variables = NULL,
 	UseMethod("svydesign", data)
 	}
 
+detibble<-function(data) {
+    if ("tbl_df" %in% class(data))
+        as.data.frame(data)
+    else
+        data
+}
+
 svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
                     data=NULL, nest=FALSE, check.strata=!nest,weights=NULL,pps=FALSE,
                             variance=c("HT","YG"),...){
+
+  data<-detibble(data)
+    
   variance<-match.arg(variance)
   if(is.character(pps)){
     a<-match.arg(pps,c("brewer","overton","other"))

@@ -448,7 +448,6 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
   
   if (type %in% c("other")  && !is.null(rho))
     warning("rho ignored.")
-
   
   if(is.null(variables))
     variables<-data
@@ -457,7 +456,9 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
     mf<-substitute(model.frame(variables, data=data,na.action=na.pass))
     variables<-eval.parent(mf)
   }
-    
+
+  variables<-detibble(variables)
+  
   if(inherits(repweights,"formula")){
     mf<-substitute(model.frame(repweights, data=data))
     repweights<-eval.parent(mf)
@@ -471,7 +472,8 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
   
   if (is.null(repweights))
     stop("You must provide replication weights")
-  
+
+  repweights<-detibble(repweights)
   
   if(inherits(weights,"formula")){
     mf<-substitute(model.frame(weights, data=data))

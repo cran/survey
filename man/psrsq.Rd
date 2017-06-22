@@ -27,7 +27,7 @@ For future expansion
 Numeric value
 }
 \references{
-Lumley T (2017) "Pseudo-R2 statistics under complex sampling" 	arXiv:1701.07745 \url{https://arxiv.org/abs/1701.07745}
+Lumley T (2017) "Pseudo-R2 statistics under complex sampling" Australian and New Zealand Journal of Statistics DOI: 10.1111/anzs.12187 (preprint: \url{https://arxiv.org/abs/1701.07745})
 }
 
 \seealso{

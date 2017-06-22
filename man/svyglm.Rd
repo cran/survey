@@ -41,7 +41,7 @@ return.replicates=FALSE, na.action,multicore=getOption("survey.multicore"))
     \code{summary.glm} }
   \item{rho}{For replicate BRR designs, to specify the parameter for
     Fay's variance method, giving weights of \code{rho} and \code{2-rho}}
-  \item{return.replicates}{Return the replicates as a component of the
+  \item{return.replicates}{Return the replicates as the \code{replicates} component of the
     result? (for \code{predict}, only possible if they
     were computed in the \code{svyglm} fit)}
   \item{object}{A \code{svyglm} object}

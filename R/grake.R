@@ -302,6 +302,39 @@ cal.logit<-make.calfun(
   },
   "logit calibration"
 )
+
+cal.sinh <- make.calfun(
+  Fm1 = function(u, bounds) 
+  {
+    if (any(!is.finite(unlist(bounds)))) 
+      stop("Sinh calibration requires finite bounds")
+
+    
+    dasinh <- function(u, alpha = 1) {
+      p <- asinh(2 * alpha * u)
+      m <- (p + sqrt((p^2) + 4*(alpha^2)))/(2*alpha)
+      m <- as.vector(m)
+      m
+    }
+    # linear truncation
+    pmin(pmax(dasinh(u), bounds$lower), bounds$upper) - 1
+    
+  },
+  dF = function(u, bounds)
+  {
+    ddasinh <- function(u, alpha = 1) {
+      p <- asinh(2 * alpha * u)
+      m <- 1/sqrt(1 + (2*alpha*u)^2)*(1 + p/sqrt(p^2 + 4*alpha^2))
+      m <- as.vector(m)
+      m
+    }
+    
+    ifelse(u < bounds$upper - 1 & u > bounds$lower - 1, ddasinh(u), 0)
+    
+  },
+  name = 'sinh calibration'
+  
+)
                       
 grake<-function(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, 
                 verbose, maxit, variance=NULL){

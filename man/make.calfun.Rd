@@ -3,6 +3,7 @@
 \alias{cal.linear}
 \alias{cal.raking}
 \alias{cal.logit}
+\alias{cal.sinh}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Calibration metrics}
 \description{
@@ -10,7 +11,9 @@ Create calibration metric for use  in \code{\link{calibrate}}. The
 function \code{F} is the link function described in section 2 of
 Deville et al. To create a new calibration metric, specify \eqn{F-1}{F-1} and its
 derivative. The package provides \code{cal.linear}, \code{cal.raking},
-and \code{cal.logit}.
+\code{cal.logit}, which are standard, and \code{cal.sinh} from the
+\code{CALMAR2} macro, for which \code{F} is the derivative of the inverse hyperbolic
+sine. 
 }
 \usage{
 make.calfun(Fm1, dF, name)

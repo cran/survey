@@ -79,7 +79,9 @@ make_covmat<-function(design1,design2,subset){
 ## Will be pruned in the future.
 ##
 twophase2<-function(id,strata=NULL, probs=NULL, fpc=NULL,
-                   subset, data){
+                    subset, data){
+
+    data<-detibble(data)
 
   d1<-svydesign(ids=id[[1]],strata=strata[[1]],weights=NULL,
                 probs=probs[[1]],fpc=fpc[[1]],data=data)
