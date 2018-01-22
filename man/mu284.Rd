@@ -21,9 +21,8 @@ population, analyzed on page 143 of the book.
 \source{
   Carl Erik Sarndal, Bengt Swensson, Jan Wretman. (1991) "Model Assisted
   Survey Sampling" Springer.
-}
-\references{
-Full MU284 population at \url{http://lib.stat.cmu.edu/datasets/mu284}
+
+  (downloaded from StatLib, which is no longer active)
 }
 \examples{
 data(mu284)

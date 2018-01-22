@@ -4,17 +4,14 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Wald test for a term in a regression model}
 \description{
-  Provides Wald test and working likelihood ratio (Rao-Scott) test of the
+  Provides Wald test and working Wald and working likelihood ratio (Rao-Scott) test of the
   hypothesis that all coefficients associated with a particular
   regression term are zero (or have some other specified
   values). Particularly useful as a substitute for \code{\link{anova}}
-  when not fitting by maximum likelihood.  The Wald tests use a
-  chisquared or F distribution, the LRT uses a linear combination of
-  chisquared or F distributions as in \code{\link{pchisqsum}}.
-}
+  when not fitting by maximum likelihood.  }
 \usage{
 regTermTest(model, test.terms, null=NULL,df=NULL,
-method=c("Wald","LRT"), lrt.approximation="saddlepoint")
+method=c("Wald","WorkingWald","LRT"), lrt.approximation="saddlepoint")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,13 +23,32 @@ method=c("Wald","LRT"), lrt.approximation="saddlepoint")
     \code{NULL} these are estimated from the model. Use \code{Inf} for a
   chi-squared test.}
 \item{method}{If \code{"Wald"}, the Wald-type test; if \code{"LRT"}
-  the Rao-Scott test based on the estimated log likelihood ratio}
+  the Rao-Scott test based on the estimated log likelihood ratio; If
+  \code{"WorkingWald"} the Wald-type test using the variance matrix
+  under simple random sampling}
 \item{lrt.approximation}{method for approximating the distribution of
-  the LRT statistic; see \code{\link{pchisqsum}}}
+  the LRT and Working Wald statistic; see \code{\link{pchisqsum}}.  }
 }
 \value{
   An object of class \code{regTermTest} or \code{regTermTestLRT}.
 }
+
+\details{
+The Wald test uses a chisquared or F distribution.  The two
+working-model tests come from the (misspecified) working model where the
+observations are independent and the weights are frequency weights. For
+categorical data, this is just the model fitted to the estimated
+population crosstabulation. The Rao-Scott LRT statistic is the likelihood
+ratio statistic in this model.  The working Wald test statistic is the Wald statistic
+in this model. The working-model tests do not have a chi-squared
+sampling distribution: we use a linear combination of chi-squared or F
+distributions as in \code{\link{pchisqsum}}. I believe the working Wald
+test is what SUDAAN refers to as a
+"Satterthwaite adjusted Wald test".
+
+To match other software you will typically need to use \code{lrt.approximation="satterthwaite"}
+  }
+
 \references{
 Rao, JNK, Scott, AJ (1984) "On Chi-squared Tests For Multiway Contingency Tables with Proportions Estimated From Survey Data" Annals of Statistics 12:46-60.
 
@@ -64,6 +80,11 @@ The \code{"LRT"} method will not work if the model had starting values supplied 
  regTermTest(model2, ~ell,df=NULL)
  regTermTest(model2, ~ell, method="LRT", df=Inf)
  regTermTest(model2, ~ell+meals, method="LRT", df=NULL)
+
+ regTermTest(model2, ~ell+meals, method="WorkingWald", df=NULL)
+
+
+
 }
 \keyword{regression}% at least one, from doc/KEYWORDS
 

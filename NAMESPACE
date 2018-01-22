@@ -9,12 +9,12 @@ export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        jk1weights,jknweights, brrweights, regTermTest, degf, nonresponse, 
        sparseCells, neighbours, joinCells, compressWeights, make.formula,
        svycontrast, svyCprod, svyrecvar, grake, svrVar, pchisqsum, pFsum,
-       make.calfun, cal.linear, cal.raking, cal.logit, svycdf, svykappa, svykm,
+       make.calfun, cal.linear, cal.raking, cal.logit, cal.sinh,svycdf, svykappa, svykm,
        svyolr, svycoplot, svyloglin, make.panel.svysmooth, dotchart, subbootweights,
        svyciprop, svyttest, marginpred, twophasevar, twophase2var, ppsmat, HR, unwtd.count,
        svyfactanal, svypredmeans, svyprcomp, trimWeights,stratsample,svylogrank,
        svyranktest,svystandardize,
-       psrsq, svysurvreg)
+       psrsq, svysurvreg, cal_names)
 
 S3method(svyloglin,survey.design)
 S3method(svyloglin,svyrep.design)
@@ -216,6 +216,10 @@ S3method(BIC,svyglm)
 
 S3method(anova,svycoxph)
 S3method(predict,svycoxph)
+S3method(extractAIC,svycoxph)
+S3method(extractAIC,svrepcoxph)
+S3method(AIC,svycoxph)
+
 
 S3method(svycontrast,svrepstat)
 S3method(svycontrast,svystat)
@@ -286,6 +290,7 @@ S3method(print, nonresponse)
 S3method(print, nonresponseSubset)
 S3method(print, regTermTest)
 S3method(print, regTermTestLRT)
+S3method(print, regTermTestWW)
 S3method(print, svrepstat)
 S3method(print, svystat)
 S3method(print, survey.design)
@@ -459,3 +464,6 @@ S3method(svyranktest,ODBCsvydesign)
 S3method(psrsq,glm)
 S3method(psrsq,svyglm)
 
+S3method(cal_names, survey.design)
+S3method(cal_names, DBIsvydesign)
+S3method(cal_names, ODBCsvydesign)

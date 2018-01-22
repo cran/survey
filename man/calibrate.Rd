@@ -8,6 +8,7 @@
 %\alias{regcalibrate}
 \alias{calibrate.twophase}
 \alias{grake}
+\alias{cal_names}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Calibration (GREG) estimators}
 \description{
@@ -33,6 +34,7 @@ calibrate(design,...)
        calfun=c("linear","raking","logit","rrz"),...)
 grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon, 
   verbose,maxit,variance=NULL)
+cal_names(formula,design,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -73,7 +75,8 @@ grake(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon,
 
   The \code{formula} argument specifies a model matrix, and the
   \code{population} argument is the population column sums of this
-  matrix.
+  matrix. The function \code{cal_names} shows what the column names of
+  this model matrix will be. 
 
   For the important special case where the calibration totals are (possibly
   overlapping) marginal tables of factor variables, as in classical
@@ -201,7 +204,6 @@ the American Statistical Association, 89, 846-866.
 
 Vanderhoeft C (2001) Generalized Calibration at Statistics
 Belgium. Statistics Belgium Working Paper No 3.
-\url{http://statbel.fgov.be/nl/binaries/paper03\%5B1\%5D_tcm325-35412.pdf}
 }
 
 \seealso{ \code{\link{postStratify}}, \code{\link{rake}} for other ways
@@ -218,6 +220,8 @@ Belgium. Statistics Belgium Working Paper No 3.
 \examples{
 data(api)
 dclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc)
+
+cal_names(~stype, dclus1)
 
 pop.totals<-c(`(Intercept)`=6194, stypeH=755, stypeM=1018)
 
@@ -238,6 +242,7 @@ svytotal(~stype, dclus1agg)
 
 
 ## Now add sch.wide
+cal_names(~stype+sch.wide, dclus1)
 (dclus1g2 <- calibrate(dclus1, ~stype+sch.wide, c(pop.totals, sch.wideYes=5122)))
 
 svymean(~api00, dclus1g2)
@@ -246,6 +251,7 @@ svytotal(~stype, dclus1g2)
 
 ## Finally, calibrate on 1999 API and school type
 
+cal_names(~stype+api99, dclus1)
 (dclus1g3 <- calibrate(dclus1, ~stype+api99, c(pop.totals, api99=3914069)))
 
 svymean(~api00, dclus1g3)

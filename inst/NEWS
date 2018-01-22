@@ -1,3 +1,16 @@
+3.33   Add explicit family= argument to svyglm() methods because of strange scoping problems (for Thomas Leeper)
+
+       calibrate() now displays differences between sample and population names (for Stas Kolenikov)
+
+       cal_names() displays what the auxiliary variable names will be for a formula
+
+       regTermTest() now does Rao-Scott-type Wald tests, which I think are the same as SUDAAN's
+       "Satterthwaite Adjusted Wald Tests" (but I don't have an example to verify).
+
+3.32-2 Actually add the hyperbolic sine distance function
+
+       Add AIC method for svycoxph
+
 3.32-1 pseudo-rsquared paper is out: update reference
 
        Add cal.sinh for the hyperbolic sine distance function (used in CALMAR2) with code from Maciej Beręsewicz

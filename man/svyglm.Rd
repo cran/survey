@@ -17,8 +17,8 @@ Fit a generalised linear model to data from a complex survey design,
 with inverse-probability weighting and design-based standard errors.
 }
 \usage{
-\method{svyglm}{survey.design}(formula, design, subset=NULL, ...)
-\method{svyglm}{svyrep.design}(formula, design, subset=NULL, ..., rho=NULL,
+\method{svyglm}{survey.design}(formula, design, subset=NULL, family=stats::gaussian(), ...)
+\method{svyglm}{svyrep.design}(formula, design, subset=NULL, family=stats::gaussian(), ..., rho=NULL,
 return.replicates=FALSE, na.action,multicore=getOption("survey.multicore"))
 \method{summary}{svyglm}(object, correlation = FALSE, df.resid=NULL,
 ...)
@@ -37,6 +37,7 @@ return.replicates=FALSE, na.action,multicore=getOption("survey.multicore"))
   \item{design}{Survey design from \code{\link{svydesign}} or \code{\link{svrepdesign}}. Must contain all variables
     in the formula}
   \item{subset}{Expression to select a subpopulation}
+  \item{family}{\code{family} object for \code{glm}}
   \item{\dots}{Other arguments passed to \code{glm} or
     \code{summary.glm} }
   \item{rho}{For replicate BRR designs, to specify the parameter for
@@ -59,10 +60,6 @@ return.replicates=FALSE, na.action,multicore=getOption("survey.multicore"))
     variance-covariance matrix of predictions}
 }
 \details{
-There is no \code{anova} method for \code{svyglm} as the models are not
-fitted by maximum likelihood. The function \code{\link{regTermTest}} may
-be useful for testing sets of regression terms.
-
 For binomial and Poisson families use \code{family=quasibinomial()}
 and \code{family=quasipoisson()} to avoid a warning about non-integer
 numbers of successes.  The `quasi' versions of the family objects give

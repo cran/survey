@@ -2,7 +2,7 @@
 deviance.svycoxph<-function(object,...) 2 * (object$ll[1] - object$ll[2])
 deviance.coxph<-function(object,...) 2 * (object$loglik[1] - object$loglik[2])
 
-regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","LRT"), lrt.approximation="saddlepoint"){
+regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","WorkingWald","LRT"), lrt.approximation="saddlepoint"){
 
   method<-match.arg(method)
   
@@ -51,7 +51,7 @@ regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","LR
       df<-length(resid(model))-length(coef(model))
   }
 
-  if (method=="LRT"){
+  if (method %in% c("LRT","WorkingWald")){
     if (inherits(model,"svyglm"))
       V0<-model$naive.cov
     else if (inherits(model, "svycoxph"))
@@ -70,10 +70,16 @@ regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","LR
     test.formula<-make.formula(test.terms)[[2]]
     if (!("formula") %in% names(model$call))
       names(model$call)[[2]]<-"formula"
+
+    if (method=="LRT"){
+        model0<-eval(bquote(update(model, .~.-(.(test.formula)))))
+        chisq<-deviance(model0)-deviance(model)
+    } else {
+        chisq<-beta%*%solve(V0)%*%beta
+    }
     
-    model0<-eval(bquote(update(model, .~.-(.(test.formula)))))
-    chisq<-deviance(model0)-deviance(model)
     misspec<-eigen(solve(V0)%*%V, only.values=TRUE)$values
+    
     if (df==Inf)
       p<-pchisqsum(chisq,rep(1,length(misspec)),misspec,method=lrt.approximation,lower.tail=FALSE)
     else
@@ -82,9 +88,12 @@ regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","LR
     rval<-list(call=sys.call(),mcall=model$call,chisq=chisq,
                df=length(index),test.terms=test.terms, 
                p=p,lambda=misspec,ddf=df)
-    class(rval)<-"regTermTestLRT"
+    if (method=="LRT")
+        class(rval)<-"regTermTestLRT"
+    else
+        class(rval)<- "regTermTestWW"
     return(rval)
-  }
+  } 
   
   
   chisq<-beta%*%solve(V)%*%beta
@@ -125,6 +134,25 @@ print.regTermTestLRT<-function(x,...){
   print(x$mcall)
   chisq<-x$chisq/mean(x$lambda)
   cat("Working 2logLR = ",chisq, 'p=',format.pval(x$p),"\n")
+  if (length(x$lambda)>1)
+    cat("(scale factors: ",signif(x$lambda/mean(x$lambda),2),")")
+  else cat("df=1")
+  if (!is.null(x$ddf) && is.finite(x$ddf))
+    cat(";  denominator df=",x$ddf)
+  cat("\n")
+  invisible(x)
+}
+
+print.regTermTestWW<-function(x,...){
+  if (is.null(x$ddf) || x$ddf==Inf)
+    cat("Working (Rao-Scott) Wald test for ")
+  else
+    cat("Working (Rao-Scott+F)  for ")
+  cat(x$test.terms)
+  cat("\n in ")
+  print(x$mcall)
+  chisq<-x$chisq/mean(x$lambda)
+  cat("Working Wald statistic = ",chisq, 'p=',format.pval(x$p),"\n")
   if (length(x$lambda)>1)
     cat("(scale factors: ",signif(x$lambda/mean(x$lambda),2),")")
   else cat("df=1")

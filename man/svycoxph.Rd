@@ -8,7 +8,8 @@
 %\alias{model.frame.svycoxph}
 %\alias{summary.svycoxph}
 %\alias{anova.svycoxph}
-%\alias{extractAIC.svycoxph}
+\alias{extractAIC.svycoxph}
+\alias{AIC.svycoxph}
 %\alias{survfit.svycoxph}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Survey-weighted Cox models.}
@@ -19,6 +20,7 @@ Fit a proportional hazards model to data from a complex survey design.
 svycoxph(formula, design,subset=NULL, ...)
 \method{predict}{svycoxph}(object, newdata, se=FALSE,
     type=c("lp", "risk", "expected", "terms","curve"),...)
+\method{AIC}{svycoxph}(object, ..., k = 2)    
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -32,7 +34,9 @@ svycoxph(formula, design,subset=NULL, ...)
     \code{type="curve"}}
   \item{type}{"curve" does predicted survival curves. The other values
     are passed to \code{predict.coxph()}}
-  \item{\dots}{Other arguments passed to \code{coxph}. }
+  \item{\dots}{For \code{AIC}, more models to compare the AIC of. For \code{svycoxph},
+  other arguments passed to \code{coxph}. }
+  \item{k}{The penalty per parameter that would be used under independent sampling: AIC has \code{k=2}}
 }
 \details{
 The main difference between \code{svycoxph} function and the \code{robust=TRUE}
@@ -44,6 +48,10 @@ having only a small number of clusters.
 Note that \code{strata} terms in the model formula describe subsets that
 have a separate baseline hazard function and need not have anything to
 do with the stratification of the sampling.
+
+The \code{AIC} method uses the same approach as \code{\link{AIC.svyglm}},
+though the relevance of the criterion this optimises is a bit less clear
+than for generalised linear models. 
 
 The standard errors for predicted survival curves are available only by linearization, not
   by replicate weights (at the moment). Use

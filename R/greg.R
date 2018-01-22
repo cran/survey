@@ -49,13 +49,18 @@ regcalibrate.survey.design2<-function(design, formula, population,
       sample.total<-sample.total[!zz]
     }
 
-    
-    if (length(sample.total)!=length(population))
-      stop("Population and sample totals are not the same length.")
-    
-    if (!is.null(names(population)) && any(names(sample.total)!=names(population)))
-      warning("Sample and population totals have different names.")
-
+    if (!is.null(names(population))){
+        if (!all(names(sample.total) %in% names(population))){
+            warning("Sampling and population totals have different names.")
+            cat("Sample: "); print(names(sample.total))
+            cat("Popltn: "); print(names(population))
+        }
+        else if (!all(names(sample.total) == names(population))){
+            warning("Sample and population totals reordered to make names agree: check results.")
+            population <- population[match(names(sample.total), names(population))]
+        }
+    }
+      
     tqr<-qr(mm*whalf/sqrt(sigma2))
 
     ## not needed
@@ -107,11 +112,15 @@ regcalibrate.survey.design2<-function(design, formula, population,
       sigma2<-drop(mm%*%lambda) # to keep the same functionality when variance = 1
     }
     
-    if(NCOL(mm)!=length(population[[1]]))
+    if(NCOL(mm)!=length(population[[1]])){
         stop("Population and sample totals are not the same length.")
-      
-    if (any(colnames(mm)!=names(population[[1]])))
-      warning("Sample and population totals have different names.")
+    }
+    if (any(colnames(mm)!=names(population[[1]]))){
+            warning("Sampling and population totals have different names.")
+            cat("Sample: "); print(colnames(mm))
+            cat("Popltn: "); print(names(population[[1]]))
+    }
+    
   
     stageweights<-1/apply(design$allprob[,1:stage,drop=FALSE],1,prod)
     if (any(duplicated(design$cluster[!duplicated(stageweights),stage])))
@@ -209,10 +218,15 @@ regcalibrate.svyrep.design<-function(design, formula, population,compress=NA,lam
     sample.total<-sample.total[!zz]
   }
   
-  if (length(sample.total)!=length(population))
-    stop("Population and sample totals are not the same length.")
-  if (!is.null(names(population)) && any(names(sample.total)!=names(population)))
-    warning("Sample and population totals have different names.")
+    if(length(sample.total)!=length(population)){
+        stop("Population and sample totals are not the same length.")
+    }
+    if (!is.null(names(population)) && any(names(sample.total)!=names(population))){
+            warning("Sampling and population totals have different names.")
+            cat("Sample: "); print(colnames(mm))
+            cat("Popltn: "); print(names(population[[1]]))
+    }
+    
   
   Tmat<-crossprod(mm*whalf/sqrt(sigma2))
   

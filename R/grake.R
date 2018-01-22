@@ -9,6 +9,25 @@ make.calfun<-function(Fm1,dF, name){
   rval
 }
 
+
+cal_names <- function(formula, design, ...) UseMethod("cal_names",design)
+
+cal_names.DBIsvydesign<-function(formula, design,...){
+    design$variables <- getvars(formula, design$db$connection, 
+        design$db$tablename, updates = design$updates, subset = design$subset)
+    colnames(model.matrix(formula, model.frame(formula,design$variables[0,])))
+}
+
+cal_names.ODBCsvydesign<-function(formula, design,...){
+    design$variables <- getvars(formula, design$db$connection, 
+                                design$db$tablename, updates = design$updates)
+    colnames(model.matrix(formula, model.frame(formula,design$variables[0,])))
+}
+
+cal_names.survey.design<-function(formula,design,...) {
+    colnames(model.matrix(formula, model.frame(formula,model.frame(design)[0,])))
+}
+    
 print.calfun<-function(x,...) cat("calibration metric: ",x$name,"\n")
 
 calibrate<-function(design, ...) UseMethod("calibrate")
@@ -91,8 +110,11 @@ calibrate.survey.design2<-function(design, formula, population,
     stop("Population and sample totals are not the same length.")
   }
   if(!is.null(names(population))){
-    if (!all(names(sample.total) %in% names(population)))
-      warning("Sampling and population totals have different names.")
+    if (!all(names(sample.total) %in% names(population))){
+        warning("Sampling and population totals have different names.")
+        cat("Sample: "); print(names(sample.total))
+        cat("Popltn: "); print(names(population))
+        }
     else if (!all(names(sample.total) == names(population))){
       warning("Sample and population totals reordered to make names agree: check results.")
       population <- population[match(names(sample.total), names(population))]
@@ -206,22 +228,23 @@ calibrate.svyrep.design<-function(design, formula, population,compress=NA,
     if (length(epsilon)>1) epsilon <- epsilon[!zz]
   }
   
-    
-
-  if (length(sample.total)!=length(population)){
-    print(sample.total)
-    print(population)
-    stop("Population and sample totals are not the same length.")
-  }
-  if (!is.null(names(population))){
-    if (!all(names(sample.total) %in% names(population)))
-      warning("Sample and population totals have different names.")
-    else if (!all(names(sample.total) == names(population))){
-      warning("Sample and population totals reordered to make names agree: check results.")
-      population <- population[match(names(sample.total), names(population))]
+    if (length(sample.total)!=length(population)){
+        print(sample.total)
+        print(population)
+        stop("Population and sample totals are not the same length.")
     }
-  }
-
+    if (!is.null(names(population))){
+        if (!all(names(sample.total) %in% names(population))){
+            warning("Sampling and population totals have different names.")
+            cat("Sample: "); print(names(sample.total))
+            cat("Popltn: "); print(names(population))
+        }
+        else if (!all(names(sample.total) == names(population))){
+            warning("Sample and population totals reordered to make names agree: check results.")
+            population <- population[match(names(sample.total), names(population))]
+        }
+    }
+    
   if(is.character(calfun))
     calfun<-switch(calfun, linear=cal.linear, raking=cal.raking, logit=cal.logit)
   else if (!inherits(calfun,"calfun"))
