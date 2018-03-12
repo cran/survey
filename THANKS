@@ -10,6 +10,7 @@ requests from users, including:
   Ron Burns
   Stefano Calza
   Shelby Chartkoff
+  Henry Chiem
   David Collins
   Anthony Damico
   Wade Davis
@@ -25,6 +26,7 @@ requests from users, including:
   Alistair Gray
   James Greiner
   Zachary Grinspan
+  Brian Guay
   Alois Haslinger
   Kieran Healy
   Lucia Hindorff
@@ -76,7 +78,7 @@ Patrick Aboyoun did the S-PLUS port of version 3.6-8
 
 John Preston provided an example of the multistage rescaled bootstrap for testing.
 
-The svyolr() code and the likelihood-based confidenece intervals are largely ripped from
+The svyolr() code and the likelihood-based confidence intervals are largely ripped from
 the MASS package of Venables & Ripley, and parts of the code for svycoxph() are modified 
 from Therneau's survival package.
 

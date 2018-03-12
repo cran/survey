@@ -1,7 +1,7 @@
 Package: survey
 Title: Analysis of Complex Survey Samples
 Description: Summary statistics, two-sample tests, rank tests, generalised linear models, cumulative link models, Cox models, loglinear models, and general maximum pseudolikelihood estimation for multistage stratified, cluster-sampled, unequally weighted survey samples. Variances by Taylor series linearisation or replicate weights. Post-stratification, calibration, and raking. Two-phase subsampling designs. Graphics. PPS sampling without replacement. Principal components, factor analysis.
-Version: 3.33
+Version: 3.33-2
 Author: Thomas Lumley
 Maintainer: "Thomas Lumley" <t.lumley@auckland.ac.nz>
 License: GPL-2 | GPL-3
@@ -12,8 +12,8 @@ Suggests: foreign, MASS, KernSmooth, hexbin, mitools, RSQLite, RODBC,
 URL: http://r-survey.r-forge.r-project.org/survey/
 Repository: CRAN
 Repository/R-Forge/Project: r-survey
-Repository/R-Forge/Revision: 67
-Repository/R-Forge/DateTimeStamp: 2018-01-22 20:53:38
-Date/Publication: 2018-01-22 23:30:24 UTC
+Repository/R-Forge/Revision: 72
+Repository/R-Forge/DateTimeStamp: 2018-03-11 23:49:12
+Date/Publication: 2018-03-13 00:01:22 UTC
 NeedsCompilation: no
-Packaged: 2018-01-22 21:10:34 UTC; rforge
+Packaged: 2018-03-12 00:12:07 UTC; rforge

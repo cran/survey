@@ -85,7 +85,8 @@ calibrate.survey.design2<-function(design, formula, population,
   
   ww<-weights(design)
   
-  if (bounds.const) bounds<-lapply(bounds, function(x) x/ww) # if bounds are set to a constant convert to multiplicative value and run as normal
+  if (bounds.const) bounds<-lapply(bounds,
+        function(x) ifelse(ww>0,x/ww,x)) # if bounds are set to a constant convert to multiplicative value and run as normal
   
   if (!is.null(aggregate.stage)){
     mm<-apply(mm,2,function(mx) ave(mx,aggindex))
@@ -396,7 +397,7 @@ grake<-function(mm,ww,calfun,eta=rep(0,NCOL(mm)),bounds,population,epsilon,
     Tmat<-crossprod(mm*ww/sqrt(sigma2)*deriv, mm/sqrt(sigma2))
 
     misfit<-(population-sample.total-colSums(mm*ww*Fm1(xeta, bounds)))
-    deta<-round(MASS::ginv(as(Tmat, "matrix"), tol=256*.Machine$double.eps)%*%misfit, 10)
+    deta<-MASS::ginv(as(Tmat, "matrix"), tol=256*.Machine$double.eps)%*%misfit
     eta<-eta+deta
 
     xeta<- drop(mm%*%eta/sigma2)

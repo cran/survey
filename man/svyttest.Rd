@@ -1,12 +1,13 @@
 \name{svyttest}
 \alias{svyttest}
+\alias{confint.svyttest}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Design-based t-test}
 \description{
 One-sample or two-sample t-test.  This function is a wrapper for
 \code{\link{svymean}} in the one-sample case and for
 \code{\link{svyglm}} in the two-sample case. Degrees of freedom are
-\code{degf(design)} for the one-sample test and \code{degf(design)-1}
+\code{degf(design)-1} for the one-sample test and \code{degf(design)-2}
 for the two-sample case.
 }
 \usage{
@@ -27,7 +28,9 @@ svyttest(formula, design,  ...)
 \examples{
 data(api)
 dclus2<-svydesign(id=~dnum+snum, fpc=~fpc1+fpc2, data=apiclus2)
-svyttest(enroll~comp.imp, dclus2)
+tt<-svyttest(enroll~comp.imp, dclus2)
+tt
+confint(tt, level=0.9)
 
 svyttest(I(api00-api99)~0, dclus2)
 

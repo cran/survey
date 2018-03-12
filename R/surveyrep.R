@@ -1302,7 +1302,7 @@ svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replica
   full
 }
 
-svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL,family=stats::gaussian(), ...,
+svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL,family=stats::gaussian(),start=NULL, ...,
                                          rho=NULL, return.replicates=FALSE, na.action,
                                          multicore=getOption("survey.multicore")){
 

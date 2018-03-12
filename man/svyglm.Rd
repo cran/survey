@@ -17,8 +17,8 @@ Fit a generalised linear model to data from a complex survey design,
 with inverse-probability weighting and design-based standard errors.
 }
 \usage{
-\method{svyglm}{survey.design}(formula, design, subset=NULL, family=stats::gaussian(), ...)
-\method{svyglm}{svyrep.design}(formula, design, subset=NULL, family=stats::gaussian(), ..., rho=NULL,
+\method{svyglm}{survey.design}(formula, design, subset=NULL, family=stats::gaussian(),start=NULL, ...)
+\method{svyglm}{svyrep.design}(formula, design, subset=NULL, family=stats::gaussian(),start=NULL, ..., rho=NULL,
 return.replicates=FALSE, na.action,multicore=getOption("survey.multicore"))
 \method{summary}{svyglm}(object, correlation = FALSE, df.resid=NULL,
 ...)
@@ -38,6 +38,7 @@ return.replicates=FALSE, na.action,multicore=getOption("survey.multicore"))
     in the formula}
   \item{subset}{Expression to select a subpopulation}
   \item{family}{\code{family} object for \code{glm}}
+  \item{start}{Starting values for the coefficients (needed for some uncommon link/family combinations)}
   \item{\dots}{Other arguments passed to \code{glm} or
     \code{summary.glm} }
   \item{rho}{For replicate BRR designs, to specify the parameter for

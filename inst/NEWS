@@ -1,3 +1,9 @@
+3.33-2 confint method for svyttest (for Brian Guay)
+
+       partial fix in start= argument for svyglm() [still doesn't work inside function] 
+
+3.33-1 two minor bug fixes for ABS contributions to calibrate()
+
 3.33   Add explicit family= argument to svyglm() methods because of strange scoping problems (for Thomas Leeper)
 
        calibrate() now displays differences between sample and population names (for Stas Kolenikov)

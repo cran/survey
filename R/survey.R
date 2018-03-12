@@ -1245,12 +1245,12 @@ anova.svycoxph<-function(object,...){
     stop("No anova method for survey models")
 }
 
-svyglm<-function(formula, design,subset=NULL,family=stats::gaussian(), ...){
+svyglm<-function(formula, design,subset=NULL,family=stats::gaussian(),start=NULL, ...){
   .svycheck(design)
   UseMethod("svyglm",design)
 }
 
-svyglm.survey.design<-function(formula,design,subset=NULL, family=stats::gaussian(),...){
+svyglm.survey.design<-function(formula,design,subset=NULL, family=stats::gaussian(),start=NULL,...){
 
       subset<-substitute(subset)
       subset<-eval(subset, model.frame(design), parent.frame())
