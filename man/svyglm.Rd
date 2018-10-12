@@ -17,8 +17,10 @@ Fit a generalised linear model to data from a complex survey design,
 with inverse-probability weighting and design-based standard errors.
 }
 \usage{
-\method{svyglm}{survey.design}(formula, design, subset=NULL, family=stats::gaussian(),start=NULL, ...)
-\method{svyglm}{svyrep.design}(formula, design, subset=NULL, family=stats::gaussian(),start=NULL, ..., rho=NULL,
+\method{svyglm}{survey.design}(formula, design, subset=NULL,
+family=stats::gaussian(),start=NULL, rescale=TRUE, ...)
+\method{svyglm}{svyrep.design}(formula, design, subset=NULL,
+family=stats::gaussian(),start=NULL, rescale=NULL, ..., rho=NULL,
 return.replicates=FALSE, na.action,multicore=getOption("survey.multicore"))
 \method{summary}{svyglm}(object, correlation = FALSE, df.resid=NULL,
 ...)
@@ -38,7 +40,12 @@ return.replicates=FALSE, na.action,multicore=getOption("survey.multicore"))
     in the formula}
   \item{subset}{Expression to select a subpopulation}
   \item{family}{\code{family} object for \code{glm}}
-  \item{start}{Starting values for the coefficients (needed for some uncommon link/family combinations)}
+  \item{start}{Starting values for the coefficients (needed for some
+    uncommon link/family combinations)}
+  \item{rescale}{Rescaling of weights, to improve numerical stability. The default
+    rescales weights to sum to the sample size. Use \code{FALSE} to not
+    rescale weights. For replicate-weight designs, use \code{TRUE} to
+    rescale weights to sum to 1, as was the case before version 3.34.}
   \item{\dots}{Other arguments passed to \code{glm} or
     \code{summary.glm} }
   \item{rho}{For replicate BRR designs, to specify the parameter for

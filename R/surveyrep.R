@@ -468,6 +468,7 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
   if(is.character(repweights)){##regular expression
     wtcols<-grep(repweights,names(data))
     repweights<-data[,wtcols]
+    repweights<-na.fail(repweights)
   }
   
   if (is.null(repweights))
@@ -1194,7 +1195,7 @@ rval
 
 
 
-svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replicates=FALSE,na.action,
+svycoxph.svyrep.design<-function(formula, design, subset=NULL,rescale=NULL,...,return.replicates=FALSE,na.action,
                                  multicore=getOption("survey.multicore")){
   subset<-substitute(subset)
   subset<-eval(subset, design$variables, parent.frame())
@@ -1215,8 +1216,12 @@ svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replica
   
   scale<-design$scale
   rscales<-design$rscales
+
+  if (is.null(rescale))
+      pwts<-design$pweights/mean(design$pweights)
+  else if (rescale)
+      pwts<-design$pweights/sum(design$pweights)
   
-  pwts<-design$pweights/sum(design$pweights)
   if (is.data.frame(pwts)) pwts<-pwts[[1]]
   
   if (!all(all.vars(formula) %in% names(data))) 
@@ -1302,7 +1307,7 @@ svycoxph.svyrep.design<-function(formula, design, subset=NULL,...,return.replica
   full
 }
 
-svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL,family=stats::gaussian(),start=NULL, ...,
+svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL,family=stats::gaussian(),start=NULL, rescale=NULL, ...,
                                          rho=NULL, return.replicates=FALSE, na.action,
                                          multicore=getOption("survey.multicore")){
 
@@ -1331,13 +1336,18 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL,family=sta
   g[[1]]<-quote(glm)      
   g$model<-TRUE
   g$x<-TRUE
-  g$y<-TRUE
+    g$y<-TRUE
+    g$rescale<-NULL
   
       scale<-design$scale
       rscales<-design$rscales
       if (!is.null(rho)) .NotYetUsed(rho)
-      
-      pwts<-design$pweights/sum(design$pweights)
+
+      if (is.null(rescale))
+          pwts<-design$pweights/mean(design$pweights)
+      else if (rescale)  ## old behaviour
+          pwts<-design$pweights/sum(design$pweights)
+
       if (is.data.frame(pwts)) pwts<-pwts[[1]]
       
       if (!all(all.vars(formula) %in% names(data))) 
@@ -1845,7 +1855,18 @@ print.svrepstat<-function(x,...){
       colnames(m)<-c(attr(x,"statistic"),"SE","DEff")
     }
     printCoefmat(m)
-  } else {stop("incorrect structure of svrepstat object")}
+  } else if (length(x)==length(vv)){
+      m<-cbind(x,sqrt((vv)))
+      if (is.null(deff))
+          colnames(m)<-c(attr(x,"statistic"),"SE")
+      else {
+          m<-cbind(m,deff(x))
+          colnames(m)<-c(attr(x,"statistic"),"SE","DEff")
+      }
+      printCoefmat(m)
+  } else {
+      stop("incorrect structure of svrepstat object")
+  }
 
   naa<-attr(vv,"na.replicates")
   if (!is.null(naa))

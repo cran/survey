@@ -167,7 +167,6 @@ svycontrast<-function(stat, contrasts,...) UseMethod("svycontrast")
 match.names <- function(nms,contrasts){
   l<-length(nms)
   ll<-sapply(contrasts,length)
-  if (all(ll==l)) return(contrasts)
 
   if (l==0) stop("No names to match")
   if( !all( unlist(sapply(contrasts,names)) %in% nms))
@@ -208,23 +207,6 @@ contrast<-function(coef,var,contrasts){
     attr(rval,"var")<-v
   }
   rval
-}
-
-svycontrast.svystat<-function(stat, contrasts,...){
-  if (!is.list(contrasts))
-    contrasts<-list(contrast=contrasts)
-  if (is.call(contrasts[[1]])){
-    rval<-nlcon(contrasts,as.list(coef(stat)), vcov(stat))
-    class(rval)<-"svrepstat"
-    attr(rval,"statistic")<-"nlcon"
-    return(rval)
-  }
-  contrasts<-match.names(names(coef(stat)),contrasts)
-  contrasts<-do.call(rbind,contrasts)
-  coef<-contrast(coef(stat),vcov(stat),contrasts)
-  class(coef)<-"svystat"
-  attr(coef,"statistic")<-"contrast"
-  coef
 }
 
 svycontrast.svystat<-function(stat, contrasts,...){

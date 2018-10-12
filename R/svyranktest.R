@@ -9,7 +9,7 @@ svyranktest.survey.design<-svyranktest.svyrep.design<-function(formula, design, 
   mf<-model.frame(formula,model.frame(design),na.action=na.omit)
   if (!is.null(naa<-attr(mf,"na.action"))){
     design<-design[-naa,]
-    mf<-model.frame(formula,model.frame(design),na.action=na.fail)
+    mf<-model.frame(formula,model.frame(design))
   }
   y<-mf[,1]
   g<-mf[,2]
@@ -31,7 +31,15 @@ svyranktest.survey.design<-svyranktest.svyrep.design<-function(formula, design, 
   ii<-order(y)
   n<-length(y)
   rankhat<-numeric(n)
+
   w<-weights(design,"sampling")
+  ## calibrated designs have weights set to zero, not removed
+  na.fixup<-FALSE
+  if (is.calibrated(design) && length(w)>n && !is.null(naa)){
+      w<-w[-naa]
+      na.fixup<-TRUE
+  }
+    
   
   N<-sum(w)
   rankhat[ii]<-ave(cumsum(w[ii])-w[ii]/2,factor(y[ii]))
@@ -39,7 +47,13 @@ svyranktest.survey.design<-svyranktest.svyrep.design<-function(formula, design, 
   m <- lm(rankscore~g, weights=w)
   delta<-coef(m)[2]
   xmat<-model.matrix(m)
-  infn<- (xmat*(rankscore-fitted(m)))%*%summary(m)$cov.unscaled
+  
+  if (na.fixup){
+      infn<-matrix(0,nrow=nrow(xmat)+length(naa),ncol=ncol(xmat))
+      infn[-naa,]<-(xmat*(rankscore-fitted(m)))%*%summary(m)$cov.unscaled
+  } else {
+      infn<- (xmat*(rankscore-fitted(m)))%*%summary(m)$cov.unscaled
+  }
   tot.infn<-svytotal(infn,design)
   if (is.character(test))
     method<-paste("Design-based",test,"test")
@@ -63,7 +77,7 @@ multiranktest<-function(formula,design,test=c('wilcoxon','vanderWaerden','median
     mf<-model.frame(formula,model.frame(design),na.action=na.omit)
     if (!is.null(naa<-attr(mf,"na.action"))){
         design<-design[-naa,]
-        mf<-model.frame(formula,model.frame(design),na.action=na.fail)
+        #mf<-model.frame(formula,model.frame(design),na.action=na.fail)
     }
     y<-mf[,1]
     g<-mf[,2]
@@ -82,11 +96,16 @@ multiranktest<-function(formula,design,test=c('wilcoxon','vanderWaerden','median
     n<-length(y)
     rankhat<-numeric(n)
     w<-weights(design,"sampling")
-    
+     ## calibrated designs have weights set to zero, not removed
+    if (is.calibrated(design) && length(w)>n && !is.null(naa)){
+      w<-w[-naa]
+     }
+  
     N<-sum(w)
     rankhat[ii]<-ave(cumsum(w[ii])-w[ii]/2,factor(y[ii]))
     rankscore<-testf(rankhat,N)
     m <- glm(rankscore~factor(g),weights=w)
+    m$na.action<-naa
     V<-svy.varcoef(m,design)
     ndf<-length(unique(g))-1
     beta<-coef(m)[-1]

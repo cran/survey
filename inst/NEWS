@@ -1,3 +1,33 @@
+3.34   removed duplicate definition of svycontrast.svystat
+
+       fix match.names() for the case of all the same names in different order (Sebastien Lucie)
+
+       make rescaling of weights optional in svyglm and svycoxph (Greg Ridgeway)
+
+       USER VISIBLE CHANGE: default rescaling of weights in svyglm and svycoxph with replicate
+       weights is now mean=1, as it always was with svydesign objects, rather than sum=1.
+       This does not affect estimates or tests or comparisons, but the AIC and its effective
+       degrees of freedom will look more plausible, as will the deviance.
+
+       Fix handling of missing data for calibrated designs in svyranktest (for Brad Biggerstaff)
+
+       handle empty subsets in onestage, because svyby().  (for Greg Freedman)
+
+       allow offset() in svymle()   (Patrick Brown)
+
+       svyhist() returns the same as hist(), plus when freq=TRUE a component
+       count_scale giving the scale factor between counts and density (for Ward Kingkade)
+
+       example of geometric means added to ?svycontrast (for Irene van Woerden)
+
+       move check for missing repweights later in the function to pick up more cases (Anthony Damico)
+
+       fix printing of predicted values from predict.svrepglm  (for Anthony Damico)
+
+       added minqa::newuoa and minqa::bobyqa as options for svymle(), and made 'newuoa'
+       the default when a gradient is available
+
+
 3.33-2 confint method for svyttest (for Brian Guay)
 
        partial fix in start= argument for svyglm() [still doesn't work inside function] 

@@ -55,6 +55,12 @@ svycontrast(moments,
 quote((`I(api00^3)`-3*`I(api00^2)`*`I(api00)`+ 3*`I(api00)`*`I(api00)`^2-`I(api00)`^3)/
       (`I(api00^2)`-`I(api00)`^2)^1.5))
 
+## Example: geometric means
+
+meanlogs <- svymean(~log(api00)+log(api99), dclus1)
+svycontrast(meanlogs,
+    list(api00=quote(exp(`log(api00)`)), api99=quote(exp(`log(api99)`))))
+
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
 

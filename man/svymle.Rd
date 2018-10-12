@@ -7,14 +7,14 @@
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Maximum pseudolikelihood estimation in complex surveys}
 \description{
-Fits a user-specified likelihood parametrised by multiple linear
+Maximises a user-specified likelihood parametrised by multiple linear
 predictors to data from a complex sample survey and computes the
 sandwich variance estimator of the coefficients. Note that this function
 maximises an estimated population likelihood, it is not the sample MLE.
 }
 \usage{
 svymle(loglike, gradient = NULL, design, formulas, start = NULL, control
-= list(maxit=1000), na.action="na.fail", method=NULL, ...)
+= list(), na.action="na.fail", method=NULL, lower=NULL,upper=NULL,...)
 \method{summary}{svymle}(object, stderr=c("robust", "model"),...)
 }
 %- maybe also `usage' for other objects documented here.
@@ -24,9 +24,13 @@ svymle(loglike, gradient = NULL, design, formulas, start = NULL, control
   \item{design}{ a \code{survey.design} object }
   \item{formulas}{A list of formulas specifying the variable and linear predictors: see Details below}
   \item{start}{Starting values for parameters}
-  \item{control}{control options for \code{\link{optim}}}
+  \item{control}{control options for the optimiser: see the help page
+    for the optimiser you are using.}
+  \item{lower,upper}{Parameter bounds for \code{bobyqa}}
   \item{na.action}{Handling of \code{NA}s}
-  \item{method}{\code{"nlm"} to use \code{nlm}, otherwise passed to \code{\link{optim}}}
+  \item{method}{\code{"nlm"} to use \code{nlm},\code{"uobyqa"} or
+    \code{"bobyqa"} to use those optimisers from the \code{minqa}
+    package;  otherwise passed to \code{\link{optim}}}
   \item{\dots}{Arguments to \code{loglike} and \code{gradient} that are
     not to be optimised over.}
   \item{object}{\code{svymle} object}
@@ -53,6 +57,11 @@ that the data variable \code{y} must be the first argument to
 \code{dnorm} and the first formula and that all the other formulas are
 labelled.  It is also permitted to have the data variable as the
 left-hand side of one of the formulas: eg \code{list( mean=y~z, sd=~1)}.
+
+The two optimisers from the \code{minqa} package do not use any
+derivatives to be specified for optimisation, but they do assume
+that the function is smooth enough for a quadratic approximation, ie,
+that two derivatives exist.
 
 
 The usual variance estimator for MLEs in a survey sample is a `sandwich'
@@ -101,7 +110,14 @@ model the \code{stderr="model"} should work fairly well.
  summary(m1,stderr="model")
  summary(m2)
 
- ## More complicated censored data example
+ ## Using offsets
+ m3 <- svymle(loglike=dnorm,gradient=gr, design=dstrat, 
+    formulas=list(mean=api00~api99+offset(ell)+ell, sd=~1),
+    start=list(c(80,1,0),c(20)), log=TRUE, method="BFGS")
+
+
+
+ ## More complicated censored lognormal data example
  ## showing that the response variable can be multivariate
 
  data(pbc, package="survival")
@@ -111,6 +127,8 @@ model the \code{stderr="model"} should work fairly well.
  dpbc<-svydesign(id=~1, prob=~randprob, strata=~edema,
     data=subset(pbc,randomized))
 
+
+## censored logNormal likelihood
  lcens<-function(x,mean,sd){
     ifelse(x[,2]==1,
            dnorm(log(x[,1]),mean,sd,log=TRUE),
@@ -131,17 +149,30 @@ model the \code{stderr="model"} should work fairly well.
         cbind(dm,ds)      
  }
 
-if(!is.null(pbc$albumin)){
-  svymle(loglike=lcens, gradient=gcens, design=dpbc,
+m<-svymle(loglike=lcens, gradient=gcens, design=dpbc, method="newuoa",
       formulas=list(mean=I(cbind(time,status>0))~bili+protime+albumin,
                     sd=~1),
          start=list(c(10,0,0,0),c(1)))
-} else {
-  svymle(loglike=lcens, gradient=gcens, design=dpbc,
-      formulas=list(mean=I(cbind(time,status>0))~bili+protime+alb,
-                    sd=~1),
+
+summary(m)
+
+## the same model, but now specifying the lower bound of zero on the
+## log standard deviation
+
+mbox<-svymle(loglike=lcens, gradient=gcens, design=dpbc, method="bobyqa",
+      formulas=list(mean=I(cbind(time,status>0))~bili+protime+albumin,
+                    sd=~1), lower=c(-Inf,-Inf,-Inf,-Inf,0), upper=Inf,
          start=list(c(10,0,0,0),c(1)))
-}
+
+
+## The censored lognormal model is now available in svysurvreg()
+
+summary(svysurvreg(Surv(time,status>0)~bili+protime+albumin,
+        design=dpbc,dist="lognormal"))
+
+## compare svymle scale value after log transformation
+svycontrast(m, quote(log(`sd.(Intercept)`)))
+
 
 
 }

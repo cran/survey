@@ -36,7 +36,15 @@ closer. The maximum and minimum are plotted as outliers if they are
 beyond the ends of the whiskers, but other outlying points are not
 plotted unless \code{all.outliers=TRUE}.  \code{svyboxplot}
 requires a two-sided formula; use \code{variable~1} for a single boxplot.
- }
+}
+
+\value{
+
+  As for \code{hist}, except that when \code{probability=FALSE}, the return value includes a component
+  \code{count_scale} giving a scale factor between density and
+  counts, assuming equal bin widths. 
+
+}
 
 \seealso{ \code{\link{svyplot}}}
 \examples{

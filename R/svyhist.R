@@ -19,4 +19,10 @@ svyhist<-function(formula, design, breaks = "Sturges",
     if (is.null(xlab)) xlab<-varname
     if (is.null(main)) main<-paste("Histogram of",varname)
     plot(h, ..., freq=freq,xlab=xlab,main=main)
+
+    if (freq){
+      h$count_scale <- mean(diff(h$breaks))*sum(weights(design, "sampling"))
+    }
+
+    invisible(h)
 }

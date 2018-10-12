@@ -23,7 +23,7 @@ Data extracted from NHANES 2009-2010 on high cholesterol.
   }
 }
 \source{
-  \url{ftp://ftp.cdc.gov/pub/Health_Statistics/NCHS/nhanes/2009-2010}
+  \url{https://wwwn.cdc.gov/nchs/nhanes/search/datapage.aspx?Component=laboratory&CycleBeginYear=2009}
 }
 \examples{
 data(nhanes)

@@ -267,6 +267,8 @@ onestrat<-function(x,cluster,nPSU,fpc, lonely.psu,stratum=NULL,stage=1,cal=cal){
 
 
 onestage<-function(x, strata, clusters, nPSU, fpc, lonely.psu=getOption("survey.lonely.psu"),stage=0, cal){
+   if (NROW(x)==0)
+        return(matrix(0,NCOL(x),NCOL(x)))
   stratvars<- tapply(1:NROW(x), list(factor(strata)), function(index){
              onestrat(x[index,,drop=FALSE], clusters[index],
              nPSU[index][1], fpc[index], ##changed from fpc[index][1], to allow pps(brewer)

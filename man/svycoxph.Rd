@@ -17,7 +17,7 @@
 Fit a proportional hazards model to data from a complex survey design.
 }
 \usage{
-svycoxph(formula, design,subset=NULL, ...)
+svycoxph(formula, design,subset=NULL, rescale=TRUE, ...)
 \method{predict}{svycoxph}(object, newdata, se=FALSE,
     type=c("lp", "risk", "expected", "terms","curve"),...)
 \method{AIC}{svycoxph}(object, ..., k = 2)    
@@ -28,6 +28,7 @@ svycoxph(formula, design,subset=NULL, ...)
   \item{design}{ \code{survey.design} object. Must contain all variables
     in the formula}
   \item{subset}{Expression to select a subpopulation}
+  \item{rescale}{Rescale weights to improve numerical stability}
   \item{object}{A \code{svycoxph} object}
   \item{newdata}{New data for prediction}
   \item{se}{Compute standard errors? This takes a lot of memory for
