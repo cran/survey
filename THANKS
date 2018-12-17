@@ -18,6 +18,7 @@ requests from users, including:
   Rex Dwyer
   Melanie Edwards
   Francisco Fabuel
+  Boris Fazio
   Bob Fay
   Daniel Fernandes
   Greg Freedman
@@ -34,6 +35,7 @@ requests from users, including:
   Jeffery Hughes
   Ward Kinkade
   Stas Kolenikov
+  Franziska Kößler
   Scott Kostyshak
   Alex Kowarik
   Michael Laviolette
@@ -75,6 +77,9 @@ and from dicussions with Chris Wild and Alastair Scott.
 Some work on the package while I was on sabbatical was funded by
 Fondation Leducq through a grant to the LINAT collaboration and by the
 Marsden Fund through a grant to the University of Auckland.
+
+Much of the new methodology from 2009 to 2016 was supported by the Marsden Fund,
+in particular the developments of the Rao-Scott likelihood
 
 Patrick Aboyoun did the S-PLUS port of version 3.6-8
 

@@ -19,7 +19,8 @@ svystandardize(design, by, over, population, excluding.missing = NULL)
 A one-sided formula specifying the variables whose distribution will be standardised
 }
   \item{over}{
-A one-sided formula specifying the domains within which the standardisation will occur
+A one-sided formula specifying the domains within which the
+standardisation will occur, or \code{~1} to use the whole population.
 }
   \item{population}{
 Desired population totals or proportions for the levels of combinations of variables in \code{by}
@@ -50,7 +51,27 @@ popage <- c( 55901 , 77670 , 72816 , 45364 )
 design<-svydesign(id=~SDMVPSU, strata=~SDMVSTRA, weights=~WTMEC2YR, data=nhanes, nest=TRUE)
 stdes<-svystandardize(design, by=~agecat, over=~race+RIAGENDR, 
    population=popage, excluding.missing=~HI_CHOL)
-svyby(~HI_CHOL, ~race+RIAGENDR, svymean, design=subset(stdes, agecat!="(0,19]"))
+svyby(~HI_CHOL, ~race+RIAGENDR, svymean, design=subset(stdes,
+agecat!="(0,19]"))
+
+
+data(nhanes)
+nhanes_design <- svydesign(ids = ~ SDMVPSU, strata = ~ SDMVSTRA, 
+                        weights = ~ WTMEC2YR, nest = TRUE, data = nhanes)
+
+## These are the same
+nhanes_adj <- svystandardize(update(nhanes_design, all_adults = "1"),
+                 by = ~ agecat, over = ~ all_adults,
+                 population = c(55901, 77670, 72816, 45364), 
+                 excluding.missing = ~ HI_CHOL)
+svymean(~I(HI_CHOL == 1), nhanes_adj, na.rm = TRUE)		 
+
+nhanes_adj <- svystandardize(nhanes_design,
+                 by = ~ agecat, over = ~ 1,
+                 population = c(55901, 77670, 72816, 45364), 
+                 excluding.missing = ~ HI_CHOL)
+svymean(~I(HI_CHOL == 1), nhanes_adj, na.rm = TRUE)		 
+
 }
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the

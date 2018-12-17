@@ -43,7 +43,7 @@ svyrqss<-function(formula,design,quantile=0.5,df=4,...){
   if(density)
     attr(ll,"ylab")<-"Density"
   else
-    attr(ll,"ylab")<-deparse(formula[[2]])
+    attr(ll,"ylab")<-paste(deparse(formula[[2]]),collapse="")
 
   class(ll)<-"svysmooth"
   
@@ -105,7 +105,7 @@ svylocpoly<-function(formula, design, ngrid=401, xlim=NULL,
   if(density)
     attr(ll,"ylab")<-"Density"
   else
-    attr(ll,"ylab")<-deparse(formula[[2]])
+    attr(ll,"ylab")<-paste(deparse(formula[[2]]),collapse="")
 
   class(ll)<-"svysmooth"
   

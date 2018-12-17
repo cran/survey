@@ -50,6 +50,7 @@ svyranktest             Design-based two-sample rank tests
 svylogrank		Design-based logrank tests
 svystandardize		Direct standardisation 
 svykappa                Cohen's kappa for inter-rater agreement
+svycralpha		Cronbach's alpha
 svymle                  Maximum pseudolikelihood estimation in complex surveys
 svyprcomp               Principal component analysis and biplots
 svyfactanal             Weighted maximum likelihood factor analysis

@@ -462,24 +462,28 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
   if(inherits(repweights,"formula")){
     mf<-substitute(model.frame(repweights, data=data))
     repweights<-eval.parent(mf)
-    repweights<-na.fail(repweights)
   }
 
   if(is.character(repweights)){##regular expression
     wtcols<-grep(repweights,names(data))
     repweights<-data[,wtcols]
-    repweights<-na.fail(repweights)
   }
   
   if (is.null(repweights))
     stop("You must provide replication weights")
 
+  if (anyNA(repweights))
+        stop("Missing values not allowed in 'repweights'")
+   
+   
   repweights<-detibble(repweights)
   
   if(inherits(weights,"formula")){
     mf<-substitute(model.frame(weights, data=data))
     weights<-eval.parent(mf)
-    weights<-drop(as.matrix(na.fail(weights)))
+     if (anyNA(weights))
+        stop("Missing values not allowed in 'weights'")
+    weights<-drop(as.matrix(weights))
   }
 
   if (is.null(weights)){

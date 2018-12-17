@@ -6,7 +6,8 @@ svydesign.character<-function (ids, probs = NULL, strata = NULL, variables = NUL
                                ...) 
 {
 
-  if (dbtype == "ODBC"){
+    if (dbtype == "ODBC"){
+        message("RODBC support is deprecated, in favour of the DBI-compatible 'odbc' package")
     if (dbname=="")
       dbconn<-RODBC::odbcDriverConnect(dbname,...)
     else

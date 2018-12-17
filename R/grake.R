@@ -497,7 +497,7 @@ onemargin2totals<-function(formula,total){
         ## just a vector
         total<-as.table(total)
         d<-dimnames(total)
-        names(d)<-deparse(formula[[2]])
+        names(d)<-paste(deparse(formula[[2]]),collapse="")
         total<-as.data.frame(total)
     }
     if (!is.data.frame(total)) stop("incorrect format for population totals")

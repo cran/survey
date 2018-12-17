@@ -1,3 +1,21 @@
+3.35   The use of RODBC is DEPRECATED. If possible, I want to move to just supporting the R-DBI
+       interface; you can use ODBC connections with the DBI-compatible 'odbc' package
+
+       Some instances of deparse() needed to be paste(deparse(), collapse=""), notably in svyciprop() (Boris Fazio)
+
+       Fix to svycontrast had broken the no-names case (Brian Miner)
+
+       More helpful error message with missing values in replicate weights (Antony Damico)
+
+       svyglm() now uses match.call() rather than sys.call() for storing the call (for Michael Laviolette)
+
+       svystandardize() now takes over=~1 for the whole population (for Michael Laviolette)
+
+       svycralpha() does Cronbach's alpha (for Franziska Kößler)
+
+       many tests based on the printed output are moved to tests/testoutput because they
+       differ trivially between platforms and so aren't CRAN-compliant.
+
 3.34   removed duplicate definition of svycontrast.svystat
 
        fix match.names() for the case of all the same names in different order (Sebastien Lucie)

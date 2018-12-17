@@ -1,11 +1,13 @@
 
-R version 3.1.0 (2014-04-10) -- "Spring Dance"
-Copyright (C) 2014 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin13.1.0 (64-bit)
+R version 3.4.1 (2017-06-30) -- "Single Candle"
+Copyright (C) 2017 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
 Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
 
 R is a collaborative project with many contributors.
 Type 'contributors()' for more information and
@@ -19,10 +21,13 @@ Type 'q()' to quit R.
 > ## examples from Breslow & Chatterjee: Applied Statistics 1999 No. 4, p458
 > ## data from Norman Breslow's web page.
 > library(survey)
+Loading required package: grid
+Loading required package: Matrix
+Loading required package: survival
 
-Attaching package: 'survey'
+Attaching package: ‘survey’
 
-The following object is masked from 'package:graphics':
+The following object is masked from ‘package:graphics’:
 
     dotchart
 
@@ -54,8 +59,8 @@ The following object is masked from 'package:graphics':
 > summary(svyglm(rel~factor(stage)*factor(histol),family=quasibinomial,design=dccs2))
 
 Call:
-svyglm(formula = rel ~ factor(stage) * factor(histol), family = quasibinomial, 
-    design = dccs2)
+svyglm(formula = rel ~ factor(stage) * factor(histol), design = dccs2, 
+    family = quasibinomial)
 
 Survey design:
 twophase2(id = id, strata = strata, probs = probs, fpc = fpc, 
@@ -72,7 +77,7 @@ factor(stage)2:factor(histol)2   0.1152     0.4410   0.261 0.793876
 factor(stage)3:factor(histol)2   0.5066     0.4241   1.194 0.232548    
 factor(stage)4:factor(histol)2   0.9785     0.6214   1.575 0.115615    
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 (Dispersion parameter for quasibinomial family taken to be 1.000876)
 
@@ -81,8 +86,8 @@ Number of Fisher Scoring iterations: 4
 > summary(svyglm(rel~factor(stage)*factor(histol),family=quasibinomial,design=dccs8))
 
 Call:
-svyglm(formula = rel ~ factor(stage) * factor(histol), family = quasibinomial, 
-    design = dccs8)
+svyglm(formula = rel ~ factor(stage) * factor(histol), design = dccs8, 
+    family = quasibinomial)
 
 Survey design:
 twophase2(id = id, strata = strata, probs = probs, fpc = fpc, 
@@ -99,7 +104,7 @@ factor(stage)2:factor(histol)2 -0.04743    0.43495  -0.109    0.913
 factor(stage)3:factor(histol)2  0.28064    0.41298   0.680    0.497    
 factor(stage)4:factor(histol)2  0.90983    0.63774   1.427    0.154    
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 (Dispersion parameter for quasibinomial family taken to be 1.000876)
 
@@ -108,8 +113,8 @@ Number of Fisher Scoring iterations: 4
 > summary(svyglm(rel~factor(stage)*factor(histol),family=quasibinomial,design=gccs8))
 
 Call:
-svyglm(formula = rel ~ factor(stage) * factor(histol), family = quasibinomial, 
-    design = gccs8)
+svyglm(formula = rel ~ factor(stage) * factor(histol), design = gccs8, 
+    family = quasibinomial)
 
 Survey design:
 calibrate(dccs2, phase = 2, formula = ~interaction(instit, stage, 
@@ -126,7 +131,7 @@ factor(stage)2:factor(histol)2 -0.04743    0.43432  -0.109    0.913
 factor(stage)3:factor(histol)2  0.28064    0.41231   0.681    0.496    
 factor(stage)4:factor(histol)2  0.90983    0.63187   1.440    0.150    
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 (Dispersion parameter for quasibinomial family taken to be 1.000876)
 
@@ -138,8 +143,8 @@ Number of Fisher Scoring iterations: 4
 +                family=quasibinomial,design=subset(dccs8,histol==1)))
 
 Call:
-svyglm(formula = rel ~ factor(stage), family = quasibinomial, 
-    design = subset(dccs8, histol == 1))
+svyglm(formula = rel ~ factor(stage), design = subset(dccs8, 
+    histol == 1), family = quasibinomial)
 
 Survey design:
 subset(dccs8, histol == 1)
@@ -151,7 +156,7 @@ factor(stage)2   0.7814     0.1473   5.306 1.48e-07 ***
 factor(stage)3   0.8009     0.1525   5.252 1.97e-07 ***
 factor(stage)4   1.0729     0.1782   6.022 2.73e-09 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 (Dispersion parameter for quasibinomial family taken to be 1.001333)
 
@@ -171,8 +176,8 @@ Warning messages:
 +                family=quasibinomial,design=subset(gccs8,histol==1)))
 
 Call:
-svyglm(formula = rel ~ factor(stage), family = quasibinomial, 
-    design = subset(gccs8, histol == 1))
+svyglm(formula = rel ~ factor(stage), design = subset(gccs8, 
+    histol == 1), family = quasibinomial)
 
 Survey design:
 subset(gccs8, histol == 1)
@@ -184,7 +189,7 @@ factor(stage)2   0.7814     0.1457   5.363 1.10e-07 ***
 factor(stage)3   0.8009     0.1504   5.324 1.34e-07 ***
 factor(stage)4   1.0729     0.1759   6.101 1.70e-09 ***
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 (Dispersion parameter for quasibinomial family taken to be 1.001333)
 
@@ -197,6 +202,3 @@ Warning messages:
   observations with zero weight not used for calculating dispersion
 > 
 > 
-> proc.time()
-   user  system elapsed 
-  2.841   0.113   2.963 

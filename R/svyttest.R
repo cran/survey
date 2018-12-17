@@ -100,7 +100,7 @@ svyciprop<-function(formula, design, method=c("logit","likelihood","asin","beta"
   }
   halfalpha<-(1-level)/2
   names(ci)<-paste(round(c(halfalpha,(1-halfalpha))*100,1),"%",sep="")
-  names(rval)<-deparse(formula[[2]])
+  names(rval)<-paste(deparse(formula[[2]]), collapse="")
   attr(rval,"ci")<-ci
   class(rval)<-"svyciprop"
   rval

@@ -1292,7 +1292,7 @@ svyglm.survey.design<-function(formula,design,subset=NULL, family=stats::gaussia
       g$df.residual <- degf(design)+1-length(coef(g)[!is.na(coef(g))])
       
       class(g)<-c("svyglm",class(g))
-      g$call<-sys.call()
+      g$call<-match.call()
       g$call[[1]]<-as.name(.Generic)
       if(!("formula" %in% names(g$call))) {
         if (is.null(names(g$call)))

@@ -1,11 +1,13 @@
 
-R version 3.1.0 (2014-04-10) -- "Spring Dance"
-Copyright (C) 2014 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin13.1.0 (64-bit)
+R version 3.4.1 (2017-06-30) -- "Single Candle"
+Copyright (C) 2017 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
 Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
 
 R is a collaborative project with many contributors.
 Type 'contributors()' for more information and
@@ -17,15 +19,17 @@ Type 'q()' to quit R.
 
 > 
 > library(survey)
+Loading required package: grid
+Loading required package: Matrix
+Loading required package: survival
 
-Attaching package: 'survey'
+Attaching package: ‘survey’
 
-The following object is masked from 'package:graphics':
+The following object is masked from ‘package:graphics’:
 
     dotchart
 
 > library(RSQLite)
-Loading required package: DBI
 > 
 > data(api)
 > apiclus1$api_stu<-apiclus1$api.stu
@@ -76,9 +80,6 @@ Loading required package: DBI
 > 
 > all.equal(nrow(dclus1),nrow(dbclus1))
 [1] TRUE
-> all.equal(nrow(subset(dclus1,stype=="E")),
-+           nrow(subset(dbclus1,stype=="E")))
-[1] TRUE
 > 
 > ## replicate weights
 > rclus1<-as.svrepdesign(dclus1)
@@ -114,6 +115,3 @@ Variables:
 > all.equal(s,s.db)
 [1] TRUE
 > 
-> proc.time()
-   user  system elapsed 
-  0.497   0.036   0.550 

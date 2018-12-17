@@ -169,6 +169,8 @@ match.names <- function(nms,contrasts){
   ll<-sapply(contrasts,length)
 
   if (l==0) stop("No names to match")
+  if (length(unlist(sapply(contrasts,names)))==0)
+      return(contrasts)
   if( !all( unlist(sapply(contrasts,names)) %in% nms))
     stop("names not matched")
   
