@@ -110,6 +110,10 @@ svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
       if (!is.list(strata))
         strata<-data.frame(strata=strata)
       has.strata<-TRUE
+      for(i in 1:NCOL(strata)){ ##drop empty strata
+          if (is.factor(strata[[i]]))
+              strata[[i]]<-as.factor(as.character(strata[[i]]))
+          }
     } else {
       has.strata <-FALSE
       strata<-na.strata(as.data.frame(matrix(1, nrow=NROW(ids), ncol=NCOL(ids))))

@@ -1,3 +1,11 @@
+3.35-1 svytable() could give an integer overflow with a replicate-weight design having integer weights,
+       such as CHIS.  (Elizabeth Purdom)
+
+       empty factor levels in the strata= argument to svydesign() no longer create strata
+
+       The twophase() function gave errors when the first phase of sampling had multiple
+       stages (reported by Pedro Luis Baldoni)
+
 3.35   The use of RODBC is DEPRECATED. If possible, I want to move to just supporting the R-DBI
        interface; you can use ODBC connections with the DBI-compatible 'odbc' package
 

@@ -93,9 +93,9 @@ twophase<-function(id,strata=NULL, probs=NULL, weights=NULL, fpc=NULL,
       cm<-rval$phase1$full$cluster[,m]
       if (nunique(sa)!=nunique(sa[subset]))
           stop("Some phase-2 strata have zero sampling fraction")
-      rval$usu<-ave(cm[subset],sa[subset],FUN=nunique)/ave(cm,sa,FUN=nunique)[subset]
+      rval$usu<-ave(as.numeric(cm[subset]),sa[subset],FUN=nunique)/ave(as.numeric(cm),sa,FUN=nunique)[subset]
   } else {
-      rval$usu<-drop(with(rval$phase1$sample,ave(cluster[,m], strata[,m], FUN=nunique))/rval$phase1$full$fpc$sampsize[rval$subset])
+      rval$usu<-drop(with(rval$phase1$sample,ave(as.numeric(cluster[,m]), strata[,m], FUN=nunique))/rval$phase1$full$fpc$sampsize[rval$subset,m])
   }
 
 ##  if (any(rval$usu<1) && any(duplicated(d1$cluster[,1])))

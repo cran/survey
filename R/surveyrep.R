@@ -1943,7 +1943,7 @@ svytable.svyrep.design<-svreptable<-function(formula, design,
        ff<-eval(substitute(lhs~rhs,list(lhs=quote(weights), rhs=formula[[2]])))
        tbl<-xtabs(ff, data=design$variables,...)
        if (!is.null(Ntotal)) {
-           tbl<-tbl*sum(Ntotal)/sum(tbl)
+           tbl<-tbl*(sum(as.numeric(Ntotal))/sum(tbl))  ## avoid integer overflow when Ntotal >sqrt(maxint)
        }
        if (round)
            tbl<-round(tbl)

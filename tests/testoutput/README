@@ -1,0 +1,5 @@
+These are tests involving the printed output.  They do not give 
+character-by-character identical results on all systems (and in 
+particular, the CRAN Windows system gives slightly different results 
+from any computer I have tried), so they can't be part of the default
+R CMD check.

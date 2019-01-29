@@ -9,7 +9,7 @@ m<-svymean(~bili, d2pbc)
 all.equal(as.vector(coef(m)),with(pbc, mean(bili[!randomized])))
 all.equal(as.vector(SE(m)),
           with(pbc, sd(bili[!randomized])/sqrt(sum(!randomized))),
-          tolerance=0.001)
+          tolerance=0.002)
 
 ## two-stage sampling as two-phase
 data(mu284)

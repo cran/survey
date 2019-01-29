@@ -75,7 +75,7 @@ data(api)
   Academic Technology Services; these pages are no longer on line. 
 }
 \references{
-  The API program and original data files are at  \url{http://api.cde.ca.gov/}
+  The API program has been discontinued at the end of 2018. Information is archived at  \url{https://www.cde.ca.gov/re/pr/api.asp}
 }
 \examples{
 library(survey)

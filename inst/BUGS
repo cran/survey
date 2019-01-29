@@ -8,3 +8,6 @@ Known bug:
 
 3. options(survey.lonely.psu="adjust") does not do what it says in the 
 case of svytotal(). Not yet clear whether it does the right thing, though.
+
+
+4. Should drop unused factor levels from strata, but don't. 

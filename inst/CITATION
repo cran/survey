@@ -2,10 +2,10 @@ citHeader("To cite the survey package in publications use:")
 
 citEntry(entry="misc",
    author="Thomas Lumley",
-   year=2018,
+   year=2019,
    title="survey: analysis of complex survey samples",
-   note="R package version 3.35",
-   textVersion="T. Lumley (2018) \"survey: analysis of complex survey samples\". R package version 3.35." )
+   note="R package version 3.35-1",
+   textVersion="T. Lumley (2019) \"survey: analysis of complex survey samples\". R package version 3.35-1." )
 
 
 

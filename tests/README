@@ -1,3 +1,5 @@
+3stage2phase.R: twophase designs with three-stage sample at phase 1
+
 api.R: Run example(api) to check that results haven't changed
 
 bycovmat.R: Check that svyby(,covmat=TRUE) is getting the ordering 
