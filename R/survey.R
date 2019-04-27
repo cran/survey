@@ -1725,13 +1725,13 @@ svymle<-function(loglike, gradient=NULL, design, formulas,
 #  mm <- lapply(formulas,model.matrix, data=mf)
   
   mmFrame <- lapply(formulas,model.frame, data=mf)
-  mm = mapply(model.matrix, object = formulas, data=mmFrame)
+  mm = mapply(model.matrix, object = formulas, data=mmFrame, SIMPLIFY=FALSE)
   mmOffset <- lapply(mmFrame, model.offset)
   
   # add a vector of zeros if there is no offset provided
   noOffset = which(unlist(lapply(mmOffset, length))==0)
   for(D in noOffset) {
-    mmOffset[[D]] =  rep(0, nrow(mm[[D]]))
+    mmOffset[[D]] =  rep(0, NROW(mm[[1]]))
   }
   
   ## parameter names
@@ -1808,6 +1808,8 @@ svymle<-function(loglike, gradient=NULL, design, formulas,
       if(rval$ier>0) warning(rval$msg)
       rval$hessian <- numDeriv::hessian(objectivefn, rval$par)
   } else if (method == "bobyqa"){
+      if (is.list(lower)) lower<-do.call(c, lower)
+      if (is.list(upper)) upper<-do.call(c,upper)
       rval<-minqa::bobyqa(theta0, function(par,...) -objectivefn(par,...), control=control,lower=lower,upper=upper, ...)
       if(rval$ier>0) warning(rval$msg)
       rval$hessian <- numDeriv::hessian(objectivefn,rval$par)

@@ -1,3 +1,18 @@
+3.36   Add withPV.survey.design for plausible-value analyses (needs mitools >=2.4)
+
+3.35-3 Warning from svrepdesign() if type="BRR" and scale= is specified, to catch defaulting
+       to BRR (Stas Kolenikov)
+
+       More fixes to svymle() with linear predictors for multiple parameters
+       (no change to results, but gets rid of warning)
+
+       allow svyby() to have a vector as the first argument
+
+       force character vectors to factor in id= argument of svydesign (fixes Stack Overflow 54239063)
+
+3.35-2 The previous (3.34) patch to allow offsets in svymle() didn't work with non-trivial linear predictors
+       for multiple parameters. (reported by Beat Hulliger)
+
 3.35-1 svytable() could give an integer overflow with a replicate-weight design having integer weights,
        such as CHIS.  (Elizabeth Purdom)
 

@@ -116,6 +116,13 @@ model the \code{stderr="model"} should work fairly well.
     start=list(c(80,1,0),c(20)), log=TRUE, method="BFGS")
 
 
+## demonstrating multiple linear predictors
+
+ m3 <- svymle(loglike=dnorm,gradient=gr, design=dstrat, 
+    formulas=list(mean=api00~api99+offset(ell)+ell, sd=~stype),
+    start=list(c(80,1,0),c(20,0,0)), log=TRUE, method="BFGS")
+
+
 
  ## More complicated censored lognormal data example
  ## showing that the response variable can be multivariate
@@ -160,9 +167,9 @@ summary(m)
 ## log standard deviation
 
 mbox<-svymle(loglike=lcens, gradient=gcens, design=dpbc, method="bobyqa",
-      formulas=list(mean=I(cbind(time,status>0))~bili+protime+albumin,
-                    sd=~1), lower=c(-Inf,-Inf,-Inf,-Inf,0), upper=Inf,
-         start=list(c(10,0,0,0),c(1)))
+      formulas=list(mean=I(cbind(time,status>0))~bili+protime+albumin, sd=~1),
+      lower=list(c(-Inf,-Inf,-Inf,-Inf),0), upper=Inf,
+      start=list(c(10,0,0,0),c(1)))
 
 
 ## The censored lognormal model is now available in svysurvreg()

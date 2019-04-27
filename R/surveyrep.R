@@ -504,8 +504,11 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
     stop(paste("rscales has length ",length(rscales),", should be ncol(repweights)",sep=""))
   }
   
-  if (type == "BRR")
-    scale<-1/ncol(repweights)
+    if (type == "BRR"){
+        ## the default, so check it hasn't been accidentally defaulted to
+        if (!is.null(scale)) warning("type='BRR' does not use 'scale=' argument")
+      scale<-1/ncol(repweights)
+      }
   if (type=="Fay")
     scale <-1/(ncol(repweights)*(1-rho)^2)
 

@@ -80,6 +80,12 @@ svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
            ids<-na.id(data.frame(ids))
        }
 
+    ## make ids factor if they are character
+    for(i in 1:ncol(ids)){
+        if (is.character(ids[[i]]))
+            ids[[i]]<-factor(ids[[i]])
+    }
+    
     na.prob<-na.failsafe("missing values in `prob'")
     if(inherits(probs,"formula")){
       mf<-substitute(model.frame(probs,data=data,na.action=na.prob))

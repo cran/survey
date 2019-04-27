@@ -1,6 +1,7 @@
 import(stats,graphics,splines,grid, survival,lattice,methods,Matrix)
 importFrom("grDevices", "col2rgb", "grey", "rgb")
 importFrom("utils", "getS3method")
+importFrom("mitools","withPV")
 export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        rake, calibrate, estWeights, as.svydesign2, svyplot, svyhist,
        svyboxplot, svyby, cv, SE, deff, svycoxph, svyglm, svyquantile,
@@ -429,6 +430,7 @@ S3method(update, svyDBimputationList)
 S3method(close, svyDBimputationList)
 S3method(open, svyDBimputationList)
 S3method(subset, svyDBimputationList)
+S3method(withPV, survey.design)
 
 S3method(confint,svystat)
 S3method(confint,svrepstat)
