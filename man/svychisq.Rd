@@ -136,6 +136,7 @@ data" Stata Technical Bulletin 45:33-49.
 
 Thomas, DR, Rao, JNK (1990) "Small-sample comparison of level and power
 for simple goodness-of-fit statistics under cluster sampling" JASA 82:630-636
+
 }
 
 \note{Rao and Scott (1984) leave open one computational issue. In
@@ -155,6 +156,9 @@ for simple goodness-of-fit statistics under cluster sampling" JASA 82:630-636
   See \code{\link{svyloglin}} for loglinear models.
 
   See \code{\link{regTermTest}} for Rao-Scott tests in regression models.
+
+See  \url{https://notstatschat.rbind.io/2019/06/08/design-degrees-of-freedom-brief-note/} for an explanation of the design degrees of freedom with replicate weights.
+
 }
 \examples{
   data(api)

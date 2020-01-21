@@ -699,7 +699,7 @@ estWeights.twophase<-function(data, formula=NULL, working.model=NULL,...){
     model<-glm(ff, data=data$phase1$full$variables, family=binomial(),
                subset=!certainty, na.action=na.fail)
   } else {
-    xx<-estfun(working.model)
+    xx<-estfuns(working.model)
     model<-glm(data$subset~xx,family=binomial(), subset=!certainty, na.action=na.fail)
   }
   fitp<-as.numeric(certainty[data$subset])
@@ -739,13 +739,13 @@ estWeights.twophase<-function(data, formula=NULL, working.model=NULL,...){
 }
 
 
-estfun<-function(model,...) UseMethod("estfun")
-estfun.coxph<-function(model, ...) resid(model,"score")
-estfun.glm<-function(model){
+estfuns<-function(model,...) UseMethod("estfuns")
+estfuns.coxph<-function(model, ...) resid(model,"score")
+estfuns.glm<-function(model){
   xmat<-model.matrix(model)
   residuals(model,"working")*model$weights*xmat
 }
-estfun.lm<-function(model,...){
+estfuns.lm<-function(model,...){
   model.matrix(model)*resid(model)
 }
 

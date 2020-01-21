@@ -19,19 +19,21 @@ data structure for such a survey.
 \usage{
 svrepdesign(variables , repweights , weights, data,...)
 \method{svrepdesign}{default}(variables = NULL, repweights = NULL, weights = NULL, 
-   data = NULL, type = c("BRR", "Fay", "JK1","JKn","bootstrap","other"),
+   data = NULL, type = c("BRR", "Fay", "JK1","JKn","bootstrap",
+   "ACS","successive-difference","JK2","other"),
    combined.weights=TRUE, rho = NULL, bootstrap.average=NULL,
    scale=NULL, rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),
    mse=getOption("survey.replicates.mse"),...)
 \method{svrepdesign}{imputationList}(variables=NULL, repweights,weights,data,
    mse=getOption("survey.replicates.mse"),...)
 \method{svrepdesign}{character}(variables=NULL,repweights=NULL, weights=NULL,data=NULL,
-type=c("BRR","Fay","JK1", "JKn","bootstrap","other"),combined.weights=TRUE, rho=NULL, 
-bootstrap.average=NULL, scale=NULL,rscales=NULL,fpc=NULL,
-fpctype=c("fraction","correction"),mse=getOption("survey.replicates.mse"),
+type=c("BRR","Fay","JK1", "JKn","bootstrap","ACS","successive-difference","JK2","other"),
+combined.weights=TRUE, rho=NULL, bootstrap.average=NULL, scale=NULL,rscales=NULL,
+fpc=NULL,fpctype=c("fraction","correction"),mse=getOption("survey.replicates.mse"),
  dbtype="SQLite", dbname,...) 
 
-\method{image}{svyrep.design}(x, ..., col=grey(seq(.5,1,length=30)), type.=c("rep","total"))
+\method{image}{svyrep.design}(x, ...,
+				 col=grey(seq(.5,1,length=30)), type.=c("rep","total"))
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -64,11 +66,23 @@ below}
   are given weight \code{rho} in one half-sample and \code{2-rho} in the
   other.  The ideal BRR analysis is restricted to a design where each
   stratum has two PSUs, however, it has been used in a much wider class
-  of surveys.
+  of surveys. The \code{scale} and \code{rscales}
+ arguments will be ignored (with a warning) if they are specified.
   
   The JK1 and JKn types are both jackknife estimators deleting one
   cluster at a time. JKn is designed for stratified and JK1 for
   unstratified designs.
+
+ The successive-difference weights in the American Community Survey
+ automatically use \code{scale = 4/ncol(repweights)} and \code{rscales=rep(1,
+   ncol(repweights))}. This can be specified as \code{type="ACS"} or
+ \code{type="successive-difference"}. The \code{scale} and \code{rscales}
+ arguments will be ignored (with a warning) if they are specified.
+
+ JK2 weights (\code{type="JK2"}), as in the California Health Interview
+ Survey, automatically use \code{scale=1},  \code{rscales=rep(1, ncol(repweights))}.
+ The \code{scale} and \code{rscales}
+ arguments will be ignored (with a warning) if they are specified.
 
   Averaged bootstrap weights ("mean bootstrap") are used for some
   surveys from Statistics Canada. Yee et al (1999) describe their
@@ -98,16 +112,13 @@ matches the replicate weight variables (and not the sampling weight
 variable).
 
 \code{data} may be a character string giving the name of a table or view
-in a relational database that can be accessed through the \code{DBI} or \code{ODBC}
-interfaces. For DBI interfaces \code{dbtype} should be the name of the database
+in a relational database that can be accessed through the \code{DBI} 
+interface. For DBI interfaces \code{dbtype} should be the name of the database
 driver and \code{dbname} should be the name by which the driver identifies
-the specific database (eg file name for SQLite). For ODBC databases
-\code{dbtype} should be \code{"ODBC"} and \code{dbname} should be the
-registed DSN for the database. On the Windows GUI, \code{dbname=""} will
-produce a dialog box for interactive selection. 
+the specific database (eg file name for SQLite).
 
 The appropriate database interface package must already be loaded (eg
-\code{RSQLite} for SQLite, \code{RODBC} for ODBC).  The survey design
+\code{RSQLite} for SQLite).  The survey design
 object will contain the replicate weights, but actual variables will
 be loaded from the database only as needed.  Use
 \code{\link[=close.DBIsvydesign]{close}} to close the database connection and
@@ -141,10 +152,7 @@ database and so can be used with read-only permissions on the database.
 
 \note{To use replication-weight analyses on a survey specified by
   sampling design, use \code{as.svrepdesign} to convert it. }
-\note{The successive difference weights in the American Community Survey
-  use \code{scale = 4/ncol(repweights)} and \code{rscales=rep(1,
-  ncol(repweights)}.  JK2 weights use \code{scale=1},
-  \code{rscales=rep(1, ncol(repweights))}}
+
 
 \seealso{\code{\link{as.svrepdesign}}, \code{\link{svydesign}},
   \code{\link{brrweights}}, \code{bootweights} }
@@ -156,6 +164,7 @@ repweights<-2*cbind(c(1,0,1,0,1,0), c(1,0,0,1,0,1), c(0,1,1,0,0,1),
 c(0,1,0,1,1,0))
 scdrep<-svrepdesign(data=scd, type="BRR", repweights=repweights, combined.weights=FALSE)
 svyratio(~alive, ~arrests, scdrep)
+
 
 \dontrun{
 ## Needs RSQLite

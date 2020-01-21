@@ -13,10 +13,11 @@ Compute quantiles for data from complex surveys.
 \method{svyquantile}{survey.design}(x, design, quantiles, alpha=0.05,
    ci=FALSE, method = "linear", f = 1,
    interval.type=c("Wald","score","betaWald"), na.rm=FALSE,se=ci,
-   ties=c("discrete","rounded"), df=Inf,...)
+   ties=c("discrete","rounded"), df=NULL,...)
 \method{svyquantile}{svyrep.design}(x, design, quantiles,
    method ="linear", interval.type=c("probability","quantile"), f = 1,
-   return.replicates=FALSE, ties=c("discrete","rounded"),na.rm=FALSE,...)
+   return.replicates=FALSE, ties=c("discrete","rounded"),na.rm=FALSE,
+   alpha=0.05,df=NULL,...)
 \method{SE}{svyquantile}(object,...)
 }
 %- maybe also `usage' for other objects documented here.
@@ -162,6 +163,7 @@ Compute quantiles for data from complex surveys.
               c(0,1,0,1,1,0))
   scdrep<-svrepdesign(data=scd, type="BRR", repweights=repweights)
   svyquantile(~arrests+alive, design=scdrep, quantile=0.5, interval.type="quantile")
+  svyquantile(~arrests+alive, design=scdrep, quantile=0.5, interval.type="quantile",df=NULL)
 
  }
 \keyword{univar}% at least one, from doc/KEYWORDS

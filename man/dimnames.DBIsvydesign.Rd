@@ -1,12 +1,10 @@
 \name{dimnames.DBIsvydesign}
 \alias{dimnames.DBIsvydesign}
-\alias{dimnames.ODBCsvydesign}
 \alias{dimnames.survey.design}
 \alias{dimnames.svyrep.design}
 \alias{dimnames.twophase}
 \alias{dimnames.svyimputationList}
 \alias{dim.DBIsvydesign}
-\alias{dim.ODBCsvydesign}
 \alias{dim.survey.design}
 \alias{dim.twophase}
 \alias{dim.svyimputationList}
@@ -27,7 +25,6 @@ excludes observations with zero weight.
 \method{dim}{svyimputationList}(x)
 \method{dimnames}{survey.design}(x)
 \method{dimnames}{DBIsvydesign}(x)
-\method{dimnames}{ODBCsvydesign}(x)
 \method{dimnames}{svyimputationList}(x)
 }
 %- maybe also 'usage' for other objects documented here.

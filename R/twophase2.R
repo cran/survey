@@ -689,7 +689,7 @@ estWeights.twophase2<-function(data, formula=NULL, working.model=NULL,...){
     model<-glm(ff, data=data$phase1$full$variables, family=binomial(),
                subset=!certainty, na.action=na.fail)
   } else {
-    xx<-estfun(working.model)
+    xx<-estfuns(working.model)
     model<-glm(data$subset~xx,family=binomial(), subset=!certainty, na.action=na.fail)
   }
   fitp<-as.numeric(certainty[data$subset])

@@ -1,5 +1,5 @@
 
-withPV.survey.design<-function(mapping, data, action, rewrite=TRUE,...){
+withPV.survey.design<-withPV.svyrep.design<-function(mapping, data, action, rewrite=TRUE,...){
 	
     if(inherits(mapping,"formula")) mapping<-list(mapping)
     

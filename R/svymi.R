@@ -43,16 +43,13 @@ svydesign.DBimputationList<-function(ids, probs = NULL, strata = NULL,
  
   design.vars<-c(all.vars(ids), all.vars(probs), all.vars(strata),all.vars(fpc), all.vars(weights))
   design.query<-paste("select", paste(design.vars,collapse=","), "from", data$imputations[1])
-  if (data$db$dbtype=="ODBC")
-    design.data<-RODBC::sqlQuery(data$db$connection, design.query)
-  else
-    design.data<-DBI::dbGetQuery(data$db$connection, design.query)
+  design.data<-DBI::dbGetQuery(data$db$connection, design.query)
 
   rval<-list()
   rval$design<-svydesign(ids=ids, probs=probs, strata=strata, data=design.data,
                   fpc=fpc, variables=variables, nest=nest,check.strata=check.strata,
                   weights=weights)
-  class(rval$design)<-c(if(data$db$dbtype=="ODBC") "ODBCsvydesign" else "DBIsvydesign", class(rval$design))
+  class(rval$design)<-c("DBIsvydesign", class(rval$design))
   
   rval$design$updates<-data$updates
   rval$db<-data$db
@@ -229,21 +226,14 @@ update.svyimputationList<-function(object, ...){
 
 close.svyDBimputationList<-function(con,...){
   dbcon<-con$db$connection
-  if (is(dbcon,"DBIConnection"))
     DBI::dbDisconnect(dbcon)
-  else
-    RODBC::odbcClose(dbcon)
   invisible(con)
 }
 
 open.svyDBimputationList<-function(con,...){
-  if(con$db$dbtype=="ODBC"){
-    oldenc<-attr(con$db$connection)
-    con$db$connection<-RODBC::odbcReConnect(con$db$connection,...)
-    attr(con$db$connection,"encoding")<-oldenc
-  } else {
+  
     dbdriver<-DBI::dbDriver(con$db$dbtype)
     con$db$connection<-DBI::dbConnect(dbdriver,dbname=con$db$dbname,...)
-  }
+  
   con
 }

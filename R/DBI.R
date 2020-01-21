@@ -7,11 +7,7 @@ svydesign.character<-function (ids, probs = NULL, strata = NULL, variables = NUL
 {
 
     if (dbtype == "ODBC"){
-        message("RODBC support is deprecated, in favour of the DBI-compatible 'odbc' package")
-    if (dbname=="")
-      dbconn<-RODBC::odbcDriverConnect(dbname,...)
-    else
-      dbconn<-RODBC::odbcConnect(dbname,...)
+        message("RODBC support has been removed. Use the 'odbc' package")
   } else {
     db<-DBI::dbDriver(dbtype)
     dbconn<- DBI::dbConnect(db, dbname,...)
@@ -23,9 +19,7 @@ svydesign.character<-function (ids, probs = NULL, strata = NULL, variables = NUL
   if (length(design.vars)==0) design.vars<-"1 as _ugly_workaround_" 
   
   design.query<-paste("select", paste(design.vars,collapse=","), "from", data)
-  if (dbtype=="ODBC")
-    design.data<-RODBC::sqlQuery(dbconn, design.query)
-  else
+  
     design.data<-DBI::dbGetQuery(dbconn, design.query)
     
   rval<-svydesign(ids=ids, probs=probs, strata=strata, data=design.data,
@@ -34,9 +28,7 @@ svydesign.character<-function (ids, probs = NULL, strata = NULL, variables = NUL
   rval$db<-list(dbname=dbname, tablename=data, connection=dbconn, dbtype=dbtype)
   rval$variables<-NULL
   rval$call<-sys.call(-1)
-  if (dbtype=="ODBC")
-    class(rval)<-c("ODBCsvydesign",class(rval))
-  else
+ 
     class(rval)<-c("DBIsvydesign",class(rval))
   rval
 }
@@ -337,7 +329,7 @@ dimnames.DBIrepdesign<-function(x){
 
 
 svrepdesign.character<-function (variables=NULL,repweights=NULL, weights=NULL,
-                                 data=NULL,type=c("BRR","Fay","JK1", "JKn","bootstrap","other"),
+                                 data=NULL,type=c("BRR","Fay","JK1", "JKn","bootstrap","ACS","successive-difference","JK2","other"),
                                  combined.weights=TRUE, rho=NULL, bootstrap.average=NULL,
                                  scale=NULL,rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),
                                  mse=getOption("survey.replicates.mse"),dbtype="SQLite", dbname,
@@ -345,10 +337,7 @@ svrepdesign.character<-function (variables=NULL,repweights=NULL, weights=NULL,
 {
 
   if (dbtype == "ODBC"){
-    if (dbname=="")
-      dbconn<-RODBC::odbcDriverConnect(dbname,...)
-    else
-      dbconn<-RODBC::odbcConnect(dbname,...)
+    stop("'RODBC' no longer supported. Use the odbc package")
   } else {
     db<-DBI::dbDriver(dbtype)
     dbconn<- DBI::dbConnect(db, dbname,...)
@@ -362,9 +351,7 @@ svrepdesign.character<-function (variables=NULL,repweights=NULL, weights=NULL,
 
   
   design.query<-paste("select", paste(design.vars,collapse=","), "from", data)
-  if (dbtype=="ODBC")
-    design.data<-RODBC::sqlQuery(dbconn, design.query)
-  else
+    
     design.data<-DBI::dbGetQuery(dbconn, design.query)
     
   rval<-svrepdesign(variables=variables,repweights=repweights, weights=weights, type=type,
@@ -375,9 +362,6 @@ svrepdesign.character<-function (variables=NULL,repweights=NULL, weights=NULL,
   rval$db<-list(dbname=dbname, tablename=data, connection=dbconn, dbtype=dbtype)
   rval$variables<-NULL
   rval$call<-sys.call(-1)
-  if (dbtype=="ODBC")
-    class(rval)<-c("ODBCrepdesign","ODBCsvydesign",class(rval))
-  else
     class(rval)<-c("DBIrepdesign","DBIsvydesign",class(rval))
   rval
 }
@@ -390,20 +374,7 @@ print.DBIrepdesign<-function(x,...){
   invisible(x)
 }
 
-print.ODBCrepdesign<-function(x,...){
-  cat("ODBC-backed replicate weight design\n")
-  print.svyrep.design(x,...)
-   if (!checkConnection(x$db$connection, error=FALSE))
-    cat("<ODBC Connection closed>\n")
-  invisible(x)
-}
-
 summary.DBIrepdesign<-function(object,...){
    summary.svyrep.design(object,...)
 }
-
-summary.ODBCrepdesign<-function(object,...){
-   summary.svyrep.design(object,...)
-}
-
 

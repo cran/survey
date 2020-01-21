@@ -50,9 +50,8 @@ is.hadamard(H, style=c("0/1","+-"), full.orthogonal.balance=TRUE)
   sample estimate. This property is called full orthogonal balance.
 }
 \references{
-Cameron PJ (2005) Hadamard Matrices. 
-\url{http://designtheory.org/library/encyc/topics/had.pdf}. In: The
-Encyclopedia of Design Theory \url{http://designtheory.org/library/encyc/}
+Cameron PJ (2005) Hadamard Matrices. In: The
+Encyclopedia of Design Theory \url{http://www.maths.qmul.ac.uk/~lsoicher/designtheory.org/library/encyc/}
 
 }
 \seealso{ \code{\link{hadamard}}}

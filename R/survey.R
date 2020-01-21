@@ -727,7 +727,7 @@ svyquantile<-function(x,design,quantiles,...) UseMethod("svyquantile", design)
 svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
                                     ci=FALSE, method="linear",f=1,
                                     interval.type=c("Wald","score","betaWald"),
-                                    na.rm=FALSE,se=ci, ties=c("discrete","rounded"), df=Inf,...){
+                                    na.rm=FALSE,se=ci, ties=c("discrete","rounded"), df=NULL,...){
     if (inherits(x,"formula"))
       x<-model.frame(x ,model.frame(design), na.action=na.pass)
     else if(typeof(x) %in% c("expression","symbol"))

@@ -1,3 +1,36 @@
+3.37	RODBC database connections are no longer supported.
+	Use the DBI-compatible 'odbc' package
+
+	set scale<-1 if it is still NULL after processing, inside svrepdesign()
+        [https://stats.stackexchange.com/questions/409463]
+
+       	Added withPV for replicate-weight designs [for Tomasz Żółtak]
+
+      	svyquantile for replicate-weight designs now uses a supplied alpha to get
+       	confidence intervals and estimates SE by dividing confidence interval length
+       	by twice abs(qnorm(alpha/2)). [For Klaus Ignacio Lehmann Melendez]
+
+       	All the svyquantile methods now take account of design degrees of freedom and
+       	use t distributions for confidence intervals. Specify df=Inf to get a Normal.
+       	[For Klaus Ignacio Lehmann Melendez]
+
+       	svyivreg() for 2-stage least-squares (requires the AER package)
+
+       	warn when rho= is used with type="BRR" in svrepdesign [for Tomasz Żółtak]
+
+	Add "ACS" and "successive-difference" to type= in svrepdesign(),
+	for the American Community Survey weights
+
+	Add "JK2" to type= in svrepdesign
+
+	Warn when scale, rscales are supplied unnecessarily to svyrepdesign
+
+        More explanation of 'symbolically nested' in anova.svyglm
+
+        Link to blog post about design df with replicate weights.
+
+        Chase 'Encyclopedia of Design Theory' link again. 
+
 3.36   Add withPV.survey.design for plausible-value analyses (needs mitools >=2.4)
 
 3.35-3 Warning from svrepdesign() if type="BRR" and scale= is specified, to catch defaulting

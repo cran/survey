@@ -45,9 +45,7 @@ checkConnection<-function(dbconnection, error=TRUE){
         stop("Database connection is closed")
       else
         return(FALSE)
-  } else{## RODBC
-    ## we aren't allowed to check odbc connections in a CRAN package
-  }
+  } 
  invisible(TRUE)
 }
 
@@ -75,17 +73,13 @@ getvars<-function (formula, dbconnection, tables, db.only = TRUE, updates=NULL, 
         query <- sub("@tab@", tables, "select * from @tab@ limit 1")
         if (is(dbconnection,"DBIConnection"))
           oneline <- DBI::dbGetQuery(dbconnection, query)
-        else ##ODBC
-          oneline <- RODBC::sqlQuery(dbconnection, query)
         in.db <- infilter$varlist[infilter$varlist %in% names(oneline)]
     }
     query <- paste("select", paste(in.db, collapse = ", "), "from", 
         tables)
     
-    if (is(dbconnection, "DBIConnection"))
       df <- DBI::dbGetQuery(dbconnection, query)
-    else ##ODBC
-      df<-RODBC::sqlQuery(dbconnection, query)
+    
 
     if (!is.null(subset)) df<-df[subset,,drop=FALSE]
 
@@ -115,4 +109,3 @@ update.DBIsvydesign<-function(object, ...){
 }
 
 
-update.ODBCsvydesign<-update.DBIsvydesign

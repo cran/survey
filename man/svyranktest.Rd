@@ -30,6 +30,12 @@ A survey design object
 
 }
 
+\details{These tests are for the null hypothesis that the population or superpopulation distributions of the response variable are different between groups, targeted at population or superpopulation alternatives. 
+The 'ranks' are defined as quantiles of the pooled distribution of the variable, so they do not just go from 1 to N; the null hypothesis does not depend on the weights, but the ranks do.   
+
+The tests reduce to the usual Normal approximations to the usual rank tests under iid sampling.  Unlike the traditional rank tests, they are not exact in small samples. 
+}
+
 \value{
 Object of class \code{htest}
 }

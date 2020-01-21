@@ -1,8 +1,6 @@
 \name{open.DBIsvydesign}
 \alias{open.DBIsvydesign}
 \alias{close.DBIsvydesign}
-\alias{open.ODBCsvydesign}
-\alias{close.ODBCsvydesign}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Open and close DBI connections }
 \description{
@@ -15,15 +13,12 @@ connections). The connection can be reopened with \code{open}.
 \usage{
 \method{open}{DBIsvydesign}(con, ...)
 \method{close}{DBIsvydesign}(con, ...)
-\method{open}{ODBCsvydesign}(con, ...)
-\method{close}{ODBCsvydesign}(con, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{con}{Object of class \code{DBIsvydesign} or \code{ODBCsvydesign}}
+  \item{con}{Object of class \code{DBIsvydesign} }
   \item{\dots}{Other options, to be passed to \code{dbConnect} or
-    \code{dbDisconnect}, or \code{odbcReConnect} or
-    \code{odbcDisconnect} }
+    \code{dbDisconnect}.}
 }
 \value{
 The same survey design object with the connection opened or closed.

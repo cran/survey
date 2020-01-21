@@ -3,7 +3,6 @@
 \alias{update.twophase}
 \alias{update.svyrep.design}
 \alias{update.DBIsvydesign}
-\alias{update.ODBCsvydesign}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{ Add variables to a survey design}
 \description{
@@ -14,7 +13,6 @@ Update the data variables in a survey design, either with a formula for a new se
 \method{update}{twophase}(object, ...)
 \method{update}{svyrep.design}(object, ...)
 \method{update}{DBIsvydesign}(object, ...)
-\method{update}{ODBCsvydesign}(object, ...)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{

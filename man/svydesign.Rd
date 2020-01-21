@@ -125,16 +125,13 @@ of these strata for variance computation is determined by
 details.
 
 \code{data} may be a character string giving the name of a table or view
-in a relational database that can be accessed through the \code{DBI} or \code{ODBC}
+in a relational database that can be accessed through the \code{DBI}
 interfaces. For DBI interfaces \code{dbtype} should be the name of the database
 driver and \code{dbname} should be the name by which the driver identifies
-the specific database (eg file name for SQLite). For ODBC databases
-\code{dbtype} should be \code{"ODBC"} and \code{dbname} should be the
-registed DSN for the database. On the Windows GUI, \code{dbname=""} will
-produce a dialog box for interactive selection. 
+the specific database (eg file name for SQLite).
 
 The appropriate database interface package must already be loaded (eg
-\code{RSQLite} for SQLite, \code{RODBC} for ODBC).  The survey design
+\code{RSQLite} for SQLite).  The survey design
 object will contain only the design meta-data, and actual variables will
 be loaded from the database as needed.  Use
 \code{\link[=close.DBIsvydesign]{close}} to close the database connection and

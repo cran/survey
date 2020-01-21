@@ -432,7 +432,8 @@ as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","su
 svrepdesign<-function(variables, repweights, weights,data=NULL,...) UseMethod("svrepdesign",data)
 
 svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
-                              data=NULL,type=c("BRR","Fay","JK1", "JKn","bootstrap","other"),
+                              data=NULL,type=c("BRR","Fay","JK1", "JKn","bootstrap",
+                                               "ACS","successive-difference","JK2","other"),
                               combined.weights=TRUE, rho=NULL, bootstrap.average=NULL,
                               scale=NULL,rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),
                               mse=getOption("survey.replicates.mse"),...)
@@ -443,7 +444,7 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
   if(type=="Fay" && is.null(rho))
     stop("With type='Fay' you must supply the correct rho")
   
-  if (type %in% c("JK1","JKn")  && !is.null(rho))
+  if (type %in% c("JK1","JKn","ACS","successive-difference","JK2")  && !is.null(rho))
     warning("rho not relevant to JK1 design: ignored.")
   
   if (type %in% c("other")  && !is.null(rho))
@@ -503,10 +504,16 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
   if (!is.null(rscales) && !(length(rscales) %in% c(1, ncol(repweights)))){
     stop(paste("rscales has length ",length(rscales),", should be ncol(repweights)",sep=""))
   }
+
+    if (type %in% c("ACS", "successive-difference")){
+        if(!is.null(scale) | !is.null(rscales))
+            warning(paste("with type",type,"scale= and rscales= are not needed and will be ignored"))
+    }
   
     if (type == "BRR"){
         ## the default, so check it hasn't been accidentally defaulted to
         if (!is.null(scale)) warning("type='BRR' does not use 'scale=' argument")
+        if (!is.null(rho))  warning("type='BRR' does not use 'rho=' argument, you may want type='Fay'")
       scale<-1/ncol(repweights)
       }
   if (type=="Fay")
@@ -538,6 +545,18 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
       rscales<-1/apply(repweights,2,max)
     } else stop("Must provide rscales for combined JKn weights")
 
+    if (type %in% c("ACS","successive-difference")){
+        rscales<-rep(1, ncol(repweights))
+        scale<-4/ncol(repweights)
+    }
+
+    if (type =="JK2"){
+        warning(paste("with type",type,"scale= and rscales= are not needed and will be ignored"))
+        rscales<-rep(1, ncol(repweights))
+        scale<-1
+    }
+    
+
   if (type=="other" && (is.null(rscales) || is.null(scale))){
     if (is.null(rscales)) rscales<-rep(1,NCOL(repweights))
     if (is.null(scale)) scale<-1
@@ -548,14 +567,15 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
   if (!is.null(fpc)){
       if (missing(fpctype)) stop("Must specify fpctype")
       fpctype<-match.arg(fpctype)
-      if (type %in% c("BRR","Fay")) stop("fpc not available for this type")
+      if (type %in% c("BRR","Fay","JK2","ACS","successive-difference")) stop("fpc not available for this type")
       if (type %in% "bootstrap") stop("Separate fpc not needed for bootstrap")
       if (length(fpc)!=length(rscales)) stop("fpc is wrong length")
       if (any(fpc>1) || any(fpc<0)) stop("Illegal fpc value")
       fpc<-switch(fpctype,correction=fpc,fraction=1-fpc)
       rscales<-rscales*fpc
   }
-  
+
+    if (is.null(scale)) scale<-1
   
   rval<-list(type=type, scale=scale, rscales=rscales,  rho=rho,call=sys.call(),
              combined.weights=combined.weights)
@@ -681,7 +701,8 @@ weights.survey.design<-function(object,...){
 svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="linear",
                                                    interval.type=c("probability","quantile"),f=1,
                                                    return.replicates=FALSE,
-                                                   ties=c("discrete","rounded"),na.rm=FALSE,...){
+                                                   ties=c("discrete","rounded"),na.rm=FALSE,
+                                                   alpha=0.05,df=NULL,...){
 
   if (!exists(".Generic",inherits=FALSE))
     .Deprecated("svyquantile")
@@ -723,6 +744,13 @@ svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="li
       return(rval)
   }
 
+    if (is.null(df))
+        df<-degf(design)
+    if (df==Inf)
+        qcrit<-qnorm
+    else
+        qcrit <-function(...) qt(...,df=df)
+    
   
     w<-weights(design,"analysis")
 
@@ -802,9 +830,10 @@ svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="li
             estfun<-0+outer(xx,point.estimates,"<")
           est<-svymean(estfun,design, return.replicates=return.replicates)
           if (return.replicates)
-            q.estimates<-matrix(Qf(est$replicates),nrow=NROW(est$replicates))
-          ci<-matrix(Qf(c(coef(est)+2*SE(est), coef(est)-2*SE(est))),ncol=2)
-          variances<-((ci[,1]-ci[,2])/4)^2
+              q.estimates<-matrix(Qf(est$replicates),nrow=NROW(est$replicates))
+          zcrit<-abs(qcrit(min(alpha,1-alpha)/2))
+          ci<-matrix(Qf(c(coef(est)+zcrit*SE(est), coef(est)-zcrit*SE(est))),ncol=2)
+          variances<-((ci[,1]-ci[,2])/2/zcrit)^2
           rval<-list(quantiles=point.estimates,
                      variances=variances)
           if (return.replicates)
@@ -829,9 +858,10 @@ svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="li
                 estfun<-0+outer(xx,point.estimates,"<")
           est<-svymean(estfun, design, return.replicates=return.replicates)
           if (return.replicates)
-            q.estimates<-matrix(Qf(est$replicates),nrow=NROW(est$replicates))
-          ci<-matrix(Qf(c(coef(est)+2*SE(est), coef(est)-2*SE(est))),ncol=2)
-          variances<-((ci[,1]-ci[,2])/4)^2
+              q.estimates<-matrix(Qf(est$replicates),nrow=NROW(est$replicates))
+          zcrit<-abs(qcrit(min(alpha,1-alpha)/2))
+          ci<-matrix(Qf(c(coef(est)+zcrit*SE(est), coef(est)-zcrit*SE(est))),ncol=2)
+          variances<-((ci[,1]-ci[,2])/2/zcrit)^2
           rval<-list(quantiles=point.estimates,
                      variances=variances)
           if (return.replicates)
