@@ -106,14 +106,14 @@ km.stderr<-function(survobj,design){
   ## Brute force and ignorance: compute Y and dN as totals, use delta-method
   keep<-which((status==1) & (weights(design)!=0))
   y<-outer(time,time[keep],">=")
-  dN<-diag(status)[,keep]
+  dN<-diag(status)[,keep,drop=FALSE]
   oo<-order(time[keep], -status[keep])
   okeep<-keep[oo]
   ntimes<-length(oo)
   ttime<-time[okeep]
   sstatus<-status[okeep]
 
-  totals<-svytotal(cbind(dN[,oo],y[,oo]), design)
+  totals<-svytotal(cbind(dN[,oo,drop=FALSE],y[,oo,drop=FALSE]), design)
   rm(dN)
   y<-coef(totals)[-(1:ntimes)]
   dNbar<-coef(totals)[1:ntimes]
@@ -124,10 +124,12 @@ km.stderr<-function(survobj,design){
   dVy <- vcov(totals)[-(1:ntimes),-(1:ntimes)]*outer(dNbar/y^2,dNbar/y^2)
   dCVny<- -vcov(totals)[(1:ntimes),-(1:ntimes)]*outer(1/y,dNbar/y^2)
   dV<-dVn+dVy+dCVny+t(dCVny)
-  
+
   V<-numeric(ntimes)
-  V[1]<-dV[1,1]
-  for(i in 2:ntimes) V[i]<-V[i-1]+sum(dV[1:(i-1),i])+sum(dV[i,1:i])
+  if (ntimes>0)
+      V[1]<-dV[1,1]
+  if (ntimes>1)
+      for(i in 2:ntimes) V[i]<-V[i-1]+sum(dV[1:(i-1),i])+sum(dV[i,1:i])
   
   rval<-list(time=ttime,surv=exp(-h),varlog=V)
   class(rval)<-"svykm"

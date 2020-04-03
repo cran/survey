@@ -1687,6 +1687,16 @@ logLik.svrepglm<-function(object,...){
    stop("svrepglm not fitted by maximum likelihood.")
 }
 
+vcov.svyrep.design<-function (object, replicates, centre, ...) 
+{
+    if (object$mse) 
+        svrVar(replicates, scale = object$scale, rscales = object$rscales, 
+            mse = object$mse, centre)
+    else svrVar(replicates, scale = object$scale, rscales = object$rscales, 
+        mse = object$mse)
+}
+
+
 
 withReplicates<-function(design, theta,  ..., return.replicates=FALSE){
   UseMethod("withReplicates",design)

@@ -616,7 +616,7 @@ is.pps<-function(x) if(is.null(x$pps)) FALSE else (x$pps!=FALSE)
   x
 }
 
-svytotal.survey.design2<-function(x,design, na.rm=FALSE, deff=FALSE,...){
+svytotal.survey.design2<-function(x,design, na.rm=FALSE, deff=FALSE,influence=FALSE,...){
 
   
     if (inherits(x,"formula")){
@@ -668,6 +668,9 @@ svytotal.survey.design2<-function(x,design, na.rm=FALSE, deff=FALSE,...){
                                      design$strata, design$fpc,
                                    postStrata=design$postStrata)
     attr(total,"statistic")<-"total"
+    if (influence){
+        attr(total, "influence")<-x/design$prob
+        }
 
     if (is.character(deff) || deff){
       nobs<-sum(weights(design)!=0)
@@ -683,7 +686,7 @@ svytotal.survey.design2<-function(x,design, na.rm=FALSE, deff=FALSE,...){
 }
 
 
-svymean.survey.design2<-function(x,design, na.rm=FALSE,deff=FALSE,...){
+svymean.survey.design2<-function(x,design, na.rm=FALSE,deff=FALSE,influence=FALSE,...){
   
   if (inherits(x,"formula")){
     ## do the right thing with factors
@@ -733,7 +736,10 @@ svymean.survey.design2<-function(x,design, na.rm=FALSE,deff=FALSE,...){
   v<-svyrecvar(x*pweights/psum,design$cluster,design$strata, design$fpc,
               postStrata=design$postStrata)
   attr(average,"var")<-v
-  attr(average,"statistic")<-"mean"
+    attr(average,"statistic")<-"mean"
+    if (influence){
+        attr(average,"influence") <- x*pweights/psum
+    }
   class(average)<-"svystat"
   if (is.character(deff) || deff){
       nobs<-sum(weights(design)!=0)
@@ -753,12 +759,15 @@ svymean.survey.design2<-function(x,design, na.rm=FALSE,deff=FALSE,...){
   return(average)
 }
 
-svyratio.survey.design2<-function(numerator=formula, denominator, design, separate=FALSE,na.rm=FALSE,formula,covmat=FALSE,deff=FALSE,...){
+svyratio.survey.design2<-function(numerator=formula, denominator, design, separate=FALSE,na.rm=FALSE,
+                                  formula,covmat=FALSE,deff=FALSE,influence=FALSE,...){
 
     if (separate){
       strats<-sort(unique(design$strata[,1]))
       if (!design$has.strata)
-        warning("Separate and combined ratio estimators are the same for unstratified designs")
+          warning("Separate and combined ratio estimators are the same for unstratified designs")
+      if(influence)
+          warning("influence functions not available for separate ratio estimators")
       rval<-list(ratios=lapply(strats,
                    function(s) {
                      tmp<-svyratio(numerator, denominator,
@@ -835,8 +844,13 @@ svyratio.survey.design2<-function(numerator=formula, denominator, design, separa
     colnames(vars)<-colnames(denominator)
     rownames(vars)<-colnames(numerator)
     rval$var<-vars
-    if (deff=="replace" || deff) attr(rval,"deff")<-deffs
+    if (deff=="replace" || deff)
+        attr(rval,"deff")<-deffs
+    
     attr(rval,"call")<-sys.call()
+    if (influence)
+        attr(rval, "influence")<-r/design$prob
+    
     class(rval)<-"svyratio"
     rval
     

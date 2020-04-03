@@ -3,12 +3,14 @@
 \alias{withReplicates.svyrep.design}
 \alias{withReplicates.svrepvar}
 \alias{withReplicates.svrepstat}
+\alias{vcov.svyrep.design}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Compute variances by replicate weighting}
 \description{
 Given a function or expression computing a statistic based on sampling
 weights, \code{withReplicates} evaluates the statistic and produces a
-replicate-based estimate of variance. 
+replicate-based estimate of variance. \code{vcov.svrep.design} produces
+the variance estimate from a set of replicates and the design object.
 }
 \usage{
 withReplicates(design, theta,..., return.replicates=FALSE)
@@ -16,6 +18,7 @@ withReplicates(design, theta,..., return.replicates=FALSE)
      scale.weights=FALSE, return.replicates=FALSE)
 \method{withReplicates}{svrepvar}(design, theta,  ...,  return.replicates=FALSE)
 \method{withReplicates}{svrepstat}(design, theta,  ...,  return.replicates=FALSE)
+\method{vcov}{svyrep.design}(object, replicates, centre,...)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -28,7 +31,14 @@ withReplicates(design, theta,..., return.replicates=FALSE)
     help with overflow problems)}
   \item{return.replicates}{Return the replicate estimates as well as
     the variance?}
-}
+    \item{object}{The replicate-weights design object used to create the replicates}
+    \item{replicates}{A set of replicates}
+    \item{centre}{The centering value for variance calculation. If
+      \code{object$mse} is \code{TRUE} 
+      this is the result of estimation using the sampling weights, and
+      must be supplied.  If  \code{object$mse} is \code{FALSE} the
+      mean of the replicates is used and this argument is silently ignored.
+}}
 \details{
 The method for \code{svyrep.design} objects evaluates a function or
 expression using the sampling weights and then each set of replicate
@@ -101,6 +111,20 @@ bclus1<-as.svrepdesign(dclus1,type="bootstrap", replicates=100)
 ## median regression
 withReplicates(bclus1, quote(coef(rq(api00~api99, tau=0.5, weights=.weights))))
 }
+
+
+## pearson correlation
+dstrat <- svydesign(id=~1,strata=~stype, weights=~pw, data=apistrat, fpc=~fpc)
+bstrat<- as.svrepdesign(dstrat,type="subbootstrap")
+
+v <- svyvar(~api00+api99, bstrat, return.replicates=TRUE)
+vcor<-cov2cor(as.matrix(v))[2,1]
+vreps<-v$replicates
+correps<-apply(vreps,1, function(v) v[2]/sqrt(v[1]*v[4]))
+
+vcov(bstrat,correps, centre=vcor)
+
+
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
 

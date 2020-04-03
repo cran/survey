@@ -18,7 +18,8 @@ with inverse-probability weighting and design-based standard errors.
 }
 \usage{
 \method{svyglm}{survey.design}(formula, design, subset=NULL,
-family=stats::gaussian(),start=NULL, rescale=TRUE, ...)
+family=stats::gaussian(),start=NULL, rescale=TRUE, ..., deff=FALSE,
+ influence=FALSE)
 \method{svyglm}{svyrep.design}(formula, design, subset=NULL,
 family=stats::gaussian(),start=NULL, rescale=NULL, ..., rho=NULL,
 return.replicates=FALSE, na.action,multicore=getOption("survey.multicore"))
@@ -53,6 +54,8 @@ return.replicates=FALSE, na.action,multicore=getOption("survey.multicore"))
   \item{return.replicates}{Return the replicates as the \code{replicates} component of the
     result? (for \code{predict}, only possible if they
     were computed in the \code{svyglm} fit)}
+  \item{deff}{Estimate the design effects}
+  \item{influence}{Return influence functions}
   \item{object}{A \code{svyglm} object}
   \item{correlation}{Include the correlation matrix of parameters?}
   \item{na.action}{Handling of NAs}
@@ -94,6 +97,34 @@ regression estimator of the population total.  Regression estimators of
 mean and total can also be obtained with \code{\link{calibrate}}.
 
 
+}
+\note{
+\code{svyglm} always returns 'model-robust' standard errors; the
+Horvitz-Thompson-type standard errors used everywhere in the survey
+package are a generalisation of the model-robust 'sandwich' estimators.
+In particular, a quasi-Poisson \code{svyglm} will return correct
+standard errors for relative risk regression models. 
+  }
+
+  \note{
+This function does not return the same standard error estimates for the
+regression estimator of population mean and total as some textbooks, or
+SAS.  However, it does give the same standard error estimator as
+estimating the mean or total with calibrated weights.
+
+In particular, under simple random sampling with or without replacement
+there is a simple rescaling of the mean squared residual to estimate the
+mean squared error of the regression estimator.   The standard error
+estimate produced by \code{predict.svyglm} has very similar
+(asymptotically identical) expected
+value to the textbook estimate, and has the advantage of being
+applicable when the supplied \code{newdata} are not the population mean
+of the predictors. The difference is small when the sample size is large, but can be
+appreciable for small samples.
+
+You can obtain the other standard error estimator by calling
+\code{predict.svyglm} with the covariates set to their estimated (rather
+than true) population mean values.
 }
 
  \value{ \code{svyglm} returns an object of class \code{svyglm}.  The

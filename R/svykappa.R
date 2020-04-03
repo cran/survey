@@ -14,12 +14,12 @@ svykappa.default<-function(formula, design,...) {
     if (nrow != ncol) 
         stop("number of categories is different")
     probs <- eval(bquote(svymean(~.(rows) + .(cols) + interaction(.(rows), 
-        .(cols)), design)))
+        .(cols)), design, ...)))
     nms <- c(rnames[1:nrow], cnames[1:ncol], outer(1:nrow, 
         1:ncol, function(i, j) paste(rnames[i], cnames[j], 
             sep = ".")))
     names(probs) <- nms
-    v <- attr(probs, "var")
+    v <- vcov(probs)
     dimnames(v) <- list(nms, nms)
     attr(probs, "var") <- v
     obs <- parse(text = paste(nms[nrow + ncol + 1+ (0:(nrow-1))*(ncol+1)], 
@@ -30,3 +30,13 @@ svykappa.default<-function(formula, design,...) {
         .(expect)))))
 }
 
+
+
+"names<-.svrepstat"<-function(x, value){
+    if (is.list(x) && !is.null(x$replicates)){
+        names(x[[1]])<-value
+        colnames(x$replicates)<-value
+        x
+    }  else NextMethod()
+    
+}

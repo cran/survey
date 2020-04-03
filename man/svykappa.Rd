@@ -14,7 +14,8 @@ svykappa(formula, design, ...)
 \arguments{
   \item{formula}{one-sided formula giving two measurements}
   \item{design}{survey design object}
-  \item{\dots}{for future expansion }
+  \item{\dots}{passed to \code{svymean} internally
+  (such as \code{return.replicates} or \code{influence})}
 }
 \value{
   Object of class \code{svystat}
@@ -28,6 +29,11 @@ svykappa(~comp.imp+sch.wide, dclus1)
 
 dclus1<-update(dclus1, stypecopy=stype)
 svykappa(~stype+stypecopy,dclus1)
+
+
+(kappas<-svyby(~comp.imp+sch.wide,~stype,design=dclus1, svykappa, covmat=TRUE))
+svycontrast(kappas, quote(E/H))
+
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

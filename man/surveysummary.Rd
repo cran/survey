@@ -33,14 +33,16 @@
 Compute means, variances, ratios and totals for data from complex surveys.
 }
 \usage{
-\method{svymean}{survey.design}(x, design, na.rm=FALSE,deff=FALSE,...) 
+\method{svymean}{survey.design}(x, design, na.rm=FALSE,deff=FALSE,influence=FALSE,...) 
+\method{svymean}{survey.design2}(x, design, na.rm=FALSE,deff=FALSE,influence=FALSE,...) 
 \method{svymean}{twophase}(x, design, na.rm=FALSE,deff=FALSE,...) 
 \method{svymean}{svyrep.design}(x, design, na.rm=FALSE, rho=NULL,
   return.replicates=FALSE, deff=FALSE,...) 
 \method{svyvar}{survey.design}(x, design, na.rm=FALSE,...) 
 \method{svyvar}{svyrep.design}(x, design, na.rm=FALSE, rho=NULL,
    return.replicates=FALSE,...,estimate.only=FALSE) 
-\method{svytotal}{survey.design}(x, design, na.rm=FALSE,deff=FALSE,...) 
+\method{svytotal}{survey.design}(x, design, na.rm=FALSE,deff=FALSE,influence=FALSE,...) 
+\method{svytotal}{survey.design2}(x, design, na.rm=FALSE,deff=FALSE,influence=FALSE,...) 
 \method{svytotal}{twophase}(x, design, na.rm=FALSE,deff=FALSE,...) 
 \method{svytotal}{svyrep.design}(x, design, na.rm=FALSE, rho=NULL,
    return.replicates=FALSE, deff=FALSE,...)
@@ -59,8 +61,10 @@ make.formula(names)
   \item{x}{A formula, vector or matrix}
   \item{design}{\code{survey.design} or \code{svyrep.design} object}
   \item{na.rm}{Should cases with missing values be dropped?}
+  \item{influence}{Should a matrix of influence functions be returned
+    (primarily to support \code{\link{svyby}})}
   \item{rho}{parameter for Fay's variance estimator in a BRR design}
-  \item{return.replicates}{Return the replicate means?}
+  \item{return.replicates}{Return the replicate means/totals?}
   \item{deff}{Return the design effect (see below)}
   \item{object}{The result of one of the other survey summary functions}
   \item{quietly}{Don't warn when there is no design effect computed}

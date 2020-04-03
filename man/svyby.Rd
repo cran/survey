@@ -6,6 +6,7 @@
 \alias{coef.svyby}
 \alias{confint.svyby}
 \alias{unwtd.count}
+\alias{svyby.survey.design2}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Survey statistics on subsets}
 \description{
@@ -16,7 +17,13 @@ svyby(formula, by ,design,...)
 \method{svyby}{default}(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE,
 keep.names = TRUE,verbose=FALSE, vartype=c("se","ci","ci","cv","cvpct","var"),
  drop.empty.groups=TRUE, covmat=FALSE, return.replicates=FALSE,
+ na.rm.by=FALSE, na.rm.all=FALSE,
+multicore=getOption("survey.multicore"))
+\method{svyby}{survey.design2}(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE,
+keep.names = TRUE,verbose=FALSE, vartype=c("se","ci","ci","cv","cvpct","var"),
+ drop.empty.groups=TRUE, covmat=FALSE, influence=covmat,
  na.rm.by=FALSE, na.rm.all=FALSE, multicore=getOption("survey.multicore"))
+
 \method{SE}{svyby}(object,...)
 \method{deff}{svyby}(object,...)
 \method{coef}{svyby}(object,...)
@@ -50,10 +57,12 @@ unwtd.count(x, design, ...)
   observations for variables defined by \code{formula} and treat these groups
   as empty}
 \item{covmat}{If \code{TRUE}, compute covariances between estimates for
-  different subsets (currently only for replicate-weight
-  designs). Allows \code{\link{svycontrast}} to be used on output.}
+  different subsets. Allows \code{\link{svycontrast}} to be used on
+  output. Requires that \code{FUN} supports either
+  \code{return.replicates=TRUE} or \code{influence=TRUE}}
 \item{return.replicates}{Only for replicate-weight designs. If
   \code{TRUE}, return all the replicates as the "replicates" attribute of the result}
+\item{influence}{Return the influence functions of the result}
 \item{multicore}{Use \code{multicore} package to distribute subsets over
    multiple processors?}
   \item{parm}{a specification of which parameters are to be given
@@ -94,9 +103,9 @@ The variance type "ci" asks for confidence intervals, which are produced
     re-evaluated in each subset, so it is unwise to use data-dependent
     terms in \code{formula}.  In particular, \code{svyby(~factor(a), ~b,
     design=d, svymean)}, will create factor variables whose levels are
-    only those values of \code{a}  present in each subset.  Use
+    only those values of \code{a}  present in each subset.  Either use
     \code{\link{update.survey.design}} to add variables to the design
-    object instead. 
+    object instead or specify the levels explicitly in the call to \code{factor}.
 
     
     }
@@ -139,6 +148,11 @@ svycontrast(mns, c(E = 1, M = -1))
 
 str(svyby(~api99, ~stype, rclus1, svymean,return.replicates=TRUE))
 
+tots<-svyby(~enroll, ~stype, dclus1, svytotal,covmat=TRUE)
+vcov(tots)
+svycontrast(tots, quote(E/H))
+
+
 
 ## extractor functions
 (a<-svyby(~enroll, ~stype, rclus1, svytotal, deff=TRUE, verbose=TRUE, 
@@ -151,6 +165,9 @@ confint(a, df=degf(rclus1))
 
 ## ratio estimates
 svyby(~api.stu, by=~stype, denominator=~enroll, design=dclus1, svyratio)
+
+ratios<-svyby(~api.stu, by=~stype, denominator=~enroll, design=dclus1, svyratio,covmat=TRUE)
+vcov(ratios)
 
 ## empty groups
 svyby(~api00,~comp.imp+sch.wide,design=dclus1,svymean)

@@ -15,11 +15,13 @@
 \title{Ratio estimation}
 \description{
 Ratio estimation and estimates of totals based on ratios for complex
-survey samples. Estimating domain (subpopulation) means can be done more easily with \code{\link{svymean}}.
+survey samples. Estimating domain (subpopulation) means can be done
+more easily with \code{\link{svymean}}.
 }
 \usage{
 \method{svyratio}{survey.design2}(numerator=formula, denominator,
-   design,separate=FALSE, na.rm=FALSE,formula, covmat=FALSE,deff=FALSE,...)
+   design,separate=FALSE, na.rm=FALSE,formula, covmat=FALSE,
+   deff=FALSE,influence=FALSE,...)
 \method{svyratio}{svyrep.design}(numerator=formula, denominator, design,
    na.rm=FALSE,formula, covmat=FALSE,return.replicates=FALSE,deff=FALSE, ...)
 \method{svyratio}{twophase}(numerator=formula, denominator, design,
@@ -46,7 +48,8 @@ survey samples. Estimating domain (subpopulation) means can be done more easily 
   \item{covmat}{Compute the full variance-covariance matrix of the
     ratios}
 \item{deff}{Compute design effects}
-  \item{return.replicates}{Return replicate estimates of ratios}
+\item{return.replicates}{Return replicate estimates of ratios}
+\item{influence}{Return influence functions}
   \item{drop}{Return a vector rather than a matrix}
   \item{parm}{a specification of which parameters are to be given
     confidence intervals, either a vector of numbers or a vector of

@@ -14,7 +14,7 @@ maximises an estimated population likelihood, it is not the sample MLE.
 }
 \usage{
 svymle(loglike, gradient = NULL, design, formulas, start = NULL, control
-= list(), na.action="na.fail", method=NULL, lower=NULL,upper=NULL,...)
+= list(), na.action="na.fail", method=NULL, lower=NULL,upper=NULL,influence=FALSE,...)
 \method{summary}{svymle}(object, stderr=c("robust", "model"),...)
 }
 %- maybe also `usage' for other objects documented here.
@@ -27,6 +27,7 @@ svymle(loglike, gradient = NULL, design, formulas, start = NULL, control
   \item{control}{control options for the optimiser: see the help page
     for the optimiser you are using.}
   \item{lower,upper}{Parameter bounds for \code{bobyqa}}
+  \item{influence}{Return the influence functions (primarily for svyby)}
   \item{na.action}{Handling of \code{NA}s}
   \item{method}{\code{"nlm"} to use \code{nlm},\code{"uobyqa"} or
     \code{"bobyqa"} to use those optimisers from the \code{minqa}

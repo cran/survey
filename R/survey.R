@@ -514,7 +514,7 @@ svymean<-function(x, design,na.rm=FALSE,...){
   UseMethod("svymean",design)
 }
 
-svymean.survey.design<-function(x,design, na.rm=FALSE,deff=FALSE,...){
+svymean.survey.design<-function(x,design, na.rm=FALSE,deff=FALSE, influence=FALSE,...){
 
   if (!inherits(design,"survey.design"))
     stop("design is not a survey design")
@@ -550,7 +550,9 @@ svymean.survey.design<-function(x,design, na.rm=FALSE,deff=FALSE,...){
   v<-svyCprod(x*pweights/psum,design$strata,design$cluster[[1]], design$fpc,
               design$nPSU,design$certainty, design$postStrata)
   attr(average,"var")<-v
-  attr(average,"statistic")<-"mean"
+    attr(average,"statistic")<-"mean"
+  if(influence)
+    attr(average, "influence")<-x*pweights/psum
   class(average)<-"svystat"
   if (is.character(deff) || deff){
     nobs<-NROW(design$cluster)
@@ -598,6 +600,10 @@ vcov.svystat<-function(object,...){
   as.matrix(attr(object,"var"))
 }
 
+influence.svystat<-function(object,...){
+  attr(object,"influence")
+}
+
 SE.svystat<-function(object,...){
  v<-vcov(object)
  if (!is.matrix(v) || NCOL(v)==1) sqrt(v) else sqrt(diag(v))
@@ -627,7 +633,7 @@ svytotal<-function(x,design,na.rm=FALSE,...){
   .svycheck(design)
   UseMethod("svytotal",design)
 }
-svytotal.survey.design<-function(x,design, na.rm=FALSE, deff=FALSE,...){
+svytotal.survey.design<-function(x,design, na.rm=FALSE, deff=FALSE,influence=FALSE,...){
 
   if (!inherits(design,"survey.design"))
     stop("design is not a survey design")
@@ -661,7 +667,10 @@ svytotal.survey.design<-function(x,design, na.rm=FALSE, deff=FALSE,...){
   attr(total, "var")<-v<-svyCprod(x/design$prob,design$strata,
                                   design$cluster[[1]], design$fpc,
                                   design$nPSU,design$certainty,design$postStrata)
-  attr(total,"statistic")<-"total"
+    attr(total,"statistic")<-"total"
+    if (influence){
+        attr(total,"influence")<-x/design$prob
+        }
   if (is.character(deff) || deff){
     vsrs<-svyvar(x,design)*sum(weights(design)^2)
     vsrs<-vsrs*(N-NROW(design$cluster))/N
@@ -1253,7 +1262,8 @@ svyglm<-function(formula, design,subset=NULL,family=stats::gaussian(),start=NULL
   UseMethod("svyglm",design)
 }
 
-svyglm.survey.design<-function(formula,design,subset=NULL, family=stats::gaussian(),start=NULL,rescale=TRUE,...){
+svyglm.survey.design<-function(formula,design,subset=NULL, family=stats::gaussian(),start=NULL,
+                               rescale=TRUE,..., deff=FALSE, influence=FALSE){
 
       subset<-substitute(subset)
       subset<-eval(subset, model.frame(design), parent.frame())
@@ -1263,10 +1273,12 @@ svyglm.survey.design<-function(formula,design,subset=NULL, family=stats::gaussia
       data<-model.frame(design)
 
       g<-match.call()
-      g$formula<-eval.parent(g$formula)
+    g$formula<-eval.parent(g$formula)
+    g$influence<-NULL
       g$design<-NULL
       g$var <- NULL
-      g$rescale <- NULL
+    g$rescale <- NULL
+    g$deff<-NULL
       g$family<-family
       if (is.null(g$weights))
         g$weights<-quote(.survey.prob.weights)
@@ -1281,8 +1293,9 @@ svyglm.survey.design<-function(formula,design,subset=NULL, family=stats::gaussia
           data$.survey.prob.weights<-(1/design$prob)/mean(1/design$prob)
       if (!all(all.vars(formula) %in% names(data))) 
 	stop("all variables must be in design= argument")
-      g<-with(list(data=data), eval(g))
-      g$naive.cov<-summary(g)$cov.unscaled
+    g<-with(list(data=data), eval(g))
+    summ<-summary(g)
+      g$naive.cov<-summ$cov.unscaled
       
       nas<-g$na.action
       if (length(nas))
@@ -1301,6 +1314,21 @@ svyglm.survey.design<-function(formula,design,subset=NULL, family=stats::gaussia
           i<-min(which(names(g$call)[-1]==""))
         names(g$call)[i+1]<-"formula"
       }
+
+    if(deff){
+        vsrs<-summ$cov.scaled*mean(data$.survey.prob.weights)/nrow(data)
+        attr(g,"deff")<-g$cov.unscaled/vsrs
+    }
+
+    if (influence){
+        estfun<-model.matrix(g)*resid(g,"working")*g$weights
+        if (g$rank<NCOL(estfun)){
+            estfun<-estfun[,g$qr$pivot[1:g$rank]]
+        }
+        attr(g, "influence")<-estfun%*%g$naive.cov
+    }
+
+    
       g$survey.design<-design 
       g
 }
@@ -1667,7 +1695,8 @@ MASSprofile_glm<-function (fitted, which = 1:p, alpha = 0.01, maxsteps = 10, del
 
 svymle<-function(loglike, gradient=NULL, design, formulas,
     start=NULL, control=list(),
-    na.action="na.fail", method=NULL,lower=NULL,upper=NULL,...){
+    na.action="na.fail", method=NULL,lower=NULL,upper=NULL,
+    influence=FALSE,...){
   if(is.null(method))
     method<-if(is.null(gradient)) "Nelder-Mead" else "newuoa"
   if (!inherits(design,"survey.design")) 
@@ -1857,6 +1886,9 @@ svymle<-function(loglike, gradient=NULL, design, formulas,
           design$certainty, design$postStrata)
     dimnames(rval$sandwich)<-list(parnms,parnms)
   }
+
+  if (influence)
+      attr(rval,"influence")<-db
   rval$call<-match.call()
   rval$design<-design
   class(rval)<-"svymle"

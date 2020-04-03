@@ -1,3 +1,26 @@
+4.0	Some (and eventually nearly all) functions now return influence functions when
+	called with a survey.design2 object and the influence=TRUE option.  These allow
+	svyby() to estimate covariances between domains, which could previously only be
+	done for replicate-weight designs, and so allow svycontrast() to do domain contrasts
+	 - svymean, svytotal, svyratio, svymle, svyglm, svykappa
+
+	Nonlinear least squares with svynls() now available
+
+	Document that predict.svyglm() doesn't use a rescaled residual mean square
+	to estimate standard errors, and so disagrees with some textbooks. (for Trent Buskirk)
+
+3.38	When given a statistic including replicates, svycontrast() now transforms the replicates
+	and calculates the variance, rather than calculating the variance then using the
+	delta method.  Allows geometric means to exactly match SAS/SUDAAN (for Robert Baskin)
+
+	vcov.svyrep.design to simplify computing variances from replicates (for William Pelham)
+
+	svykm() no longer throws an error with single-observation domains (for Guy Cafri)
+
+	Documentation for svyglm() specifies that it has always returned
+	model-robust standard errors. (for various people wanting to fit relative risk
+	regression models).
+
 3.37	RODBC database connections are no longer supported.
 	Use the DBI-compatible 'odbc' package
 

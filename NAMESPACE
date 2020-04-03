@@ -15,7 +15,7 @@ export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        svyciprop, svyttest, marginpred, twophasevar, twophase2var, ppsmat, HR, unwtd.count,
        svyfactanal, svypredmeans, svyprcomp, trimWeights,stratsample,svylogrank,
        svyranktest,svystandardize,
-       psrsq, svysurvreg, cal_names, svycralpha, svyivreg)
+       psrsq, svysurvreg, cal_names, svycralpha, svyivreg, svynls)
 
 S3method(svyloglin,survey.design)
 S3method(svyloglin,svyrep.design)
@@ -175,6 +175,7 @@ S3method(SE,svyby)
 S3method(SE,svyquantile)
 S3method(SE,svyratio)
 
+S3method(vcov,svyrep.design)
 S3method(vcov, svyquantile)
 S3method(vcov, svrepstat)
 S3method(vcov, svyglm)
@@ -364,6 +365,7 @@ S3method(transform,svyimputationList)
 
 S3method(svyby, default)
 S3method(svyby, DBIsvydesign)
+S3method(svyby, survey.design2)
 
 S3method(regcalibrate, survey.design2)
 S3method(regcalibrate, svyrep.design)
@@ -420,7 +422,8 @@ S3method(`[`, DBIrepdesign)
          
 
 S3method(`[<-`, survey.design)         
-         
+
+S3method(`names<-`, svrepstat)
 
 S3method(svylogrank,survey.design2)
 S3method(svylogrank,svyrep.design)
@@ -442,4 +445,13 @@ S3method(psrsq,svyglm)
 
 S3method(cal_names, survey.design)
 S3method(cal_names, DBIsvydesign)
+
+S3method(svynls, DBIsvydesign)
+S3method(svynls, survey.design2)
+S3method(svynls, svyrep.design)
+
+S3method(print, svynls)
+S3method(summary, svynls)
+S3method(coef,svynls)
+S3method(vcov,svynls)
 

@@ -29,11 +29,14 @@ names are used to match up the vectors and the remaining elements of
 \code{contrasts} are assumed to be zero. If the names are not legal
 variable names (eg \code{0.1}) they must be quoted (eg \code{"0.1"})
 
-If \code{contrasts} is a \code{"call"} or list of \code{"call"s}, the
-delta-method is used to compute variances, and the calls must use only
-functions that \code{\link{deriv}} knows how to differentiate. If the
-names are not legal variable names they must be quoted with backticks
-(eg \code{`0.1`}).
+If \code{contrasts} is a \code{"call"} or list of \code{"call"s}, and
+\code{stat} is a \code{svrepstat} object including replicates, the
+replicates are transformed and used to compute the variance. If
+\code{stat} is a \code{svystat} object or a \code{svrepstat} object
+without replicates, the delta-method is used to compute variances, and
+the calls must use only functions that \code{\link{deriv}} knows how
+to differentiate. If the names are not legal variable names they must
+be quoted with backticks (eg \code{`0.1`}).
   }
 \seealso{\code{\link{regTermTest}}, \code{svyglm}}
 \examples{
@@ -56,9 +59,21 @@ quote((`I(api00^3)`-3*`I(api00^2)`*`I(api00)`+ 3*`I(api00)`*`I(api00)`^2-`I(api0
       (`I(api00^2)`-`I(api00)`^2)^1.5))
 
 ## Example: geometric means
-
+## using delta method
 meanlogs <- svymean(~log(api00)+log(api99), dclus1)
 svycontrast(meanlogs,
+    list(api00=quote(exp(`log(api00)`)), api99=quote(exp(`log(api99)`))))
+
+## using delta method
+rclus1<-as.svrepdesign(dclus1)
+meanlogs <- svymean(~log(api00)+log(api99), rclus1)
+svycontrast(meanlogs,
+    list(api00=quote(exp(`log(api00)`)),
+api99=quote(exp(`log(api99)`))))
+
+## transforming replicates
+meanlogs_r <- svymean(~log(api00)+log(api99), rclus1, return.replicates=TRUE)
+svycontrast(meanlogs_r,
     list(api00=quote(exp(`log(api00)`)), api99=quote(exp(`log(api99)`))))
 
 }
