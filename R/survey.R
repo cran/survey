@@ -1128,6 +1128,8 @@ svycoxph.survey.design<-function(formula,design, subset=NULL, rescale=TRUE, ...)
     ## unless the user doesn't want to
     if (rescale)
         data$.survey.prob.weights<-(1/design$prob)/mean(1/design$prob)
+    else
+        data$.survey.prob.weights<-(1/design$prob)
     if (!all(all.vars(formula) %in% names(data))) 
         stop("all variables must be in design= argument")
     g<-with(list(data=data), eval(g))
@@ -1291,6 +1293,8 @@ svyglm.survey.design<-function(formula,design,subset=NULL, family=stats::gaussia
       ## (unless the user doesn't want to)
       if (rescale)
           data$.survey.prob.weights<-(1/design$prob)/mean(1/design$prob)
+      else
+          data$.survey.prob.weights<-(1/design$prob)
       if (!all(all.vars(formula) %in% names(data))) 
 	stop("all variables must be in design= argument")
     g<-with(list(data=data), eval(g))
