@@ -122,6 +122,35 @@ ppsmat<-function(jointprob, tolerance=0.0001){
   rval
 }
 
+ppscov<-function(probcov, weighted=FALSE){
+  if ((!is.matrix(probcov)) && (!is(probcov,"Matrix")) || !(NROW(probcov)==NCOL(probcov)))
+      stop("jointprob must be a square matrix")
+  if (weighted){
+      rval<-list(dcheck=probcov,call=sys.call())
+      class(rval)<-"ppsdcheck"
+  } else {
+      rval<-list(delta=probcov,call=sys.call())
+      class(rval)<-"ppsdelta"
+  }
+  rval
+
+}
+
+
+print.ppsdcheck<-function(x,...) {
+  cat("PPS: Weighted covariance matrix: ")
+  print(x$call)
+  invisible(x)
+}
+
+
+print.ppsdelta<-function(x,...) {
+  cat("PPS: Sampling covariance matrix: ")
+  print(x$call)
+  invisible(x)
+}
+
+
 print.ppsmat<-function(x,...) {
   cat("PPS: Joint probability matrix: ")
   print(x$call)
@@ -144,6 +173,51 @@ pps_design.ppsmat<-function(method,ids,strata=NULL, probs=NULL, fpc=NULL,variabl
   class(rval) <- c("pps","survey.design")
   rval
 }
+
+
+pps_design.ppsdcheck<-function(method,ids,strata=NULL, probs=NULL, fpc=NULL,variables=variables,
+                   subset, data,call=sys.call(),variance="HT",...){
+
+  if (length(ids[[2]])>1) stop("Multistage PPS sampling not supported")
+  rval<-svydesign(ids=ids,strata=strata,weights=NULL,variables=variables,
+                probs=probs,fpc=fpc,data=data,pps="other")
+
+  deltacheck<-method$dcheck
+  rval$variance<-variance
+
+  rval$dcheck<-list(list(id=1:nrow(deltacheck), dcheck=deltacheck))
+
+  rval$call<-call
+  class(rval) <- c("pps","survey.design")
+  rval
+}
+
+
+
+pps_design.ppsdelta<-function(method,ids,strata=NULL, probs=NULL, fpc=NULL,variables=variables,
+                   subset, data,call=sys.call(),variance="HT",...){
+
+  if (length(ids[[2]])>1) stop("Multistage PPS sampling not supported")
+  rval<-svydesign(ids=ids,strata=strata,weights=NULL,variables=variables,
+                probs=probs,fpc=fpc,data=data,pps="other")
+
+  w<-weights(rval)
+  deltacheck<-method$delta*tcrossprod(w)
+  diag(deltacheck)<-diag(method$delta)*w  
+  rval$variance<-variance
+
+  rval$dcheck<-list(list(id=1:nrow(method$deltacheck), dcheck=deltacheck))
+
+  rval$call<-call
+  class(rval) <- c("pps","survey.design")
+  rval
+}
+
+poisson_sampling<-function(p){
+    ppscov(Diagonal(x=1-p),weighted=TRUE)
+}
+
+
 
 HR<-function(psum=NULL, strata=NULL){
   if (is.null(psum)) { ## estimate
@@ -221,7 +295,7 @@ ppsvar<-function(x,design){
       if (inherits(psvar, "greg_calibration")) {
         if (psvar$stage==0){
           ## G-calibration at population level
-          y<-qr.resid(psvar$qr,y/psvar$w)*psvar$w
+          y<-qr.resid(psvar$qr,x/psvar$w)*psvar$w
         } else {
           ## G-calibration within clusters
           stop("calibration within clusters not yet available for PPS designs")

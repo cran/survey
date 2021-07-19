@@ -93,7 +93,10 @@ svyby.default<-function(formula, by, design, FUN,..., deff=FALSE, keep.var=TRUE,
                       })
       rval<-t(sapply(results, unwrap))
       if ((covmat && inherits(design, "svyrep.design")) || return.replicates) {
-        replicates<-do.call(cbind,lapply(results,"[[","replicates"))
+          replicates<-do.call(cbind,lapply(results,"[[","replicates"))
+          attr(replicates,"scale")<-design$scale
+          attr(replicates, "rscales")<-design$rscales
+          attr(replicates, "mse")<-design$mse
         colnames(replicates)<-rep(as.character(uniquelevels), each=NCOL(replicates)/length(uniquelevels))
         covmat.mat<-svrVar(replicates,design$scale,design$rscales, mse=design$mse,coef=as.vector(sapply(results,coef)))
       } else{
@@ -198,6 +201,7 @@ SE.svyby <-function(object,...){
     aa<-attr(object,"svyby")
     if (!aa$vars) stop("Object does not contain variances")
     vartype<-attr(object,"svyby")$vartype
+    vartype <- c("se","ci","ci","cv","cvpct","var")[c("se","ci","ci","cv","cvpct","var") %in% vartype]
     if (pos<-match("se",vartype,0))
         object[,max(aa$margins)+aa$nstats*pos+(1:aa$nstats)]
     else if (pos<-match("var",vartype,0))
@@ -245,19 +249,6 @@ vcov.svyby<-function(object,...){
   dimnames(rval)<-list(nms,nms)
   rval
 }
-
-confint.svyquantile<-function(object,parm=NULL,level=NULL,...){
-  if (!is.null(level)) stop("need to re-run svyquantile to specify level")
-  ci<-t(matrix(as.vector(object$CIs),nrow=2))
-  colnames(ci)<-dimnames(object$CIs)[[1]]
-  rownames(ci)<-outer(dimnames(object$CIs)[[2]],
-                      dimnames(object$CIs)[[3]],paste,sep="_")
-  if (is.null(parm)) 
-    ci
-  else 
-    ci[parm,,drop=FALSE]
-}
-
 
 
 ## allows for influence functions. Does not allow for replicates
@@ -460,4 +451,15 @@ svyby.survey.design2<-function(formula, by, design, FUN,..., deff=FALSE, keep.va
   attr(rval,"call")<-sys.call()
   class(rval)<-c("svyby","data.frame")
   rval
+}
+
+
+svybys<-function(formula,  bys,  design, FUN, ...){
+  tms <- attr(terms(bys),"variables")[-1]	
+  
+  lapply(tms, function(tm){
+      eval(bquote(svyby(.(formula),by=~.(tm),
+                        design=.(design), FUN=.(FUN), ...)))
+  })
+  
 }

@@ -1,5 +1,8 @@
 \name{as.svrepdesign}
 \alias{as.svrepdesign}
+\alias{as.svrepdesign.default}
+\alias{as.svrepdesign.svyimputationList}
+
 %- Also NEED an `\alias' for EACH other topic documented here. 
 \title{Convert a survey design to use replicate weights}
 \description{
@@ -8,22 +11,33 @@
   jackknife methods, \code{BRR} is Balanced Repeated Replicates and
   \code{Fay} is Fay's modification of this, \code{bootstrap} is Canty
   and Davison's bootstrap, \code{subbootstrap} is Rao and Wu's
-  \eqn{(n-1)} bootstrap, and \code{mrbbootstrap} is Preston's multistage rescaled bootstrap.
+  \eqn{(n-1)} bootstrap, and \code{mrbbootstrap} is Preston's multistage
+  rescaled bootstrap.  With a \code{svyimputationList} object, the same
+  replicate weights will be used for each imputation if the sampling
+  weights are all the same and \code{separate.replicates=FALSE}.
 }
 \usage{
-as.svrepdesign(design, type=c("auto", "JK1", "JKn", "BRR", "bootstrap",
+as.svrepdesign(design,...)
+\method{as.svrepdesign}{default}(design, type=c("auto", "JK1", "JKn", "BRR", "bootstrap",
    "subbootstrap","mrbbootstrap","Fay"),
    fay.rho = 0, fpc=NULL,fpctype=NULL,..., compress=TRUE, 
+   mse=getOption("survey.replicates.mse"))
+\method{as.svrepdesign}{svyimputationList}(design, type=c("auto", "JK1", "JKn", "BRR", "bootstrap",
+   "subbootstrap","mrbbootstrap","Fay"),
+   fay.rho = 0, fpc=NULL,fpctype=NULL, separate.replicates=FALSE, ..., compress=TRUE, 
    mse=getOption("survey.replicates.mse"))
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
-  \item{design}{Object of class \code{survey.design} }
+  \item{design}{Object of class \code{survey.design} or   \code{svyimputationList}}
   \item{type}{Type of replicate weights. \code{"auto"} uses JKn for
     stratified, JK1 for unstratified designs}
   \item{fay.rho}{Tuning parameter for Fay's variance method }
   \item{fpc,fpctype,\dots}{Passed to \code{jk1weights}, \code{jknweights},
-    \code{brrweights}, \code{bootweights}, \code{subbootweights}, or \code{mrbweights}.}
+    \code{brrweights}, \code{bootweights}, \code{subbootweights}, or
+    \code{mrbweights}.}
+  \item{separate.replicates}{Compute replicate weights separately for
+    each design (useful for the bootstrap types, which are not deterministic}
   \item{compress}{Use a compressed representation of the replicate
     weights matrix.}
   \item{mse}{if \code{TRUE}, compute variances from sums of squares around

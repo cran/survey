@@ -297,7 +297,8 @@ brrweights<-function(strata,psu, match=NULL, small=c("fail","split","merge"),
 ## Designs with replication weights rather than survey structure.
 ##
 
-as.svrepdesign<- function(design,type=c("auto","JK1","JKn","BRR","bootstrap","subbootstrap","mrbbootstrap","Fay"),
+as.svrepdesign<- function(design,...) UseMethod("as.svrepdesign")
+as.svrepdesign.default<-function(design,type=c("auto","JK1","JKn","BRR","bootstrap","subbootstrap","mrbbootstrap","Fay"),
                           fay.rho=0, fpc=NULL, fpctype=NULL,...,compress=TRUE, mse=getOption("survey.replicates.mse")){
 
   type<-match.arg(type)
@@ -698,204 +699,6 @@ weights.survey.design<-function(object,...){
 }
 
 
-svyquantile.svyrep.design<-svrepquantile<-function(x,design,quantiles,method="linear",
-                                                   interval.type=c("probability","quantile"),f=1,
-                                                   return.replicates=FALSE,
-                                                   ties=c("discrete","rounded"),na.rm=FALSE,
-                                                   alpha=0.05,df=NULL,...){
-
-  if (!exists(".Generic",inherits=FALSE))
-    .Deprecated("svyquantile")
-
-  ties<-match.arg(ties)
-  interval<-match.arg(interval.type)
-  if (design$type %in% c("JK1","JKn") && interval=="quantile")
-    warning("Jackknife replicate weights may not give valid standard errors for quantiles")
-  if (design$type %in% "other" && interval=="quantile")
-    warning("Not all replicate weight designs give valid standard errors for quantiles.")
-  if (inherits(x,"formula"))
-		x<-model.frame(x,design$variables,na.action=if(na.rm) na.pass else na.fail)
-    else if(typeof(x) %in% c("expression","symbol"))
-        x<-eval(x, design$variables)
-
-
-   if (na.rm){
-         nas<-rowSums(is.na(x))
-       design<-design[nas==0,]
-        if (length(nas)>length(design$prob))
-          x<-x[nas==0,,drop=FALSE]
-        else
-          x[nas>0,]<-0
-      }
-    
-  if (NROW(x)<=1){
-      rval<-matrix(rep(as.matrix(x),length(quantiles)),ncol=NCOL(x),nrow=length(quantiles),byrow=TRUE)
-      dimnames(rval)<-list(paste("q",round(quantiles,2),sep=""), names(x))
-      if (getOption("survey.drop.replicates") && !is.null(design$selfrep) && all(design$selfrep))
-          vv<-matrix(0,ncol=NCOL(x),nrow=length(quantiles))
-      else
-          vv<-matrix(NA,ncol=NCOL(x),nrow=length(quantiles))
-      dimnames(vv)<-list(paste("q",round(quantiles,2),sep=""), names(x))
-      attr(rval,"var")<-vv
-      attr(rval,"statistic")<-quantiles
-      if (return.replicates)
-          rval<-list(mean=rval,replicates=NULL)
-      class(rval)<-"svrepstat"
-      return(rval)
-  }
-
-    if (is.null(df))
-        df<-degf(design)
-    if (df==Inf)
-        qcrit<-qnorm
-    else
-        qcrit <-function(...) qt(...,df=df)
-    
-  
-    w<-weights(design,"analysis")
-
-    if (interval=="quantile"){
-      ## interval on quantile scale
-      if (ties=="discrete")
-        computeQuantiles<-function(xx){
-          oo<-order(xx)
-          
-          ws<-weights(design,"sampling")
-          cum.ws<-cumsum(ws[oo])/sum(ws)
-          rval<-approx(cum.ws,xx[oo],method=method,f=f,
-                       yleft=min(xx),yright=max(xx),
-                       xout=quantiles,ties=min)$y
-          
-          cum.w<-apply(w,2,function(wi) cumsum(wi[oo])/sum(wi))
-          
-          qq<-apply(cum.w, 2,function(cum.wi) approx(cum.wi,xx[oo],method=method,f=f,
-                                                     yleft=min(xx),yright=max(xx),
-                                                     xout=quantiles,ties=min)$y)
-          if (length(quantiles)>1)
-            qq<-t(qq)
-          else
-            qq<-as.matrix(qq)
-          ##rval<-colMeans(qq)
-          
-          rval<-list(quantiles=rval,
-                     variances=diag(as.matrix(svrVar(qq,design$scale,design$rscales,mse=design$mse,coef=rval))))
-          if (return.replicates)
-            rval<-c(rval, list(replicates=qq))
-          rval
-        } else { ##ties="rounded"
-          computeQuantiles<-function(xx){
-            ws<-weights(design,"sampling")
-
-            wws<-rowsum(ws,xx,reorder=TRUE)
-            uxx<-sort(unique(xx))
-            
-            cum.wws<-cumsum(wws)/sum(wws)
-            rval<-approx(cum.wws,uxx,method=method,f=f,
-                     yleft=min(xx),yright=max(xx),
-                         xout=quantiles,ties=min)$y
-            
-            cum.w<-apply(rowsum(w,xx,reorder=TRUE),2,function(wi) cumsum(wi)/sum(wi))
-            
-            qq<-apply(cum.w, 2,function(cum.wi) approx(cum.wi,uxx,method=method,f=f,
-                                                       yleft=min(xx),yright=max(xx),
-                                                       xout=quantiles,ties=min)$y)
-            if (length(quantiles)>1)
-              qq<-t(qq)
-            else
-              qq<-as.matrix(qq)
-            ##rval<-colMeans(qq)
-            
-            rval<-list(quantiles=rval,
-                       variances=diag(as.matrix(svrVar(qq,design$scale,design$rscales,mse=design$mse,coef=rval))))
-            if (return.replicates)
-              rval<-c(rval, list(replicates=qq))
-            rval
-          }
-        }
-    } else {
-      ## interval on probability scale, backtransformed.
-      if (ties=="discrete"){
-        computeQuantiles<-function(xx){
-          oo<-order(xx)
-          w<-weights(design,"sampling")
-          cum.w<- cumsum(w[oo])/sum(w)
-          Qf<-approxfun(cum.w,xx[oo],method=method,f=f,
-                        yleft=min(xx),yright=max(xx),
-                        ties=min)
-          
-          point.estimates<-Qf(quantiles)
-          if(length(quantiles)==1)
-            estfun<-as.numeric(xx<point.estimates)
-          else
-            estfun<-0+outer(xx,point.estimates,"<")
-          est<-svymean(estfun,design, return.replicates=return.replicates)
-          if (return.replicates)
-              q.estimates<-matrix(Qf(est$replicates),nrow=NROW(est$replicates))
-          zcrit<-abs(qcrit(min(alpha,1-alpha)/2))
-          ci<-matrix(Qf(c(coef(est)+zcrit*SE(est), coef(est)-zcrit*SE(est))),ncol=2)
-          variances<-((ci[,1]-ci[,2])/2/zcrit)^2
-          rval<-list(quantiles=point.estimates,
-                     variances=variances)
-          if (return.replicates)
-            rval<-c(rval, list(replicates=q.estimates))
-          rval
-        }
-      } else {
-        ## ties=rounded
-        computeQuantiles<-function(xx){
-          w<-weights(design,"sampling")
-          ww<-rowsum(w,xx,reorder=TRUE)
-          uxx<-sort(unique(xx))
-          cum.w<- cumsum(ww)/sum(ww)
-          Qf<-approxfun(cum.w,uxx,method=method,f=f,
-                        yleft=min(xx),yright=max(xx),
-                        ties=min)
-          
-          point.estimates<-Qf(quantiles)
-          if(length(quantiles)==1)
-            estfun<-as.numeric(xx<point.estimates)
-          else
-                estfun<-0+outer(xx,point.estimates,"<")
-          est<-svymean(estfun, design, return.replicates=return.replicates)
-          if (return.replicates)
-              q.estimates<-matrix(Qf(est$replicates),nrow=NROW(est$replicates))
-          zcrit<-abs(qcrit(min(alpha,1-alpha)/2))
-          ci<-matrix(Qf(c(coef(est)+zcrit*SE(est), coef(est)-zcrit*SE(est))),ncol=2)
-          variances<-((ci[,1]-ci[,2])/2/zcrit)^2
-          rval<-list(quantiles=point.estimates,
-                     variances=variances)
-          if (return.replicates)
-            rval<-c(rval, list(replicates=q.estimates))
-          rval
-        }
-        
-      }
-    }
-
-  if (!is.null(dim(x)))
-    results<-apply(x,2,computeQuantiles)
-  else
-    results<-computeQuantiles(x)
-  
-  rval<-matrix(sapply(results,"[[","quantiles"),ncol=NCOL(x),nrow=length(quantiles),
-               dimnames=list(paste("q",round(quantiles,2),sep=""), names(x)))
-  vv<-matrix(sapply(results,"[[","variances"),ncol=NCOL(x),nrow=length(quantiles),
-             dimnames=list(paste("q",round(quantiles,2),sep=""), names(x)))
-  attr(rval,"var")<-vv
-  attr(rval, "statistic")<-"quantiles"
-  if (return.replicates) {
-    reps<-do.call(cbind,lapply(results,"[[","replicates"))
-    attr(reps,"scale")<-design$scale
-    attr(reps,"rscales")<-design$rscales
-    attr(reps,"mse")<-design$mse
-    rval<-list(mean=rval, replicates=reps)
-  }
-  class(rval)<-"svrepstat"
-  rval
-  
-}
-
-
 svrVar<-function(thetas, scale, rscales,na.action=getOption("na.action"),mse=getOption("survey.replicates.mse"),coef){
   thetas<-get(na.action)(thetas)
   naa<-attr(thetas,"na.action")
@@ -1265,7 +1068,9 @@ svycoxph.svyrep.design<-function(formula, design, subset=NULL,rescale=NULL,...,r
     stop("all variables must be in design= argument")
   .survey.prob.weights<-pwts
   full<-with(data,eval(g))
-  
+  if (inherits(full, "coxph.penal"))
+      warning("svycoxph does not support penalised terms")
+ 
   nas<-attr(full$model, "na.action")
   
   betas<-matrix(ncol=length(coef(full)),nrow=ncol(design$repweights))
@@ -1352,7 +1157,10 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL,family=sta
     .Deprecated("svyglm")
   
   subset<-substitute(subset)
-  subset<-eval(subset, design$variables, parent.frame())
+    subset<-eval(subset, design$variables, parent.frame())
+    if (any(is.na(subset)))
+        stop("subset must not contain NA values")
+
   if (!is.null(subset))
     design<-design[subset,]
 
@@ -1462,6 +1270,7 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL,family=sta
     full$replicates<-betas
   }  
   class(full)<-c("svrepglm", "svyglm", class(full))
+    
   full$call<-sys.call(-1)
   if(!("formula" %in% names(full$call))) {
     if (is.null(names(full$call)))
@@ -1501,7 +1310,8 @@ print.summary.svyglm<-function (x, digits = max(3, getOption("digits") - 3),
         }
         printCoefmat(coefs, digits = digits, signif.stars = signif.stars, 
             na.print = "NA", ...)
-    
+    if (x$df.resid<=0)
+        cat("\nZero or negative residual df; p-values not defined\n")
     cat("\n(Dispersion parameter for ", x$family$family, " family taken to be ", 
         format(x$dispersion), ")\n\n",  "Number of Fisher Scoring iterations: ", 
         x$iter, "\n", sep = "")
@@ -2082,7 +1892,7 @@ postStratify.svyrep.design<-function(design, strata, population,
                            match(designlabel, both$label),
                            reorder=TRUE)
     repreweight<-  both$Pop.Freq/replicateFreq
-    design$repweights <- as.matrix(design$repweights)*repreweight[index]
+    design$repweights <- as.matrix(design$repweights)*repreweight[index,]
   } else { 
     replicateFreq<- rowsum(as.matrix(design$repweights)*oldpw,
                            match(designlabel, both$label),

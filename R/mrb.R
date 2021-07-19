@@ -27,11 +27,11 @@ mrbweights<-function(clusters,stratas,fpcs, replicates=50, multicore=getOption("
         n <-length(su)
         nstar<-floor(n/2)
         cumff<-cumffs[thisstratum][1]
+        fpc<- fpcs$sampsize[thisstratum,i][1]/fpcs$popsize[thisstratum,i][1]
         if (nstar==0) {
           wstar<-0
           keep<- rep(FALSE,sum(thisstratum))
         } else {
-          fpc<- fpcs$sampsize[thisstratum,i][1]/fpcs$popsize[thisstratum,i][1]
           lambda<-sqrt(cumff*nstar*(1-fpc)/(n-nstar))
           keep<-clusters[thisstratum,i] %in% sample(su,nstar)
           wstar<-(-lambda+lambda*(n/nstar)*keep)

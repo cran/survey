@@ -2,6 +2,21 @@
 deviance.svycoxph<-function(object,...) 2 * (object$ll[1] - object$ll[2])
 deviance.coxph<-function(object,...) 2 * (object$loglik[1] - object$loglik[2])
 
+explicit1<-function(formula){
+    if (length(formula)==1) 
+        return(formula==1)
+    
+    if (!(formula[[1]]=="+" || formula[[1]]=="*" || formula[[1]]=="/" || formula[[1]]=="^"|| formula[[1]]=="~"))
+        return(FALSE)
+    
+    if (length(formula)==3){
+        (formula[[2]]==1) || explicit1(formula[[2]]) || explicit1(formula[[3]])
+    } else {
+        (formula[[2]]==1) || explicit1(formula[[2]])
+    }
+    
+}
+
 regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","WorkingWald","LRT"), lrt.approximation="saddlepoint"){
 
   method<-match.arg(method)
@@ -11,20 +26,30 @@ regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","Wo
     tt<-lapply(tt,sort)
     sapply(tt,paste,collapse=":")
   }
+  
+  if(inherits(test.terms,"formula")){
+      test_intercept<-explicit1(test.terms)
+      test.terms<-attr(terms(test.terms),"term.labels")
+  } else test_intercept<-FALSE
     
-  
-  if(inherits(test.terms,"formula"))
-    test.terms<-attr(terms(test.terms),"term.labels")
-  
   okbeta<-!is.na(coef(model,na.rm=FALSE)) ## na.rm for svyglm
   tt<-attr(terms(model),"term.labels")
   aa<-attr(model.matrix(model),"assign")[okbeta]
-  if((inherits(model,"coxph")|| inherits(model,"svyloglin") || inherits(model,"svyolr"))  && attr(terms(model),"intercept"))
-    aa<-aa[-1]
+  if((inherits(model,"svyloglin") || inherits(model,"svyolr"))  && attr(terms(model),"intercept")){
+      aa<-aa[-1]
+  }
+    
   index<-which(aa %in% match(canonicalOrder(test.terms),canonicalOrder(tt)))
   if (any(is.na(index)))
     stop("Terms didn't match:",canonicalOrder(test.terms),canonicalOrder(tt))
-  
+
+    if (test_intercept){
+        if (attr(terms(model),"intercept"))
+            index<-unique(c(1,index))
+        else
+            stop("model does not have an intercept")
+    }
+    
   beta<-coef(model)[index]
 
   if (!is.null(null))
@@ -67,12 +92,18 @@ regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","Wo
       V0<-solve(model$Hess)
     } else stop("method='LRT' not supported for this model")
     V0<-V0[index,index]
-    test.formula<-make.formula(test.terms)[[2]]
-    if (!("formula") %in% names(model$call))
+    
+    if (test_intercept){
+        test.formula<-make.formula(c(1,test.terms))[[2]]
+    } else {
+        test.formula<-make.formula(test.terms)[[2]]
+    }
+    
+    if (!("formula" %in% names(model$call)))
       names(model$call)[[2]]<-"formula"
 
     if (method=="LRT"){
-        model0<-eval(bquote(update(model, .~.-(.(test.formula)))))
+        model0<-eval(bquote(update(.(model), .~.-(.(test.formula)))),environment(formula(model)))
         chisq<-deviance(model0)-deviance(model)
     } else {
         chisq<-beta%*%solve(V0)%*%beta
@@ -162,7 +193,7 @@ print.regTermTestWW<-function(x,...){
   invisible(x)
 }
 
-svycontrast<-function(stat, contrasts,...) UseMethod("svycontrast")
+svycontrast<-function(stat, contrasts,add=FALSE,...) UseMethod("svycontrast")
 
 match.names <- function(nms,contrasts){
   l<-length(nms)
@@ -217,34 +248,57 @@ contrast<-function(coef,var,contrasts, influence=NULL){
   rval
 }
 
-svycontrast.svystat<-function(stat, contrasts,...){
-  if (!is.list(contrasts))
-    contrasts<-list(contrast=contrasts)
-  if (is.call(contrasts[[1]])){
-    rval<-nlcon(contrasts,as.list(coef(stat)), vcov(stat), attr(stat,"influence"))
-    class(rval)<-"svrepstat"
-    attr(rval,"statistic")<-"nlcon"
-    return(rval)
-  }
+addQuote<-function(contrasts, original){
+    ll<-as.list(original)
+    names(ll)<-original
+    ll<-lapply(ll, as.name)
+    c(contrasts,ll)
+}
+
+addLin<-function(contrasts, original){
+    id<-diag(length(original))
+    dimnames(id)<-list(original,original)
+    rbind(contrasts,id)
+    }
+
+svycontrast.svystat<-function(stat, contrasts,add=FALSE,...){
+    if (!is.list(contrasts))
+        contrasts<-list(contrast=contrasts)
+    if (is.language(contrasts[[1]])){
+        if(add){
+            contrasts<-addQuote(contrasts,names(coef(stat)))
+        }
+        rval<-nlcon(contrasts,as.list(coef(stat)), vcov(stat), attr(stat,"influence"))
+        class(rval)<-"svrepstat"
+        attr(rval,"statistic")<-"nlcon"
+        return(rval)
+    }
   contrasts<-match.names(names(coef(stat)),contrasts)
-  contrasts<-do.call(rbind,contrasts)
-  coef<-contrast(coef(stat),vcov(stat),contrasts, attr(stat,"influence"))
+    contrasts<-do.call(rbind,contrasts)
+    if (add)
+          contrasts<-addLin(contrasts, names(coef(stat)))
+    coef<-contrast(coef(stat),vcov(stat),contrasts, attr(stat,"influence"))
   class(coef)<-"svystat"
   attr(coef,"statistic")<-"contrast"
   coef
 }
 
-svycontrast.svyolr<-function(stat, contrasts,...){
+svycontrast.svyolr<-function(stat, contrasts,add=FALSE,...){
   if (!is.list(contrasts))
     contrasts<-list(contrast=contrasts)
-  if (is.call(contrasts[[1]])){
-      rval<-nlcon(contrasts,as.list(c(coef(stat),stat$zeta)), vcov(stat))
+  if (is.language(contrasts[[1]])){
+         if(add){
+            contrasts<-addQuote(contrasts,names(coef(stat)))
+         }
+         rval<-nlcon(contrasts,as.list(c(coef(stat),stat$zeta)), vcov(stat))
       class(rval)<-"svystat"
       attr(rval,"statistic")<-"nlcon"
       return(rval)
   }
   contrasts <- match.names(names(coef(stat)), contrasts)
   contrasts<-do.call(rbind,contrasts)
+  if (add)
+          contrasts<-addLin(contrasts, names(coef(stat)))
   coef<-contrast(as.vector(as.matrix(coef(stat))),
                  vcov(stat),contrasts)
   class(coef)<-"svystat"
@@ -253,16 +307,16 @@ svycontrast.svyolr<-function(stat, contrasts,...){
 }
 
 
-svycontrast.svyglm<-svycontrast.svystat
-svycontrast.svycoxph<-svycontrast.svystat
-svycontrast.svyby<-svycontrast.svystat
-svycontrast.default<-svycontrast.svystat
 
-svycontrast.svrepstat<-function(stat, contrasts,...){
+
+svycontrast.svrepstat<-function(stat, contrasts,add=FALSE,...){
   if (!is.list(contrasts))
     contrasts<-list(contrast=contrasts)
-  if (is.call(contrasts[[1]])){
-    if (is.list(stat)){ ##replicates
+  if (is.language(contrasts[[1]])){
+      if(add){
+            contrasts<-addQuote(contrasts,names(coef(stat)))
+      }
+      if (is.list(stat) && !is.null(stat$replicates)){ ##replicates
         rval<-list(nlcon=nlcon(contrasts,as.list(coef(stat)),varmat=NULL))
         reps<-as.matrix(stat$replicates)
         colnames(reps)<-names(coef(stat))
@@ -279,18 +333,21 @@ svycontrast.svrepstat<-function(stat, contrasts,...){
     }
     class(rval)<-"svrepstat"
     return(rval)
+  } else {
+      contrasts<-match.names(names(coef(stat)), contrasts)
+      contrasts<-do.call(rbind,contrasts)
+      if (add)
+          contrasts<-addLin(contrasts, names(coef(stat)))
+     
+      coef<-contrast(coef(stat), vcov(stat), contrasts)
+      if (is.list(stat)){
+          coef<-list(contrast=coef,
+                     replicates=crossprod(stat$replicates, contrasts))
+      }
+      class(coef)<-"svrepstat"
+      attr(coef,"statistic")<-"contrast"
+      coef
   }
-  contrasts<-match.names(names(coef(stat)), contrasts)
-  contrasts<-do.call(rbind,contrasts)
-  
-  coef<-contrast(coef(stat), vcov(stat), contrasts)
-  if (is.list(stat)){
-    coef<-list(contrast=coef,
-               replicates=crossprod(stat$replicates, contrasts))
-  }
-  class(coef)<-"svrepstat"
-  attr(coef,"statistic")<-"contrast"
-  coef
 }
 
 
@@ -314,4 +371,27 @@ nlcon<-function(exprlist, datalist, varmat, influence=NULL){
         attr(values,"influence")<-influence%*%t(jac)
     }
     values
+}
+
+
+
+svycontrast.svyglm<-svycontrast.svystat
+svycontrast.svycoxph<-svycontrast.svystat
+svycontrast.svrepglm<-svycontrast.svrepstat
+svycontrast.svrepcoxph<-svycontrast.svrepstat
+
+
+svycontrast.svyby<-svycontrast.svystat
+svycontrast.default<-svycontrast.svystat
+
+
+svycontrast.svyby<-function(stat, contrasts,...){
+
+    if(!is.null(r<-attr(stat, "replicates"))){
+        repstat<-list(stat=coef(stat), replicates=r)
+        attr(repstat,"var")<-vcov(stat)
+        class(repstat)<-c("svrepstat",class(stat))
+        svycontrast(repstat, contrasts,...)
+    } else NextMethod() ## default
+   
 }

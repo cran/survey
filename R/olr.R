@@ -77,15 +77,16 @@ svyolr.survey.design2<-function (formula, design,  start, ...,  na.action=na.omi
             -sum(wt * log(pr))
         else Inf
     }
-    gmini <- function(beta) {
-        jacobian <- function(theta) {
-            k <- length(theta)
-            etheta <- exp(theta)
-            mat <- matrix(0, k, k)
-            mat[, 1] <- rep(1, k)
-            for (i in 2:k) mat[i:k, i] <- etheta[i]
-            mat
-        }
+    jacobian <- function(theta) {
+        k <- length(theta)
+        etheta <- exp(theta)
+        mat <- matrix(0, k, k)
+        mat[, 1] <- rep(1, k)
+        for (i in 2:k) mat[i:k, i] <- etheta[i]
+        mat
+    }
+    gmini <- function(beta,logdiff=FALSE) {
+ 
         theta <- beta[pc + 1:q]
         gamm <- c(-100, cumsum(c(theta[1], exp(theta[-1]))), 
             100)
@@ -100,13 +101,14 @@ svyolr.survey.design2<-function (formula, design,  start, ...,  na.action=na.omi
         else numeric(0)
         xx <- .polrY1 * p1 - .polrY2 * p2
         g2 <- - xx * (wt/pr)
-        g2 <- g2 %*% jacobian(theta)
+        if (logdiff)
+            g2 <- g2 %*% jacobian(theta)
         if (all(pr > 0)) 
             cbind(g1, g2)
         else NA+cbind(g1,g2)
     }
     gmin<-function(beta){
-      colSums(gmini(beta))
+      colSums(gmini(beta,logdiff=TRUE))
     }
     m <- match.call(expand.dots = FALSE)
     method <- match.arg(method)
@@ -207,14 +209,26 @@ svyolr.survey.design2<-function (formula, design,  start, ...,  na.action=na.omi
         niter = niter)
 
     dn <- c(names(beta), names(zeta))
-    H <- res$hessian
-    dimnames(H) <- list(dn, dn)
-    fit$Hessian <- H
+
+    ## MASS::polr reparametrises the intercepts other than the first
+    ## using logs of differences (to ensure the ordering). Need to undo it.
+    vc <- MASS::ginv(res$hessian)
+    pc <- length(beta)
+    gamma <- fit$zeta
+    z.ind <- pc + seq_along(gamma)
+    theta <- c(gamma[1L], log(diff(gamma)))
+    J <- jacobian(theta)
+    A <- diag(pc + length(gamma))
+    A[z.ind, z.ind] <- J
+    Vm <- A %*% vc %*% t(A)
+    dimnames(Vm) <- list(dn, dn)
+    fit$Hessian<-H <- solve(Vm)
+    ##
 
     fit$call<-sys.call()
     fit$call[[1]]<-as.name(.Generic)
     
-    inffun<- gmini(res$par)%*%solve(H)
+    inffun<- gmini(res$par, logdiff=FALSE)%*%solve(H)
     fit$var<-svyrecvar(inffun, design$cluster, 
                      design$strata, design$fpc,
                      postStrata = design$postStrata)
@@ -270,16 +284,8 @@ summary.svyolr<-function (object, digits = max(3, .Options$digits - 3), correlat
     z.ind <- (pc + 1):(pc + q)
     gamma <- object$zeta
     theta <- c(gamma[1], log(diff(gamma)))
-    jacobian <- function(theta) {
-        k <- length(theta)
-        etheta <- exp(theta)
-        mat <- matrix(0, k, k)
-        mat[, 1] <- rep(1, k)
-        for (i in 2:k) mat[i:k, i] <- etheta[i]
-        mat
-    }
-    J <- jacobian(theta)
-    vc[z.ind, z.ind] <- J %*% vc[z.ind, z.ind] %*% t(J)
+
+    ## used to have jacobian here but it's now in svyolr
     coef[, 2] <- sd <- sqrt(diag(vc))
     coef[, 3] <- coef[, 1]/coef[, 2]
     object$coefficients <- coef

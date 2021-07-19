@@ -2,6 +2,9 @@
 \alias{anova.svyglm}
 \alias{AIC.svyglm}
 \alias{BIC.svyglm}
+\alias{extractAIC.svyglm}
+\alias{extractAIC.svrepglm}
+
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Model comparison for glms.
@@ -12,12 +15,14 @@ A method for the \code{\link{anova}} function, for use on \code{\link{svyglm}} o
 \usage{
 \method{anova}{svyglm}(object, object2 = NULL, test = c("F", "Chisq"), 
  method = c("LRT", "Wald"), tolerance = 1e-05, ..., force = FALSE)
-\method{AIC}{svyglm}(object,...,k=2)
+\method{AIC}{svyglm}(object,...,k=2, null_has_intercept=TRUE)
 \method{BIC}{svyglm}(object,...,maximal)
+\method{extractAIC}{svyglm}(fit,scale,k=2,..., null_has_intercept=TRUE)
+\method{extractAIC}{svrepglm}(fit,scale,k=2,..., null_has_intercept=TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{object}{
+  \item{object,fit}{
   A \code{\link{svyglm}} object.
 }
   \item{object2}{
@@ -35,6 +40,9 @@ A method for the \code{\link{anova}} function, for use on \code{\link{svyglm}} o
   \item{\dots}{
   For \code{AIC} and \code{BIC}, optionally more \code{svyglm} objects
 }
+\item{scale}{not used}
+\item{null_has_intercept}{Does the null model for AIC have an intercept or
+  not? }
   \item{force}{
    Force the tests to be done by explicit projection even if the models
    are symbolically nested (eg, for debugging)
@@ -55,6 +63,8 @@ on regression coefficients from the maximal model implied by each
 submodel (ie, the models that say some coefficients in the maximal model
 are zero) (Lumley and Scott, 2015). It corresponds to comparing the models with a Wald test and replacing the sample size in the penalty by an effective sample size.
 For computational reasons, the models must not only be nested, the names of the coefficients must match.
+
+\code{extractAIC} for a model with a Gaussian link uses the actual AIC based on maximum likelihood estimation of the variance parameter as well as the regression parameters.
 
 }
 \value{

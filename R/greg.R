@@ -3,6 +3,16 @@ regcalibrate<-function(design, ...) UseMethod("regcalibrate")
 
 is.calibrated<-function(design){ !is.null(design$postStrata)}
 
+regcalibrate.pps<-function(design,formula, population,
+                           stage=NULL,  lambda=NULL, aggregate.stage=NULL,...){
+
+    if (!is.null(stage) && !(stage==0)) stop("'stage' not supported for pps designs")
+    if (!is.null(aggregate.stage)) stop("'aggregate.stage' not supported for pps designs")
+
+    regcalibrate.survey.design2(design,formula, population,
+                           stage=NULL,  lambda=NULL, aggregate.stage=NULL,...)
+
+    }
 ##
 ## unbounded linear calibration using qr decomposition: less sensitive to
 ## collinearity than Deville & Sarndal's Newton algorithm.

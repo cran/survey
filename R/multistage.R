@@ -379,7 +379,7 @@ multistage<-function(x, clusters,  stratas, nPSUs, fpcs,
 ## fpc not given are zero: full sampling.
 as.fpc<-function(df,strata,ids,pps=FALSE){
 
-  count<-function(x) length(unique(x))
+  count<-function(x) sum(!duplicated(x))
   
   sampsize<-matrix(ncol=ncol(ids),nrow=nrow(ids))
   for(i in 1:ncol(ids))

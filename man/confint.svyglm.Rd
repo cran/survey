@@ -12,7 +12,7 @@ model deviance is lower than the threshold for the Rao-Scott test at the
 specified level.
 }
 \usage{
-\method{confint}{svyglm}(object, parm, level = 0.95, method = c("Wald", "likelihood"), ddf = Inf, ...)
+\method{confint}{svyglm}(object, parm, level = 0.95, method = c("Wald", "likelihood"), ddf = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

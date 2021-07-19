@@ -7,6 +7,8 @@
 ## Dcheck simplifies to (n/N-1)/(n-1) or -(1-p)/(n-1)
 ##
 Dcheck_strat<-function(strata, prob){
+    if (is.character(strata))
+        strata<-as.factor(strata)
     strata<-as.numeric(strata) ## for ave()
     n<-length(strata)
     rval<-matrix(0, n,n)
@@ -37,6 +39,8 @@ Dcheck_multi<-function(id,strata,probs){
 ## (no: need to know strata before subsetting to get sampsize.
 
 Dcheck_subset<-function(strata, prob,sampsize, withreplacement){
+    if (is.character(strata))
+        strata<-as.factor(strata)
     strata<-as.numeric(strata) ## for ave()
     N<-length(strata)
     n<-NROW(strata)
@@ -56,7 +60,9 @@ Dcheck_subset<-function(strata, prob,sampsize, withreplacement){
 
 
 oldDcheck_subset<-function(strata, subset, prob, withreplacement){
-    strata<-as.numeric(strata) ## for ave()
+     if (is.character(strata))
+        strata<-as.factor(strata)
+   strata<-as.numeric(strata) ## for ave()
     N<-length(strata)
     n<-sum(subset)
     rval<-matrix(0, n,n)

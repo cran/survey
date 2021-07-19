@@ -87,7 +87,7 @@ and used by the SUDAAN software package. It is a Wald test based on the
 differences between the observed cells counts and those expected under
 independence. The adjustment given by \code{statistic="adjWald"} reduces
 the statistic when the number of PSUs is small compared to the number of
-degrees of freedom of the test. Thomas and Rao (1990) compare these
+degrees of freedom of the test. Thomas and Rao (1987) compare these
 tests and find the adjustment benefical.
 
 \code{statistic="lincom"} replaces the numerator of the Rao-Scott F with
@@ -134,7 +134,7 @@ of Statistics 12:46-60.
 Sribney WM (1998) "Two-way contingency tables for survey or clustered
 data" Stata Technical Bulletin 45:33-49.
 
-Thomas, DR, Rao, JNK (1990) "Small-sample comparison of level and power
+Thomas, DR, Rao, JNK (1987) "Small-sample comparison of level and power
 for simple goodness-of-fit statistics under cluster sampling" JASA 82:630-636
 
 }

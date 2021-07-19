@@ -19,26 +19,27 @@ print.svylogrank<-function(x,...){
 	x<-model.matrix(coxmodel)
 
 	detail<-coxph.detail(coxmodel,riskmat=TRUE)	
-	Y<-t(detail$riskmat)
 	dLambda<-detail$hazard
 	E<-as.matrix(detail$means)
 	N<-coxmodel$y[,"status"]
 
 	times<-coxmodel$y[,"time"]
+        Y<-t(outer(times, detail$time,">=")) # was t(detail$riskmat) but that doesn't do what is documented
+
 	U<-matrix(nrow=nrow(x),ncol=ncol(x))
 	index<-match(times[N==1],detail$time)
 	ZmEdN<- matrix(0,nrow=nrow(x),ncol=ncol(x))
 	ZmEdN[N==1,]<-x[N==1,,drop=FALSE]-E[index,]
 	for(p in 1:ncol(x)){
-            ZmE <- -outer(E[,p], x[,p], "-")  ##times are rows, people are columns
-            U[,p]<- ZmEdN[,p]*w(times)- colSums(w(detail$time)*ZmE*dLambda*Y)
+            ZmE <- outer(x[,p],E[,p],  "-")  ##people are rows, times are columns
+            U[,p]<- ZmEdN[,p]*w(times)- rowSums(ZmE *t(w(detail$time)*dLambda*Y))
 	}
 	means <- svytotal(U,design)
 	zstat<-coef(means)/SE(means)
 	chisqstat<-coef(means)%*%solve(vcov(means),coef(means))
 
 	rval<-list(cbind(score=coef(means),se=SE(means),z=coef(means)/SE(means),p= 2*pnorm(-abs(coef(means)/SE(means)))),
-		 c(chisq=chisqstat,p=pchisq(chisqstat,df=ncol(x),lower.tail=FALSE)))
+		 c(Chisq=chisqstat,p=pchisq(chisqstat,df=ncol(x),lower.tail=FALSE)))
         class(rval)<-"svylogrank"
 	rval
 	}
@@ -77,7 +78,7 @@ print.svylogrank<-function(x,...){
 	chisqstat<-coef(means)%*%solve(vcov(means),coef(means))
 
 	rval<-list(data.frame(score=coef(means),se=SE(means),z=coef(means)/SE(means),p= 2*pnorm(-abs(coef(means)/SE(means)))),
-		 c(chisq=chisqstat,p=pchisq(chisqstat,df=ncol(x),lower.tail=FALSE)))
+		 c(Chisq=chisqstat,p=pchisq(chisqstat,df=ncol(x),lower.tail=FALSE)))
         class(rval)<-"svylogrank"
         rval
 	

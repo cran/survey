@@ -1,11 +1,13 @@
 
-R version 3.6.0 (2019-04-26) -- "Planting of a Tree"
-Copyright (C) 2019 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin15.6.0 (64-bit)
+R version 4.0.2 (2020-06-22) -- "Taking Off Again"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin17.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
 Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
 
 R is a collaborative project with many contributors.
 Type 'contributors()' for more information and
@@ -20,9 +22,9 @@ Loading required package: grid
 Loading required package: Matrix
 Loading required package: survival
 
-Attaching package: 'survey'
+Attaching package: ‘survey’
 
-The following object is masked from 'package:graphics':
+The following object is masked from ‘package:graphics’:
 
     dotchart
 
@@ -36,11 +38,11 @@ In svydesign.default(id = ~1, data = df) :
   No weights or probabilities supplied, assuming equal probability
 > rdf<-as.svrepdesign(ddf)
 > 
-> SE(svyquantile(~x,ddf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE))
+> SE(oldsvyquantile(~x,ddf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE))
       0.01        0.1        0.5        0.9       0.99 
 0.01543792 0.01264453 0.03386225 0.16131948 2.10605799 
 > 
-> SE(svyquantile(~x,rdf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE))
+> SE(oldsvyquantile(~x,rdf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE))
                x
 q0.01 0.01554946
 q0.1  0.01425828
@@ -48,11 +50,11 @@ q0.5  0.03428012
 q0.9  0.16457488
 q0.99 1.88672412
 > 
-> SE(svyquantile(~x,ddf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE,df=Inf))
+> SE(oldsvyquantile(~x,ddf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE,df=Inf))
       0.01        0.1        0.5        0.9       0.99 
 0.01545209 0.01265608 0.03388011 0.16145776 2.10061576 
 > 
-> SE(svyquantile(~x,rdf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE,df=Inf))
+> SE(oldsvyquantile(~x,rdf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE,df=Inf))
                x
 q0.01 0.01556240
 q0.1  0.01420086
@@ -61,7 +63,7 @@ q0.9  0.16461019
 q0.99 1.88818131
 > 
 > 
-> svyquantile(~y,ddf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE,ties="rounded",interval.type="betaWald")
+> oldsvyquantile(~y,ddf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE,ties="rounded",interval.type="betaWald")
 $quantiles
         0.01       0.1       0.5  0.9 0.99
 y 0.02352941 0.2230769 0.9340909 3.55  9.4
@@ -75,7 +77,7 @@ upper) 0.03287947 0.2467045 1.0059815 3.862241 14.978632
 
 
 > 
-> svyquantile(~y,rdf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE)
+> oldsvyquantile(~y,rdf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE)
 Statistic:
         y
 q0.01 0.1
@@ -91,7 +93,7 @@ q0.5  0.02547977
 q0.9  0.15287859
 q0.99 1.88302540
 > 
-> svyquantile(~y,ddf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE,ties="rounded",interval.type="betaWald",df=Inf)
+> oldsvyquantile(~y,ddf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE,ties="rounded",interval.type="betaWald",df=Inf)
 $quantiles
         0.01       0.1       0.5  0.9 0.99
 y 0.02352941 0.2230769 0.9340909 3.55  9.4
@@ -105,7 +107,7 @@ upper) 0.03287947 0.2467045 1.0059815 3.862241 14.978632
 
 
 > 
-> svyquantile(~y,rdf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE, df=Inf)
+> oldsvyquantile(~y,rdf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE, df=Inf)
 Statistic:
         y
 q0.01 0.1
@@ -130,11 +132,11 @@ Warning message:
 In svydesign.default(id = ~1, data = df) :
   No weights or probabilities supplied, assuming equal probability
 > rdf<-as.svrepdesign(ddf)
-> SE(svyquantile(~x,ddf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE))
+> SE(oldsvyquantile(~x,ddf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE))
       0.01        0.1        0.5        0.9       0.99 
 0.03576771 0.07329496 0.30149917 2.03440784 1.88468597 
 > 
-> SE(svyquantile(~x,rdf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE))
+> SE(oldsvyquantile(~x,rdf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE))
                x
 q0.01 0.00000000
 q0.1  0.04598541
@@ -142,11 +144,11 @@ q0.5  0.25943731
 q0.9  2.12343073
 q0.99 1.91998924
 > 
-> SE(svyquantile(~x,ddf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE,df=Inf))
+> SE(oldsvyquantile(~x,ddf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE,df=Inf))
       0.01        0.1        0.5        0.9       0.99 
 0.03637398 0.07470310 0.29938115 2.16381289 2.00708994 
 > 
-> SE(svyquantile(~x,rdf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE,df=Inf))
+> SE(oldsvyquantile(~x,rdf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE,df=Inf))
                x
 q0.01 0.00000000
 q0.1  0.04732818
@@ -155,7 +157,7 @@ q0.9  2.25211815
 q0.99 2.04043154
 > 
 > 
-> svyquantile(~y,ddf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE,ties="rounded",interval.type="betaWald")
+> oldsvyquantile(~y,ddf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE,ties="rounded",interval.type="betaWald")
 $quantiles
   0.01  0.1  0.5 0.9 0.99
 y  0.1 0.15 0.75 2.4 8.68
@@ -169,7 +171,7 @@ upper) 1.132533 0.3464541 1.6303784 8.473337 10.2000000
 
 
 > 
-> svyquantile(~y,rdf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE)
+> oldsvyquantile(~y,rdf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE)
 Statistic:
          y
 q0.01 0.10
@@ -185,7 +187,7 @@ q0.5  0.26542051
 q0.9  2.10908603
 q0.99 1.91777710
 > 
-> svyquantile(~y,ddf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE,ties="rounded",interval.type="betaWald",df=Inf)
+> oldsvyquantile(~y,ddf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE,ties="rounded",interval.type="betaWald",df=Inf)
 $quantiles
   0.01  0.1  0.5 0.9 0.99
 y  0.1 0.15 0.75 2.4 8.68
@@ -199,7 +201,7 @@ upper) 1.132533 0.3464541 1.6303784 8.473337 10.2000000
 
 
 > 
-> svyquantile(~y,rdf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE, df=Inf)
+> oldsvyquantile(~y,rdf, c(0.01,0.1,0.5,0.9,0.99),ci=TRUE, df=Inf)
 Statistic:
          y
 q0.01 0.10
@@ -217,4 +219,4 @@ q0.99 2.03881114
 > 
 > proc.time()
    user  system elapsed 
-  2.309   0.215   2.550 
+  1.791   0.148   2.936 

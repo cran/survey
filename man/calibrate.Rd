@@ -183,6 +183,10 @@ cal_names(formula,design,...)
 }
 
 \references{
+Breslow NE, Lumley T, Ballantyne CM, Chambless LE, Kulich M. Using the
+whole cohort in the analysis of case-cohort data. Am J Epidemiol.
+2009;169(11):1398-1405. doi:10.1093/aje/kwp055
+
 Deville J-C, Sarndal C-E, Sautory O (1993) Generalized Raking
 Procedures in Survey Sampling. JASA 88:1013-1020
 

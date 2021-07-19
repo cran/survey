@@ -121,8 +121,8 @@ svyboxplot.default<-function(formula, design,  all.outliers=FALSE,col=NULL,names
             z$names<-as.character(qs[,1])
         }
     } else {
-        qs<-svyquantile(outcome,design,ci=FALSE,
-                        quantiles=c(0,0.25,0.5,0.75,1),na.rm=TRUE)
+        qs<-coef(svyquantile(outcome,design,ci=FALSE,
+                        quantiles=c(0,0.25,0.5,0.75,1),na.rm=TRUE))
         iqr<-qs[4]-qs[2]
         z<-list(stats=matrix(c(max(qs[1],qs[2]-1.5*iqr),
                 qs[2:4],min(qs[5],qs[4]+1.5*iqr))),

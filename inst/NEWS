@@ -1,3 +1,101 @@
+4.1-1	CRAN
+
+4.1	svyquantile() has been COMPLETELY REWRITTEN. The old version is available
+	as oldsvyquantile() (for David Eduardo Jorquera Petersen)
+
+	svycontrast()'s improvements for statistics with replicates are now also there with
+	svyby(), for domain comparisons (Robert Baskin)
+
+	svyttest() now gives an error message if the binary group variable isn't binary
+	(for StackOverflow 60930323)
+
+	confint.svyglm Wald-type intervals now correctly label the columns (eg 2.5%, 97.5%)
+	(for Molly Petersen)
+
+	svyolr() using linearisation had the wrong standard errors for intercepts
+	other than the first, if extracted using vcov (it was correct in summary() output)
+
+	svyglm() gave deffs that were too large by a factor of nrow(design). (Adrianne Bradford)
+
+	svycoxph() now warns if you try to use frailty or other penalised terms, because they
+	just come from calling coxph and I have no reason to believe they work correctly
+	in complex samples (for Claudia Rivera)
+
+	coef.svyglm() now has a complete= argument to match coef.default(). (for Thomas Leeper)
+
+	summary.svyglm() now gives NA p-values and a warning, rather than Inf standard errors,
+	when the residual df are zero or negative (for Dan Simpson and Lauren Kennedy)
+
+	In the multigroup case, svyranktest() now documents which elements of the 'htest'
+	object have which parts of the result, because it's a bit weird (for Justin Allen)
+
+	svycontrast() gets a new argument add=TRUE to keep the old coefficients as well
+
+	twophase() can now take strata= arguments that are character, not just factor
+	or numeric. (for Pam Shaw)
+
+	add reference to Chen & Lumley on tail probabilities for quadratic forms.
+
+	add reference to Breslow et al for calibrate()
+
+	add svyqqplot and svyqqmath for quantile-quantile plots
+
+	SE.svyby would grab confidence interval limits instead of SEs if vartype=c("ci","se").
+
+	svylogrank(method="small") was wrong (though method="score" and method="large" are ok),
+	because of problems in obtaining the at-risk matrix from coxph.detail. (for Zhiwen Yao)
+
+	added as.svrepdesign.svyimputationList and withReplicates.svyimputationList
+	(for Ángel Rodríguez Laso)
+
+	logLik.svyglm used to return the deviance and now divides it by -2
+
+	svybys() to make multiple tables by separate variables rather than a joint table
+	(for Hannah Evans)
+
+	added predictat= option to svypredmeans for Steven Johnston.
+
+	Fixed bug in postStratify.svyrep.design, was reweighting all reps the same (Steven Johnston)
+
+	Fix date for Thomas & Rao (1987) (Neil Diamond)
+
+	Add svygofchisq() for one-sample chisquared goodness of fit (for Natalie Gallagher)
+
+	confint.svyglm(method="Wald") now uses t distribution with design df by default.
+	(for Ehsan Karim)
+
+	confint.svyglm() checks for zero/negative degrees of freedom
+
+
+	confint.svyglm() checks for zero/negative degrees of freedom
+
+	mrb bootstrap now doesn't throw an error when there's a single PSU in a stratum
+	(Steve White)
+
+	oldsvyquantile() bug with producing replicate-weight confidence intervals for
+	multiple quantiles (Ben Schneider)
+
+	regTermTest(,method="LRT") didn't work if the survey design object and model were
+	defined in a function (for Keiran Shao)
+
+	svyglm() has clearer error message when the subset= argument contains NAs (for Pam Shaw)
+	and when the weights contain NAs (for Paige Johnson)
+
+	regTermTest was dropping the first term for coxph() models (Adam Elder)
+
+	svydesign() is much faster for very large datasets with character ids or strata.
+
+	svyglm() now works with na.action=na.exclude (for Terry Therneau)
+
+	extractAIC.svylm does the design-based AIC for the two-parameter Gaussian model, so
+	estimating the variance parameter as well as the regression parameters.
+	(for Benmei Liu and Barry Graubard)
+
+	svydesign(, pps=poisson_sampling()) for Poisson sampling, and ppscov() for
+	specifying PPS design with weighted or unweighted covariance of sampling indicators
+	(for Claudia Rivera Rodriguez)
+
+
 4.0	Some (and eventually nearly all) functions now return influence functions when
 	called with a survey.design2 object and the influence=TRUE option.  These allow
 	svyby() to estimate covariances between domains, which could previously only be

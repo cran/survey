@@ -34,7 +34,7 @@ Desired population totals or proportions for the levels of combinations of varia
 A new survey design object of the same type as the input.
 }
 \references{
-National Center for Health Statistics \url{http://www.cdc.gov/nchs/tutorials/NHANES/NHANESAnalyses/agestandardization/age_standardization_intro.htm}}
+National Center for Health Statistics \verb{https://www.cdc.gov/nchs/tutorials/NHANES/NHANESAnalyses/agestandardization/age_standardization_intro.htm}}
 \note{
 The standard error estimates do not exactly match the NCHS estimates
 }

@@ -51,9 +51,10 @@ If  the \code{CompQuadForm} package is not present, a warning is given
   
   \code{"saddlepoint"} uses Kuonen's saddlepoint approximation. This
   is moderately accurate even very far out in the upper tail or with some
-  \code{a=0} and does not require any additional packages. It is
-  implemented in pure R and so is slower than the \code{"integration"}
-  method. 
+  \code{a=0} and does not require any additional packages. The relative error
+  in the right tail is uniformly bounded for all \code{x} and decreases as p
+  increases. This method is implemented in pure R and so is slower than
+  the \code{"integration"}  method. 
 
   The distribution in \code{pFsum} is standardised so that a likelihood
   ratio test can use the same \code{x} value as in \code{pchisqsum}.
@@ -64,6 +65,10 @@ If  the \code{CompQuadForm} package is not present, a warning is given
   }
 
 \references{
+Chen, T., & Lumley T. (2019). Numerical evaluation of methods approximating
+the distribution of a large quadratic form in normal variables.
+Computational Statistics and Data Analysis, 139, 75-81.
+
 Davies RB (1973). "Numerical inversion of a characteristic function"
 Biometrika 60:415-7
 

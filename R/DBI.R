@@ -77,8 +77,10 @@ svyquantile.DBIsvydesign<-function(x, design,quantiles,...){
   design$variables<-getvars(x, design$db$connection, design$db$tablename,updates=design$updates, subset=design$subset)
   NextMethod("svyquantile",design)
 }
-
-
+oldsvyquantile.DBIsvydesign<-function(x, design,quantiles,...){
+  design$variables<-getvars(x, design$db$connection, design$db$tablename,updates=design$updates, subset=design$subset)
+  NextMethod("svyquantile",design)
+}
 dropFactor<-function(mf, w){
   if(!any(w==0)) return(mf)
   dropped<-w==0

@@ -18,7 +18,7 @@ The \code{hospital} data frame has 15 rows and 5 columns.
   }
 }
 \source{
-\url{http://www.ats.ucla.edu/stat/books/sop/hospsamp.dta}
+Previously at \verb{http://www.ats.ucla.edu/stat/books/sop/hospsamp.dta}
 }
 \references{
 Levy and Lemeshow. "Sampling of Populations" (3rd edition). Wiley.

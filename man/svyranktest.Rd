@@ -38,6 +38,8 @@ The tests reduce to the usual Normal approximations to the usual rank tests unde
 
 \value{
 Object of class \code{htest}
+
+Note that with more than two groups the \code{statistic} element of the return value holds the numerator degrees of freedom and the \code{parameter} element holds the test statistic. 
 }
 \references{
 Lumley, T., & Scott, A. J. (2013). Two-sample rank tests under complex sampling. BIOMETRIKA, 100 (4), 831-842. 
@@ -59,7 +61,7 @@ svyranktest(ell~comp.imp, dclus1, test="median")
 svyranktest(ell~stype, dclus1)
 svyranktest(ell~stype, dclus1, test="median")
 
-
+str(svyranktest(ell~stype, dclus1))
 
 ## upper quartile
 svyranktest(ell~comp.imp, dclus1, test=function(r,N) as.numeric(r>0.75*N))

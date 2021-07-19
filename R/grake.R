@@ -32,6 +32,18 @@ print.calfun<-function(x,...) cat("calibration metric: ",x$name,"\n")
 
 calibrate<-function(design, ...) UseMethod("calibrate")
 
+calibrate.pps<-function(design, formula, population,
+                                    aggregate.stage=NULL, stage=0,...){
+
+    if (!is.null(stage) && !(stage==0)) stop("'stage'(>0) not supported for pps designs")
+    if (!is.null(aggregate.stage)) stop("'aggregate.stage' not supported for pps designs")
+
+    calibrate.survey.design2(design, formula, population,
+                                    aggregate.stage=NULL, stage=0,,...)
+
+}
+
+
 calibrate.survey.design2<-function(design, formula, population,
                                     aggregate.stage=NULL, stage=0, variance=NULL,
                                     bounds=c(-Inf,Inf), calfun=c("linear","raking","logit"),

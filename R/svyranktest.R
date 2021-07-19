@@ -4,7 +4,8 @@ svyranktest<-function(formula,design,test=c('wilcoxon','vanderWaerden','median',
         UseMethod("svyranktest", design)
 }
 
-svyranktest.survey.design<-svyranktest.svyrep.design<-function(formula, design, test=c('wilcoxon','vanderWaerden','median',"KruskalWallis"),...)
+svyranktest.survey.design<-svyranktest.svyrep.design<-function(formula, design,
+                                                               test=c('wilcoxon','vanderWaerden','median',"KruskalWallis"),...)
 {
   mf<-model.frame(formula,model.frame(design),na.action=na.omit)
   if (!is.null(naa<-attr(mf,"na.action"))){

@@ -731,198 +731,6 @@ print.svyvar<-function (x,  covariance=FALSE, ...)
 
 as.matrix.svyvar<-function(x,...) unclass(x)
 
-svyquantile<-function(x,design,quantiles,...) UseMethod("svyquantile", design)
-
-svyquantile.survey.design<-function(x,design,quantiles,alpha=0.05,
-                                    ci=FALSE, method="linear",f=1,
-                                    interval.type=c("Wald","score","betaWald"),
-                                    na.rm=FALSE,se=ci, ties=c("discrete","rounded"), df=NULL,...){
-    if (inherits(x,"formula"))
-      x<-model.frame(x ,model.frame(design), na.action=na.pass)
-    else if(typeof(x) %in% c("expression","symbol"))
-      x<-eval(x, model.frame(design,na.action=na.pass))
-    
-    if (na.rm){
-        nas<-rowSums(is.na(x))
-        design<-design[nas==0,]
-        if (length(nas)>length(design$prob))
-          x<-x[nas==0,,drop=FALSE]
-        else
-          x[nas>0,]<-0
-      }
-   
-
-    w<-weights(design)
-
-    if (is.null(df)){
-      qcrit<-function(p, lower.tail=TRUE) qt(p, df=degf(design), lower.tail=lower.tail)
-    } else if(df==Inf){
-      qcrit <- function(p,lower.tail=TRUE) qnorm(p,lower.tail=lower.tail)
-    } else {
-      qcrit <- function(p,lower.tail=TRUE) qt(p,df=df,lower.tail=lower.tail)
-    }
-
-    
-    computeQuantiles<-function(xx,p=quantiles){
-      if (any(is.na(x))) return(NA*p)
-      oo<-order(xx)
-      cum.w<-cumsum(w[oo])/sum(w)
-      cdf<-approxfun(cum.w,xx[oo],method=method,f=f,
-                     yleft=min(xx),yright=max(xx),ties=min) 
-      cdf(p)
-    }
-    
-    computeQuantilesRounded<-function(xx,p=quantiles){
-      if (any(is.na(xx))) return(NA*p)
-      ww<-rowsum(w,xx,reorder=TRUE)
-      xx<-sort(unique(xx))
-      cum.w <- cumsum(ww)/sum(ww)
-      cdf <- approxfun(cum.w, xx, method = method, f = f, 
-                       yleft = min(xx), yright = max(xx),ties=min)
-      cdf(p)
-    }
-      
-    
-    
-    computeScoreCI<-function(xx,p){
-      if (any(is.na(xx))) return(c(NA,NA))
-   
-      U<-function(theta){ ((xx>theta)-(1-p))}
-        
-      scoretest<-function(theta,qlimit){
-        umean<-svymean(U(theta),design)
-        umean/sqrt(attr(umean,"var"))-qlimit
-      }
-      
-      iqr<-IQR(xx)
-      lower<-min(xx)+iqr/100
-      upper<-max(xx)-iqr/100
-      tol<-1/(100*sqrt(nrow(design)))
-      c(uniroot(scoretest,interval=c(lower,upper),
-                qlimit=qcrit(alpha/2,lower.tail=FALSE),tol=tol)$root,
-        uniroot(scoretest,interval=c(lower,upper),
-                qlimit=qcrit(alpha/2,lower.tail=TRUE),tol=tol)$root)
-    }
-    
-    computePCI<-function(se,alpha,p){
-      if (interval.type=="Wald"){
-        p.up<-p+qcrit(alpha/2,lower.tail=FALSE)*se
-        p.low<-p+qcrit(alpha/2,lower.tail=TRUE)*se
-        c(p.low,p.up)
-      } else if (interval.type=="betaWald"){
-        n.eff <- (p*(1-p))/(se^2)
-        n.eff <- n.eff * ( qt(alpha/2, nrow(design)-1)/qt(alpha/2, degf(design)) )^2
-        p.up<-qbeta(1-alpha/2, n.eff*p+1, n.eff*(1-p))
-        p.low<-qbeta(alpha/2,  n.eff*p, n.eff*(1-p)+1)
-        c(p.low,p.up)
-      }
-      
-    }
-    
-    computeWaldCI<-function(xx,p){
-      if (any(is.na(xx))) return(c(NA,NA))
-      theta0<-computeQuantiles(xx,p)
-      U<- ((xx>theta0)-(1-p))
-      wtest<-svymean(U,design)
-      p.ci<-computePCI(SE(wtest),alpha,p)
-      p.low<-p.ci[1]
-      p.up<-p.ci[2]
-      oo<-order(xx)
-      cum.w<-cumsum(w[oo])/sum(w)
-      approx(cum.w,xx[oo],xout=c(p.low,p.up), method=method,f=f,
-             yleft=min(xx),yright=max(xx),ties=min)$y 
-      
-    }
-    
-    computeWaldCIRounded<-function(xx,p){
-      if(any(is.na(xx))) return(c(NA,NA))
-        theta0<-computeQuantilesRounded(xx,p)
-        U<- ((xx>theta0)-(1-p))
-        ww<-rowsum(w,xx, reorder=TRUE)
-        uxx <- sort(unique(xx))
-        wtest<-svymean(U,design)
-        p.ci<-computePCI(SE(wtest),alpha,p)
-        p.low<-p.ci[1]
-        p.up<-p.ci[2]
-        oo<-order(xx)
-        cum.w<-cumsum(ww)/sum(ww)
-        approx(cum.w,uxx,xout=c(p.low,p.up), method=method,f=f,
-               yleft=min(xx),yright=max(xx),ties=min)$y 
-        
-      }
-
-    ties<-match.arg(ties)
-    computeQ<-switch(ties, discrete=computeQuantiles,rounded=computeQuantilesRounded)
-    
-    if (!is.null(dim(x)))
-        rval<-t(matrix(apply(x,2,computeQ),nrow=length(quantiles),
-                       dimnames=list(as.character(round(quantiles,2)),colnames(x))))
-    else
-      rval<-computeQ(x)
-    
-    if (!ci & !se) return(rval)
-    
-    interval.type<-match.arg(interval.type)
-    
-    computeCI<-switch(paste(interval.type,ties,sep="."), score.discrete=computeScoreCI,
-                            score.rounded=stop("ties=\"rounded\" not available with interval.type=\"score\""),
-                            Wald.rounded=computeWaldCIRounded,
-                            betaWald.rounded=computeWaldCIRounded,
-                            Wald.discrete=computeWaldCI,
-                            betaWald.discrete=computeWaldCI)
-    
-    if (!is.null(dim(x)))
-      cis<-array(apply(x,2,function(xx) sapply(quantiles,function(qq) computeCI(xx,qq))),
-                 dim=c(2,length(quantiles),ncol(x)),
-                 dimnames=list(c("(lower","upper)"),
-                   as.character(round(quantiles,2)),
-                   colnames(x)))
-    else
-      cis<-sapply(quantiles, function(qq) computeCI(x,qq))
-
-    if (ci)
-      rval<-list(quantiles=rval,CIs=cis)
-    else
-      rval<-list(quantiles=rval)
-    
-    if (is.null(dim(x)))
-        ses<-(cis[2,]-cis[1,])/(2*qcrit(alpha/2,lower.tail=FALSE))
-    else
-        ses<-(cis[2,,]-cis[1,,])/(2*qcrit(alpha/2,lower.tail=FALSE))
-    attr(rval,"SE")<-ses
-    class(rval)<-"svyquantile"
-    rval
-  }
-
-SE.svyquantile<-function(object,...){
-    attr(object,"SE")
-}
-
-vcov.svyquantile<-function(object,...){
-  se<-SE(object)
-  if (is.null(se)) stop("no uncertainty information present")
-  v<-matrix(NA,length(se),length(se))
-  warning("Only diagonal of vcov() available")
-  diag(v)<-se
-  v
-}
-
-coef.svyquantile<-function(object,...){
-  rval<-as.vector(object$quantiles)
-  if(ncol(object$quantiles)==1)
-    names(rval)<-rownames(object$quantiles)
-  else if (nrow(object$quantiles)==1)
-    names(rval)<-colnames(object$quantiles)
-  else names(rval)<-t(outer(colnames(object$quantiles),
-                            rownames(object$quantiles),
-                            paste,sep=":"))
-  rval
-}
-
-print.svyquantile<-function(x,...){
-    print(list(quantiles=x$quantiles, CIs=x$CIs))
-}
-
 coef.svyratio<-function(object,...,drop=TRUE){
   if (!drop) return(object$ratio)
   cf<-as.vector(object$ratio)
@@ -1131,6 +939,10 @@ svycoxph.survey.design<-function(formula,design, subset=NULL, rescale=TRUE, ...)
     if (!all(all.vars(formula) %in% names(data))) 
         stop("all variables must be in design= argument")
     g<-with(list(data=data), eval(g))
+
+    if (inherits(g, "coxph.penal"))
+        warning("svycoxph does not support penalised terms")
+    
     g$call<-match.call()
     g$call[[1]]<-as.name(.Generic)
     g$printcall<-sys.call(-1)
@@ -1267,9 +1079,11 @@ svyglm.survey.design<-function(formula,design,subset=NULL, family=stats::gaussia
 
       subset<-substitute(subset)
       subset<-eval(subset, model.frame(design), parent.frame())
-      if (!is.null(subset))
+    if (!is.null(subset)){
+        if (any(is.na(subset)))
+            stop("subset must not contain NA values")
         design<-design[subset,]
-      
+      }
       data<-model.frame(design)
 
       g<-match.call()
@@ -1279,11 +1093,12 @@ svyglm.survey.design<-function(formula,design,subset=NULL, family=stats::gaussia
       g$var <- NULL
     g$rescale <- NULL
     g$deff<-NULL
+    g$subset <- NULL  ## done it already
       g$family<-family
       if (is.null(g$weights))
         g$weights<-quote(.survey.prob.weights)
       else 
-        g$weights<-bquote(.survey.prob.weights*.(g$weights))
+          g$weights<-bquote(.survey.prob.weights*.(g$weights))
       g$data<-quote(data)
       g[[1]]<-quote(glm)      
 
@@ -1291,6 +1106,11 @@ svyglm.survey.design<-function(formula,design,subset=NULL, family=stats::gaussia
       ## (unless the user doesn't want to)
       if (rescale)
           data$.survey.prob.weights<-(1/design$prob)/mean(1/design$prob)
+      else
+          data$.survey.prob.weights<-(1/design$prob)
+
+      if(any(is.na(data$.survey.prob.weights)))
+        stop("weights must not contain NA values")
       if (!all(all.vars(formula) %in% names(data))) 
 	stop("all variables must be in design= argument")
     g<-with(list(data=data), eval(g))
@@ -1299,7 +1119,7 @@ svyglm.survey.design<-function(formula,design,subset=NULL, family=stats::gaussia
       
       nas<-g$na.action
       if (length(nas))
-	design<-design[-nas,]
+         design<-design[-nas,]
 
       g$cov.unscaled<-svy.varcoef(g,design)
       g$df.residual <- degf(design)+1-length(coef(g)[!is.na(coef(g))])
@@ -1316,21 +1136,20 @@ svyglm.survey.design<-function(formula,design,subset=NULL, family=stats::gaussia
       }
 
     if(deff){
-        vsrs<-summ$cov.scaled*mean(data$.survey.prob.weights)/nrow(data)
+        vsrs<-summ$cov.scaled*mean(data$.survey.prob.weights)
         attr(g,"deff")<-g$cov.unscaled/vsrs
     }
 
     if (influence){
-        estfun<-model.matrix(g)*resid(g,"working")*g$weights
+        estfun< model.matrix(g)*naa_shorter(nas, resid(g,"working"))*g$weights
         if (g$rank<NCOL(estfun)){
             estfun<-estfun[,g$qr$pivot[1:g$rank]]
         }
         attr(g, "influence")<-estfun%*%g$naive.cov
     }
 
-    
-      g$survey.design<-design 
-      g
+    g$survey.design<-design 
+    g
 }
 
 print.svyglm<-function(x,...){
@@ -1339,7 +1158,7 @@ print.svyglm<-function(x,...){
 
 }
 
-coef.svyglm<-function(object,...,na.rm=TRUE) {
+coef.svyglm<-function(object,complete=FALSE,...,na.rm=!complete) {
   beta<-object$coefficients
   if (!na.rm || length(beta)==object$rank)
     beta
@@ -1356,7 +1175,8 @@ vcov.svyglm<-function(object,...) {
 
 svy.varcoef<-function(glm.object,design){
     Ainv<-summary(glm.object)$cov.unscaled
-    estfun<-model.matrix(glm.object)*resid(glm.object,"working")*glm.object$weights
+    nas<-glm.object$na.action
+    estfun<-model.matrix(glm.object)*naa_shorter(nas, resid(glm.object,"working"))*glm.object$weights
     if (glm.object$rank<NCOL(estfun)){
       estfun<-estfun[,glm.object$qr$pivot[1:glm.object$rank]]
     }
@@ -1445,8 +1265,9 @@ summary.svyglm<-function (object, correlation = FALSE, df.resid=NULL,...)
             "Pr(>|t|)"))
     }
     else {
-        coef.table <- cbind(coef.p, Inf)
-        dimnames(coef.table) <- list(names(coef.p), dn)
+       coef.table <- cbind(coef.p, s.err, tvalue, NaN)
+       dimnames(coef.table) <- list(names(coef.p), c(dn, "t value", 
+                                                      "Pr(>|t|)"))
     }
     ans <- c(object[c("call", "terms", "family", "deviance", 
         "aic", "contrasts", "df.residual", "null.deviance", "df.null", 
@@ -1465,90 +1286,23 @@ summary.svyglm<-function (object, correlation = FALSE, df.resid=NULL,...)
 }
 
 
-logLik.svyglm<-function(object,...){
-   warning("svyglm not fitted by maximum likelihood.")
-   object$deviance
-}
-
-AIC.svyglm<-function(object,...,k=2){
-	if (length(list(...))){
-		do.call(rbind,lapply(list(object,...),extractAIC,k=k))
-    } else {
-	   extractAIC(object,k=k)
+confint.svyglm<-function(object,parm,level=0.95,method=c("Wald","likelihood"),ddf=NULL,...){
+    method<-match.arg(method)
+    if(method=="Wald"){        
+        if (is.null(ddf))
+            ddf <- object$df.residual
+        if (ddf<=0) {
+            ci<-confint.default(object,parm=parm,level=.95,...)*NaN
+        } else {
+            tlevel <- 1 - 2*pnorm(qt((1 - level)/2, df = ddf))
+            ci<-confint.default(object,parm=parm,level=tlevel,...)
+        }
+        a <- (1 - level)/2
+        a <- c(a, 1 - a)
+        pct <- format.perc(a, 3)
+        colnames(ci)<-pct
+        return(ci)
     }
-}
-extractAIC.svyglm<-function(fit,scale,k=2,...){
-	if (length(attr(terms(fit),"factors"))){
-	    r<-regTermTest(fit, delete.response(formula(fit)), method="LRT")
-	    deltabar<-mean(r$lambda)
-	} else {
-	    r<-list(lambda=0)
-	    deltabar<-NaN
-	}
-	d<-fit$deviance
-	c(eff.p=sum(r$lambda), AIC=d+k*sum(r$lambda),deltabar=deltabar)
-}
-
-extractAIC.svrepglm<-extractAIC.svyglm
-
-BIC.svyglm<-function(object,...,maximal){
-	if (length(list(...))){
-		do.call(rbind,lapply(list(object,...),dBIC,modelM=maximal))
-    } else {
-	   dBIC(object,modelM=maximal)
-    }
-	
-	}
-	
-dBIC<-function(modela,modelM){
-	pm<-modela$rank
-	pM<-modelM$rank	
-
-	if (any(!(names(coef(modela))%in% names(coef(modelM))))){
-		stop("coefficients in model but not in maximal model")
-		}
-	index<-!(names(coef(modelM))%in% names(coef(modela)))
-	n<-1+modela$df.null	
-	if(any(index)){
-		wald<-coef(modelM)[index]%*%solve(vcov(modelM)[index,index],coef(modelM)[index])
-		detDelta<-det(solve(modelM$naive.cov[index,index,drop=FALSE],modelM$cov.unscaled[index,index,drop=FALSE]))
-		dbar<-detDelta^(1/(pM-pm))
-		nstar<-n/dbar	
-	}else {
-		wald<-0
-		detDelta<-1
-		dbar<-1
-		nstar=NaN
-		}
-	c(p=pm, BIC=wald+pm*log(n)+log(detDelta)+deviance(modelM),neff=nstar)
-    }
-
-extractAIC.svrepcoxph<-function (fit, scale, k = 2, ...) .NotYetImplemented()
-extractAIC.svycoxph<-function (fit, scale, k = 2, ...) 
-{
-    Delta<-solve(fit$inv.info, fit$var)
-    deltabar <- mean(diag(Delta))
-    d <- -2*fit$ll[1]
-    c(eff.p = sum(diag(Delta)), AIC = d + k * sum(diag(Delta)), deltabar = deltabar)
-}
-AIC.svycoxph<-function (object, ..., k = 2) 
-{
-    if (length(list(...))) {
-        do.call(rbind, lapply(list(object, ...), extractAIC, 
-            k = k))
-    }
-    else {
-        extractAIC(object, k = k)
-    }
-}
-
-
-confint.svyglm<-function(object,parm,level=0.95,method=c("Wald","likelihood"),ddf=Inf,...){
-  method<-match.arg(method)
-  if(method=="Wald"){
-      tlevel <- 1 - 2*pnorm(qt((1 - level)/2, df = ddf))
-      return(confint.default(object,parm=parm,level=tlevel,...))
-  }
   pnames <- names(coef(object))
   if (missing(parm)) 
     parm <- seq_along(pnames)
@@ -1556,9 +1310,11 @@ confint.svyglm<-function(object,parm,level=0.95,method=c("Wald","likelihood"),dd
     parm <- match(parm, pnames, nomatch = 0)
   lambda<-diag(object$cov.unscaled[parm,parm,drop=FALSE])/diag(object$naive.cov[parm,parm,drop=FALSE])
   if(is.null(ddf)) ddf<-object$df.residual
-  if (ddf==Inf)
+  if (ddf==Inf){
       alpha<-pnorm(qnorm((1-level)/2)*sqrt(lambda))/2
-  else {
+  }  else if (ddf<=0) {
+      stop("zero or negative denomintor df")
+  } else {
       alpha<-pnorm(qt((1-level)/2,df=ddf)*sqrt(lambda))/2
   }
   rval<-vector("list",length(parm))

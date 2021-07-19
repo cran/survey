@@ -1,9 +1,14 @@
 
-svypredmeans<-function(adjustmodel, groupfactor){
+svypredmeans<-function(adjustmodel, groupfactor, predictat=NULL){
 
-	design<-eval(bquote(update(adjustmodel$survey.design, .groupfactor=.(groupfactor[[2]]))))
+    
+    design<-eval(bquote(update(adjustmodel$survey.design, .groupfactor=.(groupfactor[[2]]))))
+    if(is.null(predictat)){
 	groups<-unique(model.frame(design)$.groupfactor)
 	groups<-groups[!is.na(groups)]
+    } else {
+        groups <- predictat
+    }
 	model<-update(adjustmodel, .~.+.groupfactor,design=design)
 	w<-weights(design,"sampling")
 	

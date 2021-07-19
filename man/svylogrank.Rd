@@ -5,13 +5,13 @@
 Compare survival distributions
 }
 \description{
-Computes a weighted version of the logrank and stratified logrank tests
-for comparing two or more survival distributions.  The generalization to
-complex samples is based on the characterization of the logrank test as
-the score test in a Cox model,  Under simple random sampling with
-replacement, this function with \code{rho=0} and \code{gamma=0} 
-is almost identical to the robust score test
-in the survival package.
+Computes a weighted version of the logrank test for comparing two or more
+survival distributions.  The generalization to complex samples is based
+on the characterization of the logrank test as the score test in a Cox model.
+Under simple random sampling with replacement, this function with
+\code{rho=0} and \code{gamma=0} is almost identical to the robust score test
+in the survival package. The \code{rho=0} and \code{gamma=0} version was
+proposed by Rader (2014).
 }
 \usage{
 svylogrank(formula, design, rho=0,gamma=0,method=c("small","large","score"), ...)
@@ -19,7 +19,7 @@ svylogrank(formula, design, rho=0,gamma=0,method=c("small","large","score"), ...
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{formula}{
-  Model formula with a single predictor and optionally a \code{\link{strata}} term. The predictor must be a factor if it has more than two levels.
+  Model formula with a single predictor. The predictor must be a factor if it has more than two levels.
 }
   \item{design}{
   A survey design object

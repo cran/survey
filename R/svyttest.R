@@ -22,7 +22,10 @@ svyttest.default<-function(formula, design, ...){
     class(rval)<-c("svyttest","htest")
   } else {
     ## two-sample
-    m <- eval(bquote(svyglm(formula,design, family=gaussian())))
+      m <- eval(bquote(svyglm(formula,design, family=gaussian())))
+      mm<-model.matrix(m)
+      if( (ncol(mm)!=2) || (any(!(mm[,2] %in% c(0,1))) && any(!(mm[,2] %in% c(1,2)))))
+          stop("group must be binary")
     rval<-list(statistic=coef(m)[2]/SE(m)[2],
                parameter=m$df.resid,
                estimate=coef(m)[2],

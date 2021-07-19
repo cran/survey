@@ -7,13 +7,14 @@ Computes linear or nonlinear contrasts of estimates produced by survey
 functions (or any object with \code{coef} and \code{vcov} methods).
 }
 \usage{
-svycontrast(stat, contrasts, ...)
+svycontrast(stat, contrasts, add=FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{stat}{object of class \code{svrepstat} or \code{svystat} }
   \item{contrasts}{A vector or list of vectors of coefficients, or a
     call or list of calls }
+  \item{add}{keep all the coefficients of the input in the output?}
   \item{\dots}{For future expansion}
 }
 \value{
@@ -70,6 +71,18 @@ meanlogs <- svymean(~log(api00)+log(api99), rclus1)
 svycontrast(meanlogs,
     list(api00=quote(exp(`log(api00)`)),
 api99=quote(exp(`log(api99)`))))
+
+## why is add=TRUE useful?
+
+(totals<-svyby(~enroll,~stype,design=dclus1,svytotal,covmat=TRUE))
+totals1<-svycontrast(totals, list(total=c(1,1,1)), add=TRUE)
+
+svycontrast(totals1, list(quote(E/total), quote(H/total), quote(M/total)))
+
+
+totals2<-svycontrast(totals, list(total=quote(E+H+M)), add=TRUE)
+all.equal(as.matrix(totals1),as.matrix(totals2))
+
 
 ## transforming replicates
 meanlogs_r <- svymean(~log(api00)+log(api99), rclus1, return.replicates=TRUE)
