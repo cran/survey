@@ -93,11 +93,11 @@ image.pps<-function(x,...){
 }
 
 ##
-pps_design<-function(method, ids,strata=NULL, probs=NULL, fpc=NULL,
+pps_design<-function(method, ids,strata=NULL, probs=NULL, fpc=NULL,variables=NULL,
                      subset, data,call=sys.call(),variance="HT",...){
   UseMethod("pps_design")
 }
-pps_design.character<-function(method,ids,strata=NULL, probs=NULL, fpc=NULL, variables=variables,
+pps_design.character<-function(method,ids,strata=NULL, probs=NULL, fpc=NULL, variables=NULL,
                    subset, data,call=sys.call(),variance="HT",...){
 
   if (length(ids[[2]])>1 && method!="brewer") stop("Multistage PPS sampling not supported with this method")
@@ -157,7 +157,7 @@ print.ppsmat<-function(x,...) {
   invisible(x)
 }
 
-pps_design.ppsmat<-function(method,ids,strata=NULL, probs=NULL, fpc=NULL,variables=variables,
+pps_design.ppsmat<-function(method,ids,strata=NULL, probs=NULL, fpc=NULL,variables=NULL,
                    subset, data,call=sys.call(),variance="HT",...){
 
   if (length(ids[[2]])>1) stop("Multistage PPS sampling not supported")
@@ -175,7 +175,7 @@ pps_design.ppsmat<-function(method,ids,strata=NULL, probs=NULL, fpc=NULL,variabl
 }
 
 
-pps_design.ppsdcheck<-function(method,ids,strata=NULL, probs=NULL, fpc=NULL,variables=variables,
+pps_design.ppsdcheck<-function(method,ids,strata=NULL, probs=NULL, fpc=NULL,variables=NULL,
                    subset, data,call=sys.call(),variance="HT",...){
 
   if (length(ids[[2]])>1) stop("Multistage PPS sampling not supported")
@@ -194,7 +194,7 @@ pps_design.ppsdcheck<-function(method,ids,strata=NULL, probs=NULL, fpc=NULL,vari
 
 
 
-pps_design.ppsdelta<-function(method,ids,strata=NULL, probs=NULL, fpc=NULL,variables=variables,
+pps_design.ppsdelta<-function(method,ids,strata=NULL, probs=NULL, fpc=NULL,variables=NULL,
                    subset, data,call=sys.call(),variance="HT",...){
 
   if (length(ids[[2]])>1) stop("Multistage PPS sampling not supported")
@@ -243,8 +243,8 @@ print.HR<-function(x,...) {
   print(x$call)
   invisible(x)
 }
-pps_design.HR<-function(method,ids,strata=NULL, probs=NULL, fpc=NULL,
-                   subset, data,call=sys.call(),variables=variables,variance="HT",...){
+pps_design.HR<-function(method,ids,strata=NULL, probs=NULL, fpc=NULL,variables=NULL,
+                   subset, data,call=sys.call(),variance="HT",...){
 
   if (length(ids[[2]])>1) stop("Multistage PPS sampling not supported with this method")
   rval<-svydesign(ids=ids,strata=strata,weights=NULL,

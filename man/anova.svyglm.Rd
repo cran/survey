@@ -4,17 +4,21 @@
 \alias{BIC.svyglm}
 \alias{extractAIC.svyglm}
 \alias{extractAIC.svrepglm}
+\alias{anova.svycoxph}
 
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Model comparison for glms.
 }
 \description{
-A method for the \code{\link{anova}} function, for use on \code{\link{svyglm}} objects.  With a single model argument it produces a sequential anova table, with two arguments it compares the two models.
+A method for the \code{\link{anova}} function, for use on
+\code{\link{svyglm}} and \code{\link{svycoxph}} objects.  With a single model argument it produces a sequential anova table, with two arguments it compares the two models.
 }
 \usage{
 \method{anova}{svyglm}(object, object2 = NULL, test = c("F", "Chisq"), 
  method = c("LRT", "Wald"), tolerance = 1e-05, ..., force = FALSE)
+\method{anova}{svycoxph}(object, object2=NULL,test=c("F","Chisq"),
+ method=c("LRT","Wald"),tolerance=1e-5,...,force=FALSE)
 \method{AIC}{svyglm}(object,...,k=2, null_has_intercept=TRUE)
 \method{BIC}{svyglm}(object,...,maximal)
 \method{extractAIC}{svyglm}(fit,scale,k=2,..., null_has_intercept=TRUE)
@@ -23,10 +27,10 @@ A method for the \code{\link{anova}} function, for use on \code{\link{svyglm}} o
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{object,fit}{
-  A \code{\link{svyglm}} object.
+  A \code{\link{svyglm}} or\code{\link{svycoxph}}  object.
 }
   \item{object2}{
-  Optionally, another \code{\link{svyglm}} object.
+  Optionally, another \code{\link{svyglm}} or \code{\link{svycoxph}} object.
 }
   \item{test}{
   Use (linear combination of) F or chi-squared distributions for p-values. F is usually preferable.
@@ -107,7 +111,14 @@ AIC(model0,model1, model2)
 BIC(model0, model2,maximal=model2)
 
 
-
+## from ?twophase
+data(nwtco)
+dcchs<-twophase(id=list(~seqno,~seqno), strata=list(NULL,~rel),
+        subset=~I(in.subcohort | rel), data=nwtco)
+a<-svycoxph(Surv(edrel,rel)~factor(stage)+factor(histol)+I(age/12), design=dcchs)
+b<-update(a, .~.-I(age/12)+poly(age,3))
+## not symbolically nested models
+anova(a,b)
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

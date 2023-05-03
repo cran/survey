@@ -39,7 +39,7 @@ estWeights(data,formula,...)
   \code{working.model}. The estimating functions from this model will be
   used as predictors of the sampling probabilities, which will increase
   efficiency to the extent that the working model and the model of
-  interest estimate the same parameters (Kulich \& Lin 2004).
+  interest estimate the same parameters (Kulich & Lin 2004).
   
   The effect on a two-phase design object is very similar to
   \code{\link{calibrate}}, and is identical when \code{formula}

@@ -17,7 +17,7 @@ svykm.survey.design<-function(formula, design,se=FALSE, ...){
     if (se)
       s<-km.stderr(y,design)
     else 
-      s<-svykm.fit(y,weights(design))
+      s<-svykm_fit(y,weights(design))
   } else {
     x<-mf[,-1]
     if (NCOL(x)>1)
@@ -30,7 +30,7 @@ svykm.survey.design<-function(formula, design,se=FALSE, ...){
       lhs[[3]]<-1
       s<-lapply(levels(groups), function(g) svykm(lhs, subset(design,groups==g),se=TRUE))
     }else{
-      s<-lapply(levels(groups), function(g) svykm.fit(y[groups==g],weights(design)[groups==g]))
+      s<-lapply(levels(groups), function(g) svykm_fit(y[groups==g],weights(design)[groups==g]))
     }
     names(s)<-levels(groups)
     class(s)<-"svykmlist"
@@ -60,7 +60,7 @@ svykm.svyrep.design<-function(formula, design,se=FALSE, ...){
     if (se)
       stop("SE not yet available")
     else 
-      s<-svykm.fit(y,weights(design,"sampling"))
+      s<-svykm_fit(y,weights(design,"sampling"))
   } else {
     x<-mf[,-1]
     if (NCOL(x)>1)
@@ -73,7 +73,7 @@ svykm.svyrep.design<-function(formula, design,se=FALSE, ...){
       lhs[[3]]<-1
       s<-lapply(levels(groups), function(g) svykm(lhs, subset(design,groups==g),se=TRUE))
     }else{
-      s<-lapply(levels(groups), function(g) svykm.fit(y[groups==g],weights(design)[groups==g]))
+      s<-lapply(levels(groups), function(g) svykm_fit(y[groups==g],weights(design)[groups==g]))
     }
     names(s)<-levels(groups)
     class(s)<-"svykmlist"
@@ -87,7 +87,7 @@ svykm.svyrep.design<-function(formula, design,se=FALSE, ...){
 }
 
 
-svykm.fit<-function(y,w){
+svykm_fit<-function(y,w){
   t<-y[,"time"]
   s<-y[,"status"]
   nn<-rowsum(cbind(s,1)*w,t)
@@ -252,7 +252,7 @@ confint.svykm<-function(object, parm, level=0.95,...){
 
 
 predict.svycoxph<-function(object, newdata, se=FALSE,
-                           type=c("lp", "risk", "expected", "terms","curve"),
+                           type=c("lp", "risk", "terms","curve"),
                            ...){
   
   type<-match.arg(type)

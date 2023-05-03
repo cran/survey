@@ -741,7 +741,7 @@ estWeights.twophase<-function(data, formula=NULL, working.model=NULL,...){
 
 estfuns<-function(model,...) UseMethod("estfuns")
 estfuns.coxph<-function(model, ...) resid(model,"score")
-estfuns.glm<-function(model){
+estfuns.glm<-function(model,...){
   xmat<-model.matrix(model)
   residuals(model,"working")*model$weights*xmat
 }

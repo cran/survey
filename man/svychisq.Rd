@@ -20,11 +20,14 @@
 }
 \usage{
 \method{svytable}{survey.design}(formula, design, Ntotal = NULL, round = FALSE,...)
-\method{svytable}{svyrep.design}(formula, design, Ntotal = sum(weights(design, "sampling")), round = FALSE,...)
+\method{svytable}{svyrep.design}(formula, design,
+		Ntotal = sum(weights(design, "sampling")), round = FALSE,...)
 \method{svychisq}{survey.design}(formula, design, 
-   statistic = c("F",  "Chisq","Wald","adjWald","lincom","saddlepoint"),na.rm=TRUE,...)
+   statistic = c("F",  "Chisq","Wald","adjWald","lincom",
+   "saddlepoint","wls-score"),na.rm=TRUE,...)
 \method{svychisq}{svyrep.design}(formula, design, 
-   statistic = c("F",  "Chisq","Wald","adjWald","lincom","saddlepoint"),na.rm=TRUE,...)
+   statistic = c("F",  "Chisq","Wald","adjWald","lincom",
+   "saddlepoint","wls-score"),na.rm=TRUE,...)
 \method{summary}{svytable}(object, 
    statistic = c("F","Chisq","Wald","adjWald","lincom","saddlepoint"),...)
 degf(design, ...)
@@ -100,6 +103,12 @@ distribution.  The \code{CompQuadForm} package is needed for
 especially useful when the p-value is very small (as in large-scale
 multiple testing problems).
 
+\code{statistic="wls-score"} is an experimental implementation of the
+weighted least squares score test of Lipsitz et al (2015). It is not
+identical to that paper, for example, I think the denominator degrees
+of freedom need to be reduced by JK for a JxK table, not (J-1)(K-1). And
+it's very close to the "adjWald" test.
+
 For designs using replicate weights the code is essentially the same as
 for designs with sampling structure, since the necessary variance
 computations are done by the appropriate methods of
@@ -126,7 +135,12 @@ Analysis, Volume 54,  858-862
 Koch, GG, Freeman, DH, Freeman, JL (1975) "Strategies in the
 multivariate analysis of data from complex surveys" International
 Statistical Review 43: 59-78
-  
+
+Stuart R. Lipsitz, Garrett M. Fitzmaurice, Debajyoti Sinha, Nathanael
+Hevelone, Edward Giovannucci, and Jim C. Hu (2015) "Testing for
+independence in JxK contingency tables with complex sample survey data"
+Biometrics 71(3): 832-840
+
 Rao, JNK, Scott, AJ (1984) "On Chi-squared Tests For Multiway
 Contigency Tables with Proportions Estimated From Survey Data"  Annals
 of Statistics 12:46-60.

@@ -125,12 +125,6 @@ svylogrank.DBIsvydesign<-function (formula, design, ...)
     NextMethod("svylogrank", design)
 }
 
-svylogrank.ODBCsvydesign<-function (formula, design, ...) 
-{
-    design$variables <- dropFactor(getvars(formula, design$db$connection, 
-        design$db$tablename, updates = design$updates), weights(design))
-    NextMethod("svylogrank", design)
-}	
 	
 svylogrank.svyrep.design<-function(formula, design,rho=0,gamma=0,method=c("small","large","score"), ...){
         method<-match.arg(method)

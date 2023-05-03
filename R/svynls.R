@@ -1,11 +1,29 @@
 ## svynls
 
-svynls<-function(formula, design,...){
+svynls<-function(formula, design, start, weights=NULL, ...){
     UseMethod("svynls", design)
 }
 
 
-svynls.DBIsvydesign<-function(formula, design, ...){
+var_power<-function(d, maxit=3){
+    ## this should use svytotal
+    dispersion<-0
+    rval<-list(
+        precision_weights=function(res,mu){
+            dispersion<<-sum((res^2)^d) /sum(abs(mu)^d)
+            variance<-dispersion*abs(mu)^d
+            1/variance
+        },
+        iterations=maxit,
+        name=paste0("weights: variance =",signif(dispersion,3),"mu^",d)
+    )
+    class(rval)<-"svynls_weights"
+    rval
+}
+
+
+
+svynls.DBIsvydesign<-function(formula, design,start, weights=NULL, ...){
     design$variables <- getvars(formula, design$db$connection, 
                                 design$db$tablename, updates = design$updates, subset = design$subset)
     NextMethod("svynls", design)
@@ -14,22 +32,41 @@ svynls.DBIsvydesign<-function(formula, design, ...){
 
 utils::globalVariables(c(".survey.prob.weight", ".survey.repwt"))
 
-svynls.svyrep.design<-function(formula, design, start, ..., return.replicates=FALSE){
+svynls.svyrep.design<-function(formula, design, start, weights=NULL, ..., return.replicates=FALSE){
     has_vars<- intersect(all.vars(formula),colnames(design))
-    dat<-model.frame(design)[,all.vars(formula)]
-    meanweight<-mean(weights(design, "sampling"))
-    dat$.survey.prob.weight<-weights(design, "sampling")/meanweight
+    dat<-model.frame(design)[,has_vars]
 
+    if (is.numeric(weights))
+        prior.weights<-weights
+    else
+        prior.weights<-rep(1, nrow(dat))
+    
+    meanweight<-mean(weights(design, "sampling"))
+    dat$.survey.prob.weight<-prior.weights*weights(design, "sampling")/meanweight
+    if (inherits(weights, "svynls_weights")){
+        maxit<-weights$iterations
+    } else {
+        maxit<-0
+    }
     
     first<-nls(formula,dat, weights=.survey.prob.weight,start=start, ...)
+
+    for(i in seq_len(maxit)){
+        prior.weights<-weights$precision_weights(fitted(first), resid(first))
+        dat$.survey.prob.weight<-prior.weights*weights(design, "sampling")/meanweight
+        first<-nls(formula, dat, weights=.survey.prob.weight,start=start,
+                   ...)
+        first$precision_weights<-prior.weights
+    }
+
     theta<-coef(first)
     
     repwts<-weights(design,"analysis")
     thetas<-matrix(0, ncol=length(theta),nrow=ncol(repwts))
     
     for(i in ncol(repwts)){
-          dat$.survey.repwt<-repwts[,i]/meanweight
-          model<-nls(formula,dat, .survey.repwt,start=theta, ...)
+          dat$.survey.repwt<-prior.weights*repwts[,i]/meanweight
+          model<-nls(formula,dat, weights=.survey.repwt,start=theta, ...)
           thetas[i, ] <- coef(model)
     }
 
@@ -53,16 +90,36 @@ svynls.svyrep.design<-function(formula, design, start, ..., return.replicates=FA
 
 
 
-svynls.survey.design2<-function(formula, design, start, ..., influence=FALSE){
+svynls.survey.design2<-function(formula, design, start, weights=NULL, ..., influence=FALSE){
     
     has_vars<- intersect(all.vars(formula),colnames(design))
     dat<-model.frame(design)[,has_vars]
-    meanweight<-mean(weights(design, "sampling"))
-    w<-weights(design, "sampling")/meanweight
-    dat$.survey.prob.weight<-w
     
+    if (is.numeric(weights))
+        prior.weights<-weights
+    else
+        prior.weights<-rep(1, nrow(dat))
+    
+    meanweight<-mean(weights(design, "sampling"))
+    w<-prior.weights*weights(design, "sampling")/meanweight
+
+    if (inherits(weights, "svynls_weights")){
+        maxit<-weights$iterations
+    } else {
+        maxit<-0
+    }
+    dat$.survey.prob.weight<-w    
     fit<-nls(formula, dat, weights=.survey.prob.weight,start=start,
              ...)
+    for(i in seq_len(maxit)){
+        precwt<-weights$precision_weights(fitted(fit), resid(fit))
+        w<-precwt*weights(design, "sampling")/meanweight
+        dat$.survey.prob.weight<-w    
+        fit<-nls(formula, dat, weights=.survey.prob.weight,start=start,
+                 ...)
+        fit$precision_weights<-precwt
+    }
+
     
     v0<-summary(fit)$cov.unscaled
     theta<-coef(fit)

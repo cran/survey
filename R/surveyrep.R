@@ -300,7 +300,9 @@ brrweights<-function(strata,psu, match=NULL, small=c("fail","split","merge"),
 as.svrepdesign<- function(design,...) UseMethod("as.svrepdesign")
 as.svrepdesign.default<-function(design,type=c("auto","JK1","JKn","BRR","bootstrap","subbootstrap","mrbbootstrap","Fay"),
                           fay.rho=0, fpc=NULL, fpctype=NULL,...,compress=TRUE, mse=getOption("survey.replicates.mse")){
-
+    if(!is.null(design$postStrata)){
+        stop("postStratify, rake, or calibrate the design *after* adding replicate weights")
+        }
   type<-match.arg(type)
 
   if (type=="auto"){
@@ -1437,7 +1439,7 @@ svyratio.svyrep.design<-svrepratio<-function(numerator=formula,denominator, desi
         vars[i,j]<-svrVar(allstats$replicates[,i]/allstats$replicates[,nn+j],
                           design$scale, design$rscales,mse=design$mse,coef=rval$ratio[i,j])
         if (deff=="replace" || deff)
-          deffs[i,j]<-deff(svytotal(numerator[,i]-rval[i,j]*denominator[,j],design,deff=deff))
+          deffs[i,j]<-deff(svytotal(numerator[,i]-rval$ratio[i,j]*denominator[,j],design,deff=deff))
       }
     }
   }
@@ -1501,7 +1503,7 @@ vcov.svyrep.design<-function (object, replicates, centre, ...)
 {
     if (object$mse) 
         svrVar(replicates, scale = object$scale, rscales = object$rscales, 
-            mse = object$mse, centre)
+            mse = object$mse, coef=centre)
     else svrVar(replicates, scale = object$scale, rscales = object$rscales, 
         mse = object$mse)
 }

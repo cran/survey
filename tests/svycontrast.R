@@ -1,0 +1,12 @@
+library(survey)
+data(api)
+dclus2<-svydesign(id=~dnum+snum, weights=~pw, data=apiclus2)
+rclus2<-as.svrepdesign(dclus2)
+model<-svyglm(formula = api00 ~ ell + meals + mobility, design = rclus2)
+svycontrast(model, c(ell=1,meals=0))
+a<-svycontrast(model, c(0,1,0,0))
+
+model2<-svyglm(formula = api00 ~ ell + meals + mobility, design = rclus2,return.replicates=TRUE)
+svycontrast(model2, c(ell=1,meals=0))
+a2<-svycontrast(model2, c(0,1,0,0))
+stopifnot(!is.null(a2$replicates))

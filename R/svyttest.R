@@ -3,7 +3,7 @@ svyttest<-function(formula, design,...) UseMethod("svyttest",design)
 svyttest.default<-function(formula, design, ...){
   if (formula[[3]]==1 || formula[[3]]==0){
     ## one-sample
-    tt <- eval(bquote(svymean(~.(formula[[2]]),design,...)))
+    tt <- eval(bquote(svymean(~as.numeric(.(formula[[2]])),design,...)))
     rval<-list(statistic=coef(tt)[1]/SE(tt)[1],
                parameter=degf(design)-1,
                estimate=coef(tt)[1],

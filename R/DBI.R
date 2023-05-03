@@ -1,7 +1,7 @@
 
 svydesign.character<-function (ids, probs = NULL, strata = NULL, variables = NULL, 
                                fpc = NULL, data, nest = FALSE, check.strata = !nest,
-                               weights = NULL,pps=FALSE,
+                               weights = NULL,pps=FALSE, calibrate.formula=NULL,
                                dbtype="SQLite", dbname,
                                ...) 
 {
@@ -24,7 +24,7 @@ svydesign.character<-function (ids, probs = NULL, strata = NULL, variables = NUL
     
   rval<-svydesign(ids=ids, probs=probs, strata=strata, data=design.data,
                   fpc=fpc, variables=variables, nest=nest,check.strata=check.strata,
-                  weights=weights)
+                  weights=weights, calibrate.formula=calibrate.formula)
   rval$db<-list(dbname=dbname, tablename=data, connection=dbconn, dbtype=dbtype)
   rval$variables<-NULL
   rval$call<-sys.call(-1)

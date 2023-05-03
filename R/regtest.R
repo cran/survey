@@ -1,6 +1,7 @@
 ##deviance methods not exported, used by method="LRT"
-deviance.svycoxph<-function(object,...) 2 * (object$ll[1] - object$ll[2])
-deviance.coxph<-function(object,...) 2 * (object$loglik[1] - object$loglik[2])
+deviance.svycoxph<-function(object,...) if(length(object$ll)==2) 2 * (object$ll[1] - object$ll[2]) else 0
+deviance.coxph<-function(object,...) if(length(object$loglik)==2) 2 * (object$loglik[1] - object$loglik[2]) else 0
+
 
 explicit1<-function(formula){
     if (length(formula)==1) 
@@ -103,8 +104,14 @@ regTermTest<-function(model, test.terms, null=NULL, df=NULL, method=c("Wald","Wo
       names(model$call)[[2]]<-"formula"
 
     if (method=="LRT"){
-        model0<-eval(bquote(update(.(model), .~.-(.(test.formula)))),environment(formula(model)))
-        chisq<-deviance(model0)-deviance(model)
+        model0<-eval(bquote(update(.(model), .~.-(.(test.formula)),design=.(model$survey.design),subset=NULL)),
+                     environment(formula(model)))  ## same missing data
+        if (inherits(model,"svyglm")){
+            rescale<-mean(model$prior.weights)/mean(model0$prior.weights)
+        } else if (inherits(model,"svycoxph")){
+            rescale<-mean(model$weights)/mean(model0$weights)
+        } else rescale<-1 ##FIXME -- probably want a generic drop_and_refit function
+        chisq<-deviance(model0)*rescale-deviance(model)
     } else {
         chisq<-beta%*%solve(V0)%*%beta
     }
@@ -340,12 +347,12 @@ svycontrast.svrepstat<-function(stat, contrasts,add=FALSE,...){
           contrasts<-addLin(contrasts, names(coef(stat)))
      
       coef<-contrast(coef(stat), vcov(stat), contrasts)
-      if (is.list(stat)){
+      attr(coef,"statistic")<-"contrast"
+      if (is.list(stat) && !is.null(stat$replicates)){
           coef<-list(contrast=coef,
-                     replicates=crossprod(stat$replicates, contrasts))
+                     replicates=tcrossprod(stat$replicates, contrasts))
       }
       class(coef)<-"svrepstat"
-      attr(coef,"statistic")<-"contrast"
       coef
   }
 }
@@ -388,9 +395,11 @@ svycontrast.default<-svycontrast.svystat
 svycontrast.svyby<-function(stat, contrasts,...){
 
     if(!is.null(r<-attr(stat, "replicates"))){
-        repstat<-list(stat=coef(stat), replicates=r)
-        attr(repstat,"var")<-vcov(stat)
-        class(repstat)<-c("svrepstat",class(stat))
+        s<-coef(stat)
+        attr(s,"var")<-vcov(stat)
+        attr(s,"statistic")<-attr(stat,"svyby")$statistic
+        repstat<-list(stat=s, replicates=r)
+        class(repstat)<-"svrepstat"
         svycontrast(repstat, contrasts,...)
     } else NextMethod() ## default
    

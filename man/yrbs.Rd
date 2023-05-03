@@ -26,7 +26,7 @@ analysis example by CDC.
 }
 \references{
 Centers for Disease Control and Prevention (2016) Software for Analysis
-of YRBS Data. Previously at \url{https://www.cdc.gov/healthyyouth/data/yrbs/pdf/2015/2015_yrbs_analysis_software.pdf}
+of YRBS Data. [CRAN doesn't believe the URL is valid]
 }
 \examples{
 data(yrbs)

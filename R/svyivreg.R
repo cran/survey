@@ -6,7 +6,7 @@ svyivreg.survey.design<-function(formula, design,...){
     .data<-model.frame(design)
     .data$.weights<-weights(design,"sampling")
     .weights<-NULL ## make CMD check happy
-    estfun<-get("estfun",mode="function")
+    ##estfun<-get("estfun",mode="function")
     model<- AER::ivreg(formula, data=.data, weights=.weights)
 
     U<-estfun.ivreg(model)/weights(design,"sampling")
@@ -25,8 +25,9 @@ svyivreg.survey.design<-function(formula, design,...){
 
 
 summary.svyivreg<-function(object, df = NULL, ...){
+    V<-vcov(object)
     class(object)<-"ivreg"
-    summary(object, vcov.=NULL, df=df, diagnostics=FALSE,...)
+    summary(object, vcov.=V, df=df, diagnostics=FALSE,...)
 }
 
 vcov.svyivreg<-function(object,...) object$cov.unscaled

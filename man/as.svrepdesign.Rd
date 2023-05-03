@@ -29,7 +29,9 @@ as.svrepdesign(design,...)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
-  \item{design}{Object of class \code{survey.design} or   \code{svyimputationList}}
+  \item{design}{Object of class \code{survey.design} or
+    \code{svyimputationList}. Must not have been
+    post-stratified/raked/calibrated in R}
   \item{type}{Type of replicate weights. \code{"auto"} uses JKn for
     stratified, JK1 for unstratified designs}
   \item{fay.rho}{Tuning parameter for Fay's variance method }

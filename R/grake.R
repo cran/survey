@@ -18,11 +18,6 @@ cal_names.DBIsvydesign<-function(formula, design,...){
     colnames(model.matrix(formula, model.frame(formula,design$variables[0,])))
 }
 
-cal_names.ODBCsvydesign<-function(formula, design,...){
-    design$variables <- getvars(formula, design$db$connection, 
-                                design$db$tablename, updates = design$updates)
-    colnames(model.matrix(formula, model.frame(formula,design$variables[0,])))
-}
 
 cal_names.survey.design<-function(formula,design,...) {
     colnames(model.matrix(formula, model.frame(formula,model.frame(design)[0,])))
@@ -451,44 +446,68 @@ trimWeights<-function(design, upper=Inf,lower=-Inf, ...){
 }
 
 
+do_trimWeights<-function(pw, upper,lower, has_trimmed){
+    outside<-pw<lower | pw>upper
+    if (!any(outside))
+        return(list(weights=pw,has_trimmed=has_trimmed))
+    pwnew<-pmax(lower,pmin(pw, upper))
+    trimmings<-pw-pwnew
+    can_trim<-!outside & !has_trimmed
+    if (!any(can_trim)){
+        warning("trimming failed")
+    } else {
+        pwnew[can_trim]<-pwnew[can_trim]+sum(trimmings)/sum(can_trim)
+    }
+    list(weights=pwnew,has_trimmed=outside | has_trimmed)
+}
+
 trimWeights.survey.design2<-function(design, upper=Inf, lower= -Inf, strict=FALSE,...){
   pw<-weights(design,"sampling")
   outside<-pw<lower | pw>upper
-  if (!any(outside)) return(design)
-  pwnew<-pmax(lower,pmin(pw, upper))
-  trimmings<-pw-pwnew
-  pwnew[!outside]<-pwnew[!outside]+sum(trimmings)/sum(!outside)
-  design$prob<-1/pwnew
+  if (!any(outside)) return(design) ## doesn't need trimming
+  has_trimmed<-rep(FALSE,length(outside))
+  while(any(outside)){
+      trim<-do_trimWeights(pw, upper,lower, has_trimmed)
+      pw<-trim$weights
+      if (!strict) break
+      outside<-pw<lower | pw>upper
+      has_trimmed<-trim$has_trimmed      
+  }
+  design$prob<-1/pw
   design$call<-sys.call()
   design$call[[1]]<-as.name(.Generic)
-  if (strict) ## ensure that the trimmings don't push anything outside the limits
-    trimWeights(design, upper,lower, strict=TRUE)
-  else 
-    design
+  design
 }
 
-trimWeights.svyrep.design<-function(design, upper=Inf, lower= -Inf, compress=FALSE,...){
+trimWeights.svyrep.design<-function(design, upper=Inf, lower= -Inf, strict=FALSE, compress=FALSE,...){
   pw<-weights(design,"sampling")
   outside<-pw<lower | pw>upper
   if (any(outside)) {
-    pwnew<-pmax(lower,pmin(pw, upper))
-    trimmings<-pw-pwnew
-    pwnew[!outside]<-pwnew[!outside]+sum(trimmings)/sum(!outside)
-    design$prob<-1/pw
+      has_trimmed<-rep(FALSE,length(outside))
+      while(any(outside)){
+          trim<-do_trimWeights(pw, upper,lower, has_trimmed)
+          pw<-trim$weights
+          if (!strict) break
+          outside<-pw<lower | pw>upper
+          has_trimmed<-trim$has_trimmed      
+      }
+      design$prob<-1/pw
   }
   rw<-weights(design, "analysis")
   outside<-rw<lower | rw>upper
   if (any(outside)) {
-    rwnew<-pmax(lower,pmin(rw, upper))
+    rwnew<-matrix(pmax(lower,pmin(rw, upper)),nrow=nrow(rw))
     trimmings<-rw-rwnew
-    rwnew<-rwnew[!outside]+t(t(!outside)+colSums(trimmings)/colSums(!outside))
+    rwnew<-rwnew+t(t(!outside)*colSums(trimmings)/colSums(!outside))
     if (compress)
       design$repweights<-compressWeights(rwnew)
     else
       design$repweights<-rwnew
     design$combined.weights<-TRUE
   }
-  
+  design$call<-sys.call()
+  design$call[[1]]<-as.name(.Generic)
+
   design
 }
 

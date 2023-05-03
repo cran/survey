@@ -18,7 +18,7 @@ detibble<-function(data) {
 
 svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
                     data=NULL, nest=FALSE, check.strata=!nest,weights=NULL,pps=FALSE,
-                            variance=c("HT","YG"),...){
+                            calibrate.formula=NULL,variance=c("HT","YG"), ...){
 
   data<-detibble(data)
     
@@ -222,6 +222,10 @@ svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
     rval$call<-sys.call(-1)
     rval$pps<-pps
     class(rval)<-c("survey.design2","survey.design")
+    if (!is.null(calibrate.formula)){
+        rval<-recalibrate(rval, calibrate.formula)
+        rval$call<-sys.call(-1)
+    }
     rval
 }
 
@@ -669,7 +673,14 @@ svytotal.survey.design2<-function(x,design, na.rm=FALSE, deff=FALSE,influence=FA
                                    postStrata=design$postStrata)
     attr(total,"statistic")<-"total"
     if (influence){
-        attr(total, "influence")<-x/design$prob
+         if (na.rm && (length(nas)>length(design$prob))) {
+             infl<-matrix(0,ncol=NCOL(x),nrow=length(nas))
+             infl[nas==0,]<-x/design$prob
+             attr(total, "influence")<-infl
+
+        }  else {
+            attr(total, "influence")<-x/design$prob
+            }
         }
 
     if (is.character(deff) || deff){
@@ -738,7 +749,13 @@ svymean.survey.design2<-function(x,design, na.rm=FALSE,deff=FALSE,influence=FALS
   attr(average,"var")<-v
     attr(average,"statistic")<-"mean"
     if (influence){
-        attr(average,"influence") <- x*pweights/psum
+        if (na.rm && (length(nas)>length(pweights))) {
+            infl<-matrix(0,ncol=NCOL(x),nrow=length(nas))
+            infl[nas==0,]<-x*pweights/psum
+            } else {
+                infl<-x*pweights/psum
+            }
+        attr(average,"influence") <- infl
     }
   class(average)<-"svystat"
   if (is.character(deff) || deff){
@@ -848,9 +865,16 @@ svyratio.survey.design2<-function(numerator=formula, denominator, design, separa
         attr(rval,"deff")<-deffs
     
     attr(rval,"call")<-sys.call()
-    if (influence)
-        attr(rval, "influence")<-r/design$prob
-    
+
+    if (influence){
+        if (na.rm && (length(nas)>length(design$prob))) {
+            infl<-matrix(0,ncol=NCOL(r),nrow=length(nas))
+            infl[nas==0,]<-r/design$prob
+        } else {
+                infl<-r/design$prob
+            }
+        attr(rval,"influence") <- infl
+    }
     class(rval)<-"svyratio"
     rval
     

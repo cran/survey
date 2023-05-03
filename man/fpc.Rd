@@ -20,7 +20,7 @@ data to illustrate survey sampling estimators.
 }
 
 \source{
-\url{https://www.stata-press.com/data/r7/fpc.dta}
+\verb{https://www.stata-press.com/data/r7/fpc.dta}
 }
 
 \examples{

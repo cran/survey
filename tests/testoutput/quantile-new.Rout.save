@@ -1,0 +1,79 @@
+
+R version 4.1.1 (2021-08-10) -- "Kick Things"
+Copyright (C) 2021 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin20 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ## From Ben Schneider, https://github.com/bschneidr/r-forge-survey-mirror/pull/7
+> library(survey)
+> data('api', package = 'survey')
+>   
+>   boot_design <- svydesign(
++     ids = ~ 1, strata = ~ stype,
++     weights = ~ pw,
++     data = apistrat,
++   ) |> as.svrepdesign(type = "boot")
+>   
+> # Attempt to estimate variance of quantile using direct replication ----
+>   new <- svyquantile(
++     x = ~ api00 + api99,
++     quantiles = c(0.25, 0.75),
++     design = boot_design,
++     interval.type = "quantile",
++     return.replicates = TRUE
++   )
+>   
+> print(new)
+Statistic:
+      api00 api99
+q0.25   565   526
+q0.75   756   728
+SE:
+         api00    api99
+q0.25 19.22732 14.45368
+q0.75 13.72320 19.50807
+> 
+>   old <- oldsvyquantile(
++     x = ~ api00 + api99,
++     quantiles = c(0.25, 0.75),
++     design = boot_design,
++     interval.type = "quantile",
++     return.replicates = TRUE
++   )
+>   
+> print(old)
+Statistic:
+         api00    api99
+q0.25 562.2056 525.4800
+q0.75 755.1226 726.7813
+SE:
+         api00    api99
+q0.25 18.91980 14.53474
+q0.75 14.13114 18.73837
+>   
+> confint(new)
+               2.5 %   97.5 %
+q0.25_api00 527.3152 602.6848
+q0.75_api00 729.1030 782.8970
+q0.25_api99 497.6713 554.3287
+q0.75_api99 689.7649 766.2351
+> confint(old)
+               2.5 %   97.5 %
+q0.25_api00 525.1235 599.2877
+q0.75_api00 727.4261 782.8191
+q0.25_api99 496.9924 553.9676
+q0.75_api99 690.0547 763.5078
+> 

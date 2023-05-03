@@ -19,7 +19,7 @@ Fit a proportional hazards model to data from a complex survey design.
 \usage{
 svycoxph(formula, design,subset=NULL, rescale=TRUE, ...)
 \method{predict}{svycoxph}(object, newdata, se=FALSE,
-    type=c("lp", "risk", "expected", "terms","curve"),...)
+    type=c("lp", "risk", "terms","curve"),...)
 \method{AIC}{svycoxph}(object, ..., k = 2)    
 }
 %- maybe also `usage' for other objects documented here.

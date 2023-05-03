@@ -218,6 +218,16 @@ survey functions.
  (a<-svytotal(~enroll, dclus1, deff=TRUE))
   deff(a)
 
+## weights that are *already* calibrated to population size
+sum(weights(dclus1))
+nrow(apipop)
+cdclus1<- svydesign(id=~dnum, weights=~pw, data=apiclus1,
+fpc=~fpc,calibrate.formula=~1)
+SE(svymean(~enroll, dclus1))
+## not equal to SE(mean)
+SE(svytotal(~enroll, dclus1))/nrow(apipop)
+## equal to SE(mean)
+SE(svytotal(~enroll, cdclus1))/nrow(apipop)
 
  }
 

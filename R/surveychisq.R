@@ -7,14 +7,13 @@ svychisq<-function(formula, design,...) UseMethod("svychisq",design)
 
 
 svychisq.survey.design<-function(formula, design,
-                   statistic=c("F","Chisq","Wald","adjWald","lincom","saddlepoint"),
+                   statistic=c("F","Chisq","Wald","adjWald","lincom","saddlepoint","wls-score"),
                    na.rm=TRUE,...){
   if (ncol(attr(terms(formula),"factors"))>2)
     stop("Only 2-way tables at the moment")
   statistic<-match.arg(statistic)
-  
-  ##if(!is.null(design$postStrata))
-  ##  warning("Post-stratification not implemented")
+
+  if (statistic=="wls-score") return(svychisqzero(formula,design,na.rm=na.rm))
   
   rows<-formula[[2]][[2]]
   cols<-formula[[2]][[3]]
@@ -281,11 +280,13 @@ svychisq.twophase<-function(formula, design,
 
 
 svychisq.svyrep.design<-function(formula, design,
-                   statistic=c("F","Chisq","Wald","adjWald","lincom","saddlepoint"),
+                   statistic=c("F","Chisq","Wald","adjWald","lincom","saddlepoint","wls-score"),
                    na.rm=TRUE,...){
   if (ncol(attr(terms(formula),"factors"))>2)
     stop("Only 2-way tables at the moment")
   statistic<-match.arg(statistic)
+    if (statistic=="wls-score") return(svychisqzero(formula,design,na.rm=na.rm))
+
     
   rows<-formula[[2]][[2]]
   cols<-formula[[2]][[3]]
@@ -441,4 +442,46 @@ summary.svytable<-function(object, statistic=c("F","Chisq","Wald","adjWald","lin
 print.summary.svytable<-function(x,digits=0,...){
   print(round(x$table,digits))
   print(x$statistic,...)
+}
+
+
+
+svychisqzero<-function(formula,design,na.rm){
+    if (ncol(attr(terms(formula), "factors")) > 2) 
+        stop("Only 2-way tables")
+    rows <- formula[[2]][[2]]
+    cols <- formula[[2]][[3]]
+    rowvar <- unique(design$variables[, as.character(rows)])
+    nr <- length(rowvar)
+
+    des<-design[rep(1:nrow(design), nr), ]
+    yind<-as.vector(eval(bquote( model.matrix(~factor(.(rows))+0, model.frame(design)))))
+    k<-rep(1:nr,each=nrow(design))
+    des<-update(des,yind=yind,k=k)
+    ff0<-eval(bquote(yind~factor(k)+factor(.(cols))))
+    ff1<-eval(bquote(~factor(k):factor(.(cols))))
+    m0<-svyglm(ff0, des)
+    test<-svyscoretest(m0, add.terms=ff1,method="pseudo")
+
+    ## rescaling: the weights matter because score test uses svytotal
+    test["X2"]<-test["X2"]/nr/nr
+    if (is.finite(test["ddf"])) {
+        p<-pf(test["X2"], test["df"],test["ddf"],lower.tail=FALSE)
+    } else{
+       p<- pchisq(test["X2"], test["df"],lower.tail=FALSE)
+    }
+    test["p"]<-p
+
+    ## formatting
+    warn<-options(warn=-1) ## turn off the small-cell count warning.
+    pearson<- chisq.test(svytable(formula,design,Ntotal=nrow(design)),
+                         correct=FALSE)
+    options(warn)
+    pearson$statistic<-test["X2"]
+    pearson$parameter<-c(ndf=test["df"],ddf=test["ddf"])
+    pearson$p.value<-test["p"]
+    attr(pearson$statistic,"names")<-"F"
+    pearson$data.name<-deparse(sys.call(-1))
+    pearson$method<-"Design-based WLS score test of association"
+    pearson
 }

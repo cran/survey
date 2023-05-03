@@ -70,12 +70,10 @@ pchisqsum<-function(x,df,a,lower.tail=TRUE,
     
     return(guess)
   } else if (method=="saddlepoint"){
-    for(i in seq(length=length(x))){
       lambda<-rep(a,df)
       sad<-sapply(x,saddle,lambda=lambda)
       if (lower.tail) sad<-1-sad
       guess<-ifelse(is.na(sad),guess,sad)
-    }
     return(guess)
   }
 }

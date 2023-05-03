@@ -11,7 +11,7 @@ linearisation or replicate weights. See \code{\link{nls}} for
 documentation of model specification and fitting.
 }
 \usage{
-svynls(formula, design, ...)
+svynls(formula, design, start, weights=NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -21,6 +21,11 @@ svynls(formula, design, ...)
   \item{design}{
     Survey design object
   }
+\item{start}{starting values, passed to \code{\link{nls}}}
+
+  \item{weights}{
+    Non-sampling weights, eg precision weights to give more efficient estimation in the presence of heteroscedasticity.
+ }
   \item{\dots}{
     Other arguments to \code{nls} (especially, \code{start}). Also
     supports \code{return.replicates} for replicate-weight designs and

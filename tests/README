@@ -47,6 +47,8 @@ rakecheck.R: check that raking by iterative post-stratification agrees with
 
 regpredict.R: ratio and regression estimation of a total.
 
+rss_scores.R:  Score test example from Rao, Scott, and Skinner (1998)
+
 scoping.R: check that svyglm and svycoxph work inside functions.
 
 survcurve.R: check that svykm and predict.coxph give the same result
@@ -59,3 +61,9 @@ quantile-chile.R: example of interpolating for quantiles, from Chilean
 	stats agency
 
 na_action.R: check that svyglm works with na.action=na.exclude
+
+svyivreg-var.R:  check that summary.svyivreg is finding the right variances
+
+svyolr-rake-subset.R: make sure subsets of calibrated designs get handled correctly 
+
+anova-svycoxph.R: check that symbolically nested and linear-algebra versions of anova.svycoxph agree

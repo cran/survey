@@ -16,13 +16,13 @@ svydesign(ids, probs=NULL, strata = NULL, variables = NULL, fpc=NULL,
 data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,pps=FALSE,...)
 \method{svydesign}{default}(ids, probs=NULL, strata = NULL, variables = NULL,
   fpc=NULL,data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,
-  pps=FALSE,variance=c("HT","YG"),...)
+  pps=FALSE,calibrate.formula=NULL,variance=c("HT","YG"),...)
 \method{svydesign}{imputationList}(ids, probs = NULL, strata = NULL, variables = NULL, 
     fpc = NULL, data, nest = FALSE, check.strata = !nest, weights = NULL, pps=FALSE,
-     ...)
+     calibrate.formula=NULL,...)
 \method{svydesign}{character}(ids, probs = NULL, strata = NULL, variables = NULL, 
     fpc = NULL, data, nest = FALSE, check.strata = !nest, weights = NULL, pps=FALSE,
-    dbtype = "SQLite", dbname, ...)
+    calibrate.formula=NULL,dbtype = "SQLite", dbname, ...)
 }
 %- maybe also `usage' for other objects documented here.'`
 \arguments{
@@ -45,7 +45,10 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,pps=FALSE,...)
   \item{pps}{\code{"brewer"} to use Brewer's approximation for PPS 
     sampling without replacement. \code{"overton"} to use
     Overton's approximation. An object of class \code{\link{HR}} to use the Hartley-Rao approximation. An
-    object of class \code{\link{ppsmat}} to use the Horvitz-Thompson estimator.}
+    object of class \code{\link{ppsmat}} to use the Horvitz-Thompson
+    estimator.}
+  \item{calibrate.formula}{model formula specifying how the weights are
+    *already* calibrated (raked, post-stratified).}
   \item{dbtype}{name of database driver to pass to \code{dbDriver}}
   \item{dbname}{name of database (eg file name for SQLite)}
    \item{variance}{For \code{pps} without replacement, use \code{variance="YG"} for the Yates-Grundy estimator instead of the Horvitz-Thompson estimator}
@@ -162,13 +165,11 @@ An object of class \code{survey.design}.
 
   \code{mitools} package for using multiple imputations
 
-  \code{\link{svyrecvar}} and \code{\link{svyCprod}} for details of
-  variance estimation
+  \code{\link{svyrecvar}} for details of variance estimation
 
   \code{\link{election}} for examples of PPS sampling without replacement.
 
-  \url{http://faculty.washington.edu/tlumley/survey/} for examples of
-  database-backed objects.
+  
 }
 
 
@@ -203,6 +204,11 @@ dbclus1<-svydesign(id=~dnum, weights=~pw, fpc=~fpc,
 data="apiclus1",dbtype="SQLite", dbname=system.file("api.db",package="survey"))
 
 }
+
+## pre-calibrated weights
+cdclus1<-svydesign(id=~dnum, weights=~pw, data=apiclus1, fpc=~fpc,
+  calibration.formula=~1)
+
 }
 \keyword{survey}% at least one, from doc/KEYWORDS
 \keyword{univar}% __ONLY ONE__ keyword per line

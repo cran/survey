@@ -1,3 +1,107 @@
+4.2	Handling of influence functions has CHANGED. A function that supplies influence
+	functions must supply one for every observation it was given in its input:
+	use 0 for observations removed by subsetting. (for Guilherme Jacob)
+
+	regTermTest(method="LRT") required the two models to use the same observations
+	(of course), but didn't check, so IT WAS WRONG.
+	It now subsets properly. (for Keiran Shao)
+
+	This will probably be the *last* interpreted-R-only version of survey. Future
+	versions will likely incorporate C++ code for faster variance computation and
+	for small-area estimation. 
+
+	deffs in svyglm.svyrep.design (Ben Schneider)
+
+	svynls() allows for prior (eg precision) weights (for Gary Nelson)
+
+	improved names in svyquantile.svyrep.design (Ben Schneider)
+
+	trimWeights() could get into an infinite recursion (Ingmar Sturm)
+
+	data(myco) from Rao, Scott, and Skinner (originally from Clayton & Hills)
+
+	as.svrepdesign now throws an error with post-stratified/raked/calibrated
+	designs -- create replicates *first*, then calibrate (for Lauren Kennedy)
+
+	trimWeights now works with replicate-weights designs
+
+	score tests for svyglm (with Keiran Shao)
+
+	svyby(), and thus svyboxplot(), didn't handle the new quantile functions
+	correctly when standard error/ci weren't requested (Stephanie Zimmer, Raymond Pan)
+
+	svycontrast() threw an error on the output of svyby() with return.replicates=TRUE
+	(Alena Stern)
+
+	Fix regTermTest for svycoxph for the methods lookup changes in R 4.0
+	(and consequential change to marginpred)
+
+	We don't provide model.matrix.svycoxph any more;use the inherited
+	survival:::model.matrix.coxph
+
+	Recent survival::coxph() switches to robust variances with non-integer weights
+	so check for model$naive.var before model$var
+
+	Disable the pass-through from predict.svycoxph to predict.coxph for type="expected"
+	(Bryan Shepherd)
+
+	svyby( svyvar) would throw an error on domains with only one observation
+	(for Dirk Schumacher)
+
+	svyvar() computes sample size 'n' in the same way for na.rm=TRUE as for a domain
+	(for Raymond Pan)
+
+	xdesign() for crossed designs (which aren't strictly surveys, but are basically similar)
+
+	removed redundant loop in saddlepoint approximation to pchisqsum (Qiaolan Deng)
+
+	fix in summary(svyivreg) for variances (Chandler McClellan)
+
+	svyolr() didn't run for subsets of raked/calibrated designs (Antony Damico)
+
+	add predict.svyolr (for Vincent Arel-Bundock)
+
+	add anova.svycoxph (for Bryan Shepherd)
+
+	add stringsToFactors=TRUE to svyby to ensure factors have same levels in domains
+	(for various people including Stephanie Zimmer)
+
+	more complicated svyby example in ?svycontrast
+
+	svyranktest() gave an error for multiple groups with replicate weights (Kasuki Yoshida)
+
+	Additional chisquared test for tables with zeros (CrossValidated question #571328)
+
+	svydesign() has a 'calibrate.formula' option to tell R that your weights have
+	already been calibrated/raked/post-stratified (for Tobias Schoch)
+
+	svycontrast() didn't work on svrepglm objects without replicates (Thomas Loughlin)
+
+	error in svycoxph with rescale=FALSE (Jing Zhang)
+
+	error in vcov.svyrep.design with mse=TRUE (shows up in svyVGAM)
+
+	svyquantile() didn't pay attention to interval_type for replicate weights (David Jorquera Petersen)
+
+	svyquantile() qrules 5 to 9 now return the single data value when there's
+	just one (David Jorquera Petersen)
+
+	regTermTest() on svyolr() objects created in a function now finds the
+	design object more reliably. (for Pedro Baldoni)
+
+	regTermTest() will now test against null models in svycoxph()
+
+	Fixes to svyquantile: https://github.com/bschneidr/r-forge-survey-mirror/pull/7
+	(Ben Schneider)
+
+	anova.svyloglin was broken by change to anova.glm(test=NULL)
+	(Brian Ripley)
+
+	One-sample svyttest() on logical variable now tests for P(TRUE==0) not P(FALSE==0)
+	(Stephanie Zimmer)
+
+	rename svykm.fit to svykm_fit because CRAN tests
+
 4.1-1	CRAN
 
 4.1	svyquantile() has been COMPLETELY REWRITTEN. The old version is available
@@ -82,6 +186,7 @@
 	and when the weights contain NAs (for Paige Johnson)
 
 	regTermTest was dropping the first term for coxph() models (Adam Elder)
+	(this was in R>=4.0)
 
 	svydesign() is much faster for very large datasets with character ids or strata.
 

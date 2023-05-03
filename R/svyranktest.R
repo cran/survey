@@ -107,7 +107,7 @@ multiranktest<-function(formula,design,test=c('wilcoxon','vanderWaerden','median
     rankscore<-testf(rankhat,N)
     m <- glm(rankscore~factor(g),weights=w)
     m$na.action<-naa
-    V<-svy.varcoef(m,design)
+    V<-svy.varcoef(m,design) 
     ndf<-length(unique(g))-1
     beta<-coef(m)[-1]
     V<-V[-1,-1]
@@ -125,3 +125,11 @@ multiranktest<-function(formula,design,test=c('wilcoxon','vanderWaerden','median
     class(rval)<-"htest"
     rval
 }
+
+cov_inffun_glm<-function(m, design){
+    A<-summary(m)$cov.unscaled
+    xmat <- model.matrix(m)
+    U<-residuals(m, "working") * m$weights * xmat/weights(design,"sampling")
+    h<-U%*%A
+    vcov(svytotal(h, design))
+    }

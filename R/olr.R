@@ -5,10 +5,17 @@ svyolr<-function(formula, design,...) UseMethod("svyolr",design)
 ##
 
 
-svyolr.svyrep.design<-function(formula,design,...,return.replicates=FALSE,
+svyolr.svyrep.design<-function(formula,design,subset=NULL,...,return.replicates=FALSE,
                                multicore=getOption("survey.multicore")){
- 	environment(formula)<-environment()
- 	df<-model.frame(design)
+    environment(formula)<-environment()
+      subset<-substitute(subset)
+      subset<-eval(subset, model.frame(design), parent.frame())
+      if (!is.null(subset)){
+        if (any(is.na(subset)))
+            stop("subset must not contain NA values")
+        design<-design[subset,]
+       }
+        df<-model.frame(design)
  	pwt<-weights(design,"sampling")
         if (multicore && !requireNamespace("parallel", quietly=TRUE))
           multicore <- FALSE
@@ -34,6 +41,7 @@ svyolr.svyrep.design<-function(formula,design,...,return.replicates=FALSE,
  	rval$var<-svrVar(t(betas),design$scale,design$rscales,mse=design$mse, coef=start)
         rval$df.residual<-degf(design)-length(rval$coefficients)
         rval$deviance<-rval$deviance/mean(pwt)
+        rval$survey.design<-design
  	class(rval)<-"svyolr"
  	rval$call<-sys.call()
         rval$call[[1]]<-as.name(.Generic)
@@ -61,7 +69,7 @@ dgumbel<-function (x, loc = 0, scale = 1, log = FALSE)
 }
 
 
-svyolr.survey.design2<-function (formula, design,  start, ...,  na.action=na.omit, 
+svyolr.survey.design2<-function (formula, design,  start, subset=NULL,...,  na.action=na.omit, 
  method = c("logistic", "probit", "cloglog", "cauchit")) 
 {
     logit <- function(p) log(p/(1 - p))
@@ -118,7 +126,15 @@ svyolr.survey.design2<-function (formula, design,  start, ...,  na.action=na.omi
     dfun <- switch(method, logistic = dlogis, probit = dnorm, 
         cloglog = dgumbel, cauchit = dcauchy)
 
+      subset<-substitute(subset)
+      subset<-eval(subset, model.frame(design), parent.frame())
+      if (!is.null(subset)){
+        if (any(is.na(subset)))
+            stop("subset must not contain NA values")
+        design<-design[subset,]
+       }
 
+    
     m<-model.frame(formula,model.frame(design),na.action=na.pass)
     Terms <- attr(m, "terms")
     m<-na.action(m)
@@ -138,7 +154,8 @@ svyolr.survey.design2<-function (formula, design,  start, ...,  na.action=na.omi
     }
     else warning("an intercept is needed and assumed")
 
-    wt <- weights(design)
+    keep<-weights(design)!=0
+    wt <- weights(design)[keep]
 
 
     offset <- model.offset(m)
@@ -229,10 +246,17 @@ svyolr.survey.design2<-function (formula, design,  start, ...,  na.action=na.omi
     fit$call[[1]]<-as.name(.Generic)
     
     inffun<- gmini(res$par, logdiff=FALSE)%*%solve(H)
+    if(any(!keep)){ ## subsets of raked designs 
+        inffun1<-matrix(0,ncol=NCOL(inffun), nrow=length(keep))
+        inffun1[keep,]<-inffun
+        inffun<-inffun1
+    }
+    
     fit$var<-svyrecvar(inffun, design$cluster, 
                      design$strata, design$fpc,
                      postStrata = design$postStrata)
     fit$df.residual<-degf(design)-length(beta)
+    fit$survey.design<-design
 
 
     fit$na.action <- attr(m, "na.action")
@@ -330,15 +354,59 @@ print.summary.svyolr<-function (x, digits = x$digits, ...)
 }
 
 model.frame.svyolr<-function(formula, ...){
-	  mcall <- match.call(svyolr, formula$call)
-	  design<- eval(mcall$design)
-	  formula<-eval(mcall$formula)
-	  mf<-model.frame(formula,model.frame(design))
-	  w<-weights(design, type="sampling")
-	  if (is.null(naa<-attr(mf,"na.action")))
-	     mf[["(weights)"]]<-w
-	  else
-	     mf[["(weights)"]]<-w[-naa]
-	  mf	
-	}
+    mcall <- match.call(svyolr, formula$call)
+    e<-environment(formula(formula))
+    formula<-eval(mcall$formula, envir=e)
+    design<- eval(mcall$design, envir=e)
+    mf<-model.frame(formula,model.frame(design))
+    w<-weights(design, type="sampling")
+    if (is.null(naa<-attr(mf,"na.action")))
+        mf[["(weights)"]]<-w
+    else
+        mf[["(weights)"]]<-w[-naa]
+    mf	
+}
 
+## taken from MASS::predict.polr
+predict.svyolr<-function (object, newdata, type = c("class", "probs"), ...) 
+{
+    type <- match.arg(type)
+    if (missing(newdata)) 
+        Y <- object$fitted
+    else {
+        newdata <- as.data.frame(newdata)
+        Terms <- delete.response(object$terms)
+        m <- model.frame(Terms, newdata, na.action = function(x) x, 
+            xlev = object$xlevels)
+        if (!is.null(cl <- attr(Terms, "dataClasses"))) 
+            .checkMFClasses(cl, m)
+        X <- model.matrix(Terms, m, contrasts = object$contrasts)
+        xint <- match("(Intercept)", colnames(X), nomatch = 0L)
+        if (xint > 0L) 
+            X <- X[, -xint, drop = FALSE]
+        n <- nrow(X)
+        q <- length(object$zeta)
+        eta <- drop(X %*% object$coefficients)
+        pfun <- switch(object$method, logistic = plogis, probit = pnorm, 
+            loglog = pgumbel, cloglog = pGumbel, cauchit = pcauchy)
+        cumpr <- matrix(pfun(matrix(object$zeta, n, q, byrow = TRUE) - 
+            eta), , q)
+        Y <- t(apply(cumpr, 1L, function(x) diff(c(0, x, 1))))
+        dimnames(Y) <- list(rownames(X), object$lev)
+    }
+    if (missing(newdata) && !is.null(object$na.action)) 
+        Y <- napredict(object$na.action, Y)
+    if (type == "class") 
+        factor(max.col(Y), levels = seq_along(object$lev), labels = object$lev)
+    else drop(Y)
+}
+
+## taken from MASS::pGumbel
+pGumbel<-function (q, loc = 0, scale = 1, lower.tail = TRUE) 
+{
+    q <- (q - loc)/scale
+    p <- exp(-exp(q))
+    if (lower.tail) 
+        1 - p
+    else p
+}

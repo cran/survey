@@ -18,12 +18,13 @@ svyby(formula, by ,design,...)
 \method{svyby}{default}(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE,
 keep.names = TRUE,verbose=FALSE, vartype=c("se","ci","ci","cv","cvpct","var"),
  drop.empty.groups=TRUE, covmat=FALSE, return.replicates=FALSE,
- na.rm.by=FALSE, na.rm.all=FALSE,
+ na.rm.by=FALSE, na.rm.all=FALSE, stringsAsFactors=TRUE,
 multicore=getOption("survey.multicore"))
 \method{svyby}{survey.design2}(formula, by, design, FUN, ..., deff=FALSE,keep.var = TRUE,
 keep.names = TRUE,verbose=FALSE, vartype=c("se","ci","ci","cv","cvpct","var"),
- drop.empty.groups=TRUE, covmat=FALSE, influence=covmat,
- na.rm.by=FALSE, na.rm.all=FALSE, multicore=getOption("survey.multicore"))
+ drop.empty.groups=TRUE, covmat=FALSE, influence=covmat, 
+ na.rm.by=FALSE, na.rm.all=FALSE, stringsAsFactors=TRUE,
+ multicore=getOption("survey.multicore"))
 
 \method{SE}{svyby}(object,...)
 \method{deff}{svyby}(object,...)
@@ -61,7 +62,7 @@ svybys(formula,  bys,  design, FUN, ...)
   \code{by} variables}.
 \item{na.rm.all}{If true, check for groups with no non-missing
   observations for variables defined by \code{formula} and treat these groups
-  as empty}
+  as empty. Doesn't make much sense without \code{na.rm=TRUE}}
 \item{covmat}{If \code{TRUE}, compute covariances between estimates for
   different subsets. Allows \code{\link{svycontrast}} to be used on
   output. Requires that \code{FUN} supports either
@@ -70,7 +71,10 @@ svybys(formula,  bys,  design, FUN, ...)
   \code{TRUE}, return all the replicates as the "replicates" attribute of the result}
 \item{influence}{Return the influence functions of the result}
 \item{multicore}{Use \code{multicore} package to distribute subsets over
-   multiple processors?}
+  multiple processors?}
+\item{stringsAsFactors}{Convert any string variables in \code{formula}
+  to factors before calling \code{FUN}, so that the factor levels will
+  be the same in all groups (See Note below). Potentially slow.}
   \item{parm}{a specification of which parameters are to be given
     confidence intervals, either a vector of numbers or a vector of
     names. If missing, all parameters are considered.}
@@ -115,9 +119,15 @@ The variance type "ci" asks for confidence intervals, which are produced
     re-evaluated in each subset, so it is unwise to use data-dependent
     terms in \code{formula}.  In particular, \code{svyby(~factor(a), ~b,
     design=d, svymean)}, will create factor variables whose levels are
-    only those values of \code{a}  present in each subset.  Either use
+    only those values of \code{a}  present in each subset. If \code{a}
+    is a character variable then \code{svyby(~a, ~b,
+    design=d, svymean)} creates factor variables implicitly and so has
+    the same problem.  Either use
     \code{\link{update.survey.design}} to add variables to the design
-    object instead or specify the levels explicitly in the call to \code{factor}.
+    object instead or specify the levels explicitly in the call to
+    \code{factor}. The \code{stringsAsFactors=TRUE} option converts
+    all character variables to factors, which can be slow, set it to
+    \code{FALSE} if you have predefined factors where necessary.
 
     
     }

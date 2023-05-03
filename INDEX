@@ -52,7 +52,9 @@ svylogrank		Design-based logrank tests
 svystandardize		Direct standardisation 
 svykappa                Cohen's kappa for inter-rater agreement
 svycralpha		Cronbach's alpha
+svyivreg		Two-stage least-squares for instrumental variables
 svymle                  Maximum pseudolikelihood estimation in complex surveys
+svynls			Design-weighted nonlinear least squares
 svyprcomp               Principal component analysis and biplots
 svyfactanal             Weighted maximum likelihood factor analysis
 
@@ -99,6 +101,7 @@ scd                     Cardiac arrests example
 api                     California Academic Performance Index
 crowd                   Small example from VPLX manual
 mu284                   Two-stage sample from MU284 population
+myco			Stratified case-control sample: BCG and leprosy
 nhanes			Subset of NHANES 2009-10
 yrbs                    One variable from Youth Risk Behavior Survey
 

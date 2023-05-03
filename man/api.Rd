@@ -75,7 +75,7 @@ data(api)
   Academic Technology Services; these pages are no longer on line. 
 }
 \references{
-  The API program has been discontinued at the end of 2018. Information is archived at  \url{https://www.cde.ca.gov/re/pr/api.asp}
+  The API program has been discontinued at the end of 2018, and the archive page at the California Department of Education is now gone. The Wikipedia article has links to past material at the Internet Archive. \url{https://en.wikipedia.org/wiki/Academic_Performance_Index_(California_public_schools)}
 }
 \examples{
 library(survey)

@@ -13,7 +13,8 @@ Trims very high or very low sampling weights to reduce the influence of outlying
 \usage{
 trimWeights(design, upper = Inf, lower = -Inf, ...)
 \method{trimWeights}{survey.design2}(design, upper = Inf, lower = -Inf, strict=FALSE,...)
-\method{trimWeights}{svyrep.design}(design, upper = Inf, lower = -Inf,compress=FALSE,...)
+\method{trimWeights}{svyrep.design}(design, upper = Inf, lower = -Inf,
+strict=FALSE, compress=FALSE,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -29,7 +30,8 @@ trimWeights(design, upper = Inf, lower = -Inf, ...)
   \item{strict}{
     The reapportionment of the `trimmings' from the weights can push
     other weights over the limits. If \code{trim=TRUE} the function
-    calls itself recursively to prevent this.
+    repeats the trimming iteratively to prevent this. For
+    replicate-weight designs \code{strict} applies only to the trimming of the sampling  weights.
   }
   \item{compress}{
     Compress the replicate weights after trimming.

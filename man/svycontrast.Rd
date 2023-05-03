@@ -83,6 +83,10 @@ svycontrast(totals1, list(quote(E/total), quote(H/total), quote(M/total)))
 totals2<-svycontrast(totals, list(total=quote(E+H+M)), add=TRUE)
 all.equal(as.matrix(totals1),as.matrix(totals2))
 
+## more complicated svyby
+means <- svyby(~api00+api99, ~stype+sch.wide, design=dclus1, svymean,covmat=TRUE)
+svycontrast(means, quote(`E.No:api00`-`E.No:api99`))
+svycontrast(means, quote(`E.No:api00`/`E.No:api99`))
 
 ## transforming replicates
 meanlogs_r <- svymean(~log(api00)+log(api99), rclus1, return.replicates=TRUE)

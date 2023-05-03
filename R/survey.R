@@ -600,8 +600,8 @@ vcov.svystat<-function(object,...){
   as.matrix(attr(object,"var"))
 }
 
-influence.svystat<-function(object,...){
-  attr(object,"influence")
+influence.svystat<-function(model,...){
+  attr(model,"influence")
 }
 
 SE.svystat<-function(object,...){
@@ -690,9 +690,16 @@ svyvar.survey.design<-function(x, design, na.rm=FALSE,...){
 	else if(typeof(x) %in% c("expression","symbol"))
             x<-eval(x, design$variables)
         
-	n<-sum(weights(design,"sampling")!=0)
+	n<-sum((weights(design,"sampling")!=0) & (rowSums(is.na(as.matrix(x)))==0))
 	xbar<-svymean(x,design, na.rm=na.rm)
-	if(NCOL(x)==1) {
+    if(NCOL(x)==1) {
+        if(n==1){
+            v<-NA
+            attr(v,"statistic")<-NA
+            attr(v,"var")<-NA
+            class(v)<-"svystat"
+            return(v)
+        }
             x<-x-xbar
             v<-svymean(x*x*n/(n-1),design, na.rm=na.rm)
             attr(v,"statistic")<-"variance"
@@ -936,6 +943,8 @@ svycoxph.survey.design<-function(formula,design, subset=NULL, rescale=TRUE, ...)
     ## unless the user doesn't want to
     if (rescale)
         data$.survey.prob.weights<-(1/design$prob)/mean(1/design$prob)
+    else
+        data$.survey.prob.weights<-1/design$prob
     if (!all(all.vars(formula) %in% names(data))) 
         stop("all variables must be in design= argument")
     g<-with(list(data=data), eval(g))
@@ -954,31 +963,38 @@ svycoxph.survey.design<-function(formula,design, subset=NULL, rescale=TRUE, ...)
     if (length(nas))
         design<-design[-nas,]
 
-    dbeta.subset<-resid(g,"dfbeta",weighted=TRUE)
-    if (nrow(design)==NROW(dbeta.subset)){
-      dbeta<-as.matrix(dbeta.subset)
-    } else {
-      dbeta<-matrix(0,ncol=NCOL(dbeta.subset),nrow=nrow(design))
-      dbeta[is.finite(design$prob),]<-dbeta.subset
-    }
-    g$inv.info<-g$var
+    ## if there are betas...
+    if (length(coef(g))>0){
+        dbeta.subset<-resid(g,"dfbeta",weighted=TRUE)
+        if (nrow(design)==NROW(dbeta.subset)){
+            dbeta<-as.matrix(dbeta.subset)
+        } else {
+            dbeta<-matrix(0,ncol=NCOL(dbeta.subset),nrow=nrow(design))
+            dbeta[is.finite(design$prob),]<-dbeta.subset
+        }
+        
+        if (!is.null(g$naive.var)) ## newer versions of survival switch to robust=TRUE with non-integer weights
+            g$inv.info<-g$naive.var
+        else
+            g$inv.info<-g$var
+        if (inherits(design,"survey.design2"))
+            g$var<-svyrecvar(dbeta, design$cluster,
+                             design$strata, design$fpc,
+                             postStrata=design$postStrata)
+        else if (inherits(design, "twophase"))
+            g$var<-twophasevar(dbeta, design)
+        else if(inherits(design, "twophase2"))
+            g$var<-twophase2var(dbeta, design)
+        else if(inherits(design, "pps"))
+            g$var<-ppsvar(dbeta,design)
+        else
+            g$var<-svyCprod(dbeta, design$strata,
+                            design$cluster[[1]], design$fpc,design$nPSU,
+                            design$certainty,design$postStrata)
     
-    if (inherits(design,"survey.design2"))
-      g$var<-svyrecvar(dbeta, design$cluster,
-                    design$strata, design$fpc,
-                    postStrata=design$postStrata)
-    else if (inherits(design, "twophase"))
-      g$var<-twophasevar(dbeta, design)
-    else if(inherits(design, "twophase2"))
-      g$var<-twophase2var(dbeta, design)
-    else if(inherits(design, "pps"))
-      g$var<-ppsvar(dbeta,design)
-    else
-      g$var<-svyCprod(dbeta, design$strata,
-                      design$cluster[[1]], design$fpc,design$nPSU,
-                      design$certainty,design$postStrata)
+        g$wald.test<-coef(g)%*%solve(g$var,coef(g))
+    } else g$var<-matrix(ncol=0,nrow=0)
     
-    g$wald.test<-coef(g)%*%solve(g$var,coef(g))
     g$ll<-g$loglik
     g$loglik<-NULL
     g$rscore<-NULL
@@ -1009,42 +1025,42 @@ model.frame.svycoxph<-function(formula,...){
     with(list(data=data), eval(f))
 }
 
-model.matrix.svycoxph<-function (object, data = NULL, contrast.arg = object$contrasts, 
-    ...) 
-{
-    if (!is.null(object[["x"]])) 
-        object[["x"]]
-    else {
-        if (is.null(data)) 
-            data <- model.frame(object, ...)
-        else data <- model.frame(object, data = data, ...)
-        Terms <- object$terms
-        attr(Terms, "intercept") <- 1
-        strats <- attr(Terms, "specials")$strata
-        cluster <- attr(Terms, "specials")$cluster
-        dropx <- NULL
-        if (length(cluster)) {
-            tempc <- untangle.specials(Terms, "cluster", 1:10)
-            ord <- attr(Terms, "order")[tempc$terms]
-            if (any(ord > 1)) 
-                stop("Cluster can not be used in an interaction")
-            dropx <- tempc$terms
-        }
-        if (length(strats)) {
-            temp <- untangle.specials(Terms, "strata", 1)
-            dropx <- c(dropx, temp$terms)
-        }
-        if (length(dropx)) {
-            newTerms <- Terms[-dropx]
-            X <- model.matrix(newTerms, data, contrasts = contrast.arg)
-        }
-        else {
-            newTerms <- Terms
-            X <- model.matrix(Terms, data, contrasts = contrast.arg)
-        }
-        X
-    }
-}
+## model.matrix.svycoxph<-function (object, data = NULL, contrast.arg = object$contrasts, 
+##     ...) 
+## {
+##     if (!is.null(object[["x"]])) 
+##         object[["x"]]
+##     else {
+##         if (is.null(data)) 
+##             data <- model.frame(object, ...)
+##         else data <- model.frame(object, data = data, ...)
+##         Terms <- object$terms
+##         attr(Terms, "intercept") <- 1
+##         strats <- attr(Terms, "specials")$strata
+##         cluster <- attr(Terms, "specials")$cluster
+##         dropx <- NULL
+##         if (length(cluster)) {
+##             tempc <- untangle.specials(Terms, "cluster", 1:10)
+##             ord <- attr(Terms, "order")[tempc$terms]
+##             if (any(ord > 1)) 
+##                 stop("Cluster can not be used in an interaction")
+##             dropx <- tempc$terms
+##         }
+##         if (length(strats)) {
+##             temp <- untangle.specials(Terms, "strata", 1)
+##             dropx <- c(dropx, temp$terms)
+##         }
+##         if (length(dropx)) {
+##             newTerms <- Terms[-dropx]
+##             X <- model.matrix(newTerms, data, contrasts = contrast.arg)
+##         }
+##         else {
+##             newTerms <- Terms
+##             X <- model.matrix(Terms, data, contrasts = contrast.arg)
+##         }
+##         X
+##     }
+## }
 
 print.svycoxph<-function(x,...){
     print(x$survey.design, varnames=FALSE, design.summaries=FALSE,...)
@@ -1058,16 +1074,14 @@ summary.svycoxph<-function(object,...){
     NextMethod()
 }
 
-survfit.svycoxph<-function(object,...){
+survfit.svycoxph<-function(formula,...){
     stop("No survfit method for survey models")
 }
 extractAIC.svycoxph<-function(fit,...){
     stop("No AIC for survey models")
 }
 
-anova.svycoxph<-function(object,...){
-    stop("No anova method for survey models")
-}
+
 
 svyglm<-function(formula, design,subset=NULL,family=stats::gaussian(),start=NULL, ...){
   .svycheck(design)
@@ -1141,10 +1155,15 @@ svyglm.survey.design<-function(formula,design,subset=NULL, family=stats::gaussia
     }
 
     if (influence){
-        estfun< model.matrix(g)*naa_shorter(nas, resid(g,"working"))*g$weights
+        estfun<- model.matrix(g)*naa_shorter(nas, resid(g,"working"))*g$weights
         if (g$rank<NCOL(estfun)){
             estfun<-estfun[,g$qr$pivot[1:g$rank]]
         }
+        if ( length(nas) && (NROW(data)>NROW(estfun))){
+            estfun1<-matrix(0,ncol=ncol(estfun),nrow=nrow(data))
+            estfun1[-nas,]<-estfun
+            estfun<-estfun1
+            }
         attr(g, "influence")<-estfun%*%g$naive.cov
     }
 
@@ -1202,8 +1221,7 @@ svy.varcoef<-function(glm.object,design){
     else if (inherits(design, "pps"))
       ppsvar(estfun%*%Ainv, design)
     else
-      svyCprod(estfun%*%Ainv,design$strata,design$cluster[[1]],design$fpc, design$nPSU,
-                  design$certainty,design$postStrata)
+      vcov(svytotal(estfun%*%Ainv/weights(design,"sampling"), design))
   }
 
 residuals.svyglm<-function(object,type = c("deviance", "pearson", "working", 
@@ -1643,8 +1661,14 @@ svymle<-function(loglike, gradient=NULL, design, formulas,
     dimnames(rval$sandwich)<-list(parnms,parnms)
   }
 
-  if (influence)
+  if (influence){
+      if (nas && (NROW(data)>NROW(db))){
+          db1<-matrix(0,nrow=NROW(data),ncol=NCOL(db))
+          db1[-nas,]<-db
+          db<-db1
+      }
       attr(rval,"influence")<-db
+      }
   rval$call<-match.call()
   rval$design<-design
   class(rval)<-"svymle"

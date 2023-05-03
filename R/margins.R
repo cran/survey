@@ -18,7 +18,7 @@ marginpred.svycoxph<-function(model, adjustfor, predictat, se=FALSE, ...){
 
   adjmf<-model.frame(terms(adjustfor), model.frame(design))
   adjmm<-model.matrix(terms(adjustfor), adjmf)
-  modelmm<-model.matrix(model)[,-1,drop=FALSE]
+  modelmm<-model.matrix(model)
   modelmm <- sweep(modelmm,2,model$means)
 
   if (qr(modelmm)$rank<ncol(modelmm))

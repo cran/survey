@@ -75,6 +75,11 @@ quantiletest<-function(p){
 svyranktest(ell~comp.imp, dclus1, test=quantiletest(0.5))
 svyranktest(ell~comp.imp, dclus1, test=quantiletest(0.75))
 
+## replicate weights
+
+rclus1<-as.svrepdesign(dclus1)
+svyranktest(ell~stype, rclus1)
+
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

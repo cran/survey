@@ -52,7 +52,8 @@ qrule_hf5<-function(x,w,p){
         x<-x[!zero]
     }
     n<-length(x)
-
+     if (n==1) return(x)
+     
      ii<-order(x)
      x<-x[ii]
      w<-w[ii]
@@ -69,6 +70,7 @@ qrule_hf6<-function(x,w,p){
         x<-x[!zero]
     }
     n<-length(x)
+     if (n==1) return(x)
 
      ii<-order(x)
      x<-x[ii]
@@ -84,6 +86,7 @@ qrule_shahvaish<-function(x,w,p){
         x<-x[!zero]
     }
     n<-length(x)
+     if (n==1) return(x)
 
      ii<-order(x)
      x<-x[ii]
@@ -103,6 +106,7 @@ qrule_hf7<-function(x,w,p){
         x<-x[!zero]
     }
     n<-length(x)
+     if (n==1) return(x)
 
     ii<-order(x)
     x<-x[ii]
@@ -119,6 +123,7 @@ qrule_hf8<-function(x,w,p){
         x<-x[!zero]
     }
     n<-length(x)
+     if (n==1) return(x)
 
     ii<-order(x)
     x<-x[ii]
@@ -136,6 +141,7 @@ qrule_hf9<-function(x,w,p){
         x<-x[!zero]
     }
     n<-length(x)
+     if (n==1) return(x)
 
     ii<-order(x)
     x<-x[ii]

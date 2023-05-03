@@ -1,10 +1,10 @@
 
 svydesign.imputationList<-function(ids, probs = NULL, strata = NULL, 
              variables = NULL, fpc = NULL, data, nest = FALSE, 
-             check.strata = !nest,  weights = NULL, pps=FALSE,...){
+             check.strata = !nest,  weights = NULL, pps=FALSE,calibrate.formula=NULL,...){
     	designs <- lapply(data$imputations, function(d) svydesign(ids=ids, probs=probs,
               strata=strata,variables=variables,fpc=fpc,nest=nest,
-              check.strata=check.strata, weights=weights,data=d,pps=pps,...))
+              check.strata=check.strata, weights=weights,data=d,pps=pps,calibrate.formula=calibrate.formula,...))
     	rval <- list(designs=designs, call=sys.call(-1))
     	class(rval) <- "svyimputationList"
     	rval

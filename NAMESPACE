@@ -15,8 +15,10 @@ export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        svyciprop, svyttest, marginpred, twophasevar, twophase2var, ppsmat, HR, unwtd.count,
        svyfactanal, svypredmeans, svyprcomp, trimWeights,stratsample,svylogrank,
        svyranktest,svystandardize,
-       psrsq, svysurvreg, cal_names, svycralpha, svyivreg, svynls,
-       oldsvyquantile,svyqqplot, svyqqmath, svybys, svygofchisq, poisson_sampling,ppscov)
+       psrsq, svysurvreg, cal_names, svycralpha, svyivreg, svynls, svyscoretest,
+       oldsvyquantile,svyqqplot, svyqqmath, svybys, svygofchisq,
+       poisson_sampling,ppscov,
+       xdesign)
 
 S3method(svyloglin,survey.design)
 S3method(svyloglin,svyrep.design)
@@ -151,6 +153,7 @@ S3method(dotchart, default)
 
 S3method(predict, svyglm)
 S3method(predict, svrepglm)
+S3method(predict, svyolr)
 S3method(predict, svyratio)
 S3method(predict, svyratio_separate)
 S3method(coef,svyratio)
@@ -271,6 +274,9 @@ S3method(summary,svyglm)
 S3method(summary,svymle)
 S3method(summary,svytable)
 
+S3method(deviance, coxph)
+S3method(deviance, svycoxph)
+
 S3method(print,summary.survey.design)
 S3method(print,summary.survey.design2)
 S3method(print,summary.twophase)
@@ -299,7 +305,9 @@ S3method(print, twophase)
 S3method(print, twophase2)
 S3method(print, calfun)
 S3method(print, svyvar)
+S3method(print, seqanova.svycoxph)
 S3method(print, seqanova.svyglm)
+
 S3method(as.matrix, svyvar)
 S3method(print, svrepvar)
 S3method(as.matrix, svrepvar)
@@ -457,6 +465,7 @@ S3method(svyranktest,DBIsvydesign)
 S3method(svyivreg,survey.design)
 S3method(svyivreg, svyrep.design)
 S3method(summary, svyivreg)
+S3method(vcov, svyivreg)
 
 S3method(psrsq,glm)
 S3method(psrsq,svyglm)
@@ -472,3 +481,48 @@ S3method(print, svynls)
 S3method(summary, svynls)
 S3method(coef,svynls)
 S3method(vcov,svynls)
+
+
+S3method(svyscoretest,svyglm)
+
+
+S3method(unwrap,default)
+S3method(unwrap2, default)
+S3method(unwrap2, newsvyquantile)
+
+
+S3method(svyxvar,xdesign)
+S3method(svymean, xdesign)
+S3method(svyglm, xdesign)
+S3method(print,xdesign)
+S3method(degf, xdesign)
+S3method(update,xdesign)
+S3method(transform, xdesign)
+S3method(subset, xdesign)
+S3method("[", xdesign)
+S3method(svyby, xdesign)
+S3method(dim, xdesign)
+S3method(dimnames, xdesign)
+
+S3method(estfuns, coxph)
+S3method(estfuns, glm)
+S3method(estfuns, lm)
+
+S3method(sigma, svyglm)
+S3method(sigma, svrepglm)
+
+S3method(pps_design, ppsdcheck)
+S3method(pps_design, ppsdelta)
+S3method(pps_design, HR)
+S3method(pps_design, ppsmat)
+S3method(pps_design, character)
+
+S3method(survfit,svycoxph)
+
+S3method(influence,svystat)
+
+S3method(estWeights,twophase2)
+S3method(postStratify,pps)
+S3method(svycontrast,svyolr)
+S3method(svylogrank,twophase2)
+S3method(svytotal,xdesign)
