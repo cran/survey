@@ -203,7 +203,8 @@ pps_design.ppsdelta<-function(method,ids,strata=NULL, probs=NULL, fpc=NULL,varia
 
   w<-weights(rval)
   deltacheck<-method$delta*tcrossprod(w)
-  diag(deltacheck)<-diag(method$delta)*w  
+  diag(deltacheck)<-diag(method$delta)*w
+  method$deltacheck<-deltacheck
   rval$variance<-variance
 
   rval$dcheck<-list(list(id=1:nrow(method$deltacheck), dcheck=deltacheck))

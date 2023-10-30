@@ -18,7 +18,7 @@ svycontrast(stat, contrasts, add=FALSE, ...)
   \item{\dots}{For future expansion}
 }
 \value{
-Object of class \code{svrepstat} or \code{svystat}
+Object of class \code{svrepstat} or \code{svystat} or \code{svyvar}
 }
 
 \details{
@@ -38,6 +38,8 @@ without replicates, the delta-method is used to compute variances, and
 the calls must use only functions that \code{\link{deriv}} knows how
 to differentiate. If the names are not legal variable names they must
 be quoted with backticks (eg \code{`0.1`}).
+
+If \code{stats} is a \code{svyvar} object, the estimates are elements of a matrix and the names are the row and column names pasted together with a colon. 
   }
 \seealso{\code{\link{regTermTest}}, \code{svyglm}}
 \examples{
@@ -92,6 +94,12 @@ svycontrast(means, quote(`E.No:api00`/`E.No:api99`))
 meanlogs_r <- svymean(~log(api00)+log(api99), rclus1, return.replicates=TRUE)
 svycontrast(meanlogs_r,
     list(api00=quote(exp(`log(api00)`)), api99=quote(exp(`log(api99)`))))
+
+## converting covariances to correlations
+vmat <-svyvar(~api00+ell,dclus1)
+print(vmat,cov=TRUE)
+cov2cor(as.matrix(vmat))[1,2]
+svycontrast(vmat, quote(`api00:ell`/sqrt(`api00:api00`*`ell:ell`)))
 
 }
 \keyword{survey}% at least one, from doc/KEYWORDS

@@ -1485,7 +1485,7 @@ residuals.svrepglm<-function(object,type = c("deviance", "pearson", "working",
    	   y <- object$y
 	   mu <- object$fitted.values
     	   wts <- object$prior.weights
-	   r<-(y - mu) * sqrt(wts)/(sqrt(object$family$variance(mu))*sqrt(object$survey.design$pweights/sum(object$survey.design$pweights)))
+	   r<-(y - mu) * sqrt(wts)/(sqrt(object$family$variance(mu))*sqrt(object$survey.design$pweights/mean(object$survey.design$pweights)))
 	   if (is.null(object$na.action)) 
         	r
     	   else 

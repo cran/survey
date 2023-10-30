@@ -7,6 +7,7 @@
 \alias{survey.drop.replicates}
 \alias{survey.multicore}
 \alias{survey.replicates.mse}
+\alias{survey.use_rcpp}
 \title{Options for the survey package}
 \description{
   This help page documents the options that control the behaviour of
@@ -75,7 +76,11 @@
     need not, especially if the computer is short on memory. The best
     strategy is probably to experiment with explicitly requesting
     \code{multicore=TRUE} in functions that support it, to see if there
-    is an increase in speed before setting the global option. 
+    is an increase in speed before setting the global option.
+
+    \code{survey.use_rcpp} controls whether the new C++ code for
+    standard errors is used (vs the old R code). The factory setting is
+    \code{TRUE} and the only reason to use \code{FALSE} is for comparisons.
     
   }
   

@@ -19,7 +19,7 @@ svyolr.svyrep.design<-function(formula,design,subset=NULL,...,return.replicates=
  	pwt<-weights(design,"sampling")
         if (multicore && !requireNamespace("parallel", quietly=TRUE))
           multicore <- FALSE
-        
+
  	rval<-suppressWarnings(MASS::polr(formula,data=df,...,Hess=TRUE,model=FALSE,
                                     weights=pwt))
  	start<-c(rval$coefficients,rval$zeta)
@@ -51,37 +51,37 @@ svyolr.svyrep.design<-function(formula,design,subset=NULL,...,return.replicates=
 
 
 pgumbel<-
-function (q, loc = 0, scale = 1, lower.tail = TRUE) 
+function (q, loc = 0, scale = 1, lower.tail = TRUE)
 {
     q <- (q - loc)/scale
     p <- exp(-exp(-q))
-    if (!lower.tail) 
+    if (!lower.tail)
         1 - p
     else p
 }
-dgumbel<-function (x, loc = 0, scale = 1, log = FALSE) 
+dgumbel<-function (x, loc = 0, scale = 1, log = FALSE)
 {
     x <- (x - loc)/scale
     d <- log(1/scale) - x - exp(-x)
-    if (!log) 
+    if (!log)
         exp(d)
     else d
 }
 
 
-svyolr.survey.design2<-function (formula, design,  start, subset=NULL,...,  na.action=na.omit, 
- method = c("logistic", "probit", "cloglog", "cauchit")) 
+svyolr.survey.design2<-function (formula, design,  start, subset=NULL,...,  na.action=na.omit,
+ method = c("logistic", "probit", "cloglog", "cauchit"))
 {
     logit <- function(p) log(p/(1 - p))
     fmin <- function(beta) {
         theta <- beta[pc + 1:q]
-        gamm <- c(-100, cumsum(c(theta[1], exp(theta[-1]))), 
+        gamm <- c(-100, cumsum(c(theta[1], exp(theta[-1]))),
             100)
         eta <- offset
-        if (pc > 0) 
+        if (pc > 0)
             eta <- eta + drop(x %*% beta[1:pc])
         pr <- pfun(gamm[y + 1] - eta) - pfun(gamm[y] - eta)
-        if (all(pr > 0)) 
+        if (all(pr > 0))
             -sum(wt * log(pr))
         else Inf
     }
@@ -94,24 +94,24 @@ svyolr.survey.design2<-function (formula, design,  start, subset=NULL,...,  na.a
         mat
     }
     gmini <- function(beta,logdiff=FALSE) {
- 
+
         theta <- beta[pc + 1:q]
-        gamm <- c(-100, cumsum(c(theta[1], exp(theta[-1]))), 
+        gamm <- c(-100, cumsum(c(theta[1], exp(theta[-1]))),
             100)
         eta <- offset
-        if (pc > 0) 
+        if (pc > 0)
             eta <- eta + drop(x %*% beta[1:pc])
         pr <- pfun(gamm[y + 1] - eta) - pfun(gamm[y] - eta)
         p1 <- dfun(gamm[y + 1] - eta)
         p2 <- dfun(gamm[y] - eta)
-        g1 <- if (pc > 0) 
+        g1 <- if (pc > 0)
             x * (wt * (p1 - p2)/pr)
         else numeric(0)
         xx <- .polrY1 * p1 - .polrY2 * p2
         g2 <- - xx * (wt/pr)
         if (logdiff)
             g2 <- g2 %*% jacobian(theta)
-        if (all(pr > 0)) 
+        if (all(pr > 0))
             cbind(g1, g2)
         else NA+cbind(g1,g2)
     }
@@ -121,9 +121,9 @@ svyolr.survey.design2<-function (formula, design,  start, subset=NULL,...,  na.a
     m <- match.call(expand.dots = FALSE)
     method <- match.arg(method)
 
-    pfun <- switch(method, logistic = plogis, probit = pnorm, 
+    pfun <- switch(method, logistic = plogis, probit = pnorm,
         cloglog = pgumbel, cauchit = pcauchy)
-    dfun <- switch(method, logistic = dlogis, probit = dnorm, 
+    dfun <- switch(method, logistic = dlogis, probit = dnorm,
         cloglog = dgumbel, cauchit = dcauchy)
 
       subset<-substitute(subset)
@@ -134,7 +134,7 @@ svyolr.survey.design2<-function (formula, design,  start, subset=NULL,...,  na.a
         design<-design[subset,]
        }
 
-    
+
     m<-model.frame(formula,model.frame(design),na.action=na.pass)
     Terms <- attr(m, "terms")
     m<-na.action(m)
@@ -159,13 +159,13 @@ svyolr.survey.design2<-function (formula, design,  start, subset=NULL,...,  na.a
 
 
     offset <- model.offset(m)
-    if (length(offset) <= 1) 
+    if (length(offset) <= 1)
         offset <- rep(0, n)
     y <- model.response(m)
-    if (!is.factor(y)) 
+    if (!is.factor(y))
         stop("response must be a factor")
     lev <- levels(y)
-    if (length(lev) <= 2) 
+    if (length(lev) <= 2)
         stop("response must have 3 or more levels")
     y <- unclass(y)
     q <- length(lev) - 1
@@ -176,31 +176,31 @@ svyolr.survey.design2<-function (formula, design,  start, subset=NULL,...,  na.a
         q1 <- length(lev)%/%2
         y1 <- (y > q1)
         X <- cbind(Intercept = rep(1, n), x)
-        fit <- switch(method, logistic = glm.fit(X, y1, wt/mean(wt), family = quasibinomial(), 
-            offset = offset), probit = glm.fit(X, y1, wt/mean(wt), family = quasibinomial("probit"), 
-            offset = offset), cloglog = glm.fit(X, y1, wt/mean(wt), family = quasibinomial("probit"), 
-            offset = offset), cauchit = glm.fit(X, y1, wt/mean(wt), family = quasibinomial("cauchit"), 
+        fit <- switch(method, logistic = glm.fit(X, y1, wt/mean(wt), family = quasibinomial(),
+            offset = offset), probit = glm.fit(X, y1, wt/mean(wt), family = quasibinomial("probit"),
+            offset = offset), cloglog = glm.fit(X, y1, wt/mean(wt), family = quasibinomial("probit"),
+            offset = offset), cauchit = glm.fit(X, y1, wt/mean(wt), family = quasibinomial("cauchit"),
             offset = offset))
-        if (!fit$converged) 
+        if (!fit$converged)
             stop("attempt to find suitable starting values failed")
         coefs <- fit$coefficients
         if (any(is.na(coefs))) {
             warning("design appears to be rank-deficient, so dropping some coefs")
-            keep <- names(coefs)[!is.na(coefs)]
-            coefs <- coefs[keep]
-            x <- x[, keep[-1], drop = FALSE]
+            betakeep <- names(coefs)[!is.na(coefs)]
+            coefs <- coefs[betakeep]
+            x <- x[, betakeep[-1], drop = FALSE]
             pc <- ncol(x)
         }
         spacing <- logit((1:q)/(q + 1))
-        if (method != "logit") 
+        if (method != "logit")
             spacing <- spacing/1.7
         gammas <- -coefs[1] + spacing - spacing[q1]
         thetas <- c(gammas[1], log(diff(gammas)))
         start <- c(coefs[-1], thetas)
     }
-    else if (length(start) != pc + q) 
+    else if (length(start) != pc + q)
         stop("'start' is not of the correct length")
-    res <- optim(start, fmin, gmin, method = "BFGS", hessian = TRUE, 
+    res <- optim(start, fmin, gmin, method = "BFGS", hessian = TRUE,
         ...)
     beta <- res$par[seq_len(pc)]
     theta <- res$par[pc + 1:q]
@@ -215,14 +215,14 @@ svyolr.survey.design2<-function (formula, design,  start, subset=NULL,...,  na.a
     else {
         eta <- rep(0, n)
     }
-    cumpr <- matrix(pfun(matrix(zeta, n, q, byrow = TRUE) - eta), 
+    cumpr <- matrix(pfun(matrix(zeta, n, q, byrow = TRUE) - eta),
         , q)
     fitted <- t(apply(cumpr, 1, function(x) diff(c(0, x, 1))))
     dimnames(fitted) <- list(row.names(m), lev)
-    fit <- list(coefficients = beta, zeta = zeta, deviance = deviance, 
-        fitted.values = fitted, lev = lev, terms = Terms, df.residual = sum(wt) - 
-            pc - q, edf = pc + q, n = sum(wt), nobs = sum(wt), 
-        method = method, convergence = res$convergence, 
+    fit <- list(coefficients = beta, zeta = zeta, deviance = deviance,
+        fitted.values = fitted, lev = lev, terms = Terms, df.residual = sum(wt) -
+            pc - q, edf = pc + q, n = sum(wt), nobs = sum(wt),
+        method = method, convergence = res$convergence,
         niter = niter)
 
     dn <- c(names(beta), names(zeta))
@@ -244,15 +244,15 @@ svyolr.survey.design2<-function (formula, design,  start, subset=NULL,...,  na.a
 
     fit$call<-sys.call()
     fit$call[[1]]<-as.name(.Generic)
-    
+
     inffun<- gmini(res$par, logdiff=FALSE)%*%solve(H)
-    if(any(!keep)){ ## subsets of raked designs 
+    if(any(!keep)){ ## subsets of raked designs
         inffun1<-matrix(0,ncol=NCOL(inffun), nrow=length(keep))
         inffun1[keep,]<-inffun
         inffun<-inffun1
     }
-    
-    fit$var<-svyrecvar(inffun, design$cluster, 
+
+    fit$var<-svyrecvar(inffun, design$cluster,
                      design$strata, design$fpc,
                      postStrata = design$postStrata)
     fit$df.residual<-degf(design)-length(beta)
@@ -269,7 +269,7 @@ svyolr.survey.design2<-function (formula, design,  start, subset=NULL,...,  na.a
 
 vcov.svyolr<-function(object,...) object$var
 
-print.svyolr<-function (x, ...) 
+print.svyolr<-function (x, ...)
 {
     if (!is.null(cl <- x$call)) {
         cat("Call:\n")
@@ -295,13 +295,13 @@ coef.svyolr<-function(object,intercepts=TRUE,...) {
 	    object$coefficients
 	}
 
-summary.svyolr<-function (object, digits = max(3, .Options$digits - 3), correlation = FALSE, 
-    ...) 
+summary.svyolr<-function (object, digits = max(3, .Options$digits - 3), correlation = FALSE,
+    ...)
 {
     cc <- coef(object)
     pc <- length(coef(object, FALSE))
     q <- length(object$zeta)
-    coef <- matrix(0, pc + q, 3, dimnames = list(names(cc), c("Value", 
+    coef <- matrix(0, pc + q, 3, dimnames = list(names(cc), c("Value",
         "Std. Error", "t value")))
     coef[, 1] <- cc
     vc <- vcov(object)
@@ -315,14 +315,14 @@ summary.svyolr<-function (object, digits = max(3, .Options$digits - 3), correlat
     object$coefficients <- coef
     object$pc <- pc
     object$digits <- digits
-    if (correlation) 
-        object$correlation <- (vc/sd)/rep(sd, rep(pc + q, pc + 
+    if (correlation)
+        object$correlation <- (vc/sd)/rep(sd, rep(pc + q, pc +
             q))
     class(object) <- "summary.svyolr"
     object
 }
 
-print.summary.svyolr<-function (x, digits = x$digits, ...) 
+print.summary.svyolr<-function (x, digits = x$digits, ...)
 {
     if (!is.null(cl <- x$call)) {
         cat("Call:\n")
@@ -332,16 +332,16 @@ print.summary.svyolr<-function (x, digits = x$digits, ...)
     pc <- x$pc
     if (pc > 0) {
         cat("\nCoefficients:\n")
-        print(x$coefficients[seq_len(pc), , drop = FALSE], quote = FALSE, 
+        print(x$coefficients[seq_len(pc), , drop = FALSE], quote = FALSE,
             ...)
     }
     else {
         cat("\nNo coefficients\n")
     }
     cat("\nIntercepts:\n")
-    print(coef[(pc + 1):nrow(coef), , drop = FALSE], quote = FALSE, 
+    print(coef[(pc + 1):nrow(coef), , drop = FALSE], quote = FALSE,
         ...)
-    if (nzchar(mess <- naprint(x$na.action))) 
+    if (nzchar(mess <- naprint(x$na.action)))
         cat("(", mess, ")\n", sep = "")
     if (!is.null(correl <- x$correlation)) {
         cat("\nCorrelation of Coefficients:\n")
@@ -364,49 +364,49 @@ model.frame.svyolr<-function(formula, ...){
         mf[["(weights)"]]<-w
     else
         mf[["(weights)"]]<-w[-naa]
-    mf	
+    mf
 }
 
 ## taken from MASS::predict.polr
-predict.svyolr<-function (object, newdata, type = c("class", "probs"), ...) 
+predict.svyolr<-function (object, newdata, type = c("class", "probs"), ...)
 {
     type <- match.arg(type)
-    if (missing(newdata)) 
+    if (missing(newdata))
         Y <- object$fitted
     else {
         newdata <- as.data.frame(newdata)
         Terms <- delete.response(object$terms)
-        m <- model.frame(Terms, newdata, na.action = function(x) x, 
+        m <- model.frame(Terms, newdata, na.action = function(x) x,
             xlev = object$xlevels)
-        if (!is.null(cl <- attr(Terms, "dataClasses"))) 
+        if (!is.null(cl <- attr(Terms, "dataClasses")))
             .checkMFClasses(cl, m)
         X <- model.matrix(Terms, m, contrasts = object$contrasts)
         xint <- match("(Intercept)", colnames(X), nomatch = 0L)
-        if (xint > 0L) 
+        if (xint > 0L)
             X <- X[, -xint, drop = FALSE]
         n <- nrow(X)
         q <- length(object$zeta)
         eta <- drop(X %*% object$coefficients)
-        pfun <- switch(object$method, logistic = plogis, probit = pnorm, 
+        pfun <- switch(object$method, logistic = plogis, probit = pnorm,
             loglog = pgumbel, cloglog = pGumbel, cauchit = pcauchy)
-        cumpr <- matrix(pfun(matrix(object$zeta, n, q, byrow = TRUE) - 
+        cumpr <- matrix(pfun(matrix(object$zeta, n, q, byrow = TRUE) -
             eta), , q)
         Y <- t(apply(cumpr, 1L, function(x) diff(c(0, x, 1))))
         dimnames(Y) <- list(rownames(X), object$lev)
     }
-    if (missing(newdata) && !is.null(object$na.action)) 
+    if (missing(newdata) && !is.null(object$na.action))
         Y <- napredict(object$na.action, Y)
-    if (type == "class") 
+    if (type == "class")
         factor(max.col(Y), levels = seq_along(object$lev), labels = object$lev)
     else drop(Y)
 }
 
 ## taken from MASS::pGumbel
-pGumbel<-function (q, loc = 0, scale = 1, lower.tail = TRUE) 
+pGumbel<-function (q, loc = 0, scale = 1, lower.tail = TRUE)
 {
     q <- (q - loc)/scale
     p <- exp(-exp(q))
-    if (lower.tail) 
+    if (lower.tail)
         1 - p
     else p
 }

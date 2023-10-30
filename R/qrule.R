@@ -9,7 +9,7 @@ qrule_math <-qrule_hf1 <- function(x,w,p){
         x<-x[!zero]
         }
     qdata<-qs(x,w,p)
-    if(qdata$wlow==0) qdata$qlow else qdata$qup
+    if(qdata$wlow<=0) qdata$qlow else qdata$qup
 }
 
 qrule_school<-qrule_hf2 <- function(x,w,p){
@@ -18,7 +18,7 @@ qrule_school<-qrule_hf2 <- function(x,w,p){
         x<-x[!zero]
         }
     qdata<-qs(x,w,p)
-    if(qdata$wlow==0) (qdata$qlow+qdata$qup)/2 else qdata$qup
+    if(qdata$wlow<=0) (qdata$qlow+qdata$qup)/2 else qdata$qup
 }
 
 qrule_hf3 <- function(x,w,p){
@@ -29,7 +29,7 @@ qrule_hf3 <- function(x,w,p){
     w<-rowsum(w,x)
     x<-sort(unique(x))
     qdata<-qs(x,w,p)
-    if((qdata$wlow==0)&& (qdata$ilow %%2 ==0)) qdata$qlow else qdata$qup
+    if((qdata$wlow<=0)&& (qdata$ilow %%2 ==0)) qdata$qlow else qdata$qup
 }
 
 ## Continuous

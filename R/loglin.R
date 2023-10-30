@@ -112,7 +112,7 @@ anova.svyloglin<-function(object,object1,...,integrate=FALSE){
                     lower.tail=FALSE,method="integration")
   } else pdev<-NA
   pdev1<-pchisq(dev*ncol(wX2)/tr(Delta),df=ncol(wX2),lower.tail=FALSE)
-  pdev2a<-pf(dev/tr(Delta), tr(Delta)^2/tr2(Delta),dfnull*tr(Delta)^2/tr2(Delta),
+  pdev2a<-pf(dev/tr(Delta), tr(Delta)^2/tr2(Delta), dfnull*tr(Delta)^2/tr2(Delta),
              lower.tail=FALSE)
   pdevsad<-pchisqsum(dev,rep(1,ncol(wX2)), a=eigen(Delta,only.values=TRUE)$values,
                     lower.tail=FALSE,method="saddlepoint")
@@ -124,7 +124,7 @@ anova.svyloglin<-function(object,object1,...,integrate=FALSE){
   } else pearsonp<-NA
   prs1<-pchisq(pearson*ncol(wX2)/tr(Delta),df=ncol(wX2),lower.tail=FALSE)
   prs2<-pchisq(pearson*ncol(wX2)/tr(Delta),df=tr(Delta)^2/tr2(Delta),lower.tail=FALSE)
-  prs2a<-pf(pearson/tr(Delta), tr(Delta)^2/tr2(Delta),dfnull*tr(Delta)^2/tr2(Delta),
+  prs2a<-pf(pearson/tr(Delta), ncol(wX2)*tr(Delta)^2/tr2(Delta),ncol(wX2)*dfnull*tr(Delta)^2/tr2(Delta),
             lower.tail=FALSE)
   pchisqsad<-pchisqsum(pearson, rep(1,ncol(wX2)), a=eigen(Delta,only.values=TRUE,symmetric=TRUE)$values,
                         lower.tail=FALSE,method="saddlepoint")
