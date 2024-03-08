@@ -54,7 +54,7 @@ pseudoscore<-function(model,newbeta,ddf, X=model.matrix(model)){
     }
 
     if (is.finite(ddf)) {
-        p<-pf(Qtest,np,ddf,lower.tail=FALSE)
+        p<-pf(Qtest/np,np,ddf,lower.tail=FALSE)
     } else{
        p<- pchisq(Qtest,np,lower.tail=FALSE)
         }

@@ -79,3 +79,48 @@ options(survey.lonely.psu="adjust")
 svymean(~api00,ds1)
 options(survey.lonely.psu="average")
 svymean(~api00,ds1)
+
+## checks for `svytotal()`
+
+df_w_singleton <- data.frame(
+  Stratum = c(1, 1, 2, 2, 3),
+  PSU = c(1, 2, 3, 4, 5),
+  Design_Weight = c(10.5, 10.5, 20, 20, 15),
+  Sex = c("M", "F", "F", "M",  "M"),
+  Age = c(30.5, 40.5, 35, 52, 44),
+  Height = c(6.2, 5.0, 5.3, 5.7, 5.5)
+)
+
+design_w_singleton <- survey::svydesign(
+  data = df_w_singleton,
+  ids = ~ PSU, strata = ~ Stratum,
+  weights = ~ Design_Weight
+)
+
+options("survey.lonely.psu" = "remove")
+
+stopifnot(all.equal(
+  target = 126625,
+  current = as.numeric(
+    vcov(svytotal(x = ~ Age, design = design_w_singleton))
+  )
+))
+
+options("survey.lonely.psu" = "certainty")
+
+stopifnot(all.equal(
+  target = 126625,
+  current = as.numeric(
+    vcov(svytotal(x = ~ Age, design = design_w_singleton))
+  )
+))
+
+options("survey.lonely.psu" = "adjust")
+
+stopifnot(all.equal(
+  target = 127579.8,
+  current = as.numeric(
+    vcov(svytotal(x = ~ Age, design = design_w_singleton))
+  ),
+  scale = 127579.8, tolerance = 0.000001
+))

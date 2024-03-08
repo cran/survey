@@ -1,17 +1,19 @@
 Package: survey
 Title: Analysis of Complex Survey Samples
-Description: Summary statistics, two-sample tests, rank tests, generalised linear models, cumulative link models, Cox models, loglinear models, and general maximum pseudolikelihood estimation for multistage stratified, cluster-sampled, unequally weighted survey samples. Variances by Taylor series linearisation or replicate weights. Post-stratification, calibration, and raking. Two-phase subsampling designs. Graphics. PPS sampling without replacement. 
-Version: 4.2-1
-Author: Thomas Lumley
+Description: Summary statistics, two-sample tests, rank tests, generalised linear models, cumulative link models, Cox models, loglinear models, and general maximum pseudolikelihood estimation for multistage stratified, cluster-sampled, unequally weighted survey samples. Variances by Taylor series linearisation or replicate weights. Post-stratification, calibration, and raking. Two-phase subsampling designs. Graphics. PPS sampling without replacement. Small-area estimation.
+Version: 4.4-1
+Author: Thomas Lumley, Peter Gao
 Maintainer: "Thomas Lumley" <t.lumley@auckland.ac.nz>
 License: GPL-2 | GPL-3
-Depends: R (>= 3.5.0), grid, methods, Matrix, survival
+Depends: R (>= 4.1.0), grid, methods, Matrix, survival
 Imports: stats, graphics, splines, lattice, minqa, numDeriv, mitools
-        (>= 2.4)
+        (>= 2.4), Rcpp (>= 0.12.8)
+LinkingTo: Rcpp, RcppArmadillo
+VignetteBuilder: R.rsp
 Suggests: foreign, MASS, KernSmooth, hexbin, RSQLite, quantreg,
-        parallel, CompQuadForm, DBI, AER
+        parallel, CompQuadForm, DBI, AER, SUMMER (>= 1.4.0), R.rsp
 URL: http://r-survey.r-forge.r-project.org/survey/
-NeedsCompilation: no
-Packaged: 2023-05-02 22:56:29 UTC; tlum005
+NeedsCompilation: yes
+Packaged: 2024-03-08 19:30:13 UTC; tlum005
 Repository: CRAN
-Date/Publication: 2023-05-03 08:10:02 UTC
+Date/Publication: 2024-03-08 20:40:02 UTC

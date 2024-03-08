@@ -17,16 +17,18 @@ the sampling design (partly for privacy reasons).  This function specifies the
 data structure for such a survey. 
 }
 \usage{
-svrepdesign(variables , repweights , weights, data,...)
+svrepdesign(variables , repweights , weights, data, degf=NULL,...)
 \method{svrepdesign}{default}(variables = NULL, repweights = NULL, weights = NULL, 
-   data = NULL, type = c("BRR", "Fay", "JK1","JKn","bootstrap",
+   data = NULL, degf=NULL, type = c("BRR", "Fay", "JK1","JKn","bootstrap",
    "ACS","successive-difference","JK2","other"),
    combined.weights=TRUE, rho = NULL, bootstrap.average=NULL,
    scale=NULL, rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),
    mse=getOption("survey.replicates.mse"),...)
-\method{svrepdesign}{imputationList}(variables=NULL, repweights,weights,data,
+\method{svrepdesign}{imputationList}(variables=NULL,
+repweights,weights,data, degf=NULL,
    mse=getOption("survey.replicates.mse"),...)
-\method{svrepdesign}{character}(variables=NULL,repweights=NULL, weights=NULL,data=NULL,
+\method{svrepdesign}{character}(variables=NULL,repweights=NULL,
+weights=NULL,data=NULL, degf=NULL,
 type=c("BRR","Fay","JK1", "JKn","bootstrap","ACS","successive-difference","JK2","other"),
 combined.weights=TRUE, rho=NULL, bootstrap.average=NULL, scale=NULL,rscales=NULL,
 fpc=NULL,fpctype=c("fraction","correction"),mse=getOption("survey.replicates.mse"),
@@ -40,7 +42,10 @@ fpc=NULL,fpctype=c("fraction","correction"),mse=getOption("survey.replicates.mse
   \item{variables}{formula or data frame specifying variables to include in the design (default is all) }
   \item{repweights}{formula or data frame specifying replication weights, or character string specifying a regular expression that matches the names of the replication weight variables }
   \item{weights}{sampling weights }
-  \item{data}{data frame to look up variables in formulas, or character string giving name of database table}
+  \item{data}{data frame to look up variables in formulas, or character
+    string giving name of database table}
+  \item{degf}{Design degrees of freedom; use \code{NULL} to have the
+				 function work this out for you}
   \item{type}{Type of replication weights}
   \item{combined.weights}{\code{TRUE} if the \code{repweights} already
     include the sampling weights. This is usually the case.}
@@ -102,6 +107,11 @@ below}
   with one entry for each replicate. To specify sampling fractions use
   \code{fpctype="fraction"} and to specify the correction directly use
   \code{fpctype="correction"}
+
+  The design degrees of freedom are returned by \code{\link{degf}}. By
+  default they are computed from the numerical rank of the
+  repweights. This is slow for very large data sets and you can specify
+  a value instead. 
 
 \code{repweights} may be a character string giving a regular expression
  for the replicate weight variables. For example, in the

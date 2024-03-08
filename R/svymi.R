@@ -10,7 +10,7 @@ svydesign.imputationList<-function(ids, probs = NULL, strata = NULL,
     	rval
     	}
 
-svrepdesign.imputationList<-function(variables=NULL, repweights,weights,data,mse=getOption("survey.replicates.mse"),...){
+svrepdesign.imputationList<-function(variables=NULL, repweights,weights,data,degf=NULL, mse=getOption("survey.replicates.mse"),...){
   ## dispatch on data=
   if (!is.null(variables) && !inherits(variables,"imputationList"))
     stop("'variables' must also be an 'imputationList' (or NULL)")
@@ -18,18 +18,18 @@ svrepdesign.imputationList<-function(variables=NULL, repweights,weights,data,mse
   
   if(!is.null(variables)){
     if (inherits(repweights,"imputationList")){
-      designs <- mapply(function(v,d,r) svrepdesign(variables=v, repweights=r, weights=weights,data=NULL,mse=mse,...),
+      designs <- mapply(function(v,d,r) svrepdesign(variables=v, repweights=r, weights=weights,data=NULL,degf=degf,mse=mse,...),
                         variables$imputations,data$imputations, repweights$imputations,SIMPLIFY=FALSE)
     } else {
-      designs <- mapply(function(d,v) svrepdesign(variables=v, repweights=repweights, weights=weights,data=d,mse=mse,...),
+      designs <- mapply(function(d,v) svrepdesign(variables=v, repweights=repweights, weights=weights,data=d,degf=degf,mse=mse,...),
                       data$imputations,variables$imputations,SIMPLIFY=FALSE)
     }
   }else{
     if (inherits(repweights,"imputationList")){
-      designs <- mapply(function(d,r) svrepdesign(repweights=r, weights=weights,data=NULL,mse=mse,...),
+      designs <- mapply(function(d,r) svrepdesign(repweights=r, weights=weights,data=NULL,degf=degf,mse=mse,...),
                         data$imputations, repweights$imputations,SIMPLIFY=FALSE)
     } else {
-      designs <- lapply(data$imputations, function(d) svrepdesign( repweights=repweights, weights=weights,data=d,mse=mse,...))
+      designs <- lapply(data$imputations, function(d) svrepdesign( repweights=repweights, weights=weights,data=d,degf=degf,mse=mse,...))
     }
   }
   rval <- list(designs=designs, call=sys.call(-1))

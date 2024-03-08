@@ -9,7 +9,7 @@ svychisq<-function(formula, design,...) UseMethod("svychisq",design)
 svychisq.survey.design<-function(formula, design,
                    statistic=c("F","Chisq","Wald","adjWald","lincom","saddlepoint","wls-score"),
                    na.rm=TRUE,...){
-  if (ncol(attr(terms(formula),"factors"))>2)
+  if (ncol(attr(terms(formula),"factors"))!=2)
     stop("Only 2-way tables at the moment")
   statistic<-match.arg(statistic)
 
@@ -144,7 +144,7 @@ svychisq.survey.design<-function(formula, design,
 svychisq.twophase<-function(formula, design,
                    statistic=c("F","Chisq","Wald","adjWald","lincom","saddlepoint"),
                    na.rm=TRUE,...){
-  if (ncol(attr(terms(formula),"factors"))>2)
+  if (ncol(attr(terms(formula),"factors"))!=2)
     stop("Only 2-way tables at the moment")
   statistic<-match.arg(statistic)
   
@@ -282,7 +282,7 @@ svychisq.twophase<-function(formula, design,
 svychisq.svyrep.design<-function(formula, design,
                    statistic=c("F","Chisq","Wald","adjWald","lincom","saddlepoint","wls-score"),
                    na.rm=TRUE,...){
-  if (ncol(attr(terms(formula),"factors"))>2)
+  if (ncol(attr(terms(formula),"factors"))!=2)
     stop("Only 2-way tables at the moment")
   statistic<-match.arg(statistic)
     if (statistic=="wls-score") return(svychisqzero(formula,design,na.rm=na.rm))

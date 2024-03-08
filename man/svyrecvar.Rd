@@ -1,6 +1,7 @@
 \name{svyrecvar}
 \alias{svyrecvar}
 \alias{multistage}
+\alias{multistage_rcpp}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Variance estimation for multistage surveys}
 \description{

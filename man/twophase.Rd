@@ -26,7 +26,7 @@ be one-stage element  or cluster sampling
 }
 \usage{
 twophase(id, strata = NULL, probs = NULL, weights = NULL, fpc = NULL,
-subset, data, method=c("full","approx","simple"))
+subset, data, method=c("full","approx","simple"), pps=NULL)
 twophasevar(x,design)
 twophase2var(x,design)
 }
@@ -47,6 +47,9 @@ twophase2var(x,design)
     version 3.14 and earlier,  which uses much less memory and is correct for designs with simple
     random sampling at phase one and stratified random sampling at phase two.
   }
+  \item{pps}{With \code{method="full"}, an optional list of two PPS
+    specifications for \code{\link{svydesign}}. At the moment, the
+    phase-one element must be \code{NULL}}
   \item{x}{probability-weighted estimating functions}
   \item{design}{two-phase design}
 }
@@ -85,6 +88,10 @@ twophase2var(x,design)
   sampling from an infinite population, and population totals will not
   be correctly estimated, but means, quantiles, and regression models
   will be correct.
+
+  The \code{pps} argument allows for PPS sampling at phase two (or
+  eventually at phase one), and also for Poisson sampling at phase two
+  as a model for non-response. 
   }
 
 \value{

@@ -55,7 +55,7 @@ unweighted data, this definition only pins down the quantile to an
 interval between two observations, and a rule is needed to interpolate.
 The default is the mathematical definition, the lower end of the
 quantile interval; \code{qrule="school"} uses the midpoint of the
-quantile interval; \code{"hf1"} to {"hf9"} are weighted analogues of
+quantile interval; \code{"hf1"} to \code{"hf9"} are weighted analogues of
 \code{type=1} to \code{9} in \code{\link{quantile}}. See the vignette
 "Quantile rules" for details and for how to write your own. 
   

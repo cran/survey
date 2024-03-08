@@ -21,7 +21,7 @@ analysis example by CDC.
 }
 
 \source{
-  \url{ftp://ftp.cdc.gov/pub/data/yrbs/2015smy/} for files
+  \url{https://ftp.cdc.gov/pub/Data/YRBS/2015smy/} for files
   
 }
 \references{

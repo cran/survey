@@ -67,6 +67,7 @@ requests from users, including:
   Lisa McShane
   Ana Patricia Martins
   Tapan Mehta
+  Isabelle Michaud
   Daryl Morris
   Joey Morris
   Kirill Mueller
@@ -104,7 +105,9 @@ requests from users, including:
   Tobias Verbeke
   Renzo Vettori
   Chris Webb
+  Justin Wishart
   Steve White
+  Jasper Yang
   Zhiwen Yao
   Thomas Yokota
   Diego Zardetto
@@ -129,3 +132,7 @@ The svyolr() code and the likelihood-based confidence intervals are largely ripp
 the MASS package of Venables & Ripley, and parts of the code for svycoxph() are modified 
 from Therneau's survival package.
 
+The C++ code for variances was contributed by Ben Schneider
+
+The small-area estimation code calls the SUMMER package, and comes from Peter Gao,
+Jon Wakefield, and Richard Li.

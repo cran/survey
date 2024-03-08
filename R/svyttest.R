@@ -122,7 +122,7 @@ vcov.svyciprop<-function(object,...) attr(object,"var")
 
 print.svyciprop<-function(x,digits=max(3,getOption("digits")-4),...){
   m <- cbind(coef(x), confint(x))
-  printCoefmat(m,digits=digits)
+  printCoefmat(m,digits=digits, cs.ind=1:3,tst.ind=NULL)
   invisible(x)
 }
 

@@ -1,3 +1,46 @@
+4.4-1   CRAN
+
+4.4	Fixes to calibration for PPS sampling
+
+	A PPS variance matrix can now be specified as phase two of a two-phase design.
+	This includes poisson_sampling() as a model for non-response (for Pam Shaw, Jasper Yang)
+
+	svysmoothUnit() and svysmoothArea() as an interface to the SUMMER package for small-area
+	estimation (Peter Gao, Jon Wakefield, Richard Li)
+
+4.3	Added Ben Schneider's C++ code for multistage variances. It is currently controlled
+	by options(survey.use_rcpp), which defaults to TRUE
+
+	error in scaling Pearson residuals for svyrepglm led to confint.svrepglm with
+	likelihood profiling not finding the ends of the interval (Stephanie Zimmer)
+
+	svyolr with rank deficiency and subsetting of cases in raked designs was overwriting
+	the 'keep' variable (Justin Wishart)
+
+	print.svyciprop() was printing fewer digits for the upper CI limit than the
+	lower limit.
+
+       	C++ code issues fixed
+
+	degrees of freedom for score F-test in loglinear models fixed (Thomas Loughin)
+
+	correct the scale in the F-distributed score test (Keiran Shao)
+
+	allow user to specify degf= in svrepdesign to avoid needing to compute it
+	(for Ben Schneider)
+
+	warn if svychisq() is used with a single variable (for Isabelle Michaud)
+
+	fix svyglm(rescale=FALSE) for replicate weights
+
+4.2-1	Fixed the penalty term in AIC for linear regression. Also stop scaling by sigma2
+	(Justin Wishart)
+
+	null_has_intercept was being ignored for AIC in linear regression
+
+	svycontrast() now works with the output of svyvar(),
+	eg to compute correlations from covariances
+
 4.2	Handling of influence functions has CHANGED. A function that supplies influence
 	functions must supply one for every observation it was given in its input:
 	use 0 for observations removed by subsetting. (for Guilherme Jacob)

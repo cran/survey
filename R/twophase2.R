@@ -120,9 +120,19 @@ twophaseDcheck<-function(Dcheck1,Dcheck2){
 }
 
 make_covmat<-function(design1,design2,subset){
-  withreplacement<-is.null(design1$fpc$popsize)
-  phase1<-Dcheck_multi_subset(design1$cluster, design1$strata, subset, design1$allprob, withreplacement)
-  phase2<-Dcheck_multi(design2$cluster, design2$strata, design2$allprob)
+    
+    if (!is.null(design1$dcheck))
+        phase1<-design1$dcheck[[1]]$dcheck
+    else{
+        withreplacement<-is.null(design1$fpc$popsize)
+        phase1<-Dcheck_multi_subset(design1$cluster, design1$strata, subset,
+                                    design1$allprob, withreplacement)
+    }
+    if (!is.null(design2$dcheck))
+        phase2<-design2$dcheck[[1]]$dcheck
+    else
+        phase2<-Dcheck_multi(design2$cluster, design2$strata, design2$allprob)
+    
   dcheck<-twophaseDcheck(phase1,phase2)
   list(phase1=phase1,phase2=phase2,full=dcheck)
 }
@@ -131,11 +141,19 @@ make_covmat<-function(design1,design2,subset){
 ## Based on twophase(), so it computes some stuff that is no longer necessary.
 ## Will be pruned in the future.
 ##
-twophase2<-function(id,strata=NULL, probs=NULL, fpc=NULL,
+twophase2<-function(id,strata=NULL, probs=NULL, fpc=NULL, pps=NULL,
                     subset, data){
 
     data<-detibble(data)
 
+    pps2<-NULL
+    if(!is.null(pps)){
+        if (!is.null(pps[[1]]))
+            stop("can't handle pps= at phase 1 yet")
+        pps2<-pps[[2]]
+    }
+
+    
   d1<-svydesign(ids=id[[1]],strata=strata[[1]],weights=NULL,
                 probs=probs[[1]],fpc=fpc[[1]],data=data)
 
@@ -151,23 +169,30 @@ twophase2<-function(id,strata=NULL, probs=NULL, fpc=NULL,
                 probs=probs[[1]],fpc=fpc[[1]],data=data[subset,])
   d1s$prob<-d1$prob[subset]
   d1s$allprob<-d1$allprob[subset,,drop=FALSE]
-  
+
+
   ## work out phase-two fpc
-  if (is.null(fpc[[2]])){
-    complete.vars<-names(data)[apply(data, 2, function(v) all(!is.na(v)))]
-    if (all(c(all.vars(id[[2]]), all.vars(strata[[2]])) %in% complete.vars)){
-      dfpc<-svydesign(ids=id[[2]], strata=strata[[2]], data=data, probs=NULL)
-      popsize<-mapply(function(s,i) ave(!duplicated(i),s,FUN=sum), dfpc$strata, dfpc$cluster)
-      rm(dfpc)
+    if (is.null(fpc[[2]])){
+        
+        complete.vars<-names(data)[apply(data, 2, function(v) all(!is.na(v)))]
+        if (all(c(all.vars(id[[2]]), all.vars(strata[[2]])) %in% complete.vars)){
+            dfpc<-svydesign(ids=id[[2]], strata=strata[[2]], data=data, probs=NULL)
+            popsize<-mapply(function(s,i) ave(!duplicated(i),s,FUN=sum), dfpc$strata, dfpc$cluster)
+            rm(dfpc)
+        } else {
+            warning("Second-stage fpc not specified and not computable")
+            popsize<-NULL
+        }
+    } else popsize<-NULL
+
+    if (is.null(pps2)){
+        d2<-svydesign(ids=id[[2]], strata=strata[[2]], probs=probs[[2]],
+                      weights=NULL, fpc=fpc[[2]], data=data[subset,])
     } else {
-      warning("Second-stage fpc not specified and not computable")
-      popsize<-NULL
+        d2<-svydesign(ids=id[[2]], strata=strata[[2]],
+                      weights=NULL, fpc=probs[[2]], data=data[subset,],pps=pps2)
     }
-  } else popsize<-NULL
-
-  d2<-svydesign(ids=id[[2]], strata=strata[[2]], probs=probs[[2]],
-                weights=NULL, fpc=fpc[[2]], data=data[subset,])
-
+    
   ## ugly hack to get nicer labels
   if(!is.null(fpc[[2]])){
     d2call<-bquote(svydesign(ids=.(id[[2]]),strata=.(strata[[2]]), probs=.(probs[[2]]),
@@ -188,13 +213,14 @@ twophase2<-function(id,strata=NULL, probs=NULL, fpc=NULL,
 
   ## Add phase 2 fpc and probs if they were computed rather than specified.
   if (!is.null(popsize))
-    d2$fpc<-as.fpc(popsize[subset,,drop=FALSE],d2$strata,d2$cluster)
+      d2$fpc<-as.fpc(popsize[subset,,drop=FALSE],d2$strata,d2$cluster)
+    
   if(is.null(probs[[2]]) && !is.null(d2$fpc$popsize)){
     d2$allprob<-1/weights(d2$fpc,final=FALSE)
     d2$prob<-apply(as.data.frame(d2$allprob),1,prod)
   }
-  
   d2$variables<-NULL
+    
   deltacheck<-make_covmat(d1,d2, subset)
 
   rval<-list(phase1=list(full=d1,sample=d1s),

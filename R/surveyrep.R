@@ -432,10 +432,10 @@ as.svrepdesign.default<-function(design,type=c("auto","JK1","JKn","BRR","bootstr
 
 
 
-svrepdesign<-function(variables, repweights, weights,data=NULL,...) UseMethod("svrepdesign",data)
+svrepdesign<-function(variables, repweights, weights,data=NULL,degf=NULL,...) UseMethod("svrepdesign",data)
 
 svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
-                              data=NULL,type=c("BRR","Fay","JK1", "JKn","bootstrap",
+                              data=NULL, degf=NULL,type=c("BRR","Fay","JK1", "JKn","bootstrap",
                                                "ACS","successive-difference","JK2","other"),
                               combined.weights=TRUE, rho=NULL, bootstrap.average=NULL,
                               scale=NULL,rscales=NULL,fpc=NULL, fpctype=c("fraction","correction"),
@@ -494,6 +494,12 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
     warning("No sampling weights provided: equal probability assumed")
     weights<-rep(1,NROW(repweights))
   }
+
+    if (!is.null(degf)){
+        if (!is.numeric(degf)) stop("degf must be NULL or numeric")
+        if (degf>ncol(repweights)) warning(paste0("degf (", degf,") is larger than number of replicates (",ncol(repweights),")"))
+        if (degf<=1) warning("degf is <=1")
+        }
 
   repwtmn<-mean(apply(repweights,2,mean))
   wtmn<-mean(weights)
@@ -588,7 +594,10 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
     class(rval)<-"repweights"
   rval$repweights<-repweights
   class(rval)<-"svyrep.design"
-  rval$degf<-degf(rval)
+    if (!is.null(degf))
+        rval$degf<-degf
+    else
+        rval$degf<-degf(rval)
   rval$mse<-mse
   rval
   
@@ -1194,6 +1203,8 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL,family=sta
           pwts<-design$pweights/mean(design$pweights)
       else if (rescale)  ## old behaviour
           pwts<-design$pweights/sum(design$pweights)
+      else
+          pwts<-design$pweights ## no rescaling
 
       if (is.data.frame(pwts)) pwts<-pwts[[1]]
       
@@ -1485,7 +1496,7 @@ residuals.svrepglm<-function(object,type = c("deviance", "pearson", "working",
    	   y <- object$y
 	   mu <- object$fitted.values
     	   wts <- object$prior.weights
-	   r<-(y - mu) * sqrt(wts)/(sqrt(object$family$variance(mu))*sqrt(object$survey.design$pweights/sum(object$survey.design$pweights)))
+	   r<-(y - mu) * sqrt(wts)/(sqrt(object$family$variance(mu))*sqrt(object$survey.design$pweights/mean(object$survey.design$pweights)))
 	   if (is.null(object$na.action)) 
         	r
     	   else 

@@ -51,8 +51,7 @@ is.hadamard(H, style=c("0/1","+-"), full.orthogonal.balance=TRUE)
 }
 \references{
 Cameron PJ (2005) Hadamard Matrices. In: The
-Encyclopedia of Design Theory \url{http://www.maths.qmul.ac.uk/~lsoicher/designtheory.org/library/encyc/}
-
+Encyclopedia of Design Theory 
 }
 \seealso{ \code{\link{hadamard}}}
 \examples{

@@ -2,10 +2,10 @@ citHeader("To cite the survey package in publications use one or more of:")
 
 bibentry(bibtype="misc",
    author="Thomas Lumley",
-   year=2023,
+   year=2024,
    title="survey: analysis of complex survey samples",
-   note="R package version 4.2",
-   textVersion="T. Lumley (2023) \"survey: analysis of complex survey samples\". R package version 4.2." )
+   note="R package version 4.4",
+   textVersion="T. Lumley (2024) \"survey: analysis of complex survey samples\". R package version 4.4." )
 
 
 

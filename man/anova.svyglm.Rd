@@ -46,7 +46,7 @@ A method for the \code{\link{anova}} function, for use on
 }
 \item{scale}{not used}
 \item{null_has_intercept}{Does the null model for AIC have an intercept or
-  not? }
+  not? Must be \code{FALSE} if any of the models are intercept-only. }
   \item{force}{
    Force the tests to be done by explicit projection even if the models
    are symbolically nested (eg, for debugging)
@@ -110,6 +110,18 @@ anova(model1, model2, method="Wald")
 AIC(model0,model1, model2)
 BIC(model0, model2,maximal=model2)
 
+## AIC for linear model is different because it considers the variance
+## parameter
+
+model0<-svyglm(api00~ell+meals+mobility, design=dclus2)
+model1<-svyglm(api00~ell+meals+mobility+as.numeric(stype), 
+     design=dclus2)
+model2<-svyglm(api00~ell+meals+mobility+stype, design=dclus2)
+modelnull<-svyglm(api00~1, design=dclus2)
+
+AIC(model0, model1, model2)
+
+AIC(model0, model1, model2,modelnull, null_has_intercept=FALSE)
 
 ## from ?twophase
 data(nwtco)

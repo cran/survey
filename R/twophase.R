@@ -1,14 +1,14 @@
 ##
 ##
 twophase<-function(id,strata=NULL, probs=NULL, weights=NULL, fpc=NULL,
-                   subset, data, method=c("full","approx","simple")){
+                   subset, data, method=c("full","approx","simple"), pps=NULL){
 
   data<-detibble(data)
     
   method<-match.arg(method)
   if(method=="full") {
     if (!is.null(weights)) stop("weights not accepted by method='full'")
-    return(twophase2(id=id, strata=strata, probs=probs, fpc=fpc,subset=subset,data=data))
+    return(twophase2(id=id, strata=strata, probs=probs, fpc=fpc,subset=subset,data=data,pps=pps))
   }
                      
   d1<-svydesign(ids=id[[1]],strata=strata[[1]],weights=weights[[1]],

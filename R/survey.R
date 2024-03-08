@@ -1735,7 +1735,9 @@ model.frame.survey.design2<-function(formula,...){
   if (is.null(getOption("survey.multicore")))
     options(survey.multicore=FALSE)
   if (is.null(getOption("survey.replicates.mse")))
-    options(survey.replicates.mse=FALSE)
+      options(survey.replicates.mse=FALSE)
+  if (is.null(getOption("survey.use_rcpp")))
+      options(survey.use_rcpp=TRUE)
 }
 
 

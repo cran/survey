@@ -186,9 +186,9 @@ svyolr.survey.design2<-function (formula, design,  start, subset=NULL,...,  na.a
         coefs <- fit$coefficients
         if (any(is.na(coefs))) {
             warning("design appears to be rank-deficient, so dropping some coefs")
-            keep <- names(coefs)[!is.na(coefs)]
-            coefs <- coefs[keep]
-            x <- x[, keep[-1], drop = FALSE]
+            betakeep <- names(coefs)[!is.na(coefs)]
+            coefs <- coefs[betakeep]
+            x <- x[, betakeep[-1], drop = FALSE]
             pc <- ncol(x)
         }
         spacing <- logit((1:q)/(q + 1))
