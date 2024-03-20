@@ -1,3 +1,7 @@
+4.4-2	Invalid read in C++ code, found by Brian Ripley, fixed by Ben Schneider
+
+	Updated small-area vignette (Peter Gao)
+
 4.4-1   CRAN
 
 4.4	Fixes to calibration for PPS sampling

@@ -42,11 +42,10 @@ arma::mat arma_onestage(const arma::mat& Y,
   arma::uword next_row_index;
   for (arma::uvec::iterator row_index = row_indices.begin(); row_index != row_indices.end(); ++row_index) {
     
-    next_row_index = (*(row_index+1));
-    
     if ((*row_index) == (number_of_data_rows-1)) {
       at_end_of_stratum = true;
     } else {
+      next_row_index = * std::next(row_index, 1);
       at_end_of_stratum = strata_ids(*row_index) != strata_ids(next_row_index);
     }
     
@@ -175,10 +174,9 @@ arma::mat arma_onestage(const arma::mat& Y,
     arma::uword h_next_row_index;
     for (arma::uvec::iterator h_row_index = h_row_indices.begin(); h_row_index != h_row_indices.end(); ++h_row_index) {
       
-      h_next_row_index = (*(h_row_index+1));
-      
       // Determine whether current row is last for the current sampling unit
       if ((*h_row_index) < strata_ends(h)) {
+        h_next_row_index = * std::next(h_row_index, 1);
         at_end_of_samp_unit = samp_unit_ids(*h_row_index) != samp_unit_ids(h_next_row_index);
       } else {
         at_end_of_samp_unit = true;
