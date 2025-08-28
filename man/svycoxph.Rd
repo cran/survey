@@ -41,7 +41,7 @@ svycoxph(formula, design,subset=NULL, rescale=TRUE, ...)
 }
 \details{
 The main difference between \code{svycoxph} function and the \code{robust=TRUE}
-option to \code{\link{coxph}} in the
+option to \code{coxph} in the
 survival package is that this function accounts for the reduction in
 variance from stratified sampling and the increase in variance from
 having only a small number of clusters.
@@ -90,7 +90,7 @@ Williams RL (1995) "Product-Limit Survival Functions with Correlated
 Survival Times" Lifetime Data Analysis 1: 171--186
 
 }
-\seealso{  \code{\link{coxph}}, \code{\link{predict.coxph}}
+\seealso{  \code{\link[survival]{coxph}}, \code{\link[survival]{predict.coxph}}
 
   \code{\link{svykm}} for estimation of Kaplan-Meier survival curves and
   for methods that operate on survival curves.

@@ -157,7 +157,7 @@ arma::mat arma_onestage(const arma::mat& Y,
     N_h = static_cast<double>(strata_pop_sizes(stratum_start));
     n_obs_h = 0;
     
-    if (arma::is_finite(N_h)) {
+    if (std::isfinite(N_h)) {
       f_h = static_cast<double>(n_h) / static_cast<double>(N_h);
     } else {
       f_h = 0.0;
@@ -324,7 +324,7 @@ arma::mat arma_multistage(arma::mat Y,
       double N_h = static_cast<double>(min(strata_pop_sizes.elem(h_indices)));
       
       double f_h;
-      if (arma::is_finite(N_h)) {
+      if (std::isfinite(N_h)) {
         f_h = static_cast<double>(n_h) /  N_h;
       } else {
         f_h = 0.0;

@@ -1,3 +1,5 @@
+4.4-7   Update for CRAN changes to inter-package links
+
 4.4-2	Invalid read in C++ code, found by Brian Ripley, fixed by Ben Schneider
 
 	Updated small-area vignette (Peter Gao)

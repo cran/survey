@@ -12,7 +12,7 @@ svycoplot(formula, design, style = c("hexbin", "transparent"), basecol =
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{formula}{A graph formula suitable for \code{\link{xyplot}}}
+  \item{formula}{A graph formula suitable for \code{{xyplot}}}
   \item{design}{A survey design object }
   \item{style}{Hexagonal binning or transparent color?}
   \item{basecol}{The fully opaque 'base' color for creating transparent
@@ -20,7 +20,7 @@ svycoplot(formula, design, style = c("hexbin", "transparent"), basecol =
   \item{alpha}{Minimum and maximum opacity }
   \item{hexscale}{Scale hexagons separate for each panel (relative) or
     across all panels (absolute)}
-  \item{\dots}{Other arguments passed to \code{grid.hexagons} or \code{\link{xyplot}} }
+  \item{\dots}{Other arguments passed to \code{grid.hexagons} or \code{xyplot} }
 }
 
 \value{

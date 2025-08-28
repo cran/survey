@@ -37,9 +37,8 @@ A Hadamard matrix
 Plackett RL, Burman JP. (1946) The Design of Optimum Multifactorial Experiments
 Biometrika, Vol. 33, No. 4  pp. 305-325 
   
-  Cameron PJ (2005) Hadamard Matrices
-\url{http://designtheory.org/library/encyc/topics/had.pdf}. In: The
-Encyclopedia of Design Theory \url{http://designtheory.org/library/encyc/}
+  Cameron PJ (2005) Hadamard Matrices In: The
+Encyclopedia of Design Theory 
   }
 \seealso{\code{\link{brrweights}}, \code{\link{paley}}}
 \examples{

@@ -4,6 +4,7 @@ make.formula<-function(names) formula(paste("~",paste(names,collapse="+")))
 dimnames.survey.design<-function(x) dimnames(x$variables)
 dimnames.svyrep.design<-function(x) dimnames(x$variables)
 dimnames.twophase<-function(x) dimnames(x$phase1$sample$variables)
+dimnames.twophase2<-function(x) dimnames(x$phase1$full$variables)
 
 oldsvydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
                     data=NULL, nest=FALSE, check.strata=!nest,weights=NULL){

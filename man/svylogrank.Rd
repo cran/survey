@@ -43,7 +43,7 @@ A vector containing the z-statistic for comparing each level of the variable to 
 \references{
 Rader, Kevin Andrew. 2014. Methods for Analyzing Survival and
 Binary Data in Complex Surveys. Doctoral dissertation, Harvard
-University.\url{http://nrs.harvard.edu/urn-3:HUL.InstRepos:12274283}
+University.\url{https://dash.harvard.edu/entities/publication/73120378-cd6f-6bd4-e053-0100007fdf3b}
 }
 
 

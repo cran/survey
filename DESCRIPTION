@@ -1,8 +1,20 @@
 Package: survey
 Title: Analysis of Complex Survey Samples
 Description: Summary statistics, two-sample tests, rank tests, generalised linear models, cumulative link models, Cox models, loglinear models, and general maximum pseudolikelihood estimation for multistage stratified, cluster-sampled, unequally weighted survey samples. Variances by Taylor series linearisation or replicate weights. Post-stratification, calibration, and raking. Two-phase subsampling designs. Graphics. PPS sampling without replacement. Small-area estimation.
-Version: 4.4-2
-Author: Thomas Lumley, Peter Gao, Ben Schneider
+Version: 4.4-8
+Authors@R: c(person(given = "Thomas",
+                      family = "Lumley",
+                      role = "aut"),
+               person(given = "Peter",
+                      family = "Gao",
+                      role = "aut"),
+               person(given = "Ben",
+                      family = "Schneider",
+                      role = "aut"),
+               person(given = "\"Thomas",
+                      family = "Lumley\"",
+                      role = "cre",
+                      email = "t.lumley@auckland.ac.nz"))
 Maintainer: "Thomas Lumley" <t.lumley@auckland.ac.nz>
 License: GPL-2 | GPL-3
 Depends: R (>= 4.1.0), grid, methods, Matrix, survival
@@ -14,6 +26,10 @@ Suggests: foreign, MASS, KernSmooth, hexbin, RSQLite, quantreg,
         parallel, CompQuadForm, DBI, AER, SUMMER (>= 1.4.0), R.rsp
 URL: http://r-survey.r-forge.r-project.org/survey/
 NeedsCompilation: yes
-Packaged: 2024-03-20 00:51:41 UTC; tlum005
+Packaged: 2025-08-28 02:11:58 UTC; tlum005
+Author: Thomas Lumley [aut],
+  Peter Gao [aut],
+  Ben Schneider [aut],
+  "Thomas Lumley" [cre]
 Repository: CRAN
-Date/Publication: 2024-03-20 15:30:02 UTC
+Date/Publication: 2025-08-28 04:30:02 UTC
