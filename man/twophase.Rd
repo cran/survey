@@ -80,7 +80,7 @@ twophase2var(x,design)
   standardization of margins (\code{\link{marginpred}}) is not available.
 
 
-  For \code{method="full"}, sampling probabilities must be available for
+  For \code{method="full"}, genuine sampling probabilities must be available for
   each stage of sampling, within each phase.  For multistage sampling
   this requires specifying either \code{fpc} or \code{probs} as a
   formula with a term for each stage of sampling.  If no \code{fpc} or

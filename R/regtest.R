@@ -404,3 +404,14 @@ svycontrast.svyby<-function(stat, contrasts,...){
     } else NextMethod() ## default
    
 }
+
+##
+## make sure that svystat,svrepstat objects lose their standard errors after transformation
+##
+dropattr1<-function(x){if (!inherits(x,"svystat")) x else coef(x)}
+Ops.svystat<-function(e1,e2){e1<-dropattr1(e1); e2<-dropattr1(e2); NextMethod()}
+Math.svystat<-function(x,...){x<-dropattr1(x);  NextMethod()}
+
+dropattr2<-function(x){if (!inherits(x,"svrepstat")) x else coef(x)}
+Ops.svrepstat<-function(e1,e2){e1<-dropattr2(e1); e2<-dropattr2(e2); NextMethod()}
+Math.svrepstat<-function(x,...){x<-dropattr2(x);  NextMethod()}

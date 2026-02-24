@@ -5,6 +5,7 @@ requests from users, including:
   Guiseppe Antonaci
   Vincent Arel-Bundock
   Pedro Luis Baldoni
+  Joel Barnes
   Robert Baskin
   Asia Bento
   Maciej Beręsewicz
@@ -13,6 +14,7 @@ requests from users, including:
   Adrienne Bradford
   Norman Breslow
   Arthur Burke
+  Zeb Burke-Conte
   Ron Burns
   Trent Buskirk
   Stefano Calza
@@ -56,11 +58,14 @@ requests from users, including:
   Franziska Kößler
   Scott Kostyshak
   Alex Kowarik
+  Pavel Krivitsky
   Michael Laviolette
   Thomas Leeper
+  Richard Li
   Thomas Loughlin
   Chandler McClellan
   Klaus Ignacio Lehmann Melendez
+  David Molina
   Benmei Liu
   Sebastien Lucie
   Jean Paul Lucas
@@ -71,6 +76,7 @@ requests from users, including:
   Daryl Morris
   Joey Morris
   Kirill Mueller
+  Durga Nagori
   Daniel Oehm
   Jean Opsomer
   Raymond Pan
@@ -81,6 +87,7 @@ requests from users, including:
   Ana Quiterio
   Gillian Raab
   Christian Raschke
+  Michael Reiss
   Brian Ripley
   Fred Rohde
   Steve Roberts
@@ -105,6 +112,7 @@ requests from users, including:
   Tobias Verbeke
   Renzo Vettori
   Chris Webb
+  David Wilson
   Justin Wishart
   Steve White
   Jasper Yang
@@ -114,6 +122,7 @@ requests from users, including:
   Alan Zaslavsky
   Stephanie Zimmer
   Jing Zhang
+  Yilin Zhang
   Tomasz Żółtak
 and from dicussions with Chris Wild and Alastair Scott. 
 
@@ -136,3 +145,5 @@ The C++ code for variances was contributed by Ben Schneider
 
 The small-area estimation code calls the SUMMER package, and comes from Peter Gao,
 Jon Wakefield, and Richard Li.
+
+Daniel Oehm at the Australian Bureau of Statistics wrote some improvements for calibrate()

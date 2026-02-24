@@ -1,7 +1,7 @@
 
-R Under development (unstable) (2024-01-29 r85841) -- "Unsuffered Consequences"
-Copyright (C) 2024 The R Foundation for Statistical Computing
-Platform: aarch64-apple-darwin20
+R version 4.3.1 (2023-06-16) -- "Beagle Scouts"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin20 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -61,8 +61,8 @@ svyglm(formula = rel ~ factor(stage) * factor(histol), design = dccs2,
     family = quasibinomial)
 
 Survey design:
-twophase2(id = id, strata = strata, probs = probs, fpc = fpc, 
-    subset = subset, data = data, pps = pps)
+twophase(id = list(~id, ~id), subset = ~in.ccs, strata = list(NULL, 
+    ~interaction(instit, rel)), data = nwt.exp)
 
 Coefficients:
                                Estimate Std. Error t value Pr(>|t|)    
@@ -88,8 +88,8 @@ svyglm(formula = rel ~ factor(stage) * factor(histol), design = dccs8,
     family = quasibinomial)
 
 Survey design:
-twophase2(id = id, strata = strata, probs = probs, fpc = fpc, 
-    subset = subset, data = data, pps = pps)
+twophase(id = list(~id, ~id), subset = ~in.ccs, strata = list(NULL, 
+    ~interaction(instit, stage, rel)), data = nwt.exp)
 
 Coefficients:
                                Estimate Std. Error t value Pr(>|t|)    
@@ -202,4 +202,4 @@ Warning messages:
 > 
 > proc.time()
    user  system elapsed 
-  0.872   0.065   0.934 
+  0.840   0.057   0.896 

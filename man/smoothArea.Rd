@@ -84,7 +84,7 @@ Fay, Robert E., and Roger A. Herriot. (1979). Estimates of Income for
  Mercer LD, Wakefield J, Pantazis A, Lutambi AM, Masanja H, Clark
     S. Space-Time Smoothing of Complex Survey Data: Small Area
     Estimation for Child Mortality. Ann Appl Stat. 2015
-    Dec;9(4):1889-1905. \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4959836/}
+    Dec;9(4):1889-1905. 
   }
 
   \examples{

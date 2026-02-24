@@ -19,7 +19,7 @@ svypredmeans<-function(adjustmodel, groupfactor, predictat=NULL){
 		mf$.groupfactor<-groups[i]
 		mu<-predict(model,newdata=mf,type="response",se.fit=FALSE)
 		eta<-predict(model,newdata=mf,type="link",se.fit=FALSE)
-		fits[,i]<-coef(mu)
+		fits[,i]<-mu  ##numeric because se.fit=FALSE
 		
 		mm<-model.matrix(terms(model),mf)
 		dg_deta[,i]<-t(colSums(w*model$family$mu.eta(eta)*mm))/sum(w)

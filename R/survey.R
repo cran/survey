@@ -4,7 +4,6 @@ make.formula<-function(names) formula(paste("~",paste(names,collapse="+")))
 dimnames.survey.design<-function(x) dimnames(x$variables)
 dimnames.svyrep.design<-function(x) dimnames(x$variables)
 dimnames.twophase<-function(x) dimnames(x$phase1$sample$variables)
-dimnames.twophase2<-function(x) dimnames(x$phase1$full$variables)
 
 oldsvydesign<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
                     data=NULL, nest=FALSE, check.strata=!nest,weights=NULL){
@@ -561,6 +560,8 @@ svymean.survey.design<-function(x,design, na.rm=FALSE,deff=FALSE, influence=FALS
     vsrs<-vsrs*(psum-nobs)/psum
     attr(average, "deff")<-v/vsrs
   }
+  # implement Bell-McCafrey here later
+  attr(average,"df")<-degf(design)
   
   return(average)
 }
@@ -609,6 +610,14 @@ SE.svystat<-function(object,...){
  v<-vcov(object)
  if (!is.matrix(v) || NCOL(v)==1) sqrt(v) else sqrt(diag(v))
 }
+
+degf.svystat<-function(design,...){
+  # implement Bell-McCafrey here later
+  attr(design,"df")
+}
+## this is declared with surveyrep.R so no need to repeat
+## degf<-function(object,...) UseMethod("degf")
+## you still need to EXPORT it, but
 
 deff <- function(object,quietly=FALSE,...) UseMethod("deff")
 
@@ -692,7 +701,7 @@ svyvar.survey.design<-function(x, design, na.rm=FALSE,...){
             x<-eval(x, design$variables)
         
 	n<-sum((weights(design,"sampling")!=0) & (rowSums(is.na(as.matrix(x)))==0))
-	xbar<-svymean(x,design, na.rm=na.rm)
+	xbar<-coef(svymean(x,design, na.rm=na.rm))
     if(NCOL(x)==1) {
         if(n==1){
             v<-NA
@@ -869,8 +878,7 @@ svytable<-function(formula, design, ...){
 
 svytable.survey.design<-function(formula, design, Ntotal=NULL, round=FALSE,...){
   
-  if (!inherits(design,"survey.design")) stop("design must be a survey design")
-  weights<-1/design$prob
+  weights<-weights(design,"sampling")
   
   ## unstratified or unadjusted
   if (length(Ntotal)<=1 || !design$has.strata){
@@ -910,6 +918,10 @@ svytable.survey.design<-function(formula, design, Ntotal=NULL, round=FALSE,...){
   attr(tbl, "call")<-match.call()
   tbl
 }
+
+
+svytable.multiframe<-svytable.survey.design
+
 
 svycoxph<-function(formula,design,subset=NULL,rescale=TRUE,...){
   .svycheck(design)
@@ -1090,65 +1102,97 @@ svyglm<-function(formula, design,subset=NULL,family=stats::gaussian(),start=NULL
 }
 
 svyglm.survey.design<-function(formula,design,subset=NULL, family=stats::gaussian(),start=NULL,
-                               rescale=TRUE,..., deff=FALSE, influence=FALSE){
+                               rescale=TRUE, ..., deff=FALSE, influence=FALSE,
+                               std.errors=c('linearized','Bell-McCaffrey','Bell-McCaffrey-2'),
+                               degf=FALSE){
+  
+    std.errors<-match.arg(std.errors)
 
-      subset<-substitute(subset)
-      subset<-eval(subset, model.frame(design), parent.frame())
+    subset<-substitute(subset)
+    subset<-eval(subset, model.frame(design), parent.frame())
     if (!is.null(subset)){
         if (any(is.na(subset)))
             stop("subset must not contain NA values")
         design<-design[subset,]
       }
-      data<-model.frame(design)
+    data<-model.frame(design)
 
-      g<-match.call()
+    # g is a placeholder for an object of class "glm"
+    g<-match.call()
     g$formula<-eval.parent(g$formula)
     g$influence<-NULL
-      g$design<-NULL
-      g$var <- NULL
+    g$design<-NULL
+    g$var <- NULL
     g$rescale <- NULL
     g$deff<-NULL
     g$subset <- NULL  ## done it already
-      g$family<-family
-      if (is.null(g$weights))
-        g$weights<-quote(.survey.prob.weights)
-      else 
-          g$weights<-bquote(.survey.prob.weights*.(g$weights))
-      g$data<-quote(data)
-      g[[1]]<-quote(glm)      
+    g$family<-family
+    if (is.null(g$weights))
+      g$weights<-quote(.survey.prob.weights)
+    else 
+      g$weights<-bquote(.survey.prob.weights*.(g$weights))
+    g$data<-quote(data)
+    
+    # added for the Bell-McCaffrey standard errors 
+    g$std.errors<-NULL
+    g$degf<-NULL
+    
+    g[[1]]<-quote(glm)      
 
-      ##need to rescale weights for stability in binomial
-      ## (unless the user doesn't want to)
-      if (rescale)
-          data$.survey.prob.weights<-(1/design$prob)/mean(1/design$prob)
-      else
-          data$.survey.prob.weights<-(1/design$prob)
+    ##need to rescale weights for stability in binomial
+    ## (unless the user doesn't want to)
+    if (rescale)
+        data$.survey.prob.weights<-(1/design$prob)/mean(1/design$prob)
+    else
+        data$.survey.prob.weights<-(1/design$prob)
 
-      if(any(is.na(data$.survey.prob.weights)))
-        stop("weights must not contain NA values")
-      if (!all(all.vars(formula) %in% names(data))) 
-	stop("all variables must be in design= argument")
+    if(any(is.na(data$.survey.prob.weights)))
+      stop("weights must not contain NA values")
+    if (!all(all.vars(formula) %in% names(data))) 
+    	stop("all variables must be in design= argument")
+    
     g<-with(list(data=data), eval(g))
+    ## now g is a populated glm object
+    ##later, design variances are computed based on the working residuals in g$residuals
+    ##scaled by g$weights
     summ<-summary(g)
-      g$naive.cov<-summ$cov.unscaled
-      
-      nas<-g$na.action
-      if (length(nas))
-         design<-design[-nas,]
-
-      g$cov.unscaled<-svy.varcoef(g,design)
+    g$naive.cov<-summ$cov.unscaled
+    
+    nas<-g$na.action
+    if (length(nas))
+      ## if there is any special na.action taken, nas would contain
+      ## the indices of the rows that have missing data (SK ?? not so sure)
+       design<-design[-nas,]
+    
+    ## this is where the design-based covariance is computed
+    ## std.errors should instruct svy.varcoef to check that g$x is meaningful
+    ## (the same nrow as the length of the response variable) and utilize it
+    ## to compute the scaling factors for the residuals/estfun
+    g$cov.unscaled<-svy.varcoef(g,design,std.errors,degf)
+    
+    if (!is.null(getOption("svy.debug.bmca"))) browser()
+    
+    if (is.null(attr(g$cov.unscaled, "degf.bmca"))) 
       g$df.residual <- degf(design)+1-length(coef(g)[!is.na(coef(g))])
+    else {
+      g$df.residual <- min(attr(g$cov.unscaled, "degf.bmca"))
+      # this is supposed to be a vector
+      g$df.coef <- attr(g$cov.unscaled, "degf.bmca")
+      names(g$df.coef) <- names(coef(g))
+    }
       
-      class(g)<-c("svyglm",class(g))
-      g$call<-match.call()
-      g$call[[1]]<-as.name(.Generic)
-      if(!("formula" %in% names(g$call))) {
-        if (is.null(names(g$call)))
-          i<-1
-        else
-          i<-min(which(names(g$call)[-1]==""))
-        names(g$call)[i+1]<-"formula"
-      }
+    # should g$df.null be reset to degf(design) ???
+    
+    class(g)<-c("svyglm",class(g))
+    g$call<-match.call()
+    g$call[[1]]<-as.name(.Generic)
+    if(!("formula" %in% names(g$call))) {
+      if (is.null(names(g$call)))
+        i<-1
+      else
+        i<-min(which(names(g$call)[-1]==""))
+      names(g$call)[i+1]<-"formula"
+    }
 
     if(deff){
         vsrs<-summ$cov.scaled*mean(data$.survey.prob.weights)
@@ -1167,14 +1211,14 @@ svyglm.survey.design<-function(formula,design,subset=NULL, family=stats::gaussia
             }
         attr(g, "influence")<-estfun%*%g$naive.cov
     }
-
+    g$aic<-NA
     g$survey.design<-design 
     g
 }
 
 print.svyglm<-function(x,...){
-  print(x$survey.design, varnames=FALSE, design.summaries=FALSE,...)
-  NextMethod()
+    print(x$survey.design, varnames=FALSE, design.summaries=FALSE,...)
+    NextMethod()
 
 }
 
@@ -1193,10 +1237,22 @@ vcov.svyglm<-function(object,...) {
 }
 
 
-svy.varcoef<-function(glm.object,design){
+svy.varcoef<-function(glm.object,design,
+    std.errors=c("linearized","Bell-McCaffrey","Bell-McCaffrey-2"), degf=FALSE){
+  
+    std.errors<-match.arg(std.errors)
+    
     Ainv<-summary(glm.object)$cov.unscaled
     nas<-glm.object$na.action
-    estfun<-model.matrix(glm.object)*naa_shorter(nas, resid(glm.object,"working"))*glm.object$weights
+
+    # browser()
+    
+    glm_resid<-naa_shorter(nas, resid(glm.object,"working"))
+    if (length(grep("Bell-McCaffrey",std.errors))>0) {
+      glm_resid<-scale_bell_mcaffrey(glm_resid,design,model.matrix(glm.object),std.errors,degf)
+    }
+    estfun<-model.matrix(glm.object)*as.vector(glm_resid)*glm.object$weights
+    
     if (glm.object$rank<NCOL(estfun)){
       estfun<-estfun[,glm.object$qr$pivot[1:glm.object$rank]]
     }
@@ -1214,16 +1270,22 @@ svy.varcoef<-function(glm.object,design){
     }
 
     if (inherits(design,"survey.design2"))
-      svyrecvar(estfun%*%Ainv,design$cluster,design$strata,design$fpc,postStrata=design$postStrata)
+      toreturn <- svyrecvar(estfun%*%Ainv,design$cluster,design$strata,design$fpc,postStrata=design$postStrata)
     else if (inherits(design, "twophase"))
-      twophasevar(estfun%*%Ainv, design)
+      toreturn <- twophasevar(estfun%*%Ainv, design)
     else if (inherits(design, "twophase2"))
-      twophase2var(estfun%*%Ainv, design)
+      toreturn <- twophase2var(estfun%*%Ainv, design)
     else if (inherits(design, "pps"))
-      ppsvar(estfun%*%Ainv, design)
+      toreturn <- ppsvar(estfun%*%Ainv, design)
     else
-      vcov(svytotal(estfun%*%Ainv/weights(design,"sampling"), design))
-  }
+      toreturn <- vcov(svytotal(estfun%*%Ainv/weights(design,"sampling"), design))
+    
+    if (!is.null(attr(glm_resid,"degf"))) {
+      attr(toreturn, "degf.bmca")<-attr(glm_resid,"degf")
+    }
+    
+    return(toreturn)
+}
 
 residuals.svyglm<-function(object,type = c("deviance", "pearson", "working", 
     "response", "partial"),...){
@@ -1232,7 +1294,7 @@ residuals.svyglm<-function(object,type = c("deviance", "pearson", "working",
    	   y <- object$y
 	   mu <- object$fitted.values
     	   wts <- object$prior.weights
-           pwts<- 1/object$survey.design$prob
+           pwts<- weights(object$survey.design, "sampling")
            pwts<- pwts/mean(pwts)
            ## missing values in calibrated/post-stratified designs
            ## the rows will still be in the design object but not in the model
@@ -1307,48 +1369,70 @@ summary.svyglm<-function (object, correlation = FALSE, df.resid=NULL,...)
 
 confint.svyglm<-function(object,parm,level=0.95,method=c("Wald","likelihood"),ddf=NULL,...){
     method<-match.arg(method)
+   ## move parsing parm and pnames upfront as it is needed for Bell-McCaffrey's d.f.s
+    pnames <- names(coef(object))
+    if (missing(parm)) 
+      parm <- seq_along(pnames)
+    else if (is.character(parm))
+      parm <- match(parm, pnames, nomatch = 0)
     if(method=="Wald"){        
+      if (is.null(object$df.coef)) {
         if (is.null(ddf))
-            ddf <- object$df.residual
+          ddf <- object$df.residual
         if (ddf<=0) {
-            ci<-confint.default(object,parm=parm,level=.95,...)*NaN
+          ci<-confint.default(object,parm=parm,level=.95,...)*NaN
         } else {
+          tlevel <- 1 - 2*pnorm(qt((1 - level)/2, df = ddf))
+          ci<-confint.default(object,parm=parm,level=tlevel,...)
+        }
+      } else {
+          if (!missing(ddf)) {  
             tlevel <- 1 - 2*pnorm(qt((1 - level)/2, df = ddf))
             ci<-confint.default(object,parm=parm,level=tlevel,...)
-        }
-        a <- (1 - level)/2
-        a <- c(a, 1 - a)
-        pct <- format.perc(a, 3)
-        colnames(ci)<-pct
-        return(ci)
-    }
-  pnames <- names(coef(object))
-  if (missing(parm)) 
-    parm <- seq_along(pnames)
-  else if (is.character(parm))
-    parm <- match(parm, pnames, nomatch = 0)
-  lambda<-diag(object$cov.unscaled[parm,parm,drop=FALSE])/diag(object$naive.cov[parm,parm,drop=FALSE])
-  if(is.null(ddf)) ddf<-object$df.residual
-  if (ddf==Inf){
+          } else {
+            ddf <- object$df.coef[parm]
+            ## placeholder
+            ci <- confint.default(object,parm=parm,level=.95,...)*NaN
+            for (i in 1:length(parm)) {
+              tlevel <- 1 - 2*pnorm(qt((1 - level)/2, df = ddf[i]))
+              ci[i,]<-confint.default(object,parm=parm[i],level=tlevel,...)
+            }
+            attr(ci,"degf")<-ddf
+          }
+      }
+      a <- (1 - level)/2
+      a <- c(a, 1 - a)
+      pct <- format.perc(a, 3)
+      colnames(ci)<-pct
+      return(ci)
+  } else if(method=="likelihood") {
+    lambda<-diag(object$cov.unscaled[parm,parm,drop=FALSE])/diag(object$naive.cov[parm,parm,drop=FALSE])
+    if(is.null(ddf)) ddf<-object$df.residual
+    if (ddf==Inf){
       alpha<-pnorm(qnorm((1-level)/2)*sqrt(lambda))/2
-  }  else if (ddf<=0) {
-      stop("zero or negative denomintor df")
-  } else {
+    }  else if (ddf<=0) {
+      stop("zero or negative denominator df")
+    } else {
+      if (!is.null(object$df.coef)) ddf<-object$df.coef[parm]
       alpha<-pnorm(qt((1-level)/2,df=ddf)*sqrt(lambda))/2
+    }
+    rval<-vector("list",length(parm))
+    for(i in 1:length(parm)){
+      temp<-MASSprofile_glm(fitted=object,which=parm[i],alpha=alpha[i],...)
+      rval[[i]]<-confint_profile(temp,parm=parm[i],level=level, unscaled_level=2*alpha[i],...)
+    }
+    
+    names(rval)<-pnames[parm]
+    if (length(rval)==1)
+      rval<-rval[[1]]
+    else
+      rval<-do.call(rbind,rval)
+    attr(rval,"levels")<-level
+    if (!is.null(object$df.coef)) attr(rval,"degf")<-ddf
+    return(rval)
+  } else {
+    stop("Unknown confint.svyglm() method")
   }
-  rval<-vector("list",length(parm))
-  for(i in 1:length(parm)){
-    temp<-MASSprofile_glm(fitted=object,which=parm[i],alpha=alpha[i],...)
-    rval[[i]]<-confint_profile(temp,parm=parm[i],level=level, unscaled_level=2*alpha[i],...)
-  }
-  
-  names(rval)<-pnames[parm]
-  if (length(rval)==1)
-    rval<-rval[[1]]
-  else
-    rval<-do.call(rbind,rval)
-  attr(rval,"levels")<-level
-  rval
 }
 
 
@@ -1526,13 +1610,13 @@ svymle<-function(loglike, gradient=NULL, design, formulas,
   
   Y<-mf[,1]
   
-#  mm <- lapply(formulas,model.matrix, data=mf)
+##  mm <- lapply(formulas,model.matrix, data=mf)
   
   mmFrame <- lapply(formulas,model.frame, data=mf)
   mm = mapply(model.matrix, object = formulas, data=mmFrame, SIMPLIFY=FALSE)
   mmOffset <- lapply(mmFrame, model.offset)
   
-  # add a vector of zeros if there is no offset provided
+  ## add a vector of zeros if there is no offset provided
   noOffset = which(unlist(lapply(mmOffset, length))==0)
   for(D in noOffset) {
     mmOffset[[D]] =  rep(0, NROW(mm[[1]]))
@@ -1544,7 +1628,7 @@ svymle<-function(loglike, gradient=NULL, design, formulas,
     parnms[[i]]<-paste(nms[i+1],parnms[[i]],sep=".")
   parnms<-unlist(parnms)
   
-  # maps position in theta to model matrices
+  ## maps position in theta to model matrices
   np<-c(0,cumsum(sapply(mm,NCOL)))
   
   
@@ -1810,32 +1894,45 @@ predict.svyglm <- function(object, newdata=NULL, total=NULL,
       newdata<-model.frame(object$survey.design)
     type<-match.arg(type)
     if (type=="terms")
-      return(predterms(object,se=se.fit,...))
+        return(predterms(object,se=se.fit,...))
+    zcoef <- ifelse(is.na(object$coefficients), 0, object$coefficients)
     tt<-delete.response(terms(formula(object)))
     mf<-model.frame(tt,data=newdata, xlev=object$xlevels)
     mm<-model.matrix(tt,mf,contrasts.arg = object$contrasts)
     if (!is.null(total) && attr(tt,"intercept")){
         mm[,attr(tt,"intercept")]<-mm[,attr(tt,"intercept")]*total
     }
-    eta<-drop(mm %*% coef(object))
+    eta<-drop(mm %*% zcoef) ## allow for NA coefficients
     d<-drop(object$family$mu.eta(eta))
     eta<-switch(type, link=eta, response=object$family$linkinv(eta))
     if(se.fit){
         if(vcov){
-            vv<-mm %*% vcov(object) %*% t(mm)
-            attr(eta,"var")<-switch(type,
-                                    link=vv,
-                                    response=d*(t(vv*d)))
+            if (any(is.na(object$coefficients)))
+                attr(eta,"var")<- matrix(NA, nrow=NROW(mm),ncol=NROW(mm))
+            else{
+                vv<-mm %*% vcov(object) %*% t(mm)
+                attr(eta,"var")<-switch(type,
+                                        link=vv,
+                                        response=d*(t(vv*d)))
+            }
         } else {
+            if (any(is.na(object$coefficients))){
+                attr(eta, "var")<-drop(NA+d)
+            } else {
             ## FIXME make this more efficient
             vv<-drop(rowSums((mm %*% vcov(object)) * mm))
             attr(eta,"var")<-switch(type,
                                     link=vv,
                                     response=drop(d*(t(vv*d))))
+            }
         }
+    } else {
+        return(eta) ## no SE; no svystat
     }
     attr(eta,"statistic")<-type
     class(eta)<-"svystat"
     eta
-    }
+}
     
+
+   

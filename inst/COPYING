@@ -1,5 +1,17 @@
-Except as otherwise stated, the code is copyright 2002-2014 Thomas Lumley
+Except as otherwise stated, the code is copyright 2002-2024 Thomas Lumley
 
 svyolr() and many of its methods are closely based on polr() from the
 MASS package, copyright Brian Ripley and Bill Venables.
+
+Ben Schneider wrote the C++ code and the R interface to it
+
+The small-area estimation code is from the SUMMER project, written by
+Peter Gao
+
+The 'phoneframes' data set is taken from the Frames2 package by Antonio Arcos, Maria del Mar Rueda, Maria Giovanna Ranalli and David Molina
+
+John Preston provided an example of the multistage rescaled bootstrap for testing.
+
+Daniel Oehm at the Australian Bureau of Statistics wrote some improvements for calibrate()
+
 

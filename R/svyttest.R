@@ -63,7 +63,8 @@ confint.svyttest<-function(object, parm, level=0.95,...){
 
 expit<-function(eta) exp(eta)/(1+exp(eta))
 	
-svyciprop<-function(formula, design, method=c("logit","likelihood","asin","beta","mean","xlogit"),
+svyciprop<-function(formula, design, 
+                    method=c("logit","likelihood","asin","beta","mean","xlogit","wilson"),
                     level=0.95,df=degf(design),...)	{
   method<-match.arg(method)
   if (method=="mean"){
@@ -94,6 +95,25 @@ svyciprop<-function(formula, design, method=c("logit","likelihood","asin","beta"
     n.eff<-n.eff*( qt(alpha/2, nrow(design)-1)/qt(alpha/2, degf(design)) )^2
     ci<-c(qbeta(alpha/2, n.eff*rval,n.eff*(1-rval)+1),
           qbeta(1-alpha/2, n.eff*rval+1, n.eff*(1-rval)))
+  } else if (method=="wilson"){
+    m<-eval(bquote(svymean(~as.numeric(.(formula[[2]])),design,...)))
+    n.eff <- coef(m)*(1-coef(m))/vcov(m)
+    if (!is.null(degf(m))) ci_df<-median(degf(m),na.rm=TRUE)
+    else ci_df<-degf(design)
+    # override from the function inputs -- maybe the user wants Inf
+    if (hasArg(df)) ci_df<-df
+    alpha<-1-level
+    t_alpha<-qt(p=alpha/2,df=ci_df,ncp=0,lower.tail=FALSE)
+    the_denom<-1+t_alpha*t_alpha/n.eff
+    the_sqrt<-sqrt(4*n.eff*m*(1-m)+t_alpha*t_alpha)
+    ci <- c(
+      (m+t_alpha*t_alpha/(2*n.eff)-t_alpha/(2*n.eff)*the_sqrt)/the_denom,
+      (m+t_alpha*t_alpha/(2*n.eff)+t_alpha/(2*n.eff)*the_sqrt)/the_denom
+    )
+    rval<-coef(m)[1]
+    attr(rval,"var")<-vcov(m)
+    # new attribute for the class "svyciprop"!!
+    attr(rval,"df")<-ci_df
   } else {
     m<-eval(bquote(svyglm(.(formula[[2]])~1,design, family=quasibinomial)))
     cimethod<-switch(method, logit="Wald",likelihood="likelihood")
@@ -125,4 +145,3 @@ print.svyciprop<-function(x,digits=max(3,getOption("digits")-4),...){
   printCoefmat(m,digits=digits, cs.ind=1:3,tst.ind=NULL)
   invisible(x)
 }
-

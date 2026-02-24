@@ -41,7 +41,8 @@ svybys(formula,  bys,  design, FUN, ...)
     of factors.}
   \item{design}{A \code{svydesign} or \code{svrepdesign} object}
   \item{FUN}{A function taking a formula and survey design object as its
-  first two arguments.}
+  first two arguments and returning an object with suitable \code{coef}
+  and \code{SE} or \code{vcov} or \code{confint} methods}
   \item{\dots}{Other arguments to \code{FUN}. NOTE: if any of the
     names of these are partial matches to \code{formula},\code{by},
     or \code{design}, you must specify the  \code{formula},\code{by},
@@ -98,15 +99,19 @@ The variance type "ci" asks for confidence intervals, which are produced
   be needed to produce confidence intervals, for example,
   \code{svyquantile} needs \code{ci=TRUE} or \code{keep.var=FALSE}.
 
+  The results are extracted by calling \code{coef}, \code{SE}, \code{vcov}, and
+  \code{confint} on the returned objects, so these need to be
+  defined. The intent is for \code{FUN} to return a \code{svystat} or
+  \code{svrepstat} object, but that isn't required. 
+
   \code{unwtd.count} is designed to be passed to \code{svyby} to report
   the number of non-missing observations in each subset. Observations
   with exactly zero weight will also be counted as missing, since that's
   how subsets are implemented for some designs.
 
   Parallel processing with \code{multicore=TRUE} is useful only for
-  fairly large problems and on computers with sufficient memory. The
-  \code{multicore} package is incompatible with some GUIs, although the
-  Mac Aqua GUI appears to be safe.
+  fairly large problems and on computers with sufficient
+  memory. Multicore processing is incompatible with some GUIs.
 
   The variant \code{svybys} creates a separate table for each term in
   \code{bys} rather than creating a joint table. 

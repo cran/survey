@@ -1,7 +1,7 @@
 
-R Under development (unstable) (2024-01-29 r85841) -- "Unsuffered Consequences"
-Copyright (C) 2024 The R Foundation for Statistical Computing
-Platform: aarch64-apple-darwin20
+R version 4.3.1 (2023-06-16) -- "Beagle Scouts"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin20 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -33,8 +33,7 @@ The following object is masked from 'package:graphics':
 > pbc$randomized<-with(pbc, !is.na(trt) & trt>-9)
 > (d2pbc<-twophase(id=list(~id,~id), data=pbc, subset=~I(!randomized)))
 Two-phase sparse-matrix design:
- twophase2(id = id, strata = strata, probs = probs, fpc = fpc, 
-    subset = subset, data = data, pps = pps)
+ twophase(id = list(~id, ~id), data = pbc, subset = ~I(!randomized))
 Phase 1:
 Independent Sampling design (with replacement)
 svydesign(ids = ~id)
@@ -71,8 +70,8 @@ svydesign(ids = ~id, strata = ~id1, fpc = `*phase1*`)
 > (d22mu284<-twophase(id=list(~id1,~id),strata=list(NULL,~id1),
 +                    fpc=list(~n1,NULL),data=mu284.1,subset=~sub,method="full"))
 Two-phase sparse-matrix design:
- twophase2(id = id, strata = strata, probs = probs, fpc = fpc, 
-    subset = subset, data = data, pps = pps)
+ twophase(id = list(~id1, ~id), strata = list(NULL, ~id1), fpc = list(~n1, 
+    NULL), data = mu284.1, subset = ~sub, method = "full")
 Phase 1:
 1 - level Cluster Sampling design
 With (5) clusters.
@@ -138,8 +137,8 @@ Data variables:
 > print(dcchs<-twophase(id=list(~seqno,~seqno), strata=list(NULL,~rel),
 +                  subset=~I(in.subcohort | rel), data=nwtco))
 Two-phase sparse-matrix design:
- twophase2(id = id, strata = strata, probs = probs, fpc = fpc, 
-    subset = subset, data = data, pps = pps)
+ twophase(id = list(~seqno, ~seqno), strata = list(NULL, ~rel), 
+    subset = ~I(in.subcohort | rel), data = nwtco)
 Phase 1:
 Independent Sampling design (with replacement)
 svydesign(ids = ~seqno)
@@ -268,4 +267,4 @@ attr(,"phases")$phase2
 > 
 > proc.time()
    user  system elapsed 
-  0.826   0.055   0.878 
+  0.814   0.050   0.862 

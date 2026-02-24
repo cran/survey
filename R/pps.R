@@ -118,7 +118,7 @@ ppsmat<-function(jointprob, tolerance=0.0001){
   if ((!is.matrix(jointprob)) || !(NROW(jointprob)==NCOL(jointprob)))
     stop("jointprob must be a square matrix")
   rval<-list(pij=jointprob, tolerance=tolerance,call=sys.call())
-  class(rval)<-"ppsmat"
+  class(rval)<-c("ppsmat","pps_spec")
   rval
 }
 
@@ -127,10 +127,10 @@ ppscov<-function(probcov, weighted=FALSE){
       stop("jointprob must be a square matrix")
   if (weighted){
       rval<-list(dcheck=probcov,call=sys.call())
-      class(rval)<-"ppsdcheck"
+      class(rval)<-c("ppsdcheck","pps_spec")
   } else {
       rval<-list(delta=probcov,call=sys.call())
-      class(rval)<-"ppsdelta"
+      class(rval)<-c("ppsdelta","pps_spec")
   }
   rval
 

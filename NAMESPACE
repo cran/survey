@@ -22,7 +22,8 @@ export(svydesign, svrepdesign, as.svrepdesign,twophase, postStratify,
        psrsq, svysurvreg, cal_names, svycralpha, svyivreg, svynls, svyscoretest,
        oldsvyquantile,svyqqplot, svyqqmath, svybys, svygofchisq,
        poisson_sampling,ppscov,
-       xdesign, svysmoothArea,svysmoothUnit)
+       xdesign, svysmoothArea,svysmoothUnit,
+       multiframe, reweight, withCrossval, multiphase, "degf<-")
 
 S3method(svyloglin,survey.design)
 S3method(svyloglin,svyrep.design)
@@ -123,6 +124,7 @@ S3method(svychisq, survey.design)
 S3method(svychisq, svyrep.design)
 S3method(svychisq, DBIsvydesign)
 S3method(svychisq, twophase)
+S3method(svychisq, twophase2)
 
 S3method(svykappa, default)
 S3method(svykappa, DBIsvydesign)
@@ -232,6 +234,9 @@ S3method(svycontrast, svrepcoxph)
 S3method(svycontrast,default)
 S3method(svycontrast, svyvar)
 
+S3method(Ops, svystat)
+S3method(Math, svystat)
+
 S3method(image,svyrep.design)
 S3method(image,pps)
 S3method(plot,svysmooth)
@@ -337,6 +342,9 @@ S3method(dimnames,twophase)
 S3method(dimnames, DBIsvydesign)
 S3method(dimnames, DBIrepdesign)
 S3method(dimnames, svyimputationList)
+S3method(dimnames, multiframe)
+S3method(dimnames, twophase)
+S3method(dimnames, twophase2)
 
 S3method(dimnames, repweights_compressed)
 
@@ -345,6 +353,10 @@ S3method(degf, svyrep.design)
 S3method(degf, pps)
 S3method(degf, twophase)
 S3method(degf, twophase2)
+S3method(degf, svystat)
+S3method(degf, svrepstat)
+S3method("degf<-", svyrep.design)
+S3method("degf<-", default)
 
 S3method(cv,default)
 S3method(cv,svyratio)
@@ -539,4 +551,39 @@ S3method(svysmoothUnit, default)
 S3method(summary, svysae)
 
        
-         
+S3method(svytotal, multiframe)
+S3method(svymean, multiframe)
+S3method(print, multiframe)
+S3method(summary, multiframe)
+S3method(print,summary.multiframe)
+S3method(svyglm, multiframe)
+S3method(degf, multiframe)
+S3method(print, dualframe)
+S3method(subset, multiframe)
+S3method(`[`, multiframe)
+S3method(svyvar, multiframe)
+S3method(weights, multiframe)
+S3method(model.frame, multiframe)
+S3method(svytable, multiframe)
+S3method(svychisq, multiframe)
+S3method(update, multiframe)
+
+S3method(reweight, dualframe)
+S3method(reweight, multiframe)
+S3method(plot, dualframe_with_rewt)
+S3method(coef, dualframe_with_rewt)
+
+S3method(svytotal, multiphase)
+S3method(svymean, multiphase)
+S3method(print, multiphase)
+S3method(update, multiphase)
+S3method(subset, multiphase)
+S3method(weights, multiphase)
+S3method(svyglm, multiphase)
+S3method(degf, multiphase)
+S3method(svyvar, multiphase)
+S3method(dim, multiphase)
+S3method(dimnames, multiphase)
+S3method(calibrate, multiphase)
+
+S3method(withCrossval, svyrep.design)

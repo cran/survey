@@ -1,0 +1,75 @@
+---
+title: "Computations for multiphase sampling"
+author: "Thomas Lumley"
+date: "2024-06-7"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Multiphase computations}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The ideas here are based on Chapter 9 of Särndal, Swensson and Wretman, which deals with two-phase sampling and the regression estimation of population totals.  Here we are interested in multiphase sampling and in settings where many statistics may be computed with the same set of calibrated weights, so the priorities and notation are slightly different.  
+
+As in the book, we consider the setting where the sampling probabilities are known (or well-estimated) in advance and raking adjustments are small. When sampling probabilities $\pi$ are grossly incorrect (eg: missing data/non-response) so that the raking adjustments are not small, we would want different computations such as those of Chang & Kott (*Biometrika*, 2008).
+
+
+### Estimation
+
+In multiphase sampling we have a sequence of $K$ nested subsamples, with sampling probabilities that can depend on any data at previous phases.  We write $\pi_{i,1}$, $\pi_{i,2|1}$, $\pi_{i,3|2}$, ... , $\pi_{i, k|k-1}$,...,$\pi_{i,K|K-1}$ as the sampling probabilities for observation $i$ at each phase, and similarly for pairwise probabilities. In general, we use a $,k|k-1$ subscript for quantities related to the $k$th phase of sampling and a $,k$ subscript for quantities related to the cumulative effect of sampling from phase 1 through phase $k$. All sums are over the population unless otherwise specified; restriction to samples is achieved with the sampling indicators $R_{i,k}$ (and $R_i\equiv R_{i,K}$).  We also write $$\pi^\dagger_{ij,k}=\pi^*_{ij,K}/\pi^*_{ij,k}=\prod_{\ell=k+1}^K \pi^*_{ij,\ell}$$
+for the forward cumulative pairwise probabilities.
+
+The product $\pi_i^*\equiv\pi^*_{i,K}=\pi_{i,1}\pi_{i,2|1}\pi_{i,3|2}...\pi_{i,K|K-1}$ is *not* in general the marginal sampling probability for observation $i$, because each $\pi_{k|k-1}$ can depend on data up to phase $k-1$, so $\pi_i^*=\pi_{i,K}^*$ is a random variable. To get the true marginal probabilities we would need to integrate out all the dependence on data measured at intermediate phases.  However, it is still true that $E[R_{i,k}/\pi_{i,k}^*]=1$, which is the key fact we need to estimate totals
+$$\hat T_X = \sum_i \frac{R_i}{\pi_i^*}X_i$$
+
+It's also still true (per Särndal et al) that the variance of a total can be estimated by something very like the Horvitz-Thompson formula
+$$\widehat{\mathrm{var}}[\hat T_X]= \sum_{i,j} \check{X}_i\check{X}_j\check{\Delta}_{ij}$$
+where $\check{X}_i=X_i/\pi_i^*$, $\Delta_{ij}=\pi^*_{ij}=\pi_i^*\pi_j^*$, and $\check{\Delta}_{ij}=\Delta_{ij}/\pi^*_{ij}=(1-\pi^*_{i}\pi^*_j/\pi^*_{ij})$
+
+
+
+In the absence of raking we could speed up computation using a recursive relationship for constructing $\check{\Delta}$ from the weighted covariances $\check{\Delta}_1, \check{\Delta}_{2|1},$ and so on at each phase, subscripted down to the subsample remaining at phase $K$.   This also has the advantage of simplicity. However, we can't do this precomputation with raking, and it has the disadvantage of not giving components of variance at each phase, which we like having. We do use the recursive combination for constructing $\check{\Delta}_{k|k-1}$ in *multistage* designs within a single phase.
+
+### Per-phase variances
+
+We need to use the a summation over phases. We consider an estimated total as a telescoping sum  over phases
+$$\hat T_X-T_X= \left(\hat T_{X,1}-T_X\right)+ \left(\hat T_{X,2}-\hat T_{X,1}\right)+\cdots+\left(\hat T_{X}-\hat T_{X,K-1}\right)$$
+where each term is the error incurred by one phase of sampling.  That is
+
+$$\hat T_{X,1}-T_X=\sum_i \frac{R_{i,1}}{\pi^*_{i,1}}x_i- \sum_i x_i$$
+$$\hat T_{X,2}-\hat T_{X,1}=\sum_i \frac{R_{i,2}}{\pi^*_{i,2}}x_i- \sum_i \frac{R_{i,1}}{\pi^*_{i,1}}x_i$$
+and in general
+$$\hat T_{X,k}-\hat T_{X,k-1}=\sum_i \frac{R_{i,k}}{\pi^*_{i,k}}x_i- \sum_i \frac{R_{i,k-1}}{\pi^*_{i,k-1}}x_i$$
+These are all uncorrelated, because each depends on sampling only at one phase. They aren't independent, because the available data for sampling at phase $k$ depends on all previous phases, but they do form a martingale difference sequence.
+I will write $\check{x}_{i,k}$ for $x_i/\pi^*_{i,k}$, the weighted observation at phase $k$, so that we have
+$$\hat T_{X,k}-\hat T_{X,k-1}=\sum_i R_{i,k}\check{x}_{i,k}- \sum_i R_{i,k-1}\check{x}_{i,k-1}$$
+
+The variance of this sum is thus the sum of variances
+$$\mathrm{var}\left[\hat T_X\right]= \mathrm{var}\left[\hat T_{X,1}-T_X\right]+ \mathrm{var}\left[\hat T_{X,2}-\hat T_{X,1}\right]+\cdots+\mathrm{var}\left[\hat T_{X}-\hat T_{X,K-1}\right]$$
+and each variance is (conditional on the sampling so far) of the usual Horvitz-Thompson form
+$$\mathrm{var}\left[\hat T_{X,k}-\hat T_{X,k-1}\right]=\sum_{i,j}R_{i,k-1}R_{j,k-1}\mathrm{cov}\left[R_{i,k|k-1},R_{j,k|k-1}\right]\check{x}_{i,k}\check{x}_{j,k}$$
+which could be estimated at phase $k$ by
+$$\widehat{\mathrm{var}}_k\left[\hat T_{X,k}-\hat T_{X,k-1}\right]=\sum_{i,j}\frac{R_{i,k}R_{j,k}}{\pi_{ij,k|k-1}}\mathrm{cov}\left[R_{i,k|k-1},R_{j,k|k-1}\right]\check{x}_{i,k}\check{x}_{j,k}=\sum_{i,j}R_{i,k}R_{j,k}\check{\Delta}_{ij,k|k-1}\check{x}_{i,k}\check{x}_{j,k} $$
+That's still not enough, because we don't necessarily have $x$ until phase $K$, so we need to weight down to phase $K$
+$$\widehat{\mathrm{var}}_K\left[\hat T_{X,k}-\hat T_{X,k-1}\right]=\sum_{i,j}R_{i,k}R_{j,k}\frac{R_{i,K}R_{j,K}}{\pi^*_{ij,K}/\pi^*_{ij,k}}\check{\Delta}_{ij,k|k-1}\check{x}_{i,k}\check{x}_{j,k}=\sum_{i,j}\frac{R_{i,K}R_{j,K}}{\pi^\dagger_{ij,k}}\check{\Delta}_{ij,k|k-1}\check{x}_{i,k}\check{x}_{j,k}$$
+
+
+
+### Raking
+
+Raking of phase $k$ to phase $k-1$ involves estimating raking adjustments $g_{i,k|k-1}$ that satisfy calibration constraints on variables $A_i$ available at phase $k-1$.
+$$\sum_i R_{i,k}g_{i,k|k-1}\frac{1}{\pi_{i,k}^*}A_i=\sum_i R_{i,k-1}\frac{1}{\pi^*_{i,k-1}}A_i$$
+Let $\Pi_A$ and $\Pi_\bar A$ be the projections on to and orthogonal to the space spanned by $A$ given weights $1/\pi_{k-1}^*$ and let $\hat x_i=\Pi_Ax_i$ and $e_i=\Pi_\bar Ax_i$. The calibrated total estimate is
+$$\hat T_X=\sum_i\frac{R_ig_{i,k|k-1}}{\pi^*_i}x_i=\sum_iR_ig_{i,k|k-1}\check{x}_i=\sum_iR_ig_{i,k|k-1}\check{e}_{i,k}+\sum_i R_{i,k}g_{i,k|k-1}\check{\hat x}_{i,k}$$
+Applying the calibration constraints to the second term we  have
+$$\sum_iR_ig_{i,k|k-1}\check{e}_{i,k}+\sum_i R_{i,k}g_{i,k|k-1}\check{\hat x}_{i,k}=\sum_iR_ig_{i,k|k-1}\check{e}_{i,k}+\sum_i R_{i,k-1}\check{\hat x}_{i,k-1}$$
+and since $\hat x_{i,k-1}$ is not random (to first order) conditional on phase $k-1$
+the estimated variance contribution for phase $k$ comes from just the first term and is
+$$\widehat{\textrm{var}}_{k|k-1}\left[\hat T_X\right]=\sum_{i,j}\frac{R_{i,K}R_{j,K}}{\pi^\dagger_{jk,K}}g_{i,k|k-1}g_{j,k|k-1}\check{e}_{i,k}\check{e}_{j,k}\check{\Delta}_{ij,k|k-1}$$
+with the variances of the other phases being unaffected. 
+
+

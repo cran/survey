@@ -18,9 +18,40 @@ detibble<-function(data) {
 
 svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
                     data=NULL, nest=FALSE, check.strata=!nest,weights=NULL,pps=FALSE,
-                            calibrate.formula=NULL,variance=c("HT","YG"), ...){
+                    calibrate.formula=NULL,variance=c("HT","YG"),
+                    na_weights=c("fail","warn","allow"), ...){
 
-  data<-detibble(data)
+    na.failsafe<-function(message="missing values in object"){
+      function(object,...){
+        if (NCOL(object)==0)
+          object
+        else {
+          ok <- complete.cases(object)
+          if (all(ok)) 
+            object
+          else stop(message)
+        }
+      }
+    }
+    
+    data<-detibble(data)
+
+    ## drop records with NA weights if that's what the user asks for
+    na_weights<-match.arg(na_weights)
+    if(inherits(weights,"formula")){
+        mf<-substitute(model.frame(weights, data=data, na.action=na.pass))
+        pre_weights<-eval.parent(mf)
+    } else if (!is.null(weights)) {
+        pre_weights<-data.frame(weights)
+    } else pre_weights<-rep(1,nrow(data))
+    if (any(is.na(pre_weights))){
+        if (na_weights=="fail"){
+            stop("missing values in weights and na_weights='fail'")
+        } else if(na_weights=="warn"){
+            warning("missing values in weights; records will be dropped")
+        }
+        data<-data[!is.na(pre_weights),]
+    }
     
   variance<-match.arg(variance)
   if(is.character(pps)){
@@ -54,18 +85,6 @@ svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
         
     }
 
-    na.failsafe<-function(message="missing values in object"){
-      function(object,...){
-        if (NCOL(object)==0)
-          object
-        else {
-          ok <- complete.cases(object)
-          if (all(ok)) 
-            object
-          else stop(message)
-        }
-      }
-    }
 
      na.id<-na.failsafe("missing values in `id'")
      if(inherits(ids,"formula")) {
@@ -92,6 +111,7 @@ svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
       probs<-eval.parent(mf)
     }
 
+
     na.weight<-na.failsafe("missing values in `weights'")
     if(inherits(weights,"formula")){
       mf<-substitute(model.frame(weights,data=data,na.action=na.weight))
@@ -104,7 +124,6 @@ svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
        else
          probs<-as.data.frame(1/as.matrix(weights))
      }
-
       
 
     na.strata<-na.failsafe("missing values in `strata'")
@@ -117,8 +136,11 @@ svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
         strata<-data.frame(strata=strata)
       has.strata<-TRUE
       for(i in 1:NCOL(strata)){ ##drop empty strata
-          if (is.factor(strata[[i]]))
+          if (is.factor(strata[[i]])) {
               strata[[i]]<-as.factor(as.character(strata[[i]]))
+          } else if (is.character(strata[[i]])){ ##coerce string to factor
+              strata[[i]]<-as.factor(strata[[i]])
+              }
           }
     } else {
       has.strata <-FALSE
@@ -204,13 +226,15 @@ svydesign.default<-function(ids,probs=NULL,strata=NULL,variables=NULL, fpc=NULL,
     }
 
   
-    if (is.numeric(probs) && length(probs)==1)
-      probs<-rep(probs, NROW(variables))
+    if (NROW(probs)==1 && NCOL(probs)==1 && is.numeric(probs[[1]]))
+      probs<-rep(probs[[1]], NROW(variables))
     
     if (length(probs)==0) probs<-rep(1,NROW(variables))
     
     if (NCOL(probs)==1) probs<-data.frame(probs)
 
+    if (NROW(probs)!=NROW(ids)) stop("lengths of prob/weights and ids don't match")
+    
     rval<-list(cluster=ids)
     rval$strata<-strata
     rval$has.strata<-has.strata
@@ -489,7 +513,18 @@ as.fpc<-function(df,strata,ids,pps=FALSE){
     cat("record",small[1,1]," stage ",small[1,2],": fpc=", fpc[small[1,,drop=FALSE]],"\n")      
     stop("Must have all fpc>=1 or all fpc<=1")
   }
-  
+
+  if (NCOL(sampsize)<NCOL(fpc)) stop("need at least as many id as fpc stages")
+    if (NCOL(sampsize)>NCOL(fpc)) {
+        tmp<-fpc   
+        if (ispopsize)
+            fpc<-matrix(Inf, nrow=NROW(sampsize), ncol=NCOL(sampsize))
+        else
+            fpc<-matrix(0, nrow=NROW(sampsize), ncol=NCOL(sampsize))
+        fpc[,1:NCOL(tmp)]<-tmp
+        warning("stages without fpc were treated as with replacement")
+    }
+    
   if (ispopsize){
     if(pps) stop("fpc must be specified as sampling fraction for PPS sampling")
     popsize<-fpc

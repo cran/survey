@@ -16,6 +16,10 @@ tconfint<-function (object, parm, level = 0.95, df=Inf)
 {
     cf <- coef(object)
     if (is.matrix(cf)) {
+        if (is.null(colnames(cf)))
+          colnames(cf) <- seq_len(ncol(cf))
+        if (is.null(rownames(cf)))
+          rownames(cf) <- seq_len(nrow(cf))
         pnames <- sapply(X = colnames(cf),
                          FUN = function(x) paste(rownames(cf), x, sep = "_"),
                          simplify = TRUE)
@@ -24,6 +28,8 @@ tconfint<-function (object, parm, level = 0.95, df=Inf)
         names(cf) <- pnames
     } else {
         pnames <- names(cf)
+        if (is.null(pnames))
+          pnames <- seq_along(cf)
     }
     if (missing(parm)) 
         parm <- pnames

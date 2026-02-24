@@ -1,5 +1,7 @@
 svydesign               Specify a survey design
 twophase                Specify two-phase designs
+multiphase		Specify a multiphase design
+multiframe		Specify dual-frame/multi-frame design
 svrepdesign             Specify replication-weight designs
 as.svrepdesign          Compute replication weights for a design
 svydesign.imputationList  Designs for multiply-imputed data.
@@ -59,8 +61,13 @@ svyprcomp               Principal component analysis and biplots
 svyfactanal             Weighted maximum likelihood factor analysis
 
                  -----
+svysmoothArea		Small-area estimation (Bayesian Fay-Herriot style)
+svysmoothUnit		Small-area estimation
+
+	 	 -----
 
 withReplicates          Replicate variances for arbitrary statistics
+withPV			Estimation using 'plausible values'
 
                  ----
 hadamard                Hadamard matrices
@@ -103,5 +110,7 @@ crowd                   Small example from VPLX manual
 mu284                   Two-stage sample from MU284 population
 myco			Stratified case-control sample: BCG and leprosy
 nhanes			Subset of NHANES 2009-10
+phoneframes		Dual-frame example of household expenses
+salamander              Salamander mating data set from McCullagh and Nelder
 yrbs                    One variable from Youth Risk Behavior Survey
 

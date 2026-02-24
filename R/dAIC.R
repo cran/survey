@@ -15,6 +15,8 @@ AIC.svyglm<-function(object,...,k=2,null_has_intercept=TRUE){
 extractAIC.svyglm<-function(fit,scale,k=2,...,null_has_intercept=TRUE){
     if(is.svylm(fit)) return(extractAIC_svylm(fit,...,null_has_intercept=null_has_intercept))
     if (length(attr(terms(fit),"factors"))){
+        model_has_intercept<-attr(terms(fit),"intercept")>0
+        if (null_has_intercept && !model_has_intercept) stop("model has no intercept, null cannot have one")
         ftest<-delete.response(formula(fit))
         if (!null_has_intercept)
             ftest<-update(ftest,.~.+`1`)

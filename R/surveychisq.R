@@ -6,7 +6,7 @@
 svychisq<-function(formula, design,...) UseMethod("svychisq",design)
 
 
-svychisq.survey.design<-function(formula, design,
+svychisq.survey.design<-svychisq.multiframe<-function(formula, design,
                    statistic=c("F","Chisq","Wald","adjWald","lincom","saddlepoint","wls-score"),
                    na.rm=TRUE,...){
   if (ncol(attr(terms(formula),"factors"))!=2)
@@ -17,8 +17,8 @@ svychisq.survey.design<-function(formula, design,
   
   rows<-formula[[2]][[2]]
   cols<-formula[[2]][[3]]
-  rowvar<-unique(design$variables[,as.character(rows)])
-  colvar<-unique(design$variables[,as.character(cols)])
+  rowvar<-unique(model.frame(design)[,as.character(rows)])
+  colvar<-unique(model.frame(design)[,as.character(cols)])
   returnNA<-FALSE
   if ((any(is.na(rowvar),is.na(colvar)))){
       rowvar<-na.omit(rowvar)
@@ -29,9 +29,9 @@ svychisq.survey.design<-function(formula, design,
   nc<-length(colvar)
   
   fsat<-eval(bquote(~interaction(factor(.(rows)),factor(.(cols)))-1))
-  mm<-model.matrix(fsat,model.frame(fsat, design$variables,na.action=na.pass))
+  mm<-model.matrix(fsat,model.frame(fsat, model.frame(design),na.action=na.pass))
   N<-nrow(mm)
-  nu <- length(unique(design$cluster[,1]))-length(unique(design$strata[,1]))
+  nu <- degf(design) ## length(unique(design$cluster[,1]))-length(unique(design$strata[,1]))
 
 
   pearson<- suppressWarnings(chisq.test(svytable(formula,design,Ntotal=N),
@@ -46,8 +46,8 @@ svychisq.survey.design<-function(formula, design,
   if(statistic %in% c("Wald", "adjWald")){
     frow<-eval(bquote(~factor(.(rows))-1))
     fcol<-eval(bquote(~factor(.(cols))-1))
-    mr<-model.matrix(frow, model.frame(frow,design$variables, na.action=na.pass))
-    mc<-model.matrix(fcol, model.frame(fcol,design$variables, na.action=na.pass))
+    mr<-model.matrix(frow, model.frame(frow,model.frame(design), na.action=na.pass))
+    mc<-model.matrix(fcol, model.frame(fcol,model.frame(design), na.action=na.pass))
     one<-rep(1,NROW(mc))
     cells<-svytotal(~mm+mr+mc+one,design,na.rm=TRUE)
 
@@ -141,7 +141,7 @@ svychisq.survey.design<-function(formula, design,
   
 }
 
-svychisq.twophase<-function(formula, design,
+svychisq.twophase<-svychisq.twophase2<-function(formula, design,
                    statistic=c("F","Chisq","Wald","adjWald","lincom","saddlepoint"),
                    na.rm=TRUE,...){
   if (ncol(attr(terms(formula),"factors"))!=2)

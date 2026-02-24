@@ -6,7 +6,7 @@ Possible additional developments in no particular order:
 
  - Score-based confidence intervals for glms
 
- [mostly done] Rao-Scott-type tests for glms.
+ [done] Rao-Scott-type tests for glms.
 
 [done] AIC/BIC
 
@@ -22,9 +22,9 @@ Possible additional developments in no particular order:
 
  - an interface to the Auckland semiparametric approach to two-phase designs.
 
- - Parametric survival models (you can do these with svymle)
+ - [done] Parametric survival models (you can do these with svymle)
 
- - linear mixed models?
+ - [see svylme package] linear mixed models?
      - simpler case: multilevel model following sampling design
        - nested model exactly matching design
        - design is simpler than model
@@ -54,4 +54,4 @@ Possible additional developments in no particular order:
 
 ########## things to fix ################
 
-Use naresid() to get better missing-value handling in svyglm, panel.svysmooth, etc
+[done] Use naresid() to get better missing-value handling in svyglm, panel.svysmooth, etc

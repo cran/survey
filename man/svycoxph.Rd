@@ -41,7 +41,7 @@ svycoxph(formula, design,subset=NULL, rescale=TRUE, ...)
 }
 \details{
 The main difference between \code{svycoxph} function and the \code{robust=TRUE}
-option to \code{coxph} in the
+option to \code{\link[survival]{coxph}} in the
 survival package is that this function accounts for the reduction in
 variance from stratified sampling and the increase in variance from
 having only a small number of clusters.

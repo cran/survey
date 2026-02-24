@@ -70,3 +70,4 @@ svyolr-rake-subset.R: make sure subsets of calibrated designs get handled correc
 
 anova-svycoxph.R: check that symbolically nested and linear-algebra versions of anova.svycoxph agree
 
+degf-subset.R: check that user-specified degf for replicate weights are preserved under subsetting

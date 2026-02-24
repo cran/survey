@@ -33,7 +33,7 @@ withPV.survey.design<-withPV.svyrep.design<-function(mapping, data, action, rewr
             if (is.function(action)){
                 actioni<-action
                 body(actioni) <- eval(bquote(substitute(.(body(actioni)), sublist)))
-                results[[i]]<- action(data)
+                results[[i]]<- actioni(data)
             } else {
                 actioni <- eval(bquote(substitute(.(action), sublist)))
                 results[[i]] <- eval(actioni)	

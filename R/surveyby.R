@@ -4,6 +4,8 @@
 svyby<-function(formula, by, design,...) UseMethod("svyby",design)
 
 
+subset_drops_rows<-function(design) !(is.pps(design) || is.calibrated(design))
+
 unwrap<-function(x,nvartype) UseMethod("unwrap",x)
 unwrap2<-function(x) UseMethod("unwrap2",x)
 
@@ -365,6 +367,7 @@ svyby.survey.design2<-function(formula, by, design, FUN,..., deff=FALSE, keep.va
       rval<-t(sapply(results, unwrap,nvartype=nvartype))
       if (covmat || influence) {
           ## do the influence function thing here
+          ## have to handle both subset-> zero wt and subset -> gone
           infs<-lapply(results,attr, "influence")
           idxs<-lapply(results,attr, "index")
           if (all(sapply(infs,is.null)))
@@ -372,7 +375,11 @@ svyby.survey.design2<-function(formula, by, design, FUN,..., deff=FALSE, keep.va
           inflmats<-vector("list",length(infs))
           for(i in seq_along(infs)){
               inflmats[[i]]<-matrix(0, ncol=NCOL(infs[[i]]),nrow=length(idxs[[i]]))
-              inflmats[[i]][idxs[[i]],]<-infs[[i]]
+              if (subset_drops_rows(design)){
+                  inflmats[[i]][idxs[[i]],]<-infs[[i]]
+              } else {
+                   inflmats[[i]][idxs[[i]],]<-infs[[i]][idxs[[i]],]
+              }
           }
           inflmat<-do.call(cbind,inflmats)
           covmat.mat<-svyrecvar(inflmat,design$cluster,

@@ -1,7 +1,7 @@
 
-R version 3.1.0 (2014-04-10) -- "Spring Dance"
-Copyright (C) 2014 The R Foundation for Statistical Computing
-Platform: x86_64-apple-darwin13.1.0 (64-bit)
+R version 4.5.2 (2025-10-31) -- "[Not] Part in a Rumble"
+Copyright (C) 2025 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin20
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -16,6 +16,9 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > library(survey)
+Loading required package: grid
+Loading required package: Matrix
+Loading required package: survival
 
 Attaching package: 'survey'
 
@@ -32,19 +35,19 @@ The following object is masked from 'package:graphics':
 > pop.types <- data.frame(stype=c("E","H","M"), Freq=c(4421,755,1018))
 > pop.schwide <- data.frame(sch.wide=c("No","Yes"), Freq=c(1072,5122))
 > 
-> rclus1r <- rake(rclus1, list(~stype,~sch.wide), list(pop.types, pop.schwide))
+> rclus1r <- rake(rclus1, list(~stype,~sch.wide), list(pop.types, pop.schwide),
++                 control=list(epsilon=1e-10,maxit=30))
 > 
 > svymean(~api00, rclus1r)
         mean     SE
-api00 641.23 26.873
+api00 641.23 26.874
 > svytotal(~enroll, rclus1r)
          total     SE
-enroll 3647300 463511
+enroll 3647280 463582
 > 
 > ff<-~stype+sch.wide
 > poptotals<-colSums(model.matrix(ff,model.frame(ff,apipop)))
-> rclus1g<-calibrate(rclus1, ~stype+sch.wide, poptotals,calfun="raking")
-Loading required package: MASS
+> rclus1g<-calibrate(rclus1, ~stype+sch.wide, poptotals,calfun="raking",tol=1e-10)
 > 
 > svymean(~api00,rclus1g)
         mean     SE
@@ -53,44 +56,21 @@ api00 641.23 26.874
          total     SE
 enroll 3647280 463582
 > 
-> summary(weights(rclus1g)/weights(rclus1r))
-       V1           V2          V3          V4           V5          V6   
- Min.   :1    Min.   :1   Min.   :1   Min.   :1    Min.   :1   Min.   :1  
- 1st Qu.:1    1st Qu.:1   1st Qu.:1   1st Qu.:1    1st Qu.:1   1st Qu.:1  
- Median :1    Median :1   Median :1   Median :1    Median :1   Median :1  
- Mean   :1    Mean   :1   Mean   :1   Mean   :1    Mean   :1   Mean   :1  
- 3rd Qu.:1    3rd Qu.:1   3rd Qu.:1   3rd Qu.:1    3rd Qu.:1   3rd Qu.:1  
- Max.   :1    Max.   :1   Max.   :1   Max.   :1    Max.   :1   Max.   :1  
- NA's   :11   NA's   :4   NA's   :2   NA's   :13   NA's   :2   NA's   :4  
-       V7          V8           V9         V10          V11    
- Min.   :1   Min.   :1    Min.   :1   Min.   :1    Min.   :1   
- 1st Qu.:1   1st Qu.:1    1st Qu.:1   1st Qu.:1    1st Qu.:1   
- Median :1   Median :1    Median :1   Median :1    Median :1   
- Mean   :1   Mean   :1    Mean   :1   Mean   :1    Mean   :1   
- 3rd Qu.:1   3rd Qu.:1    3rd Qu.:1   3rd Qu.:1    3rd Qu.:1   
- Max.   :1   Max.   :1    Max.   :1   Max.   :1    Max.   :1   
- NA's   :4   NA's   :16   NA's   :9   NA's   :34   NA's   :21  
-      V12              V13          V14         V15    
- Min.   :0.9997   Min.   :1    Min.   :1   Min.   :1   
- 1st Qu.:1.0001   1st Qu.:1    1st Qu.:1   1st Qu.:1   
- Median :1.0001   Median :1    Median :1   Median :1   
- Mean   :1.0000   Mean   :1    Mean   :1   Mean   :1   
- 3rd Qu.:1.0001   3rd Qu.:1    3rd Qu.:1   3rd Qu.:1   
- Max.   :1.0002   Max.   :1    Max.   :1   Max.   :1   
- NA's   :37       NA's   :13   NA's   :1   NA's   :12  
-> 
+> all.equal(as.vector(weights(rclus1g)/weights(rclus1r)),rep(1,183))
+[1] "Numeric: lengths (2745, 183) differ"
 > 
 > ## Do it for a design without replicate weights
-> dclus1r<-rake(dclus1, list(~stype,~sch.wide), list(pop.types, pop.schwide))
+> dclus1r<-rake(dclus1, list(~stype,~sch.wide), list(pop.types, pop.schwide),
++               control=list(epsilon=1e-10,maxit=30))
 > 
 > svymean(~api00, dclus1r)
         mean     SE
 api00 641.23 23.704
 > svytotal(~enroll, dclus1r)
          total     SE
-enroll 3647300 400603
+enroll 3647280 400603
 > 
-> dclus1g<-calibrate(dclus1, ~stype+sch.wide, poptotals,calfun="raking")
+> dclus1g<-calibrate(dclus1, ~stype+sch.wide, poptotals,calfun="raking",tol=1e-10)
 > 
 > svymean(~api00,dclus1g)
         mean     SE
@@ -99,34 +79,36 @@ api00 641.23 23.704
          total     SE
 enroll 3647280 400603
 > 
-> summary(weights(dclus1g)/weights(dclus1r))
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-      1       1       1       1       1       1 
-> 
+> all.equal(as.vector(weights(dclus1g)/weights(dclus1r)),rep(1,183))
+[1] TRUE
 > 
 > 
 > ## Example of raking with partial joint distributions
 > pop.table <- xtabs(~stype+sch.wide,apipop)
 > pop.imp<-data.frame(comp.imp=c("No","Yes"),Freq=c(1712,4482))
 > dclus1r2<-rake(dclus1, list(~stype+sch.wide, ~comp.imp),
-+                list(pop.table, pop.imp))
++                list(pop.table, pop.imp),
++                control=list(epsilon=1e-10,maxit=30))
+Warning message:
+In rake(dclus1, list(~stype + sch.wide, ~comp.imp), list(pop.table,  :
+  Raking did not converge after 30 iterations.
+
 > svymean(~api00, dclus1r2)
         mean     SE
-api00 642.62 22.732
+api00 642.61 22.731
 > 
 > ff1 <-~stype*sch.wide+comp.imp
 > 
 > poptotals1<-colSums(model.matrix(ff1,model.frame(ff1,apipop)))
-> dclus1g2<-calibrate(dclus1, ~stype*sch.wide+comp.imp, poptotals1, calfun="raking")
+> dclus1g2<-calibrate(dclus1, ~stype*sch.wide+comp.imp, poptotals1, calfun="raking",tol=1e-10)
 > 
 > svymean(~api00, dclus1g2)
         mean     SE
 api00 642.61 22.731
 > 
-> summary(weights(dclus1r2)/weights(dclus1g2))
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-  0.999   1.000   1.000   1.000   1.000   1.002 
+> all.equal(as.vector(weights(dclus1g2)/weights(dclus1r2)),rep(1,183))
+[1] TRUE
 > 
 > proc.time()
    user  system elapsed 
-  0.459   0.032   0.499 
+  0.608   0.050   0.655 

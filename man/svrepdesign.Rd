@@ -9,6 +9,7 @@
 \alias{model.frame.svyrep.design}
 \alias{summary.svyrep.design}
 \alias{print.summary.svyrep.design}
+\alias{degf<-}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Specify survey design with replicate weights}
 \description{
@@ -33,7 +34,7 @@ type=c("BRR","Fay","JK1", "JKn","bootstrap","ACS","successive-difference","JK2",
 combined.weights=TRUE, rho=NULL, bootstrap.average=NULL, scale=NULL,rscales=NULL,
 fpc=NULL,fpctype=c("fraction","correction"),mse=getOption("survey.replicates.mse"),
  dbtype="SQLite", dbname,...) 
-
+degf(design)<-value
 \method{image}{svyrep.design}(x, ...,
 				 col=grey(seq(.5,1,length=30)), type.=c("rep","total"))
 }
@@ -63,6 +64,8 @@ below}
 \item{...}{Other arguments to \code{\link{image}}}
 \item{col}{Colors}
 \item{type.}{\code{"rep"} for only the replicate weights, \code{"total"} for the replicate and sampling weights combined.}
+\item{design}{replicate-weight design}
+\item{value}{new degrees of freedom to assign}
 }
 \details{
   In the BRR method, the dataset is split into halves, and the
@@ -82,7 +85,12 @@ below}
  automatically use \code{scale = 4/ncol(repweights)} and \code{rscales=rep(1,
    ncol(repweights))}. This can be specified as \code{type="ACS"} or
  \code{type="successive-difference"}. The \code{scale} and \code{rscales}
- arguments will be ignored (with a warning) if they are specified.
+ arguments will be ignored (with a warning) if they are specified. The
+ American Community Survey recommends mse-style standard error
+ estimates; if you do not specify \code{mse} explicitly \code{mse=TRUE}
+ will be set with a message, overriding
+ \code{getOption("survey.replicates.mse")}. If you explicitly specify
+ \code{mse=FALSE} there will be a warning but your choice will be respected. 
 
  JK2 weights (\code{type="JK2"}), as in the California Health Interview
  Survey, automatically use \code{scale=1},  \code{rscales=rep(1, ncol(repweights))}.
@@ -111,7 +119,8 @@ below}
   The design degrees of freedom are returned by \code{\link{degf}}. By
   default they are computed from the numerical rank of the
   repweights. This is slow for very large data sets and you can specify
-  a value instead. 
+  a value instead. The specified value is not modified when you subset
+ the object; to change it use the \code{degf<-} assignment method
 
 \code{repweights} may be a character string giving a regular expression
  for the replicate weight variables. For example, in the

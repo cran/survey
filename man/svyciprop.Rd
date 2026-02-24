@@ -7,8 +7,9 @@ Computes confidence intervals for proportions using methods that may be
 more accurate near 0 and 1 than simply using \code{confint(svymean())}.
 }
 \usage{
-svyciprop(formula, design, method = c("logit", "likelihood", "asin", "beta",
-"mean","xlogit"), level = 0.95, df=degf(design),...)
+svyciprop(formula, design, 
+  method = c("logit", "likelihood", "asin", "beta","mean","xlogit","wilson"), 
+  level = 0.95, df=degf(design),...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -41,14 +42,24 @@ estimated variance of the proportion. (Korn and Graubard, 1998)
 
 The \code{"xlogit"} method uses a logit transformation of the mean and
 then back-transforms to the probablity scale. This appears to be the
-method used by SUDAAN and SPSS COMPLEX SAMPLES. 
+method used by SUDAAN and SPSS COMPLEX SAMPLES and the Stata option
+\code{citype(logit)}. The results are nearly identical to the \code{"logit"} method 
+except when replicate weights are used, as in that case \code{"logit"} 
+estimates the variance of the transformed proportion using the replicate weights, 
+whereas \code{"xlogit"} uses the replicate weights to estimate 
+the variance of the proportion.
+
+The \code{"wilson"} method is the Wilson score interval, which inverts
+the coverage probability statement using the true probability rather
+than the estimated probability, which results in a quadratic equation
+for the estimated probability. This interval is contained in [0,1].
 
 The \code{"mean"} method is a Wald-type interval on the probability
 scale, the same as \code{confint(svymean())}
 
 All methods undercover for probabilities close enough to zero or one,
-but \code{"beta"}, \code{"likelihood"}, \code{"logit"}, and \code{"logit"} are noticeably
-better than the other two. None of the methods will work when the
+but \code{"mean"} and \code{"asin"} are noticeably
+worse than the others. None of the methods will work when the
 observed proportion is exactly 0 or 1.
 
 The \code{confint} method extracts the confidence interval; the
@@ -64,10 +75,15 @@ Rao, JNK, Scott, AJ (1984) "On Chi-squared Tests For Multiway
 Contingency Tables with Proportions Estimated From Survey Data" Annals
 of Statistics 12:46-60.
 
-Korn EL, Graubard BI. (1998) Confidence Intervals For Proportions With
+  Korn EL, Graubard BI. (1998) Confidence Intervals For Proportions With
   Small Expected Number of Positive Counts Estimated From Survey
   Data. Survey Methodology 23:193-201.
-  
+\url{https://www150.statcan.gc.ca/n1/pub/12-001-x/1998002/article/4356-eng.pdf}
+
+Dean, N., and Pagano, M. (2015) Evaluating Confidence Interval Methods 
+for Binomial Proportions in Clustered Surveys.
+Journal of Survey Statistics and Methodology, 3 (4), 484-503.
+
 }
 
 \seealso{ \code{\link{svymean}}, \code{\link{yrbs}} }
@@ -81,12 +97,12 @@ svyciprop(~I(ell==0), dclus1, method="as")
 svyciprop(~I(ell==0), dclus1, method="be")
 svyciprop(~I(ell==0), dclus1, method="me")
 svyciprop(~I(ell==0), dclus1, method="xl")
+svyciprop(~I(ell==0), dclus1, method="wi")
 
 ## reproduces Stata svy: mean
 svyciprop(~I(ell==0), dclus1, method="me", df=degf(dclus1))
 ## reproduces Stata svy: prop
 svyciprop(~I(ell==0), dclus1, method="lo", df=degf(dclus1))
-
 
 rclus1<-as.svrepdesign(dclus1)
 svyciprop(~I(emer==0), rclus1, method="li")
@@ -94,7 +110,7 @@ svyciprop(~I(emer==0), rclus1, method="lo")
 svyciprop(~I(emer==0), rclus1, method="as")
 svyciprop(~I(emer==0), rclus1, method="be")
 svyciprop(~I(emer==0), rclus1, method="me")
-
+svyciprop(~I(emer==0), rclus1, method="wi")
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

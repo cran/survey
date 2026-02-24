@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Thomas Lumley" />
+
+
+<title>Computations for multiphase sampling</title>
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Computations for multiphase sampling</h1>
+<h4 class="author">Thomas Lumley</h4>
+<h4 class="date">2024-06-7</h4>
+
+
+
+<p>The ideas here are based on Chapter 9 of Särndal, Swensson and Wretman, which deals with two-phase sampling and the regression estimation of population totals. Here we are interested in multiphase sampling and in settings where many statistics may be computed with the same set of calibrated weights, so the priorities and notation are slightly different.</p>
+<p>As in the book, we consider the setting where the sampling probabilities are known (or well-estimated) in advance and raking adjustments are small. When sampling probabilities <span class="math inline">\(\pi\)</span> are grossly incorrect (eg: missing data/non-response) so that the raking adjustments are not small, we would want different computations such as those of Chang &amp; Kott (<em>Biometrika</em>, 2008).</p>
+<div id="estimation" class="section level3">
+<h3>Estimation</h3>
+<p>In multiphase sampling we have a sequence of <span class="math inline">\(K\)</span> nested subsamples, with sampling probabilities that can depend on any data at previous phases. We write <span class="math inline">\(\pi_{i,1}\)</span>, <span class="math inline">\(\pi_{i,2|1}\)</span>, <span class="math inline">\(\pi_{i,3|2}\)</span>, ... , <span class="math inline">\(\pi_{i, k|k-1}\)</span>,...,<span class="math inline">\(\pi_{i,K|K-1}\)</span> as the sampling probabilities for observation <span class="math inline">\(i\)</span> at each phase, and similarly for pairwise probabilities. In general, we use a <span class="math inline">\(,k|k-1\)</span> subscript for quantities related to the <span class="math inline">\(k\)</span>th phase of sampling and a <span class="math inline">\(,k\)</span> subscript for quantities related to the cumulative effect of sampling from phase 1 through phase <span class="math inline">\(k\)</span>. All sums are over the population unless otherwise specified; restriction to samples is achieved with the sampling indicators <span class="math inline">\(R_{i,k}\)</span> (and <span class="math inline">\(R_i\equiv R_{i,K}\)</span>). We also write <span class="math display">\[\pi^\dagger_{ij,k}=\pi^*_{ij,K}/\pi^*_{ij,k}=\prod_{\ell=k+1}^K \pi^*_{ij,\ell}\]</span> for the forward cumulative pairwise probabilities.</p>
+<p>The product <span class="math inline">\(\pi_i^*\equiv\pi^*_{i,K}=\pi_{i,1}\pi_{i,2|1}\pi_{i,3|2}...\pi_{i,K|K-1}\)</span> is <em>not</em> in general the marginal sampling probability for observation <span class="math inline">\(i\)</span>, because each <span class="math inline">\(\pi_{k|k-1}\)</span> can depend on data up to phase <span class="math inline">\(k-1\)</span>, so <span class="math inline">\(\pi_i^*=\pi_{i,K}^*\)</span> is a random variable. To get the true marginal probabilities we would need to integrate out all the dependence on data measured at intermediate phases. However, it is still true that <span class="math inline">\(E[R_{i,k}/\pi_{i,k}^*]=1\)</span>, which is the key fact we need to estimate totals <span class="math display">\[\hat T_X = \sum_i \frac{R_i}{\pi_i^*}X_i\]</span></p>
+<p>It's also still true (per Särndal et al) that the variance of a total can be estimated by something very like the Horvitz-Thompson formula <span class="math display">\[\widehat{\mathrm{var}}[\hat T_X]= \sum_{i,j} \check{X}_i\check{X}_j\check{\Delta}_{ij}\]</span> where <span class="math inline">\(\check{X}_i=X_i/\pi_i^*\)</span>, <span class="math inline">\(\Delta_{ij}=\pi^*_{ij}=\pi_i^*\pi_j^*\)</span>, and <span class="math inline">\(\check{\Delta}_{ij}=\Delta_{ij}/\pi^*_{ij}=(1-\pi^*_{i}\pi^*_j/\pi^*_{ij})\)</span></p>
+<p>In the absence of raking we could speed up computation using a recursive relationship for constructing <span class="math inline">\(\check{\Delta}\)</span> from the weighted covariances <span class="math inline">\(\check{\Delta}_1, \check{\Delta}_{2|1},\)</span> and so on at each phase, subscripted down to the subsample remaining at phase <span class="math inline">\(K\)</span>. This also has the advantage of simplicity. However, we can't do this precomputation with raking, and it has the disadvantage of not giving components of variance at each phase, which we like having. We do use the recursive combination for constructing <span class="math inline">\(\check{\Delta}_{k|k-1}\)</span> in <em>multistage</em> designs within a single phase.</p>
+</div>
+<div id="per-phase-variances" class="section level3">
+<h3>Per-phase variances</h3>
+<p>We need to use the a summation over phases. We consider an estimated total as a telescoping sum over phases <span class="math display">\[\hat T_X-T_X= \left(\hat T_{X,1}-T_X\right)+ \left(\hat T_{X,2}-\hat T_{X,1}\right)+\cdots+\left(\hat T_{X}-\hat T_{X,K-1}\right)\]</span> where each term is the error incurred by one phase of sampling. That is</p>
+<p><span class="math display">\[\hat T_{X,1}-T_X=\sum_i \frac{R_{i,1}}{\pi^*_{i,1}}x_i- \sum_i x_i\]</span> <span class="math display">\[\hat T_{X,2}-\hat T_{X,1}=\sum_i \frac{R_{i,2}}{\pi^*_{i,2}}x_i- \sum_i \frac{R_{i,1}}{\pi^*_{i,1}}x_i\]</span> and in general <span class="math display">\[\hat T_{X,k}-\hat T_{X,k-1}=\sum_i \frac{R_{i,k}}{\pi^*_{i,k}}x_i- \sum_i \frac{R_{i,k-1}}{\pi^*_{i,k-1}}x_i\]</span> These are all uncorrelated, because each depends on sampling only at one phase. They aren't independent, because the available data for sampling at phase <span class="math inline">\(k\)</span> depends on all previous phases, but they do form a martingale difference sequence. I will write <span class="math inline">\(\check{x}_{i,k}\)</span> for <span class="math inline">\(x_i/\pi^*_{i,k}\)</span>, the weighted observation at phase <span class="math inline">\(k\)</span>, so that we have <span class="math display">\[\hat T_{X,k}-\hat T_{X,k-1}=\sum_i R_{i,k}\check{x}_{i,k}- \sum_i R_{i,k-1}\check{x}_{i,k-1}\]</span></p>
+<p>The variance of this sum is thus the sum of variances <span class="math display">\[\mathrm{var}\left[\hat T_X\right]= \mathrm{var}\left[\hat T_{X,1}-T_X\right]+ \mathrm{var}\left[\hat T_{X,2}-\hat T_{X,1}\right]+\cdots+\mathrm{var}\left[\hat T_{X}-\hat T_{X,K-1}\right]\]</span> and each variance is (conditional on the sampling so far) of the usual Horvitz-Thompson form <span class="math display">\[\mathrm{var}\left[\hat T_{X,k}-\hat T_{X,k-1}\right]=\sum_{i,j}R_{i,k-1}R_{j,k-1}\mathrm{cov}\left[R_{i,k|k-1},R_{j,k|k-1}\right]\check{x}_{i,k}\check{x}_{j,k}\]</span> which could be estimated at phase <span class="math inline">\(k\)</span> by <span class="math display">\[\widehat{\mathrm{var}}_k\left[\hat T_{X,k}-\hat T_{X,k-1}\right]=\sum_{i,j}\frac{R_{i,k}R_{j,k}}{\pi_{ij,k|k-1}}\mathrm{cov}\left[R_{i,k|k-1},R_{j,k|k-1}\right]\check{x}_{i,k}\check{x}_{j,k}=\sum_{i,j}R_{i,k}R_{j,k}\check{\Delta}_{ij,k|k-1}\check{x}_{i,k}\check{x}_{j,k} \]</span> That's still not enough, because we don't necessarily have <span class="math inline">\(x\)</span> until phase <span class="math inline">\(K\)</span>, so we need to weight down to phase <span class="math inline">\(K\)</span> <span class="math display">\[\widehat{\mathrm{var}}_K\left[\hat T_{X,k}-\hat T_{X,k-1}\right]=\sum_{i,j}R_{i,k}R_{j,k}\frac{R_{i,K}R_{j,K}}{\pi^*_{ij,K}/\pi^*_{ij,k}}\check{\Delta}_{ij,k|k-1}\check{x}_{i,k}\check{x}_{j,k}=\sum_{i,j}\frac{R_{i,K}R_{j,K}}{\pi^\dagger_{ij,k}}\check{\Delta}_{ij,k|k-1}\check{x}_{i,k}\check{x}_{j,k}\]</span></p>
+</div>
+<div id="raking" class="section level3">
+<h3>Raking</h3>
+<p>Raking of phase <span class="math inline">\(k\)</span> to phase <span class="math inline">\(k-1\)</span> involves estimating raking adjustments <span class="math inline">\(g_{i,k|k-1}\)</span> that satisfy calibration constraints on variables <span class="math inline">\(A_i\)</span> available at phase <span class="math inline">\(k-1\)</span>. <span class="math display">\[\sum_i R_{i,k}g_{i,k|k-1}\frac{1}{\pi_{i,k}^*}A_i=\sum_i R_{i,k-1}\frac{1}{\pi^*_{i,k-1}}A_i\]</span> Let <span class="math inline">\(\Pi_A\)</span> and <span class="math inline">\(\Pi_\bar A\)</span> be the projections on to and orthogonal to the space spanned by <span class="math inline">\(A\)</span> given weights <span class="math inline">\(1/\pi_{k-1}^*\)</span> and let <span class="math inline">\(\hat x_i=\Pi_Ax_i\)</span> and <span class="math inline">\(e_i=\Pi_\bar Ax_i\)</span>. The calibrated total estimate is <span class="math display">\[\hat T_X=\sum_i\frac{R_ig_{i,k|k-1}}{\pi^*_i}x_i=\sum_iR_ig_{i,k|k-1}\check{x}_i=\sum_iR_ig_{i,k|k-1}\check{e}_{i,k}+\sum_i R_{i,k}g_{i,k|k-1}\check{\hat x}_{i,k}\]</span> Applying the calibration constraints to the second term we have <span class="math display">\[\sum_iR_ig_{i,k|k-1}\check{e}_{i,k}+\sum_i R_{i,k}g_{i,k|k-1}\check{\hat x}_{i,k}=\sum_iR_ig_{i,k|k-1}\check{e}_{i,k}+\sum_i R_{i,k-1}\check{\hat x}_{i,k-1}\]</span> and since <span class="math inline">\(\hat x_{i,k-1}\)</span> is not random (to first order) conditional on phase <span class="math inline">\(k-1\)</span> the estimated variance contribution for phase <span class="math inline">\(k\)</span> comes from just the first term and is <span class="math display">\[\widehat{\textrm{var}}_{k|k-1}\left[\hat T_X\right]=\sum_{i,j}\frac{R_{i,K}R_{j,K}}{\pi^\dagger_{jk,K}}g_{i,k|k-1}g_{j,k|k-1}\check{e}_{i,k}\check{e}_{j,k}\check{\Delta}_{ij,k|k-1}\]</span> with the variances of the other phases being unaffected.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

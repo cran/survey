@@ -141,6 +141,8 @@ print.summary.twophase<-function(x,...,varnames=TRUE){
   invisible(x)
 }
 
+dimnames.twophase<-function(x) dimnames(x$phase1$full$variables)
+
 twophasevar<-function(x,design){
   d1 <- design$phase1$sample
   if (NROW(x)==length(design$usu)){
@@ -645,6 +647,16 @@ calibrate.twophase<-function(design, phase=2, formula, population,
             design$call<-sys.call(-1)
             return(design)
         }
+
+        if(!inherits(formula,"formula")){
+            if (inherits(formula, "glm") || inherits(formula, "coxph") || inherits(formula, "lm")){
+                if (is.character(calfun))
+                    calfun<-switch(calfun,linear=cal.linear, raking=cal.raking, logit=cal.logit)
+                rval<-inf_calibrate(design, working_model=formula, add_mat=NULL,
+                                    calfun=calfun,...)
+                return(rval)
+            }
+        }
             
         if (missing(population) || is.null(population)){
             ## calibrate to phase 1 totals
@@ -772,4 +784,36 @@ estWeights.data.frame<-function(data,formula=NULL, working.model=NULL,
     rval$call<-sys.call(-1)
     rval
     
+}
+
+
+inf_calibrate<-function(design, working_model,add_mat=NULL, calfun, bounds=list(lower=-Inf,upper=Inf),
+                       verbose=FALSE,  epsilon = 1e-07, force=FALSE,maxit=50,...){
+    whalf<-sqrt(weights(design))
+    h<-estfuns(working_model)
+    if (max(colSums(h)/colMeans(abs(h))) >1e-5) warning("estimating functions don't seem to sum to zero")
+    
+    if(NROW(h)!=nrow(design$phase1$full)) stop("Sample sizes of model and full cohort don't match")
+    if (!isTRUE(all.equal(rownames(design$phase1$full$variables), rownames(h)))) warning("row names do not match")
+
+    if(!is.null(add_mat)){
+        h<-cbind(h, add_mat)
+    }
+    population<-colSums(h)
+
+    hsamp<-h[design$subset,,drop=FALSE]
+    tqr<-qr(hsamp*whalf)
+    g <- grake(hsamp, weights(design), calfun, bounds = bounds, population = population, 
+        verbose = verbose, epsilon = epsilon, maxit = maxit)
+    if (!is.null(attr(g, "failed"))) {
+        if (!force) 
+            stop("Calibration failed")
+    }
+    
+    design$prob <- design$prob/g
+    caldata <- list(qr = tqr, w = g * whalf, stage = 0, index = NULL)
+    class(caldata) <- c("greg_calibration", "gen_raking")
+    design$postStrata <- c(design$postStrata, list(caldata))
+    design$call <- sys.call()
+    design
 }

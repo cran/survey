@@ -8,48 +8,49 @@ rclus1 <- as.svrepdesign(dclus1)
 pop.types <- data.frame(stype=c("E","H","M"), Freq=c(4421,755,1018))
 pop.schwide <- data.frame(sch.wide=c("No","Yes"), Freq=c(1072,5122))
 
-rclus1r <- rake(rclus1, list(~stype,~sch.wide), list(pop.types, pop.schwide))
+rclus1r <- rake(rclus1, list(~stype,~sch.wide), list(pop.types, pop.schwide),
+                control=list(epsilon=1e-10,maxit=30))
 
 svymean(~api00, rclus1r)
 svytotal(~enroll, rclus1r)
 
 ff<-~stype+sch.wide
 poptotals<-colSums(model.matrix(ff,model.frame(ff,apipop)))
-rclus1g<-calibrate(rclus1, ~stype+sch.wide, poptotals,calfun="raking")
+rclus1g<-calibrate(rclus1, ~stype+sch.wide, poptotals,calfun="raking",tol=1e-10)
 
 svymean(~api00,rclus1g)
 svytotal(~enroll,rclus1g)
 
-summary(weights(rclus1g)/weights(rclus1r))
-
+all.equal(as.vector(weights(rclus1g)/weights(rclus1r)),rep(1,183))
 
 ## Do it for a design without replicate weights
-dclus1r<-rake(dclus1, list(~stype,~sch.wide), list(pop.types, pop.schwide))
+dclus1r<-rake(dclus1, list(~stype,~sch.wide), list(pop.types, pop.schwide),
+              control=list(epsilon=1e-10,maxit=30))
 
 svymean(~api00, dclus1r)
 svytotal(~enroll, dclus1r)
 
-dclus1g<-calibrate(dclus1, ~stype+sch.wide, poptotals,calfun="raking")
+dclus1g<-calibrate(dclus1, ~stype+sch.wide, poptotals,calfun="raking",tol=1e-10)
 
 svymean(~api00,dclus1g)
 svytotal(~enroll,dclus1g)
 
-summary(weights(dclus1g)/weights(dclus1r))
-
+all.equal(as.vector(weights(dclus1g)/weights(dclus1r)),rep(1,183))
 
 
 ## Example of raking with partial joint distributions
 pop.table <- xtabs(~stype+sch.wide,apipop)
 pop.imp<-data.frame(comp.imp=c("No","Yes"),Freq=c(1712,4482))
 dclus1r2<-rake(dclus1, list(~stype+sch.wide, ~comp.imp),
-               list(pop.table, pop.imp))
+               list(pop.table, pop.imp),
+               control=list(epsilon=1e-10,maxit=30))
 svymean(~api00, dclus1r2)
 
 ff1 <-~stype*sch.wide+comp.imp
 
 poptotals1<-colSums(model.matrix(ff1,model.frame(ff1,apipop)))
-dclus1g2<-calibrate(dclus1, ~stype*sch.wide+comp.imp, poptotals1, calfun="raking")
+dclus1g2<-calibrate(dclus1, ~stype*sch.wide+comp.imp, poptotals1, calfun="raking",tol=1e-10)
 
 svymean(~api00, dclus1g2)
 
-summary(weights(dclus1r2)/weights(dclus1g2))
+all.equal(as.vector(weights(dclus1g2)/weights(dclus1r2)),rep(1,183))

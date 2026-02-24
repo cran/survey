@@ -43,7 +43,8 @@ cal_names(formula,design,...)
     formulas for each margin}
   \item{population}{Vectors of population column totals for the model matrix in the
     calibration model, or list of such vectors for each
-    cluster, or list of tables for each margin. Required except for two-phase designs}
+    cluster, or list of tables or data frames for each margin (see
+    Details below). Required except for phase 2 of two-phase designs}
   \item{compress}{compress the resulting replicate weights if
     \code{TRUE} or if \code{NA} and weights were previously compressed}
   \item{stage}{See Details below}
@@ -81,7 +82,8 @@ cal_names(formula,design,...)
   For the important special case where the calibration totals are (possibly
   overlapping) marginal tables of factor variables, as in classical
   raking, the \code{formula} and \code{population} arguments may be
-  lists in the same format as the input to \code{\link{rake}}.
+  lists of tables or lists of data frames in the same format as the
+  input to \code{\link{rake}}.
 
   If the \code{population} argument has a names attribute it will be
   checked against the names produced by \code{model.matrix(formula)} and
@@ -176,6 +178,9 @@ cal_names(formula,design,...)
   \code{method="approx"} argument to \code{\link{twophase}}, calibration of the first
   phase of sampling to the population is not supported.
 
+  In a two-phase design, \code{formula} may be a glm or lm or coxph
+  model fitted to the phase-one data. Calibration will be done using the
+  influence functions of this model as the calibration variables.
 
 }
 \value{

@@ -12,7 +12,7 @@ svycoplot(formula, design, style = c("hexbin", "transparent"), basecol =
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{formula}{A graph formula suitable for \code{{xyplot}}}
+  \item{formula}{A graph formula suitable for \code{lattice::xyplot}}
   \item{design}{A survey design object }
   \item{style}{Hexagonal binning or transparent color?}
   \item{basecol}{The fully opaque 'base' color for creating transparent
@@ -31,7 +31,7 @@ As with all 'Trellis' graphs, this function creates an object but does
   not draw the graph. When used inside a function or non-interactively
   you need to \code{print()} the result to create the graph.
 }
-\seealso{\code{\link{svyplot}}}
+\seealso{\code{svyplot}}
 \examples{
 data(api)
 dclus2<-svydesign(id=~dnum+snum,  weights=~pw,

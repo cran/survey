@@ -16,13 +16,14 @@ svydesign(ids, probs=NULL, strata = NULL, variables = NULL, fpc=NULL,
 data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,pps=FALSE,...)
 \method{svydesign}{default}(ids, probs=NULL, strata = NULL, variables = NULL,
   fpc=NULL,data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,
-  pps=FALSE,calibrate.formula=NULL,variance=c("HT","YG"),...)
+  pps=FALSE,calibrate.formula=NULL,variance=c("HT","YG"),
+na_weights=c("fail","warn","allow"),...)
 \method{svydesign}{imputationList}(ids, probs = NULL, strata = NULL, variables = NULL, 
     fpc = NULL, data, nest = FALSE, check.strata = !nest, weights = NULL, pps=FALSE,
      calibrate.formula=NULL,...)
 \method{svydesign}{character}(ids, probs = NULL, strata = NULL, variables = NULL, 
     fpc = NULL, data, nest = FALSE, check.strata = !nest, weights = NULL, pps=FALSE,
-    calibrate.formula=NULL,dbtype = "SQLite", dbname, ...)
+    calibrate.formula=NULL,na_weights="fail",dbtype = "SQLite", dbname, ...)
 }
 %- maybe also `usage' for other objects documented here.'`
 \arguments{
@@ -51,7 +52,13 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,pps=FALSE,...)
     *already* calibrated (raked, post-stratified).}
   \item{dbtype}{name of database driver to pass to \code{dbDriver}}
   \item{dbname}{name of database (eg file name for SQLite)}
-   \item{variance}{For \code{pps} without replacement, use \code{variance="YG"} for the Yates-Grundy estimator instead of the Horvitz-Thompson estimator}
+   \item{variance}{For \code{pps} without replacement, use
+     \code{variance="YG"} for the Yates-Grundy estimator instead of the
+     Horvitz-Thompsonestimator}
+   \item{na_weights}{If \code{"allow"} or \code{"warn"}, observations
+     with \code{NA} weights will be dropped before the design is
+     created, with a warning if \code{"warn"}. With \code{"fail"} it is
+     an error to have any \code{NA} weights}
   \item{\dots}{for future expansion}
 }
 \details{
@@ -61,7 +68,9 @@ data = NULL, nest = FALSE, check.strata = !nest, weights=NULL,pps=FALSE,...)
    \code{id} argument is always required, the \code{strata},
    \code{fpc}, \code{weights} and \code{probs} arguments are
    optional. If these variables are specified they must not have any
-   missing values.
+   missing values, with the exception that \code{NA} weights can be used
+   to specify rows that should be dropped before setting up the design if
+   \code{na_weights="allow"} or \code{"warn"}.
    
    By default, \code{svydesign} assumes that all PSUs, even those in
    different strata, have a unique value of the \code{id}

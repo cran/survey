@@ -499,7 +499,8 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
         if (!is.numeric(degf)) stop("degf must be NULL or numeric")
         if (degf>ncol(repweights)) warning(paste0("degf (", degf,") is larger than number of replicates (",ncol(repweights),")"))
         if (degf<=1) warning("degf is <=1")
-        }
+        attr(degf,"set-by-user")<-TRUE
+    } 
 
   repwtmn<-mean(apply(repweights,2,mean))
   wtmn<-mean(weights)
@@ -548,11 +549,12 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
     }
   }
 
-  if (type =="JKn" && is.null(rscales))
-    if (!combined.weights) {
-      warning("rscales (n-1)/n not provided:guessing from weights")
-      rscales<-1/apply(repweights,2,max)
-    } else stop("Must provide rscales for combined JKn weights")
+  if (type =="JKn" && is.null(rscales)){
+      if (!combined.weights) {
+          warning("rscales (n-1)/n not provided:guessing from weights")
+          rscales<-1/apply(repweights,2,max)
+      } else stop("Must provide rscales for combined JKn weights")
+  }
 
     if (type %in% c("ACS","successive-difference")){
         rscales<-rep(1, ncol(repweights))
@@ -598,6 +600,14 @@ svrepdesign.default<-function(variables=NULL,repweights=NULL, weights=NULL,
         rval$degf<-degf
     else
         rval$degf<-degf(rval)
+    if (type=="ACS"){
+        if (missing(mse) && !mse){
+            mse<-TRUE
+            message("mse=TRUE assumed for type=\"ACS\"")
+        } else if (!mse){
+            warning("The ACS uses MSE standard errors but you have specified mse=FALSE")
+        }
+    }
   rval$mse<-mse
   rval
   
@@ -620,7 +630,15 @@ print.svyrep.design<-function(x,...){
   if (x$type=="mrbbootstrap")
     cat("Multistage rescaled bootstrap ")
   if (x$type=="subbootstrap")
-    cat("(n-1) bootstrap ")
+      cat("(n-1) bootstrap ")
+  if (x$type=="successive-difference")
+      cat("Successive difference ")
+  if (x$type=="ACS")
+      cat("American Community Survey ")
+  if(x$type=="JK2")
+      cat("JK2 jackknife ")
+  if(x$type=="other")
+      cat("Replicate weight design ")
   nweights<-ncol(x$repweights)
   cat("with", nweights,"replicates")
   if (!is.null(x$mse) && x$mse) cat(" and MSE variances")
@@ -665,9 +683,11 @@ image.svyrep.design<-function(x, ..., col=grey(seq(.5,1,length=30)),
     if (!missing(j))
       x$variables<-x$variables[i,j, drop=FALSE]
     else
-      x$variables<-x$variables[i,,drop=FALSE]
-    x$degf<-NULL
+        x$variables<-x$variables[i,,drop=FALSE]
+    if (is.null(attr(x$degf,"set-by-user"))) ##keep it if user-specified
+        x$degf<-NULL
     x$degf<-degf(x)
+    if (x$degf>length(x$pweights)) warning("Fewer observations than degrees of freedom in subset")
   } else {
     x$variables<-x$variables[,j,drop=FALSE]
   }
@@ -797,7 +817,7 @@ svyvar.svyrep.design<-svrepvar<-function(x, design, na.rm=FALSE, rho=NULL,
   repvars<-apply(wts,2, v)
   
   repvars<-drop(t(repvars))
-  attr(rval,"var")<-svrVar(repvars, scale, rscales,mse=design$mse, coef=rval)
+  attr(rval,"var")<-svrVar(repvars, scale, rscales,mse=design$mse, coef=as.vector(rval))
   attr(rval, "statistic")<-"variance"
   if (return.replicates){
     attr(repvars,"scale")<-design$scale
@@ -1248,7 +1268,8 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL,family=sta
           contrl<-full$control
           if (multicore){
             betas<-do.call(rbind,parallel::mclapply(1:ncol(wts), function(i){
-              wi<-as.vector(wts[,i])*pw1
+                wi<-as.vector(wts[,i])*pw1
+                if(all(wi==0)) return(NaN*beta0)
               glm.fit(XX, YY, weights = wi/sum(wi),
                       start =beta0,
                       offset = offs,
@@ -1259,6 +1280,7 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL,family=sta
           } else {
             for(i in 1:ncol(wts)){
               wi<-as.vector(wts[,i])*pw1
+              if(all(wi==0)) return(NaN*beta0)
               betas[i,]<-glm.fit(XX, YY, weights = wi/sum(wi),
                                  start =beta0,
                                  offset = offs,
@@ -1292,6 +1314,7 @@ svrepglm<-svyglm.svyrep.design<-function(formula, design, subset=NULL,family=sta
       i<-min(which(names(full$call)[-1]==""))
     names(full$call)[i+1]<-"formula"
   }
+  full$aic<-NA  
   full$survey.design<-design
   full
 }
@@ -1962,11 +1985,10 @@ rake<-function(design, sample.margins, population.margins,
                    )
     
 
-    allterms<-unlist(lapply(sample.margins,all.vars))
-    ff<-formula(paste("~", paste(allterms,collapse="+"),sep=""))
-    oldtable<-svytable(ff, design)
+    oldtables<-lapply(sample.margins, function(margin) svytable(margin, design))
+    names(oldtables) <- lapply(sample.margins, all.vars)
     if (control$verbose)
-        print(oldtable)
+        print(oldtables)
 
     oldpoststrata<-design$postStrata
     iter<-0
@@ -1980,16 +2002,19 @@ rake<-function(design, sample.margins, population.margins,
                                  population.margins[[i]],
                                  compress=FALSE)
         }
-        newtable<-svytable(ff, design)
+        newtables<-lapply(sample.margins, function(margin) svytable(margin, design))
+        names(newtables) <- lapply(sample.margins, all.vars)
         if (control$verbose)
-            print(newtable)
+            print(newtables)
 
-        delta<-max(abs(oldtable-newtable))
+        delta<-sapply(seq_along(sample.margins), function(margin_index) {
+          max(abs(newtables[[margin_index]] - oldtables[[margin_index]]))
+        }) |> max()
         if (delta<epsilon){
             converged<-TRUE
             break
         }
-        oldtable<-newtable
+        oldtables<-newtables
         iter<-iter+1
     }
 
@@ -2038,5 +2063,28 @@ degf.survey.design2<-function(design,...){
 degf.twophase<-function(design,...){
   degf(design$phase2)
 }
+
+
+degf.svrepstat<-function(design,...){
+  # implement Bell-McCafrey here later
+  attr(design,"df")
+}
+
+"degf<-"<-function(design, value){
+    UseMethod("degf<-")
+}
+
+"degf<-.default"<-function(design, value){
+    stop("cannot assign degf for this class of design")
+}
+
+"degf<-.svyrep.design"<-function(design, value){
+    attr(value,"set-by-user")<-TRUE
+    if (value>sum(weights(design,"sampling")>0))
+        warning("assigned degf larger than number of observations")
+    design$degf<-value
+    design
+}
+
 
 dim.svyrep.design<-function(x) dim(x$variables)

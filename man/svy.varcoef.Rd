@@ -6,11 +6,16 @@
 Computes the sandwich variance estimator for a generalised linear model fitted to data from a complex sample survey. Designed to be used internally by \code{\link{svyglm}}.
 }
 \usage{
-svy.varcoef(glm.object, design)
+svy.varcoef(glm.object, design,std.errors = c("linearized",
+                 "Bell-McCaffrey", "Bell-McCaffrey-2"), degf = FALSE)
 }
 \arguments{
   \item{glm.object}{A \code{\link{glm}} object}
   \item{design}{A \code{survey.design} object }
+    \item{std.errors}{The kind of standard errors to compute}
+  \item{degf}{Whether to compute the adjusted degrees of freedom along with 
+    Bell-McCaffrey standard errors}
+
 }
 \value{
  A variance matrix

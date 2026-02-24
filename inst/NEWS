@@ -1,4 +1,90 @@
-4.4-7   Update for CRAN changes to inter-package links
+4.5	start of first version of multiphase() for arbitrary multiphase sampling
+	(experimental, may contain nuts)
+
+	Wilson ('score test') confidence intervals in svyciprop (from Stas Kolenikov)
+
+	svydesign() gives a clearer error message when there are more stages in
+	fpc= than in id= (for Stephanie Zimmer)
+
+	svrepdesign(type="ACS") now uses mse=TRUE unless mse=FALSE is explicitly
+	given, in which case it warns (for Anthony Damico)
+
+	svystat,svrepstat objects lose their variance attribute and class on
+	math operations so the standard errors don't end up misleading. Use
+	svycontrast() to get transformed versions with SEs
+	(for Pavel Krivitsky)
+
+	The $aic component of svyglm objects, which is undocumented and meaningless,
+	is now set to NA. If this breaks your code, your code was already wrong.
+	(for Michael Reiss)
+
+	svyby(covmat=TRUE) now works for estimators where subset() doesn't actually
+	drop rows
+
+	svydesign(.., weights=1) now works, though it's still not recommended. Attempts
+	to recycle a weights vector that isn't of length 1 get an error
+
+	for replicate-weight designs with user-forced degrees of freedom, the
+	degrees of freedom shouldn't change under subsetting
+	(because that's computationally expensive).  For Joel Barnes, Isabelle Michaud
+
+	clarify that calibrate() can take margins specified in either of the formats
+	that rake() accepts
+
+	rake() now handles much larger sets of margins (from Ben Schneider)
+	The results may be different if too loose a tolerance was specified or if
+	zeroes make the true optimum non-unique.
+
+	confint(withReplicates()) assigns names when there aren't any,
+	rather than failing (from Ben Schneider)
+
+	degf<-.svyrep.design() to allow the user to modify the degrees of freedom
+	if they specified it by hand
+
+	a bit more detail on svyciprop(type="xlogit") (from Ben Schneider)
+
+	Bell-McCaffrey standard errors (from Stas Kolenikov)
+
+	remove spurious warning in svyvar for replicate-weights with mse=TRUE
+	(Ben Schneider)
+
+	change deprecated arma::is_finite to standard::isfinite
+
+	Add option na_weights. If "allow" or "warn", svydesign will drop any
+	records with NA weights before setting up the design.
+	The default, "fail", will give an error.
+	For database-backed designs it is currently only possible to have "fail"
+	but this may change in the future (for Stephanie Zimmer and David Wilson)
+	
+
+4.4-3	options(survey.lonely.psu="adjust") needed strata to be a factor or numeric
+	(for Richard Li, Durga Nagori)
+
+	Initial version of multiframe() for dual-frame sampling and
+	reweight() for optimising frame weights. Methods for svytotal,
+	svymean, svyglm, svyvar, svychisq, update, subset
+
+	Initial version of withCrossval() for cross-validation
+
+	withPV with action=fun and rewrite=TRUE wasn't working
+
+	add "pps_spec" virtual class for all the PPS sparse matrix things
+
+	support calibration to the influence functions of a phase-1 model in calibrate.twophase and
+	calibrate.twophase2 (currently only with simple random sampling at phase 1)
+
+	added svychisq.twophase2 (for Yilin Zhang)
+
+	twophase2 objects now print the call that created them better
+
+	?svystat and ?svrepstat now point to ?surveysummary, which describes the structure
+	(for Terry Therneau)
+
+	predict.svyglm will impute zero for NA coefficients (Terry Therneau).
+
+	With se.fit=FALSE, predict.svyglm returns a numeric vector rather than a
+	svystat object
+
 
 4.4-2	Invalid read in C++ code, found by Brian Ripley, fixed by Ben Schneider
 

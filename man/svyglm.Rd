@@ -10,6 +10,7 @@
 \alias{predict.svyglm}
 \alias{predict.svrepglm}
 \alias{coef.svyglm}
+\encoding{UTF-8}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Survey-weighted generalised linear models.}
 \description{
@@ -18,13 +19,12 @@ with inverse-probability weighting and design-based standard errors.
 }
 \usage{
 \method{svyglm}{survey.design}(formula, design, subset=NULL,
-family=stats::gaussian(),start=NULL, rescale=TRUE, ..., deff=FALSE,
- influence=FALSE)
+    family=stats::gaussian(),start=NULL, rescale=TRUE, ..., deff=FALSE, influence=FALSE, 
+    std.errors=c("linearized","Bell-McCaffrey","Bell-McCaffrey-2"),degf=FALSE)
 \method{svyglm}{svyrep.design}(formula, design, subset=NULL,
-family=stats::gaussian(),start=NULL, rescale=NULL, ..., rho=NULL,
-return.replicates=FALSE, na.action,multicore=getOption("survey.multicore"))
-\method{summary}{svyglm}(object, correlation = FALSE, df.resid=NULL,
-...)
+    family=stats::gaussian(),start=NULL, rescale=NULL, ..., rho=NULL,
+    return.replicates=FALSE, na.action,multicore=getOption("survey.multicore"))
+\method{summary}{svyglm}(object, correlation = FALSE, df.resid=NULL, ...)
 \method{predict}{svyglm}(object,newdata=NULL,total=NULL,
                          type=c("link","response","terms"),
                          se.fit=(type != "terms"),vcov=FALSE,...)
@@ -56,6 +56,9 @@ return.replicates=FALSE, na.action,multicore=getOption("survey.multicore"))
     were computed in the \code{svyglm} fit)}
   \item{deff}{Estimate the design effects}
   \item{influence}{Return influence functions}
+  \item{std.errors}{The kind of standard errors to compute}
+  \item{degf}{Whether to compute the adjusted degrees of freedom along with 
+    Bell-McCaffrey standard errors}
   \item{object}{A \code{svyglm} object}
   \item{correlation}{Include the correlation matrix of parameters?}
   \item{na.action}{Handling of NAs}
@@ -79,11 +82,28 @@ warning.
 
 If \code{df.resid} is not specified the df for the null model is
 computed by \code{\link{degf}} and the residual df computed by
-subtraction.  This is recommended by Korn and Graubard and is correct
+subtraction.  This is recommended by Korn and Graubard (1999) and is correct
 for PSU-level covariates but is potentially very conservative for
 individual-level covariates. To get tests based on a Normal distribution
 use \code{df.resid=Inf}, and to use number of PSUs-number of strata,
 specify \code{df.resid=degf(design)}.
+
+When \code{std.errors="Bell-McCaffrey(-2)"} option is specified
+for clustered \code{svydesign}, Bell-McCaffrey standard errors are produced
+that adjust for some of the known downward biases of linearized 
+standard errors. Bell and McAffrey (2002) also suggest corrections
+for the degrees of freedom, which end up being even more conservative
+than the (# of PSUs)-(# of strata) design degrees of freedom.
+By default, the computation of these degrees of freedom adjustments
+is skipped (\code{degf=FALSE}) as they require dealing with 
+projection matrices of size \code{nrow(svydesign$variables)} by 
+\code{nrow(svydesign$variables)}. The option 
+\code{std.errors="Bell-McCaffrey"} produces a version with unit working
+residual covariance matrix, and option \code{std.errors="Bell-McCaffrey-2"}
+produces a version with the exchangeable correlation working
+residual covariance matrix, recommended by Imbens and Kolesar (2016)
+(typically more conservative). The standard errors themselves
+are identical between these two options.
 
 Parallel processing with \code{multicore=TRUE} is helpful only for
 fairly large data sets and on computers with sufficient memory. It may
@@ -96,6 +116,9 @@ the population totals and \code{total} is specified it gives the
 regression estimator of the population total.  Regression estimators of
 mean and total can also be obtained with \code{\link{calibrate}}.
 
+When the model is not of full rank, so that some coefficients are
+\code{NA}, point predictions will be made by setting those coefficients
+to zero. Standard error and variance estimates will be \code{NA}.
 
 }
 \note{
@@ -128,7 +151,8 @@ than true) population mean values.
 }
 
  \value{ \code{svyglm} returns an object of class \code{svyglm}.  The
- \code{predict} method returns an object of class \code{svystat}}
+ \code{predict} method returns an object of class \code{svystat} if
+ \code{se.fit} is \code{TRUE}, otherwise just a numeric vector}
 
 \author{Thomas Lumley}
 
@@ -145,11 +169,25 @@ than true) population mean values.
 }
 
 \references{
+Robert M. Bell and Daniel F. McCaffrey (2002).
+  Bias Reduction in Standard Errors for Linear Regression with
+  Multi-Stage Samples. Survey Methodology 28 (2), 169-181.
+  \url{https://www150.statcan.gc.ca/n1/pub/12-001-x/2002002/article/9058-eng.pdf}
 
-Lumley T, Scott A (2017) "Fitting Regression Models to Survey Data"
-Statistical Science 32: 265-278
+David A. Binder (1983).
+On the Variances of Asymptotically Normal Estimators from Complex Surveys.
+International Statistical Review: 51(3), 279-292.
 
-  }
+Guido W. Imbens and Michal Kolesár (2016).
+Robust Standard Errors in Small Samples: Some Practical Advice.
+The Review of Economics and Statistics, 98(4): 701-712
+
+Edward L. Korn and Barry I. Graubard (1999). Analysis of Health Surveys.
+Wiley Series in Survey Methodology. Wiley: Hoboken, NJ.
+
+Thomas Lumley and Alastair J. Scott (2017). Fitting Regression Models to Survey Data.
+Statistical Science 32: 265-278.
+}
 
 \examples{
 
@@ -165,6 +203,11 @@ Statistical Science 32: 265-278
   summary(svyglm(api00~ell+meals+mobility, design=dclus2))
   summary(svyglm(api00~ell+meals+mobility, design=rstrat))
   summary(svyglm(api00~ell+meals+mobility, design=rclus2))
+
+  ## standard errors corrected up
+  summary(svyglm(api00~ell+meals+mobility, design=dstrat, std.errors="Bell-McCaffrey"))
+  summary(svyglm(api00~ell+meals+mobility, design=dclus2, std.errors="Bell-McCaffrey"))
+  ## not applicable to replicate designs
 
   ## use quasibinomial, quasipoisson to avoid warning messages
   summary(svyglm(sch.wide~ell+meals+mobility, design=dstrat,

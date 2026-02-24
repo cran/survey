@@ -2,6 +2,7 @@
 svydesign.character<-function (ids, probs = NULL, strata = NULL, variables = NULL, 
                                fpc = NULL, data, nest = FALSE, check.strata = !nest,
                                weights = NULL,pps=FALSE, calibrate.formula=NULL,
+                               na_weights="fail",
                                dbtype="SQLite", dbname,
                                ...) 
 {
@@ -12,7 +13,10 @@ svydesign.character<-function (ids, probs = NULL, strata = NULL, variables = NUL
     db<-DBI::dbDriver(dbtype)
     dbconn<- DBI::dbConnect(db, dbname,...)
   }
-  design.vars<-c(all.vars(ids), all.vars(probs), all.vars(strata),
+
+    na_weights<-match.arg(na_weights)
+    
+    design.vars<-c(all.vars(ids), all.vars(probs), all.vars(strata),
                  all.vars(fpc), all.vars(weights))
   
   ## Need at least one variable to find out the data size

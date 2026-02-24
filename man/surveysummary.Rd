@@ -27,6 +27,8 @@
 \alias{confint.svystat}
 \alias{confint.svrepstat}
 \alias{make.formula}
+\alias{svystat}
+\alias{svrepstat}
 %- Also NEED an `\alias' for EACH other topic documented here.
 \title{Summary statistics for sample surveys}
 \description{
@@ -140,10 +142,20 @@ survey functions.
   Objects of class \code{"svystat"} or \code{"svrepstat"},
     which are vectors with a \code{"var"} attribute giving the variance
     and a \code{"statistic"} attribute giving the name of the
-    statistic.
+    statistic, and optionally a \code{"deff"} attribute with design effects
 
     These objects have methods for \code{vcov}, \code{SE}, \code{coef},
     \code{confint}, \code{svycontrast}.
+
+    When \code{influence=TRUE} is used, a \code{svystat} object has an
+    attribute \code{"influence"} with influence functions for each
+    observations
+
+    When \code{return.replicates=TRUE}, the \code{svrepstat} object is a
+    list whose second component is a matrix of replicate values.
+
+    \code{svystat} objects have \code{Math} and \code{Ops} methods that
+    remove the variance attribute
     
 }
 

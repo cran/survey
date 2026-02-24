@@ -70,7 +70,10 @@ possible with public-use data.
   on Survey Research Methodology. 1993 (866--871)
 }
 
-\seealso{\code{\link{as.svrepdesign}}}
+\seealso{\code{\link{as.svrepdesign}}
+
+ \url{https://bschneidr.github.io/svrep/} for other sorts of replicate weights
+}
 
 \keyword{survey}% at least one, from doc/KEYWORDS
 
